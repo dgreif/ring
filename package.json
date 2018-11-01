@@ -6,7 +6,8 @@
   "scripts": {
     "test": "tslint **/*.ts",
     "lint": "tslint **/*.ts --fix",
-    "build": "tsc --declaration"
+    "build": "tsc --declaration",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",

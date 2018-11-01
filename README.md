@@ -1,6 +1,12 @@
-# homebridge-ring-alarm
+# homebridge-ring-alarm [![CircleCI](https://circleci.com/gh/dgreif/homebridge-ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/homebridge-ring-alarm)
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for the
  [Ring Alarm System](https://shop.ring.com/pages/security-system)
+ 
+ ### Installation
+ 
+ Assuming a global installation of `homebridge`:
+ 
+ `npm i -g homebridge-ring-alarm`
  
  ### Homebridge Configuration
  
@@ -10,9 +16,6 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
  
  ```json
 {
-  "bridge": {
-    ...
-  },
   "platforms": [
     {
       "platform": "RingAlarm",
@@ -27,6 +30,7 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.
+    * Detect active burglar alarm
   * Base Station
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
     * Battery status

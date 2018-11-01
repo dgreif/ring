@@ -1,17 +1,17 @@
 {
   "name": "homebridge-ring-alarm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Homebridge plugin for ring secuirty alarm system",
   "main": "lib/index.js",
   "scripts": {
     "test": "tslint **/*.ts",
     "lint": "tslint **/*.ts --fix",
     "build": "tsc --declaration",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build && npm test"
   },
   "repository": {
     "type": "git",
-    "url": "git@me.github.com:dgreif/homebridge-ring-alarm.git"
+    "url": "git://github.com/dgreif/homebridge-ring-alarm.git"
   },
   "keywords": [
     "homebridge",

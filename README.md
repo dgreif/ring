@@ -30,6 +30,7 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.
+    
     * Detect active burglar alarm
   * Base Station
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
@@ -45,3 +46,18 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
     * Detect motion
     * Tamper status
     * Battery status
+
+### Alarm Modes
+
+Ring Mode | HomeKit Mode
+--- | ---
+Disarmed | Off
+Home | Home
+Away | Away
+Home | Night
+
+Entry delays and bypassed sensors (ex. for Home mode) are all controlled in the Ring app.
+These settings will automatically be used by HomeKit.
+
+**Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
+HomeKit should immediately switch to `Home` to match.  

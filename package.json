@@ -1,6 +1,6 @@
 {
   "name": "homebridge-ring-alarm",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Homebridge plugin for ring secuirty alarm system",
   "main": "lib/index.js",
   "scripts": {

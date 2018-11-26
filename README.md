@@ -1,4 +1,8 @@
-# homebridge-ring-alarm [![CircleCI](https://circleci.com/gh/dgreif/homebridge-ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/homebridge-ring-alarm)
+# homebridge-ring-alarm
+ 
+[![CircleCI](https://circleci.com/gh/dgreif/homebridge-ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/homebridge-ring-alarm)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
+ 
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for the
  [Ring Alarm System](https://shop.ring.com/pages/security-system)
  

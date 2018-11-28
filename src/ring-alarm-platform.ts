@@ -6,9 +6,10 @@ import { BaseStation } from './base-station'
 import { Keypad } from './keypad'
 import { ContactSensor } from './contact-sensor'
 import { MotionSensor } from './motion-sensor'
+import { Lock } from './lock'
 
-function getAccessoryClass(device: AlarmDevice) {
-  switch (device.data.deviceType) {
+function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
+  switch (deviceType) {
     case AlarmDeviceType.ContactSensor:
       return ContactSensor
     case AlarmDeviceType.MotionSensor:
@@ -19,9 +20,13 @@ function getAccessoryClass(device: AlarmDevice) {
       return BaseStation
     case AlarmDeviceType.Keypad:
       return Keypad
-    default:
-      return null
   }
+
+  if (/^lock($|\.)/.test(deviceType)) {
+    return Lock
+  }
+
+  return null
 }
 
 export class RingAlarmPlatform {

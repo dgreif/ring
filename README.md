@@ -65,3 +65,35 @@ These settings will automatically be used by HomeKit.
 
 **Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
 HomeKit should immediately switch to `Home` to match.  
+
+### Changes Modes on Arrive/Leave Home
+
+The Home app allows you to create an automation that runs when you arrive/leave home.  If you include an accessory or
+scene that "allows access" to your home (e.g. Security System or Lock), the Home app will require you to manually verify
+that you actually want to run the automation every time it gets triggered.  For anyone who wants to arm/disarm their
+Ring Alarm automatically, this manual verification can be quite annoying.  To work around this issue, you can add two
+"dummy" switches to you homebridge setup using [homebridge-dummy](https://www.npmjs.com/package/homebridge-dummy).  You
+can then use these dummy switches to trigger your other automation (e.g. Arm/Disarm Ring Alarm).
+
+#### Example Dummy Config
+```json
+"accessories": [
+    {
+      "accessory": "DummySwitch",
+      "name": "Arrived Home"
+    },
+    {
+      "accessory": "DummySwitch",
+      "name": "Left Home"
+    }
+]
+```
+
+#### Example Home Automations
+
+Trigger | Action
+--- | ---
+People Arrive | Turn on "Arrived Home"
+People Leave | Turn on "Left Home"
+"Arrived Home" turns on | Set Ring Alarm mode to Off
+"Left Home" turns on | Set Ring Alarm mode to Away

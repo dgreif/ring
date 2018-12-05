@@ -71,7 +71,7 @@ export class Lock extends BaseAccessory {
       command: {
         v1: [
           {
-            commandType: `lock.${state === State.Secured ? 'lock' : 'unlock'}`,
+            commandType: `lock.${state === State.SECURED ? 'lock' : 'unlock'}`,
             data: {}
           }
         ]

@@ -1,5 +1,5 @@
 import RingApi = require('ring-api')
-import { AlarmDeviceType, AlarmDevice } from 'ring-api'
+import { AlarmDevice, AlarmDeviceType } from 'ring-api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -7,6 +7,9 @@ import { Keypad } from './keypad'
 import { ContactSensor } from './contact-sensor'
 import { MotionSensor } from './motion-sensor'
 import { Lock } from './lock'
+import { SmokeAlarm } from './smoke-alarm'
+import { CoAlarm } from './co-alarm'
+import { SmokeCoListener } from './smoke-co-listener'
 
 function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
   switch (deviceType) {
@@ -20,6 +23,12 @@ function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
       return BaseStation
     case AlarmDeviceType.Keypad:
       return Keypad
+    case AlarmDeviceType.SmokeAlarm:
+      return SmokeAlarm
+    case AlarmDeviceType.CoAlarm:
+      return CoAlarm
+    case AlarmDeviceType.SmokeCoListener:
+      return SmokeCoListener
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

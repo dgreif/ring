@@ -1,4 +1,4 @@
-import { AlarmDevice, AlarmDeviceData } from 'ring-api'
+import { AlarmDevice, AlarmDeviceData } from '../api'
 import { HAP, hap } from './hap'
 import Service = HAP.Service
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'

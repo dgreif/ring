@@ -1,5 +1,5 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice, AlarmDeviceData } from 'ring-api'
+import { AlarmDevice, AlarmDeviceData } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
 

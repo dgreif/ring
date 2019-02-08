@@ -1,5 +1,5 @@
-import { RingAlarmPlatform } from './src/ring-alarm-platform'
-import { hap } from './src/hap'
+import { RingAlarmPlatform } from './ring-alarm-platform'
+import { hap } from './hap'
 
 export default function(homebridge: any) {
   hap.PlatformAccessory = homebridge.platformAccessory

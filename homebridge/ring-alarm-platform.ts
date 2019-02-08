@@ -1,5 +1,4 @@
-import RingApi = require('ring-api')
-import { AlarmDevice, AlarmDeviceType } from 'ring-api'
+import { AlarmDevice, AlarmDeviceType, getAlarms } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -40,11 +39,10 @@ function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
 
 export class RingAlarmPlatform {
   private readonly homebridgeAccessories: { [uuid: string]: HAP.Accessory } = {}
-  public ringApi?: RingApi.Api
 
   constructor(
     public log: HAP.Log,
-    public config: RingApi.Config,
+    public config: { email: string; password: string },
     public api: HAP.Platform
   ) {
     this.api.on('didFinishLaunching', () => {
@@ -69,9 +67,7 @@ export class RingAlarmPlatform {
   }
 
   async connectToApi() {
-    this.ringApi = await RingApi(Object.assign({ poll: false }, this.config))
-
-    const alarms = await this.ringApi.alarms(),
+    const alarms = await getAlarms(this.config),
       { api } = this
 
     return Promise.all(

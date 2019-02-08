@@ -1,5 +1,5 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice } from 'ring-api'
+import { AlarmDevice } from '../api'
 import { HAP } from './hap'
 
 export class Keypad extends BaseAccessory {

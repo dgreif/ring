@@ -1,99 +1,51 @@
-# homebridge-ring-alarm
+# ring-alarm
  
-[![CircleCI](https://circleci.com/gh/dgreif/homebridge-ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/homebridge-ring-alarm)
+[![CircleCI](https://circleci.com/gh/dgreif/ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/ring-alarm)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
-This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for the
- [Ring Alarm System](https://shop.ring.com/pages/security-system)
+This is TypeScript api for the [Ring Alarm System](https://shop.ring.com/pages/security-system).  Built to support the 
+[homebridge-ring-alarm Plugin](./homebridge)
  
- ### Installation
- 
- Assuming a global installation of `homebridge`:
- 
- `npm i -g homebridge-ring-alarm`
- 
- ### Homebridge Configuration
- 
- Add the `RingAlarm` platform in your homebridge `config.json` file.  The platform options are passed directly into 
- [ring-api](https://github.com/jimhigson/ring-api) (with `poll` set to `false` since it's not needed
- for alarms)
- 
- ```json
-{
-  "platforms": [
-    {
-      "platform": "RingAlarm",
-      "email": "some.one@website.com",
-      "password": "abc123!#"
-    }
-  ]
-}
+## Installation
+
+`npm i @dgreif/ring-alarm`
+
+
+## Fetching Alarms
+```js
+import { getAlarms } from '@dgreif/ring-alarm'
+
+const alarms = await getAlarms();
+```
+`alarms` will be an array of alarms based on the locations you have set
+up in Ring.  Each location has it's own alarm that can be armed or disarmed,
+and used to interact with alarm devices in that location.
+## Arming/Disarming Alarms
+```js
+const alarm = alarms[0]
+alarm.disarm()
+alarm.armHome([/* optional array of zids for devices to bypass */])
+alarm.armAway([/* bypass zids */])
+const rooms = await alarm.getRooms() // array of rooms { id: number, name: string }
 ```
 
-### Supported Devices
-  * Security Panel
-    * This is a software device that represents the alarm for a Ring location
-    * Arm Home / Arm Away / Disarm alarm for Ring location.
-    
-    * Detect active burglar alarm
-  * Base Station
-    * Set Volume (Not currently supported in Home, but works in other apps like Eve)
-    * Battery status
-  * Keypad
-    * Set Volume (Not currently supported in Home, but works in other apps like Eve)
-    * Battery status
-  * Contact Sensor
-    * Detect if sensor is open or closed
-    * Tamper status
-    * Battery status
-  * Motion Sensor
-    * Detect motion
-    * Tamper status
-    * Battery status
+## Devices
+Once you have acquired the alarm for you desired location, you can start
+to interact with associated devices.
+```js
+import { AlarmDeviceType } from '@dgreif/ring-alarm'
 
-### Alarm Modes
-
-Ring Mode | HomeKit Mode
---- | ---
-Disarmed | Off
-Home | Home
-Away | Away
-Home | Night
-
-Entry delays and bypassed sensors (ex. for Home mode) are all controlled in the Ring app.
-These settings will automatically be used by HomeKit.
-
-**Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
-HomeKit should immediately switch to `Home` to match.  
-
-### Changes Modes on Arrive/Leave Home
-
-The Home app allows you to create an automation that runs when you arrive/leave home.  If you include an accessory or
-scene that "allows access" to your home (e.g. Security System or Lock), the Home app will require you to manually verify
-that you actually want to run the automation every time it gets triggered.  For anyone who wants to arm/disarm their
-Ring Alarm automatically, this manual verification can be quite annoying.  To work around this issue, you can add two
-"dummy" switches to you homebridge setup using [homebridge-dummy](https://www.npmjs.com/package/homebridge-dummy).  You
-can then use these dummy switches to trigger your other automation (e.g. Arm/Disarm Ring Alarm).
-
-#### Example Dummy Config
-```json
-"accessories": [
-    {
-      "accessory": "DummySwitch",
-      "name": "Arrived Home"
-    },
-    {
-      "accessory": "DummySwitch",
-      "name": "Left Home"
-    }
-]
+const devices = await alarm.getDevices()
+const baseStation = devices.find(device => device.data.deviceType === AlarmDeviceType.BaseStation)
+baseStation.setVolume(.75) // base station and keypad support volume settings between 0 and 1
+console.log(baseStation.data) // object containing properties like zid, name, roomId, faulted, tamperStatus, etc.
+baseStation.onData.subscribe(data => {
+    // this will be called any time data is updated for this specific device
+})
 ```
 
-#### Example Home Automations
+See the `examples` directory for additional code examples.
 
-Trigger | Action
---- | ---
-People Arrive | Turn on "Arrived Home"
-People Leave | Turn on "Left Home"
-"Arrived Home" turns on | Set Ring Alarm mode to Off
-"Left Home" turns on | Set Ring Alarm mode to Away
+## homebridge-ring-alarm
+
+The `homebridge-ring-alarm` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)

@@ -2,12 +2,17 @@
   "name": "@dgreif/ring-alarm",
   "version": "1.2.0",
   "description": "API for ring security alarm system",
-  "main": "lib/api/index.js",
+  "main": "api/index.js",
   "scripts": {
     "test": "tslint **/*.ts",
     "lint": "tslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
-    "prepublish": "npm run build && npm test"
+    "pre-release": "npm run build && npm test",
+    "release-api": "./build/publish-api.sh",
+    "release-homebridge": "./build/publish-homebridge.sh",
+    "release": "./build/publish-api.sh && ./build/publish-homebridge.sh",
+    "patch": "npm run pre-release && npm version patch && npm run release",
+    "minor": "npm run pre-release && npm version minor && npm run release"
   },
   "repository": {
     "type": "git",

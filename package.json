@@ -1,6 +1,6 @@
 {
   "name": "@dgreif/ring-alarm",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "API for ring security alarm system",
   "main": "api/index.js",
   "scripts": {

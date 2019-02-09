@@ -1,7 +1,7 @@
 {
   "name": "homebridge-ring-alarm",
   "description": "Homebridge plugin for ring security alarm system",
-  "main": "lib/homebridge/index.js",
+  "main": "homebridge/index.js",
   "keywords": [
     "homebridge",
     "homebridge-plugin",
@@ -11,5 +11,6 @@
   "engines": {
     "node": ">=8.3.0",
     "homebridge": ">=0.4.0"
-  }
+  },
+  "scripts": {}
 }

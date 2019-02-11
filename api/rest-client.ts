@@ -12,15 +12,15 @@ const ringErrorCodes: { [code: number]: string } = {
 
 async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
   try {
-    // logger( 'making request:', loggableRequest( axiosParams ))
-
     const response = await axios(options)
-
-    // logger( 'got response:', loggableResponse( axiosResponse ), null, 4 )
     return response.data as T
   } catch (e) {
-    if (e.code === 'ENOTFOUND') {
-      // logger(colors.red(`http request failed.  ${url} not found.  Trying again in 5 seconds`))
+    if (!e.response) {
+      console.error(
+        `Failed to reach Ring server at ${
+          options.url
+        }.  Trying again in 5 seconds...`
+      )
       await delay(5000)
       return requestWithRetry(options)
     }

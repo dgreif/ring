@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { delay } from './util'
+import { delay, logError, logInfo } from './util'
 import * as querystring from 'querystring'
 
 const ringErrorCodes: { [code: number]: string } = {
@@ -12,11 +12,12 @@ const ringErrorCodes: { [code: number]: string } = {
 
 async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
   try {
+    logInfo(`Making request: ${JSON.stringify(options, null, 2)}`)
     const response = await axios(options)
     return response.data as T
   } catch (e) {
     if (!e.response) {
-      console.error(
+      logError(
         `Failed to reach Ring server at ${
           options.url
         }.  Trying again in 5 seconds...`
@@ -36,7 +37,6 @@ export class RingRestClient {
 
   private async getAuthToken() {
     try {
-      console.log('requesting', this.email, this.password)
       const response = await requestWithRetry<{ access_token: string }>({
         url: 'https://oauth.ring.com/oauth/token',
         data: {
@@ -51,10 +51,11 @@ export class RingRestClient {
 
       return response.access_token as string
     } catch (requestError) {
-      console.error(requestError)
-      throw new Error(
+      const errorMessage =
         'Failed to fetch oauth token from Ring.  Verify that your email and password are correct.'
-      )
+      logError(requestError)
+      logError(errorMessage)
+      throw new Error(errorMessage)
     }
   }
 
@@ -96,24 +97,20 @@ export class RingRestClient {
             .join(', ')
 
         if (errorText) {
-          // logger(
-          //   colors.red(
-          //     `http request failed.  ${url} returned errors: (${errorText}).  Trying again in 20 seconds`
-          //   )
-          // )
+          logError(
+            `http request failed.  ${url} returned errors: (${errorText}).  Trying again in 20 seconds`
+          )
 
           await delay(20000)
           return this.request(method, url, data)
         } else {
-          // logger(
-          //   colors.red(
-          //     `http request failed.  ${url} returned unknown errors: (${errors}).  Trying again in 20 seconds`
-          //   )
-          // )
+          logError(
+            `http request failed.  ${url} returned unknown errors: (${errors}).  Trying again in 20 seconds`
+          )
         }
       }
 
-      console.error(`Request to ${url} failed`)
+      logError(`Request to ${url} failed`)
 
       throw e
     }

@@ -1,4 +1,9 @@
-import { AlarmDevice, AlarmDeviceType, getAlarms } from '../api'
+import {
+  AlarmDevice,
+  AlarmDeviceType,
+  getAlarms,
+  RingAlarmOptions
+} from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -42,7 +47,7 @@ export class RingAlarmPlatform {
 
   constructor(
     public log: HAP.Log,
-    public config: { email: string; password: string },
+    public config: RingAlarmOptions,
     public api: HAP.Platform
   ) {
     this.api.on('didFinishLaunching', () => {

@@ -15,11 +15,20 @@ This is TypeScript api for the [Ring Alarm System](https://shop.ring.com/pages/s
 ```js
 import { getAlarms } from '@dgreif/ring-alarm'
 
-const alarms = await getAlarms();
+const alarms = await getAlarms({
+  email: 'some.one@website.com',
+  password: 'abc123!#',
+  locationIds: ['488e4800-fcde-4493-969b-d1a06f683102', '4bbed7a7-06df-4f18-b3af-291c89854d60'] // OPTIONAL. See below for details
+});
 ```
 `alarms` will be an array of alarms based on the locations you have set
 up in Ring.  Each location has it's own alarm that can be armed or disarmed,
 and used to interact with alarm devices in that location.
+
+`locationIds` is an optional parameter that allows you to limit the alarm results to a specific set of locations.
+This is mainly useful for the [homebridge-ring-alarm Plugin](./homebridge), but can also be used if you only care about
+listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your base
+ stations.  If this option is not included, all alarm locations will be returned.
 ## Arming/Disarming Alarms
 ```js
 const alarm = alarms[0]

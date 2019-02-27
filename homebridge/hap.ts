@@ -48,7 +48,16 @@ export namespace HAP {
 
   export interface Platform {
     on(...args: any[]): void
-    registerPlatformAccessories(...args: any[]): void
+    registerPlatformAccessories(
+      pluginName: string,
+      platformName: string,
+      accessories: Accessory[]
+    ): void
+    unregisterPlatformAccessories(
+      pluginName: string,
+      platformName: string,
+      accessories: Accessory[]
+    ): void
   }
 }
 

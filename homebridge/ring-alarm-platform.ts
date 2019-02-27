@@ -63,9 +63,7 @@ export class RingAlarmPlatform {
 
   configureAccessory(accessory: HAP.Accessory) {
     this.log.info(
-      'Configuring cached accessory: [%s] %s',
-      accessory.displayName,
-      accessory.UUID
+      `Configuring cached accessory ${accessory.UUID} ${accessory.displayName}`
     )
     this.log.debug('%j', accessory)
     this.homebridgeAccessories[accessory.UUID] = accessory
@@ -73,11 +71,18 @@ export class RingAlarmPlatform {
 
   async connectToApi() {
     const alarms = await getAlarms(this.config),
-      { api } = this
+      { api } = this,
+      cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
+      activeAccessoryIds: string[] = []
 
-    return Promise.all(
+    await Promise.all(
       alarms.map(async alarm => {
         const devices = await alarm.getDevices()
+        this.log.info(
+          `Configuring ${devices.length} devices for locationId ${
+            alarm.locationId
+          }`
+        )
         devices.forEach(device => {
           const AccessoryClass = getAccessoryClass(device)
 
@@ -89,9 +94,13 @@ export class RingAlarmPlatform {
             uuid = hap.UUIDGen.generate(id),
             createHomebridgeAccessory = () => {
               const accessory = new hap.PlatformAccessory(
-                device.data.name,
+                device.name,
                 uuid,
                 hap.AccessoryCategories.SECURITY_SYSTEM
+              )
+
+              this.log.info(
+                `Adding new accessory ${device.data.deviceType} ${device.name}`
               )
 
               api.registerPlatformAccessories(
@@ -104,11 +113,32 @@ export class RingAlarmPlatform {
             homebridgeAccessory =
               this.homebridgeAccessories[uuid] || createHomebridgeAccessory()
 
-          new AccessoryClass(device, homebridgeAccessory)
+          new AccessoryClass(device, homebridgeAccessory, this.log)
 
           this.homebridgeAccessories[uuid] = homebridgeAccessory
+          activeAccessoryIds.push(uuid)
         })
       })
     )
+
+    const staleAccessories = cachedAccessoryIds
+      .filter(cachedId => !activeAccessoryIds.includes(cachedId))
+      .map(id => this.homebridgeAccessories[id])
+
+    staleAccessories.forEach(staleAccessory => {
+      this.log.info(
+        `Removing stale cached accessory ${staleAccessory.UUID} ${
+          staleAccessory.displayName
+        }`
+      )
+    })
+
+    if (staleAccessories.length) {
+      this.api.unregisterPlatformAccessories(
+        'homebridge-ring-alarm',
+        'RingAlarm',
+        staleAccessories
+      )
+    }
   }
 }

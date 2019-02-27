@@ -49,6 +49,10 @@ export class AlarmDevice {
     return this.onData.getValue()
   }
 
+  get name() {
+    return this.data.name
+  }
+
   get supportsVolume() {
     return (
       deviceTypesWithVolume.includes(this.data.deviceType) &&

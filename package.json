@@ -9,10 +9,12 @@
     "build": "rm -rf lib && tsc --declaration",
     "pre-release": "npm run build && npm test",
     "release-api": "./build/publish-api.sh",
-    "release-homebridge": "./build/publish-homebridge.sh",
+    "package-homebridge": "./build/package-homebridge.sh",
+    "release-homebridge": "npm run package-homebridge && ./build/publish-homebridge.sh",
     "release": "./build/publish-api.sh && ./build/publish-homebridge.sh",
     "patch": "npm run pre-release && npm version patch && npm run release",
-    "minor": "npm run pre-release && npm version minor && npm run release"
+    "minor": "npm run pre-release && npm version minor && npm run release",
+    "test-homebridge": "npm run build && npm run package-homebridge && homebridge -P ./release-homebridge"
   },
   "repository": {
     "type": "git",
@@ -33,16 +35,17 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.0",
-    "@types/node": "^10.12.24",
+    "@types/debug": "^4.1.2",
+    "@types/node": "^11.9.5",
     "@types/socket.io-client": "^1.4.32",
     "dotenv": "^6.2.0",
+    "homebridge": "^0.4.46",
     "prettier": "^1.16.4",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.12.1",
+    "ts-node": "^8.0.2",
+    "tslint": "^5.13.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.3.3"
+    "typescript": "^3.3.3333"
   },
   "engines": {
     "node": ">=8.3.0"

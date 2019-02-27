@@ -44,6 +44,7 @@ function getBatteryChargingState({
 export abstract class BaseAccessory {
   abstract readonly device: AlarmDevice
   abstract readonly accessory: HAP.Accessory
+  abstract readonly logger: HAP.Log
 
   protected constructor() {
     setTimeout(() => this.initBase())

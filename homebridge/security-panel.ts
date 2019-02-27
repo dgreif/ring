@@ -29,7 +29,8 @@ export class SecurityPanel extends BaseAccessory {
 
   constructor(
     public readonly device: AlarmDevice,
-    public readonly accessory: HAP.Accessory
+    public readonly accessory: HAP.Accessory,
+    public readonly logger: HAP.Log
   ) {
     super()
 
@@ -87,10 +88,13 @@ export class SecurityPanel extends BaseAccessory {
     this.targetState = state
 
     if (state === State.AWAY_ARM) {
+      this.logger.info(`Arming (Away) ${this.device.name}`)
       alarm.armAway()
     } else if (state === State.DISARM) {
+      this.logger.info(`Disarming ${this.device.name}`)
       alarm.disarm()
     } else {
+      this.logger.info(`Arming (Home) ${this.device.name}`)
       alarm.armHome()
     }
   }

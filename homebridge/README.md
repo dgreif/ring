@@ -25,15 +25,21 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
       "platform": "RingAlarm",
       "email": "some.one@website.com",
       "password": "abc123!#",
-      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"] // OPTIONAL. See below for details
+      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"], // OPTIONAL. See below for details
+      "alarmOnEntryDelay": false // Optional. See below for details
     }
   ]
 }
 ```
 
-`locationIds` is an optional parameter that allows you to limit the alarm results to a specific set of locations.
+`locationIds`: an optional parameter that allows you to limit the alarm results to a specific set of locations.
 Use this option if you only want a subset of your alarms to appear in HomeKit. If this option is not included, 
 all of your alarms will be added to HomeKit (which is what most users will want to do).  
+
+`alarmOnEntryDelay`: if `true`, HomeKit will register a delayed entry event as a triggered alarm.  
+There are some households where this is a nice feature as a heads up if you have other people who
+enter your house and you want an alert so that you can disable the alarm for them before it actually goes off.
+This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
 
 ### Supported Devices
   * Security Panel

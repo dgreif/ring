@@ -1,9 +1,4 @@
-import {
-  AlarmDevice,
-  AlarmDeviceType,
-  getAlarms,
-  RingAlarmOptions
-} from '../api'
+import { AlarmDevice, AlarmDeviceType, getAlarms } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -14,6 +9,7 @@ import { Lock } from './lock'
 import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
+import { RingAlarmPlatformConfig } from './config'
 
 function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
   switch (deviceType) {
@@ -47,7 +43,7 @@ export class RingAlarmPlatform {
 
   constructor(
     public log: HAP.Log,
-    public config: RingAlarmOptions,
+    public config: RingAlarmPlatformConfig,
     public api: HAP.Platform
   ) {
     this.api.on('didFinishLaunching', () => {
@@ -113,7 +109,7 @@ export class RingAlarmPlatform {
             homebridgeAccessory =
               this.homebridgeAccessories[uuid] || createHomebridgeAccessory()
 
-          new AccessoryClass(device, homebridgeAccessory, this.log)
+          new AccessoryClass(device, homebridgeAccessory, this.log, this.config)
 
           this.homebridgeAccessories[uuid] = homebridgeAccessory
           activeAccessoryIds.push(uuid)

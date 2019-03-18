@@ -2,6 +2,7 @@ import { BaseAccessory } from './base-accessory'
 import { AlarmDevice, AlarmDeviceData } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
+import { RingAlarmPlatformConfig } from './config'
 
 function getCurrentState({ locked }: AlarmDeviceData) {
   const {
@@ -26,7 +27,8 @@ export class Lock extends BaseAccessory {
   constructor(
     public readonly device: AlarmDevice,
     public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log
+    public readonly logger: HAP.Log,
+    public readonly config: RingAlarmPlatformConfig
   ) {
     super()
 

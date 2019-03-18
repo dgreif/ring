@@ -27,6 +27,15 @@ export interface SocketIoMessage {
   body: any[]
 }
 
+export type AlarmState =
+  | 'burglar-alarm'
+  | 'entry-delay'
+  | 'fire-alarm'
+  | 'co-alarm'
+  | 'panic'
+  | 'user-verified-co-or-fire-alarm'
+  | 'user-verified-burglar-alarm'
+
 export interface AlarmDeviceData {
   zid: string
   name: string
@@ -42,15 +51,9 @@ export interface AlarmDeviceData {
   roomId?: number
   volume?: number
   mode?: AlarmMode
+  transitionDelayEndTimestamp?: number | null
   alarmInfo?: {
-    state:
-      | 'burglar-alarm'
-      | 'entry-delay'
-      | 'fire-alarm'
-      | 'co-alarm'
-      | 'panic'
-      | 'user-verified-co-or-fire-alarm'
-      | 'user-verified-burglar-alarm'
+    state: AlarmState
     faultedDevices?: string[]
     timestamp?: number
     uuid?: string

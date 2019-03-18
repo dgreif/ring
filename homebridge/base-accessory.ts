@@ -3,6 +3,7 @@ import { HAP, hap } from './hap'
 import Service = HAP.Service
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import { Subject } from 'rxjs'
+import { RingAlarmPlatformConfig } from './config'
 
 function getBatteryLevel({ batteryLevel, batteryStatus }: AlarmDeviceData) {
   if (batteryLevel !== undefined) {
@@ -45,6 +46,7 @@ export abstract class BaseAccessory {
   abstract readonly device: AlarmDevice
   abstract readonly accessory: HAP.Accessory
   abstract readonly logger: HAP.Log
+  abstract readonly config: RingAlarmPlatformConfig
 
   protected constructor() {
     setTimeout(() => this.initBase())

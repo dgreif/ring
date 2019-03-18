@@ -1,36 +1,20 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice, AlarmDeviceData } from '../api'
+import { AlarmDevice, AlarmDeviceData, AlarmState } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
-
-function getCurrentState({ mode, alarmInfo }: AlarmDeviceData) {
-  const {
-    Characteristic: { SecuritySystemCurrentState: State }
-  } = hap
-
-  if (alarmInfo && alarmInfo.state === 'burglar-alarm') {
-    return State.ALARM_TRIGGERED
-  }
-
-  switch (mode) {
-    case 'all':
-      return State.AWAY_ARM
-    case 'some':
-      return State.STAY_ARM
-    case 'none':
-      return State.DISARMED
-    default:
-      return State.DISARMED
-  }
-}
+import { RingAlarmPlatformConfig } from './config'
 
 export class SecurityPanel extends BaseAccessory {
   private targetState: any
+  private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
+    ? ['entry-delay', 'burglar-alarm']
+    : ['burglar-alarm']
 
   constructor(
     public readonly device: AlarmDevice,
     public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log
+    public readonly logger: HAP.Log,
+    public readonly config: RingAlarmPlatformConfig
   ) {
     super()
 
@@ -46,7 +30,7 @@ export class SecurityPanel extends BaseAccessory {
       Characteristic.SecuritySystemCurrentState,
       Service.SecuritySystem,
       data => {
-        const state = getCurrentState(data)
+        const state = this.getCurrentState(data)
 
         if (state === this.targetState) {
           this.targetState = undefined
@@ -62,6 +46,27 @@ export class SecurityPanel extends BaseAccessory {
       data => this.getTargetState(data),
       value => this.setTargetState(value)
     )
+  }
+
+  getCurrentState({ mode, alarmInfo }: AlarmDeviceData) {
+    const {
+      Characteristic: { SecuritySystemCurrentState: State }
+    } = hap
+
+    if (alarmInfo && this.alarmStates.includes(alarmInfo.state)) {
+      return State.ALARM_TRIGGERED
+    }
+
+    switch (mode) {
+      case 'all':
+        return State.AWAY_ARM
+      case 'some':
+        return State.STAY_ARM
+      case 'none':
+        return State.DISARMED
+      default:
+        return State.DISARMED
+    }
   }
 
   setTargetState(state: any) {
@@ -80,7 +85,7 @@ export class SecurityPanel extends BaseAccessory {
       }, 100)
     }
 
-    if (state === getCurrentState(data)) {
+    if (state === this.getCurrentState(data)) {
       this.targetState = undefined
       return
     }
@@ -100,6 +105,6 @@ export class SecurityPanel extends BaseAccessory {
   }
 
   getTargetState(data: AlarmDeviceData) {
-    return this.targetState || getCurrentState(data)
+    return this.targetState || this.getCurrentState(data)
   }
 }

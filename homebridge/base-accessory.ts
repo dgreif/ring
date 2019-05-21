@@ -1,11 +1,11 @@
-import { AlarmDevice, AlarmDeviceData } from '../api'
+import { RingDevice, RingDeviceData } from '../api'
 import { HAP, hap } from './hap'
 import Service = HAP.Service
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import { Subject } from 'rxjs'
 import { RingAlarmPlatformConfig } from './config'
 
-function getBatteryLevel({ batteryLevel, batteryStatus }: AlarmDeviceData) {
+function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
   if (batteryLevel !== undefined) {
     return batteryLevel
   } else if (batteryStatus === 'full') {
@@ -16,7 +16,7 @@ function getBatteryLevel({ batteryLevel, batteryStatus }: AlarmDeviceData) {
   return 0
 }
 
-function getStatusLowBattery(data: AlarmDeviceData) {
+function getStatusLowBattery(data: RingDeviceData) {
   const { StatusLowBattery } = hap.Characteristic,
     batteryLevel = getBatteryLevel(data)
 
@@ -28,7 +28,7 @@ function getStatusLowBattery(data: AlarmDeviceData) {
 function getBatteryChargingState({
   batteryStatus,
   batteryBackup
-}: AlarmDeviceData) {
+}: RingDeviceData) {
   const { ChargingState } = hap.Characteristic
 
   if (
@@ -42,8 +42,12 @@ function getBatteryChargingState({
   return ChargingState.NOT_CHARGEABLE
 }
 
+function hasBatteryStatus({ batteryStatus }: RingDeviceData) {
+  return batteryStatus !== 'none'
+}
+
 export abstract class BaseAccessory {
-  abstract readonly device: AlarmDevice
+  abstract readonly device: RingDevice
   abstract readonly accessory: HAP.Accessory
   abstract readonly logger: HAP.Log
   abstract readonly config: RingAlarmPlatformConfig
@@ -76,38 +80,24 @@ export abstract class BaseAccessory {
     )
 
     if (initialData.volume !== undefined) {
-      let targetVolume: number | undefined
-
       this.registerCharacteristic(
         Characteristic.Mute,
         Service.Speaker,
         () => false
       )
-      this.registerCharacteristic(
+      this.registerLevelCharacteristic(
         Characteristic.Volume,
         Service.Speaker,
         data => {
-          if (data.volume === undefined) {
-            return 0
-          }
-
-          const newVolume = data.volume * 100
-
-          if (newVolume === targetVolume) {
-            targetVolume = undefined
-          }
-
-          return targetVolume === undefined ? newVolume : targetVolume
+          return data.volume ? data.volume * 100 : 0
         },
         (volume: number) => {
-          targetVolume = volume
           device.setVolume(volume / 100)
-        },
-        500
+        }
       )
     }
 
-    if (initialData.batteryStatus !== 'none') {
+    if (hasBatteryStatus(initialData)) {
       this.registerCharacteristic(
         Characteristic.BatteryLevel,
         Service.BatteryService,
@@ -137,7 +127,7 @@ export abstract class BaseAccessory {
   registerCharacteristic(
     characteristicType: HAP.Characteristic,
     serviceType: Service,
-    getValue: (data: AlarmDeviceData) => any,
+    getValue: (data: RingDeviceData) => any,
     setValue?: (data: any) => any,
     setValueDebounceTime = 0
   ) {
@@ -172,6 +162,34 @@ export abstract class BaseAccessory {
       .subscribe(value => characteristic.updateValue(value))
   }
 
+  registerLevelCharacteristic(
+    characteristicType: HAP.Characteristic,
+    serviceType: Service,
+    getValue: (data: RingDeviceData) => number,
+    setValue: (data: any) => any
+  ) {
+    let targetLevel: number | undefined
+
+    this.registerCharacteristic(
+      characteristicType,
+      serviceType,
+      data => {
+        const newLevel = getValue(data)
+
+        if (newLevel === targetLevel) {
+          targetLevel = undefined
+        }
+
+        return targetLevel === undefined ? newLevel : targetLevel
+      },
+      (volume: number) => {
+        targetLevel = volume
+        setValue(volume)
+      },
+      500
+    )
+  }
+
   initSensorService(SensorService: HAP.Service) {
     const { Characteristic } = hap
 
@@ -184,10 +202,13 @@ export abstract class BaseAccessory {
           : Characteristic.StatusTampered.TAMPERED
       }
     )
-    this.registerCharacteristic(
-      Characteristic.StatusLowBattery,
-      SensorService,
-      data => getStatusLowBattery(data)
-    )
+
+    if (hasBatteryStatus(this.device.data)) {
+      this.registerCharacteristic(
+        Characteristic.StatusLowBattery,
+        SensorService,
+        data => getStatusLowBattery(data)
+      )
+    }
   }
 }

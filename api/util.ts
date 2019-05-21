@@ -9,10 +9,6 @@ export function delay(milliseconds: number) {
   })
 }
 
-export function unique<T>(values: T[]) {
-  return Array.from(new Set(values))
-}
-
 export function logInfo(message: any) {
   logger(message)
 }

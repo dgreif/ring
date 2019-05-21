@@ -1,34 +1,38 @@
 import 'dotenv/config'
-import { getAlarms } from '../api'
+import { getLocations } from '../api'
 import { skip } from 'rxjs/operators'
 
 async function example() {
   const { env } = process
-  const alarms = await getAlarms({
+  const locations = await getLocations({
     // Replace with your ring email/password
     email: env.RING_EMAIL!,
     password: env.RING_PASS!,
-    locationIds: [env.RING_LOCATION_ID!] // Remove is you want all locations
+    locationIds: [env.RING_LOCATION_ID!] // Remove if you want all locations
   })
 
-  console.log(`Found ${alarms.length} alarm(s).`)
+  console.log(`Found ${locations.length} location(s).`)
 
-  for (let alarm of alarms) {
-    alarm.onConnected.pipe(skip(1)).subscribe(connected => {
+  for (let location of locations) {
+    location.onConnected.pipe(skip(1)).subscribe(connected => {
       const status = connected ? 'Connected to' : 'Disconnected from'
-      console.log(`**** ${status} alarm at location ${alarm.locationId}`)
+      console.log(
+        `**** ${status} location ${location.locationDetails.name} - ${
+          location.locationId
+        }`
+      )
     })
   }
 
-  for (let alarm of alarms) {
-    const alarmDevices = await alarm.getDevices()
+  for (let location of locations) {
+    const devices = await location.getDevices()
     console.log(
-      `Alarm at location ${alarm.locationId} has the following ${
-        alarmDevices.length
+      `Location ${location.locationId} has the following ${
+        devices.length
       } device(s):`
     )
 
-    for (let device of alarmDevices) {
+    for (let device of devices) {
       console.log(
         `- ${device.zid}: ${device.data.name} (${device.data.deviceType})`
       )

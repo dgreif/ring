@@ -1,11 +1,11 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice } from '../api'
+import { RingDevice } from '../api'
 import { HAP } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 
 export class BaseStation extends BaseAccessory {
   constructor(
-    public readonly device: AlarmDevice,
+    public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
     public readonly config: RingAlarmPlatformConfig

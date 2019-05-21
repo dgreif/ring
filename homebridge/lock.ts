@@ -1,10 +1,10 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice, AlarmDeviceData } from '../api'
+import { RingDevice, RingDeviceData } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 
-function getCurrentState({ locked }: AlarmDeviceData) {
+function getCurrentState({ locked }: RingDeviceData) {
   const {
     Characteristic: { LockCurrentState: State }
   } = hap
@@ -25,7 +25,7 @@ export class Lock extends BaseAccessory {
   private targetState: any
 
   constructor(
-    public readonly device: AlarmDevice,
+    public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
     public readonly config: RingAlarmPlatformConfig
@@ -64,13 +64,13 @@ export class Lock extends BaseAccessory {
 
   setTargetState(state: any) {
     const {
-        Characteristic: { LockTargetState: State }
-      } = hap,
-      { alarm, data, zid } = this.device
+      Characteristic: { LockTargetState: State }
+    } = hap
 
-    this.targetState = state === getCurrentState(data) ? undefined : state
+    this.targetState =
+      state === getCurrentState(this.device.data) ? undefined : state
 
-    return alarm.setDeviceInfo(zid, {
+    return this.device.setInfo({
       command: {
         v1: [
           {
@@ -82,7 +82,7 @@ export class Lock extends BaseAccessory {
     })
   }
 
-  getTargetState(data: AlarmDeviceData) {
+  getTargetState(data: RingDeviceData) {
     return this.targetState || getCurrentState(data)
   }
 }

@@ -4,7 +4,7 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for the
- [Ring Alarm System](https://shop.ring.com/pages/security-system)
+[Ring Alarm System](https://shop.ring.com/pages/security-system) and [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting) line of products.
  
  ### Installation
  
@@ -14,9 +14,7 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
  
  ### Homebridge Configuration
  
- Add the `RingAlarm` platform in your homebridge `config.json` file.  The platform options are passed directly into 
- [ring-api](https://github.com/jimhigson/ring-api) (with `poll` set to `false` since it's not needed
- for alarms)
+ Add the `RingAlarm` platform in your homebridge `config.json` file.
  
  ```json
 {
@@ -26,26 +24,30 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
       "email": "some.one@website.com",
       "password": "abc123!#",
       "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"], // OPTIONAL. See below for details
-      "alarmOnEntryDelay": false // Optional. See below for details
+      "alarmOnEntryDelay": false, // Optional. See below for details
+      "beamDurationSeconds": 60 // Optional. See below for details
     }
   ]
 }
 ```
 
-`locationIds`: an optional parameter that allows you to limit the alarm results to a specific set of locations.
-Use this option if you only want a subset of your alarms to appear in HomeKit. If this option is not included, 
-all of your alarms will be added to HomeKit (which is what most users will want to do).  
+`locationIds`: Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, 
+all of your locations will be added to HomeKit (which is what most users will want to do).  
 
 `alarmOnEntryDelay`: if `true`, HomeKit will register a delayed entry event as a triggered alarm.  
 There are some households where this is a nice feature as a heads up if you have other people who
 enter your house and you want an alert so that you can disable the alarm for them before it actually goes off.
 This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
 
+`beamDurationSeconds`: Ring smart lighting has a default behavior of only staying on for 60 seconds
+when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit,
+set this option to a specific number of seconds.
+If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app.
+
 ### Supported Devices
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.
-    
     * Detect active burglar alarm
   * Base Station
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
@@ -61,10 +63,21 @@ This works well if you automatically arm/disarm on leave/arrive (see setup instr
     * Detect motion
     * Tamper status
     * Battery status
+  * Ring Smart Lights (Motion Detector, Flood/Path/Spot Lights, Transformer)
+    * On/Off
+    * Brightness Level
+    * Detect motion
+    * Battery Status
   * Smoke Alarm
   * Carbon Monoxide Alarm
   * Smoke/Carbon Monoxide Listener
   * Smart Locks
+  * Lights/Switches (Implemented but not tested)
+    * On/Off
+    * Brightness Level
+    * Hue/Sat/Color Temp are _possible_, but currently not supported.
+      Please open an issue if you have a device that you would be able to
+      test these on.
 
 ### Alarm Modes
 

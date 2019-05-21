@@ -1,4 +1,6 @@
-export enum AlarmDeviceType {
+import { LocationAddress } from './index'
+
+export enum RingDeviceType {
   BaseStation = 'hub.redsky',
   Keypad = 'security-keypad',
   SecurityPanel = 'security-panel',
@@ -10,20 +12,31 @@ export enum AlarmDeviceType {
   AccessCode = 'access-code',
   SmokeAlarm = 'alarm.smoke',
   CoAlarm = 'alarm.co',
-  SmokeCoListener = 'listener.smoke-co'
+  SmokeCoListener = 'listener.smoke-co',
+  MultiLevelSwitch = 'switch.multilevel',
+  BeamsMotionSensor = 'motion-sensor.beams',
+  BeamsSwitch = 'switch.multilevel.beams',
+  BeamsLightGroupSwitch = 'group.light-group.beams',
+  BeamsTransformerSwitch = 'switch.transformer.beams'
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
-export type MessageType = 'RoomGetList' | 'SessionInfo' | 'DeviceInfoDocGetList'
+export type MessageType =
+  | 'RoomGetList'
+  | 'SessionInfo'
+  | 'DeviceInfoDocGetList'
+  | 'DeviceInfoSet'
 export type MessageDataType =
   | 'RoomListV2Type'
   | 'SessionInfoType'
   | 'DeviceInfoDocType'
+  | 'DeviceInfoSetType'
   | 'HubDisconnectionEventType'
 
 export interface SocketIoMessage {
   msg: MessageType
   datatype: MessageDataType
+  src: string
   body: any[]
 }
 
@@ -36,10 +49,10 @@ export type AlarmState =
   | 'user-verified-co-or-fire-alarm'
   | 'user-verified-burglar-alarm'
 
-export interface AlarmDeviceData {
+export interface RingDeviceData {
   zid: string
   name: string
-  deviceType: AlarmDeviceType
+  deviceType: RingDeviceType
   batteryLevel?: number
   batteryStatus: 'full' | 'ok' | 'low' | 'none' | 'charging'
   batteryBackup?: 'charged' | 'charging'
@@ -61,11 +74,22 @@ export interface AlarmDeviceData {
   alarmStatus?: 'active'
   co?: { alarmStatus?: 'active' }
   smoke?: { alarmStatus?: 'active' }
+  motionStatus?: 'clear' | 'faulted'
+
+  // switch
+  on?: boolean
+  // switch.multilevel
+  level?: number // 0 - 1
+  hs?: {
+    hue?: number // 0 - 1
+    sat?: number // 0 - 1
+  }
+  ct?: number // 0 - 1
 }
 
 export const deviceTypesWithVolume = [
-  AlarmDeviceType.BaseStation,
-  AlarmDeviceType.Keypad
+  RingDeviceType.BaseStation,
+  RingDeviceType.Keypad
 ]
 
 export interface BaseStation {
@@ -91,4 +115,47 @@ export interface BaseStation {
   settings: null
   stolen: boolean
   time_zone: string
+}
+
+export interface BeamBridge {
+  created_at: string
+  description: string
+  hardware_id: string
+  id: number
+  kind: string
+  location_id: string
+  metadata: { ethernet: boolean; legacy_fw_migrated: boolean }
+  owner_id: number
+  role: string
+  updated_at: string
+}
+
+export interface LocationAddress {
+  address1: string
+  address2: string
+  cross_street: string
+  city: string
+  state: string
+  timezone: string
+  zip_code: string
+}
+
+export interface UserLocation {
+  address: LocationAddress
+  created_at: string
+  geo_coordinates: { latitude: string; longitude: string }
+  geo_service_verified: 'address_only' | string
+  location_id: string
+  name: string
+  owner_id: number
+  updated_at: string
+  user_verified: boolean
+}
+
+export interface TicketAsset {
+  doorbotId: number
+  kind: 'base_station_v1' | 'beams_bridge_v1'
+  onBattery: boolean
+  status: 'online' | 'offline'
+  uuid: string
 }

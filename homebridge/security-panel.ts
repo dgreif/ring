@@ -1,5 +1,5 @@
 import { BaseAccessory } from './base-accessory'
-import { AlarmDevice, AlarmDeviceData, AlarmState } from '../api'
+import { RingDevice, RingDeviceData, AlarmState } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
@@ -11,7 +11,7 @@ export class SecurityPanel extends BaseAccessory {
     : ['burglar-alarm']
 
   constructor(
-    public readonly device: AlarmDevice,
+    public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
     public readonly config: RingAlarmPlatformConfig
@@ -48,7 +48,7 @@ export class SecurityPanel extends BaseAccessory {
     )
   }
 
-  getCurrentState({ mode, alarmInfo }: AlarmDeviceData) {
+  getCurrentState({ mode, alarmInfo }: RingDeviceData) {
     const {
       Characteristic: { SecuritySystemCurrentState: State }
     } = hap
@@ -73,7 +73,7 @@ export class SecurityPanel extends BaseAccessory {
     const {
         Characteristic: { SecuritySystemTargetState: State }
       } = hap,
-      { alarm, data } = this.device
+      { location, data } = this.device
 
     if (state === State.NIGHT_ARM) {
       state = State.STAY_ARM
@@ -94,17 +94,17 @@ export class SecurityPanel extends BaseAccessory {
 
     if (state === State.AWAY_ARM) {
       this.logger.info(`Arming (Away) ${this.device.name}`)
-      alarm.armAway()
+      location.armAway()
     } else if (state === State.DISARM) {
       this.logger.info(`Disarming ${this.device.name}`)
-      alarm.disarm()
+      location.disarm()
     } else {
       this.logger.info(`Arming (Home) ${this.device.name}`)
-      alarm.armHome()
+      location.armHome()
     }
   }
 
-  getTargetState(data: AlarmDeviceData) {
+  getTargetState(data: RingDeviceData) {
     return this.targetState || this.getCurrentState(data)
   }
 }

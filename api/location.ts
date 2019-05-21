@@ -10,20 +10,23 @@ import {
   scan,
   refCount
 } from 'rxjs/operators'
-import { delay } from './util'
+import { delay, logError, logInfo } from './util'
 import {
   AlarmMode,
-  AlarmDeviceData,
+  RingDeviceData,
   deviceTypesWithVolume,
-  AlarmDeviceType,
+  RingDeviceType,
   SocketIoMessage,
-  MessageType
+  MessageType,
+  UserLocation,
+  TicketAsset,
+  MessageDataType
 } from './ring-types'
 import { RingRestClient } from './rest-client'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
 
-function flattenDeviceData(data: any): AlarmDeviceData {
+function flattenDeviceData(data: any): RingDeviceData {
   return Object.assign(
     {},
     data.general && data.general.v2,
@@ -31,17 +34,21 @@ function flattenDeviceData(data: any): AlarmDeviceData {
   )
 }
 
-export class AlarmDevice {
+export class RingDevice {
   onData = new BehaviorSubject(this.initialData)
   zid = this.initialData.zid
 
-  constructor(private initialData: AlarmDeviceData, public alarm: Alarm) {
-    alarm.onDeviceDataUpdate
+  constructor(
+    private initialData: RingDeviceData,
+    public location: Location,
+    public assetId: string
+  ) {
+    location.onDeviceDataUpdate
       .pipe(filter(update => update.zid === this.zid))
       .subscribe(update => this.updateData(update))
   }
 
-  updateData(update: Partial<AlarmDeviceData>) {
+  updateData(update: Partial<RingDeviceData>) {
     this.onData.next(Object.assign({}, this.data, update))
   }
 
@@ -71,7 +78,21 @@ export class AlarmDevice {
       )
     }
 
-    return this.alarm.setDeviceInfo(this.zid, { device: { v1: { volume } } })
+    return this.setInfo({ device: { v1: { volume } } })
+  }
+
+  setInfo(body: any) {
+    return this.location.sendMessage({
+      msg: 'DeviceInfoSet',
+      datatype: 'DeviceInfoSetType',
+      dst: this.assetId,
+      body: [
+        {
+          zid: this.zid,
+          ...body
+        }
+      ]
+    })
   }
 
   toString() {
@@ -89,7 +110,7 @@ export class AlarmDevice {
   }
 }
 
-export class Alarm {
+export class Location {
   private seq = 1
 
   onMessage = new Subject<SocketIoMessage>()
@@ -102,13 +123,16 @@ export class Alarm {
     map(flattenDeviceData)
   )
   onDeviceList = this.onMessage.pipe(
-    filter(m => m.msg === deviceListMessageType),
-    map(m => m.body)
+    filter(m => m.msg === deviceListMessageType)
   )
   onDevices = this.onDeviceList.pipe(
     scan(
-      (devices, deviceList) => {
-        return deviceList.reduce((updatedDevices, data) => {
+      (devices, { body: deviceList, src }) => {
+        if (!this.receivedAssetDeviceLists.includes(src)) {
+          this.receivedAssetDeviceLists.push(src)
+        }
+
+        return deviceList.reduce((updatedDevices: RingDevice[], data) => {
           const flatData = flattenDeviceData(data),
             existingDevice = updatedDevices.find(x => x.zid === flatData.zid)
 
@@ -117,42 +141,69 @@ export class Alarm {
             return updatedDevices
           }
 
-          return [...updatedDevices, new AlarmDevice(flatData, this)]
+          return [...updatedDevices, new RingDevice(flatData, this, src)]
         }, devices)
       },
-      [] as AlarmDevice[]
+      [] as RingDevice[]
     ),
     distinctUntilChanged((a, b) => a.length === b.length),
+    filter(() => {
+      return Boolean(
+        // TODO: test with beam bridge offline
+        this.assets &&
+          this.assets.every(asset =>
+            this.receivedAssetDeviceLists.includes(asset.uuid)
+          )
+      )
+    }),
     publishReplay(1),
     refCount()
   )
   onConnected = new BehaviorSubject(false)
   reconnecting = false
   connectionPromise?: Promise<SocketIOClient.Socket>
-  securityPanelZid?: string
+  securityPanel?: RingDevice
+  assets?: TicketAsset[]
+  receivedAssetDeviceLists: string[] = []
+
+  public readonly locationId: string
 
   constructor(
-    public readonly locationId: string,
+    public readonly locationDetails: UserLocation,
     private restClient: RingRestClient
   ) {
+    this.locationId = locationDetails.location_id
+
     // start listening for devices immediately
     this.onDevices.subscribe()
   }
 
   async createConnection(): Promise<SocketIOClient.Socket> {
-    // logger('Creating alarm socket.io connection')
-    const connectionDetails = await this.restClient.request<{
-      server: string
-      authCode: string
-    }>('POST', 'https://app.ring.com/api/v1/rs/connections', {
-      accountId: this.locationId
-    })
+    logInfo('Creating location socket.io connection')
+    const { assets, ticket, host } = await this.restClient.request<{
+      assets: TicketAsset[]
+      host: string
+      ticket: string
+    }>(
+      'GET',
+      'https://app.ring.com/api/v1/clap/tickets?locationID=' + this.locationId
+    )
+    this.assets = assets
+    this.receivedAssetDeviceLists.length = 0
+
+    if (!assets.length) {
+      const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${
+        this.locationDetails.name
+      } - ${this.locationId}`
+      logError(errorMessage)
+      throw new Error(errorMessage)
+    }
+
     const connection = connectSocketIo(
-      `wss://${connectionDetails.server}/?authcode=${
-        connectionDetails.authCode
-      }`,
+      `wss://${host}/?authcode=${ticket}&ack=false&EIO=3`,
       { transports: ['websocket'] }
     )
+
     const reconnect = () => {
       if (this.reconnecting && this.connectionPromise) {
         return this.connectionPromise
@@ -160,7 +211,7 @@ export class Alarm {
 
       this.onConnected.next(false)
 
-      // logger('Reconnecting alarm socket.io connection')
+      logInfo('Reconnecting location socket.io connection')
       this.reconnecting = true
       connection.close()
       return (this.connectionPromise = delay(1000).then(() => {
@@ -171,7 +222,7 @@ export class Alarm {
     this.reconnecting = false
     connection.on('DataUpdate', (message: SocketIoMessage) => {
       if (message.datatype === 'HubDisconnectionEventType') {
-        // logger('Alarm connection told to reconnect')
+        logInfo('Location connection told to reconnect')
         return reconnect()
       }
 
@@ -186,8 +237,10 @@ export class Alarm {
       connection.once('connect', () => {
         resolve(connection)
         this.onConnected.next(true)
-        // logger('Ring alarm connected to socket.io server')
-        this.requestList(deviceListMessageType)
+        logInfo('Ring connected to socket.io server')
+        assets.forEach(asset =>
+          this.requestList(deviceListMessageType, asset.uuid)
+        )
       })
       connection.once('error', reject)
     }).catch(reconnect)
@@ -201,28 +254,21 @@ export class Alarm {
     return (this.connectionPromise = this.createConnection())
   }
 
-  async sendMessage(message: any) {
+  async sendMessage(message: {
+    msg: MessageType
+    datatype?: MessageDataType
+    dst: string
+    body?: any
+    seq?: number
+  }) {
     const connection = await this.getConnection()
     message.seq = this.seq++
     connection.emit('message', message)
   }
 
-  setDeviceInfo(zid: string, body: any) {
-    return this.sendMessage({
-      msg: 'DeviceInfoSet',
-      datatype: 'DeviceInfoSetType',
-      body: [
-        {
-          zid,
-          ...body
-        }
-      ]
-    })
-  }
-
   async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
-    const zid = await this.getSecurityPanelZid()
-    return this.setDeviceInfo(zid, {
+    const securityPanel = await this.getSecurityPanel()
+    return securityPanel.setInfo({
       command: {
         v1: [
           {
@@ -237,23 +283,23 @@ export class Alarm {
     })
   }
 
-  getNextMessageOfType(type: MessageType) {
+  getNextMessageOfType(type: MessageType, src: string) {
     return this.onMessage
       .pipe(
-        filter(m => m.msg === type),
+        filter(m => m.msg === type && m.src === src),
         map(m => m.body),
         take(1)
       )
       .toPromise()
   }
 
-  requestList(listType: MessageType) {
-    this.sendMessage({ msg: listType })
+  requestList(listType: MessageType, assetId: string) {
+    this.sendMessage({ msg: listType, dst: assetId })
   }
 
-  getList(listType: MessageType) {
-    this.requestList(listType)
-    return this.getNextMessageOfType(listType)
+  getList(listType: MessageType, assetId: string) {
+    this.requestList(listType, assetId)
+    return this.getNextMessageOfType(listType, assetId)
   }
 
   getDevices() {
@@ -264,27 +310,29 @@ export class Alarm {
     return this.onDevices.pipe(take(1)).toPromise()
   }
 
-  getRoomList() {
-    return this.getList('RoomGetList')
+  getRoomList(assetId: string) {
+    return this.getList('RoomGetList', assetId)
   }
 
-  async getSecurityPanelZid() {
-    if (this.securityPanelZid) {
-      return this.securityPanelZid
+  async getSecurityPanel() {
+    if (this.securityPanel) {
+      return this.securityPanel
     }
 
     const devices = await this.getDevices()
     const securityPanel = devices.find(device => {
-      return device.data.deviceType === AlarmDeviceType.SecurityPanel
+      return device.data.deviceType === RingDeviceType.SecurityPanel
     })
 
     if (!securityPanel) {
       throw new Error(
-        `Could not find a security panel for location ${this.locationId}`
+        `Could not find a security panel for location ${
+          this.locationDetails.name
+        } - ${this.locationId}`
       )
     }
 
-    return (this.securityPanelZid = securityPanel.zid)
+    return (this.securityPanel = securityPanel)
   }
 
   disarm() {

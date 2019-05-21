@@ -1,4 +1,4 @@
-import { AlarmDevice, AlarmDeviceType, getAlarms } from '../api'
+import { RingDevice, RingDeviceType, getLocations } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -10,25 +10,34 @@ import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
 import { RingAlarmPlatformConfig } from './config'
+import { Beam } from './beam'
+import { MultiLevelSwitch } from './multi-level-switch'
 
-function getAccessoryClass({ data: { deviceType } }: AlarmDevice) {
+function getAccessoryClass({ data: { deviceType } }: RingDevice) {
   switch (deviceType) {
-    case AlarmDeviceType.ContactSensor:
+    case RingDeviceType.ContactSensor:
       return ContactSensor
-    case AlarmDeviceType.MotionSensor:
+    case RingDeviceType.MotionSensor:
       return MotionSensor
-    case AlarmDeviceType.SecurityPanel:
+    case RingDeviceType.SecurityPanel:
       return SecurityPanel
-    case AlarmDeviceType.BaseStation:
+    case RingDeviceType.BaseStation:
       return BaseStation
-    case AlarmDeviceType.Keypad:
+    case RingDeviceType.Keypad:
       return Keypad
-    case AlarmDeviceType.SmokeAlarm:
+    case RingDeviceType.SmokeAlarm:
       return SmokeAlarm
-    case AlarmDeviceType.CoAlarm:
+    case RingDeviceType.CoAlarm:
       return CoAlarm
-    case AlarmDeviceType.SmokeCoListener:
+    case RingDeviceType.SmokeCoListener:
       return SmokeCoListener
+    case RingDeviceType.BeamsMotionSensor:
+    case RingDeviceType.BeamsSwitch:
+    case RingDeviceType.BeamsTransformerSwitch:
+    case RingDeviceType.BeamsLightGroupSwitch:
+      return Beam
+    case RingDeviceType.MultiLevelSwitch:
+      return MultiLevelSwitch
   }
 
   if (/^lock($|\.)/.test(deviceType)) {
@@ -66,17 +75,17 @@ export class RingAlarmPlatform {
   }
 
   async connectToApi() {
-    const alarms = await getAlarms(this.config),
+    const locations = await getLocations(this.config),
       { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
       activeAccessoryIds: string[] = []
 
     await Promise.all(
-      alarms.map(async alarm => {
-        const devices = await alarm.getDevices()
+      locations.map(async location => {
+        const devices = await location.getDevices()
         this.log.info(
           `Configuring ${devices.length} devices for locationId ${
-            alarm.locationId
+            location.locationId
           }`
         )
         devices.forEach(device => {

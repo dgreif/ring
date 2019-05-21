@@ -14,6 +14,7 @@
     "release": "./build/publish-api.sh && npm run release-homebridge",
     "patch": "npm run pre-release && npm version patch && npm run release",
     "minor": "npm run pre-release && npm version minor && npm run release",
+    "major": "npm run pre-release && npm version major && npm run release",
     "test-homebridge": "npm run build && npm run package-homebridge && homebridge -P ./release-homebridge"
   },
   "repository": {

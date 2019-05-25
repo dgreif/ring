@@ -25,7 +25,8 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
       "password": "abc123!#",
       "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"], // OPTIONAL. See below for details
       "alarmOnEntryDelay": false, // Optional. See below for details
-      "beamDurationSeconds": 60 // Optional. See below for details
+      "beamDurationSeconds": 60, // Optional. See below for details
+      "hideLightGroups": true // Optional. See below for details
     }
   ]
 }
@@ -44,6 +45,12 @@ when you turn on a light via the Ring app.  To force a duration when the light i
 set this option to a specific number of seconds.
 If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app.
 The maximum value is `32767`, which is ~9.1 hours.
+
+`hideLightGroups`: Ring smart lighting allows you to create lighting groups within the Ring app.
+These groups are convenient for detecting motion in an area of your yard and turning on/off all lights
+in the group.  However, you may wish to group the lights differently in HomeKit and ignore the 
+groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor)
+will be ignored and will not show up in HomeKit.
 
 ### Supported Devices
   * Security Panel

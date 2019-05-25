@@ -1,4 +1,4 @@
-import { RingDevice, RingDeviceType, getLocations } from '../api'
+import { getLocations, RingDevice, RingDeviceType } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -91,7 +91,11 @@ export class RingAlarmPlatform {
         devices.forEach(device => {
           const AccessoryClass = getAccessoryClass(device)
 
-          if (!AccessoryClass) {
+          if (
+            !AccessoryClass ||
+            (this.config.hideLightGroups &&
+              device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch)
+          ) {
             return
           }
 

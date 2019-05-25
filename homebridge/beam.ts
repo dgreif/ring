@@ -49,9 +49,11 @@ export class Beam extends BaseAccessory {
   setOnState(on: boolean) {
     this.logger.info(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
 
-    const data = on
-      ? { lightMode: 'on', duration: this.config.beamDurationSeconds }
-      : { lightMode: 'default' }
+    const { beamDurationSeconds } = this.config
+    const duration = beamDurationSeconds
+      ? Math.min(beamDurationSeconds, 32767)
+      : undefined
+    const data = on ? { lightMode: 'on', duration } : { lightMode: 'default' }
 
     return this.device.setInfo({
       command: {

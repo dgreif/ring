@@ -43,6 +43,7 @@ This works well if you automatically arm/disarm on leave/arrive (see setup instr
 when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit,
 set this option to a specific number of seconds.
 If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app.
+The maximum value is `32767`, which is ~9.1 hours.
 
 ### Supported Devices
   * Security Panel

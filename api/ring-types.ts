@@ -40,6 +40,16 @@ export interface SocketIoMessage {
   body: any[]
 }
 
+export type AssetKind = 'base_station_v1' | 'beams_bridge_v1'
+
+export interface AssetSession {
+  assetUuid: string
+  connectionStatus: 'unknown' | 'cell-backup' | 'online'
+  doorbotId: number
+  kind: AssetKind
+  sessionId: number
+}
+
 export type AlarmState =
   | 'burglar-alarm' // Ring is Alarming
   | 'entry-delay' // Alarm will sound in ${timeLeft} seconds
@@ -157,7 +167,7 @@ export interface UserLocation {
 
 export interface TicketAsset {
   doorbotId: number
-  kind: 'base_station_v1' | 'beams_bridge_v1'
+  kind: AssetKind
   onBattery: boolean
   status: 'online' | 'offline'
   uuid: string

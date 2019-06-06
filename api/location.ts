@@ -20,7 +20,8 @@ import {
   MessageType,
   UserLocation,
   TicketAsset,
-  MessageDataType
+  MessageDataType,
+  AssetSession
 } from './ring-types'
 import { RingRestClient } from './rest-client'
 
@@ -127,9 +128,9 @@ export class Location {
   private seq = 1
 
   onMessage = new Subject<SocketIoMessage>()
-  onDataUpdate = new Subject()
+  onDataUpdate = new Subject<SocketIoMessage>()
   onDeviceDataUpdate = this.onDataUpdate.pipe(
-    filter((message: any) => {
+    filter(message => {
       return message.datatype === 'DeviceInfoDocType' && Boolean(message.body)
     }),
     concatMap(message => message.body),
@@ -141,6 +142,10 @@ export class Location {
   onDevices = this.onDeviceList.pipe(
     scan(
       (devices, { body: deviceList, src }) => {
+        if (!deviceList) {
+          return devices
+        }
+
         if (!this.receivedAssetDeviceLists.includes(src)) {
           this.receivedAssetDeviceLists.push(src)
         }
@@ -162,7 +167,6 @@ export class Location {
     distinctUntilChanged((a, b) => a.length === b.length),
     filter(() => {
       return Boolean(
-        // TODO: test with beam bridge offline
         this.assets &&
           this.assets.every(asset =>
             this.receivedAssetDeviceLists.includes(asset.uuid)
@@ -172,12 +176,17 @@ export class Location {
     publishReplay(1),
     refCount()
   )
+  onSessionInfo = this.onDataUpdate.pipe(
+    filter(m => m.msg === 'SessionInfo'),
+    map(m => m.body as AssetSession[])
+  )
   onConnected = new BehaviorSubject(false)
   reconnecting = false
   connectionPromise?: Promise<SocketIOClient.Socket>
   securityPanel?: RingDevice
   assets?: TicketAsset[]
   receivedAssetDeviceLists: string[] = []
+  offlineAssets: string[] = []
 
   public readonly locationId: string
 
@@ -189,6 +198,36 @@ export class Location {
 
     // start listening for devices immediately
     this.onDevices.subscribe()
+
+    // watch for sessions to come online
+    this.onSessionInfo.subscribe(sessions => {
+      sessions.forEach(({ connectionStatus, assetUuid }) => {
+        const assetWasOffline = this.offlineAssets.includes(assetUuid)
+        const asset = this.assets && this.assets.find(x => x.uuid === assetUuid)
+
+        if (!asset) {
+          // we don't know about this asset, so don't worry about it
+          return
+        }
+
+        if (connectionStatus === 'online') {
+          if (assetWasOffline) {
+            this.requestList(deviceListMessageType, assetUuid)
+            this.offlineAssets = this.offlineAssets.filter(
+              id => id !== assetUuid
+            )
+            logInfo(`Ring ${asset.kind} ${assetUuid} has come back online`)
+          }
+        } else if (!assetWasOffline) {
+          logError(
+            `Ring ${
+              asset.kind
+            } ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
+          )
+          this.offlineAssets.push(assetUuid)
+        }
+      })
+    })
   }
 
   async createConnection(): Promise<SocketIOClient.Socket> {
@@ -203,6 +242,7 @@ export class Location {
     )
     this.assets = assets
     this.receivedAssetDeviceLists.length = 0
+    this.offlineAssets.length = 0
 
     if (!assets.length) {
       const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${

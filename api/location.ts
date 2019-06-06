@@ -319,22 +319,24 @@ export class Location {
     connection.emit('message', message)
   }
 
-  async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
+  async sendCommandToSecurityPanel(commandType: string, data?: {}) {
     const securityPanel = await this.getSecurityPanel()
-    return securityPanel.sendCommand('security-panel.switch-mode', {
+    return securityPanel.sendCommand(commandType, data)
+  }
+
+  setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
+    return this.sendCommandToSecurityPanel('security-panel.switch-mode', {
       mode: alarmMode,
       bypass: bypassSensorZids
     })
   }
 
-  async soundSiren() {
-    const securityPanel = await this.getSecurityPanel()
-    return securityPanel.sendCommand('security-panel.sound-siren')
+  soundSiren() {
+    return this.sendCommandToSecurityPanel('security-panel.sound-siren')
   }
 
-  async silenceSiren() {
-    const securityPanel = await this.getSecurityPanel()
-    return securityPanel.sendCommand('security-panel.silence-siren')
+  silenceSiren() {
+    return this.sendCommandToSecurityPanel('security-panel.silence-siren')
   }
 
   getNextMessageOfType(type: MessageType, src: string) {

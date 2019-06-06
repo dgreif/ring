@@ -41,13 +41,15 @@ export interface SocketIoMessage {
 }
 
 export type AlarmState =
-  | 'burglar-alarm'
-  | 'entry-delay'
-  | 'fire-alarm'
-  | 'co-alarm'
-  | 'panic'
-  | 'user-verified-co-or-fire-alarm'
-  | 'user-verified-burglar-alarm'
+  | 'burglar-alarm' // Ring is Alarming
+  | 'entry-delay' // Alarm will sound in ${timeLeft} seconds
+  | 'fire-alarm' // Alarming - Smoke
+  | 'co-alarm' // Alarming - CO
+  | 'panic' // Panic Triggered
+  | 'user-verified-burglar-alarm' // Alarming - User Verified Police
+  | 'user-verified-co-or-fire-alarm' // Alarming - User Verified Smoke or CO
+  | 'burglar-accelerated-alarm' // Alarming - Police Response Requested
+  | 'fire-accelerated-alarm' // Alarming - Fire Department Response Requested
 
 export interface RingDeviceData {
   zid: string
@@ -71,6 +73,7 @@ export interface RingDeviceData {
     timestamp?: number
     uuid?: string
   }
+  siren?: { state: 'on' | 'off' }
   alarmStatus?: 'active'
   co?: { alarmStatus?: 'active' }
   smoke?: { alarmStatus?: 'active' }

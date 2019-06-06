@@ -57,6 +57,7 @@ will be ignored and will not show up in HomeKit.
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.
     * Detect active burglar alarm
+    * Sound/silence siren (shows as a "Ring Alarm Siren" switch)
   * Base Station
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
     * Battery status

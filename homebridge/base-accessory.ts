@@ -116,8 +116,7 @@ export abstract class BaseAccessory {
     }
   }
 
-  getService(serviceType: HAP.Service) {
-    const { name } = this.device.data
+  getService(serviceType: HAP.Service, name = this.device.data.name) {
     return (
       this.accessory.getService(serviceType, name) ||
       this.accessory.addService(serviceType, name)
@@ -129,9 +128,10 @@ export abstract class BaseAccessory {
     serviceType: Service,
     getValue: (data: RingDeviceData) => any,
     setValue?: (data: any) => any,
-    setValueDebounceTime = 0
+    setValueDebounceTime = 0,
+    name?: string
   ) {
-    const service = this.getService(serviceType),
+    const service = this.getService(serviceType, name),
       characteristic = service.getCharacteristic(characteristicType)
 
     characteristic.on('get', callback => {

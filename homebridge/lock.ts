@@ -66,20 +66,12 @@ export class Lock extends BaseAccessory {
     const {
       Characteristic: { LockTargetState: State }
     } = hap
+    const command = state === State.SECURED ? 'lock' : 'unlock'
 
     this.targetState =
       state === getCurrentState(this.device.data) ? undefined : state
 
-    return this.device.setInfo({
-      command: {
-        v1: [
-          {
-            commandType: `lock.${state === State.SECURED ? 'lock' : 'unlock'}`,
-            data: {}
-          }
-        ]
-      }
-    })
+    return this.device.sendCommand(`lock.${command}`)
   }
 
   getTargetState(data: RingDeviceData) {

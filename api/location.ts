@@ -95,6 +95,19 @@ export class RingDevice {
     })
   }
 
+  sendCommand(commandType: string, data = {}) {
+    this.setInfo({
+      command: {
+        v1: [
+          {
+            commandType,
+            data
+          }
+        ]
+      }
+    })
+  }
+
   toString() {
     return this.toJSON()
   }
@@ -268,19 +281,20 @@ export class Location {
 
   async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
     const securityPanel = await this.getSecurityPanel()
-    return securityPanel.setInfo({
-      command: {
-        v1: [
-          {
-            commandType: 'security-panel.switch-mode',
-            data: {
-              mode: alarmMode,
-              bypass: bypassSensorZids
-            }
-          }
-        ]
-      }
+    return securityPanel.sendCommand('security-panel.switch-mode', {
+      mode: alarmMode,
+      bypass: bypassSensorZids
     })
+  }
+
+  async soundSiren() {
+    const securityPanel = await this.getSecurityPanel()
+    return securityPanel.sendCommand('security-panel.sound-siren')
+  }
+
+  async silenceSiren() {
+    const securityPanel = await this.getSecurityPanel()
+    return securityPanel.sendCommand('security-panel.silence-siren')
   }
 
   getNextMessageOfType(type: MessageType, src: string) {

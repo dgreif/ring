@@ -33,6 +33,8 @@ const location = locations[0]
 location.disarm()
 location.armHome([/* optional array of zids for devices to bypass */])
 location.armAway([/* bypass zids */])
+location.soundSiren()
+location.silenceSiren()
 const rooms = await location.getRoomList() // array of rooms { id: number, name: string }
 ```
 

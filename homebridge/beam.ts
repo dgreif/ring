@@ -55,16 +55,7 @@ export class Beam extends BaseAccessory {
       : undefined
     const data = on ? { lightMode: 'on', duration } : { lightMode: 'default' }
 
-    return this.device.setInfo({
-      command: {
-        v1: [
-          {
-            commandType: 'light-mode.set',
-            data
-          }
-        ]
-      }
-    })
+    return this.device.sendCommand('light-mode.set', data)
   }
 
   setLevelState(level: number) {

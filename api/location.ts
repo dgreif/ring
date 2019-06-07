@@ -339,6 +339,23 @@ export class Location {
     return this.sendCommandToSecurityPanel('security-panel.silence-siren')
   }
 
+  setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
+    console.log('SETTING LIGHT GROUP', groupId, on, durationSeconds)
+    this.restClient.request<any>(
+      'POST',
+      `https://api.ring.com/groups/v1/locations/${
+        this.locationId
+      }/groups/${groupId}/devices`,
+      {
+        lights_on: {
+          duration_seconds: durationSeconds,
+          enabled: on
+        }
+      },
+      true
+    )
+  }
+
   getNextMessageOfType(type: MessageType, src: string) {
     return this.onMessage
       .pipe(

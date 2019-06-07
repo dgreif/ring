@@ -44,6 +44,7 @@ This works well if you automatically arm/disarm on leave/arrive (see setup instr
 when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit,
 set this option to a specific number of seconds.
 If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app.
+For light groups, this will default to 60 seconds.
 The maximum value is `32767`, which is ~9.1 hours.
 
 `hideLightGroups`: Ring smart lighting allows you to create lighting groups within the Ring app.

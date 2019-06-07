@@ -88,6 +88,7 @@ export interface RingDeviceData {
   co?: { alarmStatus?: 'active' }
   smoke?: { alarmStatus?: 'active' }
   motionStatus?: 'clear' | 'faulted'
+  groupId?: string
 
   // switch
   on?: boolean

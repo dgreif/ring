@@ -4,6 +4,10 @@ import { RingAlarmPlatformConfig } from './config'
 import { BaseAccessory } from './base-accessory'
 
 export class Beam extends BaseAccessory {
+  isLightGroup =
+    this.device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch
+  groupId = this.device.data.groupId
+
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
@@ -53,6 +57,11 @@ export class Beam extends BaseAccessory {
     const duration = beamDurationSeconds
       ? Math.min(beamDurationSeconds, 32767)
       : undefined
+
+    if (this.isLightGroup && this.groupId) {
+      return this.device.location.setLightGroup(this.groupId, on, duration)
+    }
+
     const data = on ? { lightMode: 'on', duration } : { lightMode: 'default' }
 
     return this.device.sendCommand('light-mode.set', data)

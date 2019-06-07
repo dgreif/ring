@@ -62,11 +62,14 @@ export class RingRestClient {
   async request<T = void>(
     method: 'GET' | 'POST',
     url: string,
-    data?: any
+    data?: any,
+    json = false
   ): Promise<T> {
     const token = await this.authTokenPromise
     const headers = {
-      'content-type': 'application/x-www-form-urlencoded',
+      'content-type': json
+        ? 'application/json'
+        : 'application/x-www-form-urlencoded',
       authorization: `Bearer ${token}`
     }
 
@@ -74,7 +77,7 @@ export class RingRestClient {
       return await requestWithRetry<T>({
         method,
         url,
-        data: querystring.stringify(data),
+        data: json ? data : querystring.stringify(data),
         headers
       })
     } catch (e) {
@@ -82,7 +85,7 @@ export class RingRestClient {
 
       if (response.status === 401) {
         this.authTokenPromise = this.getAuthToken()
-        return this.request(method, url, data)
+        return this.request(method, url, data, json)
       }
 
       if (

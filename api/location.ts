@@ -340,7 +340,6 @@ export class Location {
   }
 
   setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
-    console.log('SETTING LIGHT GROUP', groupId, on, durationSeconds)
     this.restClient.request<any>(
       'POST',
       `https://api.ring.com/groups/v1/locations/${

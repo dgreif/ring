@@ -21,9 +21,11 @@ import {
   UserLocation,
   TicketAsset,
   MessageDataType,
-  AssetSession
+  AssetSession,
+  LocationEvent
 } from './ring-types'
-import { RingRestClient } from './rest-client'
+import { clientApi, RingRestClient } from './rest-client'
+import { RingCamera } from './ring-camera'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
 
@@ -38,6 +40,8 @@ function flattenDeviceData(data: any): RingDeviceData {
 export class RingDevice {
   onData = new BehaviorSubject(this.initialData)
   zid = this.initialData.zid
+  id = this.zid
+  deviceType = this.initialData.deviceType
 
   constructor(
     private initialData: RingDeviceData,
@@ -192,6 +196,8 @@ export class Location {
 
   constructor(
     public readonly locationDetails: UserLocation,
+    public readonly cameras: RingCamera[],
+    public readonly hasHubs: boolean,
     private restClient: RingRestClient
   ) {
     this.locationId = locationDetails.location_id
@@ -220,9 +226,7 @@ export class Location {
           }
         } else if (!assetWasOffline) {
           logError(
-            `Ring ${
-              asset.kind
-            } ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
+            `Ring ${asset.kind} ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
           )
           this.offlineAssets.push(assetUuid)
         }
@@ -236,18 +240,16 @@ export class Location {
       assets: TicketAsset[]
       host: string
       ticket: string
-    }>(
-      'GET',
-      'https://app.ring.com/api/v1/clap/tickets?locationID=' + this.locationId
-    )
+    }>({
+      url:
+        'https://app.ring.com/api/v1/clap/tickets?locationID=' + this.locationId
+    })
     this.assets = assets
     this.receivedAssetDeviceLists.length = 0
     this.offlineAssets.length = 0
 
     if (!assets.length) {
-      const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${
-        this.locationDetails.name
-      } - ${this.locationId}`
+      const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${this.locationDetails.name} - ${this.locationId}`
       logError(errorMessage)
       throw new Error(errorMessage)
     }
@@ -300,6 +302,12 @@ export class Location {
   }
 
   async getConnection() {
+    if (!this.hasHubs) {
+      throw new Error(
+        `Location ${this.locationDetails.name} does not have any hubs`
+      )
+    }
+
     if (this.connectionPromise) {
       return this.connectionPromise
     }
@@ -340,19 +348,17 @@ export class Location {
   }
 
   setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
-    this.restClient.request<any>(
-      'POST',
-      `https://api.ring.com/groups/v1/locations/${
-        this.locationId
-      }/groups/${groupId}/devices`,
-      {
+    this.restClient.request<any>({
+      method: 'POST',
+      url: `https://api.ring.com/groups/v1/locations/${this.locationId}/groups/${groupId}/devices`,
+      data: {
         lights_on: {
           duration_seconds: durationSeconds,
           enabled: on
         }
       },
-      true
-    )
+      json: true
+    })
   }
 
   getNextMessageOfType(type: MessageType, src: string) {
@@ -375,6 +381,10 @@ export class Location {
   }
 
   getDevices() {
+    if (!this.hasHubs) {
+      return [] as RingDevice[]
+    }
+
     if (!this.connectionPromise) {
       this.getConnection()
     }
@@ -398,9 +408,7 @@ export class Location {
 
     if (!securityPanel) {
       throw new Error(
-        `Could not find a security panel for location ${
-          this.locationDetails.name
-        } - ${this.locationId}`
+        `Could not find a security panel for location ${this.locationDetails.name} - ${this.locationId}`
       )
     }
 
@@ -417,5 +425,18 @@ export class Location {
 
   armAway(bypassSensorZids?: string[]) {
     return this.setAlarmMode('all', bypassSensorZids)
+  }
+
+  getEvents(limit = 50, olderThanId?: number | string) {
+    const paginationKey = olderThanId ? `&pagination_key=${olderThanId}` : ''
+
+    return this.restClient.request<{
+      events: LocationEvent[]
+      meta: { pagination_key: string }
+    }>({
+      url: clientApi(
+        `locations/${this.locationId}/events?limit=${limit}${paginationKey}`
+      )
+    })
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "@dgreif/ring-alarm",
   "version": "2.2.2",
-  "description": "API for ring security alarm system and smart lighting",
+  "description": "API for ring doorbells, cameras, security alarm system and smart lighting",
   "main": "api/index.js",
   "scripts": {
     "test": "tslint **/*.ts",
@@ -23,6 +23,9 @@
   },
   "keywords": [
     "ring",
+    "doorbell",
+    "doorbot",
+    "camera",
     "alarm",
     "smart",
     "light",
@@ -44,12 +47,12 @@
     "@types/socket.io-client": "^1.4.32",
     "dotenv": "^8.0.0",
     "homebridge": "^0.4.50",
-    "prettier": "^1.17.1",
-    "ts-node": "^8.2.0",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.3.0",
     "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.2"
   },
   "engines": {
     "node": ">=8.3.0"

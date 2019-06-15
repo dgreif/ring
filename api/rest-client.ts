@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios'
+import axios, { AxiosRequestConfig, ResponseType } from 'axios'
 import { delay, logError, logInfo } from './util'
 import * as querystring from 'querystring'
 
@@ -10,6 +10,12 @@ const ringErrorCodes: { [code: number]: string } = {
   7063: 'MAINTENANCE'
 }
 
+const clientApiBaseUrl = 'https://api.ring.com/clients_api/'
+
+export function clientApi(path: string) {
+  return clientApiBaseUrl + path
+}
+
 async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
   try {
     logInfo(`Making request: ${JSON.stringify(options, null, 2)}`)
@@ -18,9 +24,7 @@ async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
   } catch (e) {
     if (!e.response) {
       logError(
-        `Failed to reach Ring server at ${
-          options.url
-        }.  Trying again in 5 seconds...`
+        `Failed to reach Ring server at ${options.url}.  Trying again in 5 seconds...`
       )
       await delay(5000)
       return requestWithRetry(options)
@@ -59,33 +63,37 @@ export class RingRestClient {
     }
   }
 
-  async request<T = void>(
-    method: 'GET' | 'POST',
-    url: string,
-    data?: any,
-    json = false
-  ): Promise<T> {
-    const token = await this.authTokenPromise
-    const headers = {
-      'content-type': json
-        ? 'application/json'
-        : 'application/x-www-form-urlencoded',
-      authorization: `Bearer ${token}`
-    }
+  async request<T = void>(options: {
+    method?: 'GET' | 'POST' | 'PUT'
+    url: string
+    data?: any
+    json?: boolean
+    responseType?: ResponseType
+  }): Promise<T> {
+    const token = await this.authTokenPromise,
+      { method, url, data, json, responseType } = options,
+      headers = {
+        'content-type': json
+          ? 'application/json'
+          : 'application/x-www-form-urlencoded',
+        authorization: `Bearer ${token}`,
+        'user-agent': 'android:com.ringapp:2.0.67(423)' // required to get active dings
+      }
 
     try {
       return await requestWithRetry<T>({
-        method,
+        method: method || 'GET',
         url,
         data: json ? data : querystring.stringify(data),
-        headers
+        headers,
+        responseType
       })
     } catch (e) {
       const response = e.response || {}
 
       if (response.status === 401) {
         this.authTokenPromise = this.getAuthToken()
-        return this.request(method, url, data, json)
+        return this.request(options)
       }
 
       if (
@@ -105,10 +113,10 @@ export class RingRestClient {
           )
 
           await delay(20000)
-          return this.request(method, url, data)
+          return this.request(options)
         } else {
           logError(
-            `http request failed.  ${url} returned unknown errors: (${errors}).  Trying again in 20 seconds`
+            `http request failed.  ${url} returned unknown errors: (${errors}).`
           )
         }
       }

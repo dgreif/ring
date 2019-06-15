@@ -1,10 +1,10 @@
-import { BaseAccessory } from './base-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice, RingDeviceData, AlarmState } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 
-export class SecurityPanel extends BaseAccessory {
+export class SecurityPanel extends BaseDeviceAccessory {
   private targetState: any
   private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
     ? ['entry-delay', 'burglar-alarm']

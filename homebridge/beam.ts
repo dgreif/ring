@@ -1,9 +1,9 @@
 import { RingDevice, RingDeviceType } from '../api'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
-import { BaseAccessory } from './base-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory'
 
-export class Beam extends BaseAccessory {
+export class Beam extends BaseDeviceAccessory {
   isLightGroup =
     this.device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch
   groupId = this.device.data.groupId

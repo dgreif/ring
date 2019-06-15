@@ -7,6 +7,7 @@ export default function(homebridge: any) {
   hap.Characteristic = homebridge.hap.Characteristic
   hap.UUIDGen = homebridge.hap.uuid
   hap.AccessoryCategories = homebridge.hap.Accessory.Categories
+  hap.StreamController = homebridge.hap.StreamController
 
   homebridge.registerPlatform(
     'homebridge-ring-alarm',

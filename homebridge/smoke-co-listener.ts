@@ -1,9 +1,9 @@
-import { BaseAccessory } from './base-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 
-export class SmokeCoListener extends BaseAccessory {
+export class SmokeCoListener extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,

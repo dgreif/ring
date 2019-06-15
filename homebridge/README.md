@@ -3,34 +3,42 @@
 [![CircleCI](https://circleci.com/gh/dgreif/ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/ring-alarm)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
-This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for the
-[Ring Alarm System](https://shop.ring.com/pages/security-system) and [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting) line of products.
+This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for
+[Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
+[Ring Cameras](https://shop.ring.com/pages/security-cameras),
+the [Ring Alarm System](https://shop.ring.com/pages/security-system),
+[Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
+and third party devices that connect to the Ring Alarm System.
  
- ### Installation
+ ## Installation
  
  Assuming a global installation of `homebridge`:
  
  `npm i -g homebridge-ring-alarm`
  
- ### Homebridge Configuration
+ ## Homebridge Configuration
  
  Add the `RingAlarm` platform in your homebridge `config.json` file.
  
- ```json
+ ```js
 {
   "platforms": [
     {
       "platform": "RingAlarm",
       "email": "some.one@website.com",
       "password": "abc123!#",
-      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"], // OPTIONAL. See below for details
-      "alarmOnEntryDelay": false, // Optional. See below for details
-      "beamDurationSeconds": 60, // Optional. See below for details
-      "hideLightGroups": true // Optional. See below for details
+
+      // OPTIONAL. See below for details
+      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
+      "alarmOnEntryDelay": false,
+      "beamDurationSeconds": 60,
+      "hideLightGroups": true
     }
   ]
 }
 ```
+
+### Optional Parameters
 
 `locationIds`: Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, 
 all of your locations will be added to HomeKit (which is what most users will want to do).  
@@ -53,7 +61,21 @@ in the group.  However, you may wish to group the lights differently in HomeKit 
 groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor)
 will be ignored and will not show up in HomeKit.
 
+`cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
+light/siren status do not update in real time and need to be requested periodically.  Defaults to `30`
+
+`cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
+doorbell presses.  Defaults to `5`
+
 ### Supported Devices
+  * Cameras (Experimental)
+    * Light On/Off
+    * Siren On/Off
+    * Motion - Requires motion alerts to be on for the camera in the Ring App.  If you have
+    motion snooze or a motion schedule enabled, you will not receive motion events via HomeKit either.
+    * Doorbell presses - Requires ring alerts to be on for the camera in the Ring App.
+    * TODO: Battery
+    * TODO: Snapshots and live streams
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.

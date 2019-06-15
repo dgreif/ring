@@ -1,9 +1,9 @@
-import { BaseAccessory } from './base-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 
-export class MultiLevelSwitch extends BaseAccessory {
+export class MultiLevelSwitch extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,

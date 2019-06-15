@@ -1,4 +1,4 @@
-import { getLocations, RingDevice, RingDeviceType } from '../api'
+import { RingApi, RingCamera, RingDevice, RingDeviceType } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -12,8 +12,17 @@ import { SmokeCoListener } from './smoke-co-listener'
 import { RingAlarmPlatformConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
+import { Camera } from './camera'
 
-function getAccessoryClass({ data: { deviceType } }: RingDevice) {
+function getAccessoryClass(device: RingDevice | RingCamera) {
+  if (device instanceof RingCamera) {
+    return Camera
+  }
+
+  const {
+    data: { deviceType }
+  } = device
+
   switch (deviceType) {
     case RingDeviceType.ContactSensor:
       return ContactSensor
@@ -55,6 +64,9 @@ export class RingAlarmPlatform {
     public config: RingAlarmPlatformConfig,
     public api: HAP.Platform
   ) {
+    config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds || 30
+    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 5
+
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
       this.connectToApi().catch(e => {
@@ -75,32 +87,34 @@ export class RingAlarmPlatform {
   }
 
   async connectToApi() {
-    const locations = await getLocations(this.config),
+    const ringApi = new RingApi(this.config),
+      locations = await ringApi.getLocations(),
       { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
       activeAccessoryIds: string[] = []
 
     await Promise.all(
       locations.map(async location => {
-        const devices = await location.getDevices()
+        const devices = await location.getDevices(),
+          cameras = location.cameras,
+          allDevices = [...devices, ...cameras]
+
         this.log.info(
-          `Configuring ${devices.length} devices for locationId ${
-            location.locationId
-          }`
+          `Configuring ${cameras.length} cameras and ${devices.length} devices for locationId ${location.locationId}`
         )
-        devices.forEach(device => {
+        allDevices.forEach(device => {
           const AccessoryClass = getAccessoryClass(device)
 
           if (
             !AccessoryClass ||
             (this.config.hideLightGroups &&
-              device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch)
+              device.deviceType === RingDeviceType.BeamsLightGroupSwitch)
           ) {
             return
           }
 
-          const id = device.data.zid,
-            uuid = hap.UUIDGen.generate(id),
+          const id = device.id,
+            uuid = hap.UUIDGen.generate(id.toString()),
             createHomebridgeAccessory = () => {
               const accessory = new hap.PlatformAccessory(
                 device.name,
@@ -109,7 +123,7 @@ export class RingAlarmPlatform {
               )
 
               this.log.info(
-                `Adding new accessory ${device.data.deviceType} ${device.name}`
+                `Adding new accessory ${device.deviceType} ${device.name}`
               )
 
               api.registerPlatformAccessories(
@@ -122,7 +136,12 @@ export class RingAlarmPlatform {
             homebridgeAccessory =
               this.homebridgeAccessories[uuid] || createHomebridgeAccessory()
 
-          new AccessoryClass(device, homebridgeAccessory, this.log, this.config)
+          new AccessoryClass(
+            device as any,
+            homebridgeAccessory,
+            this.log,
+            this.config
+          )
 
           this.homebridgeAccessories[uuid] = homebridgeAccessory
           activeAccessoryIds.push(uuid)
@@ -136,9 +155,7 @@ export class RingAlarmPlatform {
 
     staleAccessories.forEach(staleAccessory => {
       this.log.info(
-        `Removing stale cached accessory ${staleAccessory.UUID} ${
-          staleAccessory.displayName
-        }`
+        `Removing stale cached accessory ${staleAccessory.UUID} ${staleAccessory.displayName}`
       )
     })
 

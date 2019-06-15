@@ -1,11 +1,14 @@
 {
   "name": "homebridge-ring-alarm",
-  "description": "Homebridge plugin for ring security alarm system and smart lighting",
+  "description": "Homebridge plugin for ring doorbells, cameras, security alarm system and smart lighting",
   "main": "homebridge/index.js",
   "keywords": [
     "homebridge",
     "homebridge-plugin",
     "ring",
+    "doorbell",
+    "doorbot",
+    "camera",
     "alarm",
     "smart",
     "light",

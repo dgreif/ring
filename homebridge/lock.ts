@@ -1,4 +1,4 @@
-import { BaseAccessory } from './base-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice, RingDeviceData } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
@@ -21,7 +21,7 @@ function getCurrentState({ locked }: RingDeviceData) {
   }
 }
 
-export class Lock extends BaseAccessory {
+export class Lock extends BaseDeviceAccessory {
   private targetState: any
 
   constructor(

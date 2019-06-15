@@ -2,17 +2,22 @@ export namespace HAP {
   export interface Accessory {
     UUID: string
     displayName: string
+    services: Service[]
 
     on(...args: any[]): void
     getService(...args: any[]): Service
     addService(...args: any[]): Service
+    removeService(...args: any[]): void
     getServiceByUUIDAndSubType(...args: any[]): Service
     updateReachability(reachable: boolean): void
     setCharacteristic(...args: any[]): Service
+    configureCameraSource(cameraSource: any): void
   }
 
   export interface Service {
     AccessoryInformation: void
+    UUID: string
+    subtype?: string
 
     setCharacteristic(...args: any[]): Service
     getCharacteristic(...args: any[]): Characteristic
@@ -84,6 +89,8 @@ class Hap {
   public AccessoryCategories: {
     [key: string]: number
   }
+
+  public StreamController: any
 }
 
 export const hap = new Hap()

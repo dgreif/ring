@@ -110,6 +110,25 @@ Some other useful propeties
 
 See the `examples` directory for additional code examples.
 
+## Breaking changes from v2 to v3
+
+v3 exports a full `RingApi` object instead of a single `getLocations` method.
+
+```typescript
+// v2
+import { getLocations } from '@dgreif/ring-alarm'
+const locations = await getLocations(options)
+
+// v3
+import { RingApi } from '@dgreif/ring-alarm'
+const ringApi = new RingApi(options),
+  locations = await ringApi.getLocations(), // same locations object form v2
+  cameras = await ringApi.getCameras() // new! all cameras from all locations
+```  
+
+v3 also exposes some other top level methods like `ringApi.getHistory()` and `ringApi.fetchRingDevices()`.
+Since these are global across all locations, it no longer made sense to export a single `getLocations` method.
+
 ## homebridge-ring-alarm
 
 The `homebridge-ring-alarm` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)

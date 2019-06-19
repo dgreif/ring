@@ -28,7 +28,7 @@ and third party devices that connect to the Ring Alarm System.
       "email": "some.one@website.com",
       "password": "abc123!#",
 
-      // OPTIONAL. See below for details
+      // Optional. DO NOT INCLUDE UNLESS NEEDED.  See below for details
       "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
       "alarmOnEntryDelay": false,
       "beamDurationSeconds": 60,
@@ -39,6 +39,8 @@ and third party devices that connect to the Ring Alarm System.
 ```
 
 ### Optional Parameters
+Only include an optional parameter if you actually need it.  Default behavior 
+without any of the optional parameters should be sufficient for most users.
 
 `locationIds`: Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, 
 all of your locations will be added to HomeKit (which is what most users will want to do).  
@@ -69,10 +71,11 @@ doorbell presses.  Defaults to `5`
 
 ### Supported Devices
   * Cameras (Experimental)
-    * Light On/Off
-    * Siren On/Off
-    * Motion - Requires motion alerts to be on for the camera in the Ring App.  If you have
-    motion snooze or a motion schedule enabled, you will not receive motion events via HomeKit either.
+    * Does **not** currently have a camera feed.  I am actively working on this functionality.
+    * Motion Sensor - Requires motion alerts to be on for the camera in the Ring App.  If you have
+        motion snooze or a motion schedule enabled, you will not receive motion events via HomeKit either.
+    * Light On/Off (if equipped)
+    * Siren On/Off (if equipped)
     * Doorbell presses - Requires ring alerts to be on for the camera in the Ring App.
     * TODO: Battery
     * TODO: Snapshots and live streams
@@ -104,7 +107,7 @@ doorbell presses.  Defaults to `5`
   * Carbon Monoxide Alarm
   * Smoke/Carbon Monoxide Listener
   * Smart Locks
-  * Lights/Switches (Implemented but not tested)
+  * Lights/Switches
     * On/Off
     * Brightness Level
     * Hue/Sat/Color Temp are _possible_, but currently not supported.

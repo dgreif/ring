@@ -76,7 +76,7 @@ Don't worry, it's really easy. Due to homebridge/HAP limitations, the cameras ca
 Configure the homebridge plugin like normal, then click on the "+" in the upper right in
 the Home app, then "Don't have a Code or Can't Scan?", then you should see the cameras listed as individual devices which
 which you can add.  The code that you need for each is the same code you used when setting up homebridge.  It should be in
-the output when you start homebridge, or in your homebridge `config.js` file. 
+the output when you start homebridge, or in your homebridge `config.json` file. 
 Walk through the setup pages and when you are done, you should see several devices related to the camera:
 
   * Camera Feed

@@ -356,3 +356,8 @@ export interface ActiveDing {
   sip_token: string
   sip_ding_id: string
 }
+
+export interface SnapshotTimestamp {
+  timestamp: number
+  doorbot_id: number
+}

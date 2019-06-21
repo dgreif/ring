@@ -69,7 +69,14 @@ export class RingApi {
       updateReceived$ = new Subject(),
       pollForStatusUpdate$ = cameraStatusPollingSeconds
         ? updateReceived$.pipe(debounceTime(cameraStatusPollingSeconds * 1000))
-        : EMPTY
+        : EMPTY,
+      camerasById = cameras.reduce(
+        (byId, camera) => {
+          byId[camera.id] = camera
+          return byId
+        },
+        {} as { [id: number]: RingCamera }
+      )
 
     if (!cameras.length) {
       return
@@ -91,7 +98,7 @@ export class RingApi {
         }
 
         cameraData.forEach(data => {
-          const camera = cameras.find(x => x.id === data.id)
+          const camera = camerasById[data.id]
           if (camera) {
             camera.updateData(data)
           }
@@ -119,11 +126,12 @@ export class RingApi {
             return
           }
 
-          cameras.forEach(camera =>
-            camera.processActiveDings(
-              activeDings.filter(ding => ding.doorbot_id === camera.id)
-            )
-          )
+          activeDings.forEach(activeDing => {
+            const camera = camerasById[activeDing.doorbot_id]
+            if (camera) {
+              camera.processActiveDing(activeDing)
+            }
+          })
         })
 
       poolForActiveDings$.next() // kick off pooling

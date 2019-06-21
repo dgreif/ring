@@ -3,7 +3,7 @@ import { RingAlarmPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { mapTo } from 'rxjs/operators'
-// import { CameraSource } from './camera-source'
+import { CameraSource } from './camera-source'
 
 export class Camera extends BaseAccessory<RingCamera> {
   constructor(
@@ -15,16 +15,8 @@ export class Camera extends BaseAccessory<RingCamera> {
     super()
     const { Characteristic, Service } = hap
 
-    // TODO: snapshots and live stream
-    // const cameraSource = new CameraSource(device)
-    // this.getService(Service.CameraControl)
-    // cameraSource.services.forEach(service => {
-    //   const existingService = accessory.services.find(
-    //     x => x.UUID === service.UUID && x.subtype === service.subtype
-    //   )
-    //   accessory.removeService(existingService)
-    // })
-    // accessory.configureCameraSource(cameraSource)
+    const cameraSource = new CameraSource(device)
+    accessory.configureCameraSource(cameraSource)
 
     this.registerObservableCharacteristic(
       Characteristic.MotionDetected,

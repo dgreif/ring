@@ -14,14 +14,11 @@ import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Camera } from './camera'
 
-function getAccessoryClass(device: RingDevice | RingCamera) {
-  if (device instanceof RingCamera) {
-    return Camera
-  }
+const pluginName = 'homebridge-ring-alarm',
+  platformName = 'RingAlarm'
 
-  const {
-    data: { deviceType }
-  } = device
+function getAccessoryClass(device: RingDevice | RingCamera) {
+  const { deviceType } = device
 
   switch (deviceType) {
     case RingDeviceType.ContactSensor:
@@ -91,6 +88,8 @@ export class RingAlarmPlatform {
       locations = await ringApi.getLocations(),
       { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
+      platformAccessories: HAP.Accessory[] = [],
+      cameraAccessories: HAP.Accessory[] = [],
       activeAccessoryIds: string[] = []
 
     await Promise.all(
@@ -103,7 +102,11 @@ export class RingAlarmPlatform {
           `Configuring ${cameras.length} cameras and ${devices.length} devices for locationId ${location.locationId}`
         )
         allDevices.forEach(device => {
-          const AccessoryClass = getAccessoryClass(device)
+          const isCamera = device instanceof RingCamera,
+            AccessoryClass = isCamera ? Camera : getAccessoryClass(device),
+            id = device.id,
+            uuid = hap.UUIDGen.generate(id.toString()),
+            existingAccessory = this.homebridgeAccessories[uuid]
 
           if (
             !AccessoryClass ||
@@ -113,24 +116,35 @@ export class RingAlarmPlatform {
             return
           }
 
-          const id = device.id,
-            uuid = hap.UUIDGen.generate(id.toString()),
-            createHomebridgeAccessory = () => {
+          if (
+            isCamera &&
+            existingAccessory &&
+            existingAccessory.category === 11
+          ) {
+            // this will remove bridged cameras from older versions of the plugin
+            this.removeAccessories([this.homebridgeAccessories[uuid]])
+            delete this.homebridgeAccessories[uuid]
+          }
+
+          const createHomebridgeAccessory = () => {
               const accessory = new hap.PlatformAccessory(
                 device.name,
                 uuid,
-                hap.AccessoryCategories.SECURITY_SYSTEM
+                isCamera
+                  ? hap.AccessoryCategories.CAMERA
+                  : hap.AccessoryCategories.SECURITY_SYSTEM
               )
 
               this.log.info(
                 `Adding new accessory ${device.deviceType} ${device.name}`
               )
 
-              api.registerPlatformAccessories(
-                'homebridge-ring-alarm',
-                'RingAlarm',
-                [accessory]
-              )
+              if (isCamera) {
+                cameraAccessories.push(accessory)
+              } else {
+                platformAccessories.push(accessory)
+              }
+
               return accessory
             },
             homebridgeAccessory =
@@ -149,6 +163,17 @@ export class RingAlarmPlatform {
       })
     )
 
+    if (platformAccessories.length) {
+      api.registerPlatformAccessories(
+        pluginName,
+        platformName,
+        platformAccessories
+      )
+    }
+    if (cameraAccessories.length) {
+      api.publishCameraAccessories(pluginName, cameraAccessories)
+    }
+
     const staleAccessories = cachedAccessoryIds
       .filter(cachedId => !activeAccessoryIds.includes(cachedId))
       .map(id => this.homebridgeAccessories[id])
@@ -160,11 +185,15 @@ export class RingAlarmPlatform {
     })
 
     if (staleAccessories.length) {
-      this.api.unregisterPlatformAccessories(
-        'homebridge-ring-alarm',
-        'RingAlarm',
-        staleAccessories
-      )
+      this.removeAccessories(staleAccessories)
     }
+  }
+
+  private removeAccessories(accessories: HAP.Accessory[]) {
+    this.api.unregisterPlatformAccessories(
+      pluginName,
+      platformName,
+      accessories
+    )
   }
 }

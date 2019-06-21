@@ -2,6 +2,7 @@ export namespace HAP {
   export interface Accessory {
     UUID: string
     displayName: string
+    category: number
     services: Service[]
 
     on(...args: any[]): void
@@ -63,6 +64,7 @@ export namespace HAP {
       platformName: string,
       accessories: Accessory[]
     ): void
+    publishCameraAccessories(pluginName: string, accessories: Accessory[]): void
   }
 }
 

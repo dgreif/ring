@@ -69,16 +69,29 @@ light/siren status do not update in real time and need to be requested periodica
 `cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
 doorbell presses.  Defaults to `5`
 
-### Supported Devices
-  * Cameras (Experimental)
-    * Does **not** currently have a camera feed.  I am actively working on this functionality.
-    * Motion Sensor - Requires motion alerts to be on for the camera in the Ring App.  If you have
-        motion snooze or a motion schedule enabled, you will not receive motion events via HomeKit either.
-    * Light On/Off (if equipped)
-    * Siren On/Off (if equipped)
-    * Doorbell presses - Requires ring alerts to be on for the camera in the Ring App.
-    * TODO: Battery
-    * TODO: Snapshots and live streams
+### Camera Setup
+
+This plugin will connect all of your Ring cameras to homebridge, but they require a little extra work to get set up.
+Don't worry, it's really easy. Due to homebridge/HAP limitations, the cameras cannot be added through a bridge and must be added as individual devices.
+Configure the homebridge plugin like normal, then click on the "+" in the upper right in
+the Home app, then "Don't have a Code or Can't Scan?", then you should see the cameras listed as individual devices which
+which you can add.  The code that you need for each is the same code you used when setting up homebridge.  It should be in
+the output when you start homebridge, or in your homebridge `config.js` file. 
+Walk through the setup pages and when you are done, you should see several devices related to the camera:
+
+  * Camera Feed
+  * Motion Sensor
+  * Light (if camera is equipped)
+  * Siren Switch (if camera is equipped)
+  
+**Please Note - there is not a live feed, just snapshots from the camera.**  The snapshots work great for seeing who is
+at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and
+are not functional at this time.  Please see https://github.com/dgreif/ring-alarm/issues/35 if you want more details. 
+
+If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
+HomeKit with a snapshot from the camera
+  
+### Supported Devices via Ring Alarm and Ring Smart Lighting Hubs
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
     * Arm Home / Arm Away / Disarm alarm for Ring location.

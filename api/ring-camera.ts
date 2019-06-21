@@ -2,7 +2,8 @@ import {
   ActiveDing,
   CameraData,
   CameraHealth,
-  HistoricalDingGlobal
+  HistoricalDingGlobal,
+  SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -11,8 +12,13 @@ import {
   filter,
   map,
   publishReplay,
-  refCount
+  refCount,
+  take
 } from 'rxjs/operators'
+import { delay, logError } from './util'
+
+const maxSnapshotRefreshAttempts = 60,
+  snapshotRefreshDelay = 500
 
 export class RingCamera {
   id = this.initialData.id
@@ -114,18 +120,26 @@ export class RingCamera {
     })
   }
 
-  processActiveDings(dings: ActiveDing[]) {
-    if (!dings.length) {
-      return
-    }
+  async getSipConnectionDetails() {
+    const vodPromise = this.onNewDing
+      .pipe(
+        filter(x => x.kind === 'on_demand'),
+        take(1)
+      )
+      .toPromise()
+    await this.startVideoOnDemand()
+    return vodPromise
+  }
 
-    dings.forEach(ding => this.onNewDing.next(ding))
+  processActiveDing(ding: ActiveDing) {
+    const activeDings = this.activeDings
 
-    this.onActiveDings.next(this.activeDings.concat(dings))
+    this.onNewDing.next(ding)
+    this.onActiveDings.next(activeDings.concat([ding]))
 
     setTimeout(() => {
-      const allActiveDings = this.onActiveDings.getValue(),
-        otherDings = allActiveDings.filter(ding => !dings.includes(ding))
+      const allActiveDings = this.activeDings,
+        otherDings = allActiveDings.filter(oldDing => oldDing !== ding)
       this.onActiveDings.next(otherDings)
     }, 65 * 1000) // dings last ~1 minute
   }
@@ -144,12 +158,56 @@ export class RingCamera {
     return response.url
   }
 
+  private async updateTimestamp() {
+    const response = await this.restClient.request<{
+        timestamps: SnapshotTimestamp[]
+      }>({
+        url: clientApi(`snapshots/timestamps`),
+        method: 'POST',
+        data: {
+          doorbot_ids: [this.id]
+        },
+        json: true
+      }),
+      timestamp = response.timestamps[0]
+
+    return timestamp ? timestamp.timestamp : 0
+  }
+
+  private refreshSnapshotInProgress?: Promise<void>
+
+  private async refreshSnapshot() {
+    const initialTimestamp = await this.updateTimestamp()
+
+    for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
+      await delay(snapshotRefreshDelay)
+
+      const newTimestamp = await this.updateTimestamp()
+      if (newTimestamp > initialTimestamp) {
+        return
+      }
+    }
+
+    throw new Error(
+      `Snapshot failed to refresh after ${maxSnapshotRefreshAttempts} attempts`
+    )
+  }
+
   async getSnapshot() {
-    const response = await this.restClient.request<Buffer>({
+    this.refreshSnapshotInProgress =
+      this.refreshSnapshotInProgress || this.refreshSnapshot()
+
+    try {
+      await this.refreshSnapshotInProgress
+    } catch (e) {
+      logError(e)
+    }
+
+    this.refreshSnapshotInProgress = undefined
+
+    return this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),
       responseType: 'arraybuffer'
     })
-
-    return response
   }
 }

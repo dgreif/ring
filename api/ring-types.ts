@@ -236,7 +236,8 @@ export interface CameraData {
   }
   owned: boolean
   alerts: {
-    connection: 'online' | string
+    connection: 'online' | 'offline' | string
+    battery?: 'low' | string
   }
   motion_snooze: {
     scheduled: boolean

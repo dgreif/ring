@@ -13,9 +13,10 @@ export class Camera extends BaseAccessory<RingCamera> {
     public readonly config: RingAlarmPlatformConfig
   ) {
     super()
-    const { Characteristic, Service } = hap
+    const { Characteristic, Service } = hap,
+      { StatusLowBattery } = Characteristic,
+      cameraSource = new CameraSource(device)
 
-    const cameraSource = new CameraSource(device)
     accessory.configureCameraSource(cameraSource)
 
     this.registerObservableCharacteristic(
@@ -80,6 +81,14 @@ export class Camera extends BaseAccessory<RingCamera> {
       data => data.device_id
     )
 
-    // TODO: battery
+    this.registerCharacteristic(
+      Characteristic.StatusLowBattery,
+      Service.MotionSensor,
+      data => {
+        return data.alerts.battery === 'low'
+          ? StatusLowBattery.BATTERY_LEVEL_LOW
+          : StatusLowBattery.BATTERY_LEVEL_NORMAL
+      }
+    )
   }
 }

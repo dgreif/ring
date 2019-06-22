@@ -105,8 +105,8 @@ export class RingAlarmPlatform {
           const isCamera = device instanceof RingCamera,
             AccessoryClass = isCamera ? Camera : getAccessoryClass(device),
             id = device.id,
-            uuid = hap.UUIDGen.generate(id.toString()),
-            existingAccessory = this.homebridgeAccessories[uuid]
+            cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
+            uuid = hap.UUIDGen.generate(id.toString() + cameraIdDifferentiator)
 
           if (
             !AccessoryClass ||
@@ -114,16 +114,6 @@ export class RingAlarmPlatform {
               device.deviceType === RingDeviceType.BeamsLightGroupSwitch)
           ) {
             return
-          }
-
-          if (
-            isCamera &&
-            existingAccessory &&
-            existingAccessory.category === 11
-          ) {
-            // this will remove bridged cameras from older versions of the plugin
-            this.removeAccessories([this.homebridgeAccessories[uuid]])
-            delete this.homebridgeAccessories[uuid]
           }
 
           const createHomebridgeAccessory = () => {
@@ -185,15 +175,11 @@ export class RingAlarmPlatform {
     })
 
     if (staleAccessories.length) {
-      this.removeAccessories(staleAccessories)
+      this.api.unregisterPlatformAccessories(
+        pluginName,
+        platformName,
+        staleAccessories
+      )
     }
-  }
-
-  private removeAccessories(accessories: HAP.Accessory[]) {
-    this.api.unregisterPlatformAccessories(
-      pluginName,
-      platformName,
-      accessories
-    )
   }
 }

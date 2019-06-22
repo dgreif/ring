@@ -64,8 +64,42 @@ export class CameraSource {
 
   handleCloseConnection(connectionID: any) {}
 
-  prepareStream(request: any, callback: (response: any) => void) {
-    callback(new Error('Not implemented'))
+  prepareStream(
+    request: any,
+    callback: (response: {
+      address: {
+        type: 'v4' | 'v6'
+        ipAddress?: string
+      }
+      video: {
+        port?: number
+        ssrc?: number
+        proxy_pt?: string
+        proxy_server_address?: string
+        proxy_server_rtp?: string
+        proxy_server_rtcp?: string
+        srtp_key?: string
+        srtp_salt?: string
+      }
+      audio: {
+        port?: number
+        ssrc?: number
+        proxy_pt?: string
+        proxy_server_address?: string
+        proxy_server_rtp?: string
+        proxy_server_rtcp?: string
+        srtp_key?: string
+        srtp_salt?: string
+      }
+    }) => void
+  ) {
+    callback({
+      address: {
+        type: 'v4'
+      },
+      video: {},
+      audio: {}
+    })
   }
 
   handleStreamRequest(request: any) {}

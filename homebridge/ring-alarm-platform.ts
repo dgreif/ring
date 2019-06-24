@@ -61,6 +61,11 @@ export class RingAlarmPlatform {
     public config: RingAlarmPlatformConfig,
     public api: HAP.Platform
   ) {
+    if (!config) {
+      this.log.info('No configuration found for platform RingAlarm')
+      return
+    }
+
     config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds || 30
     config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 5
 

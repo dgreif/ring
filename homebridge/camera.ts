@@ -68,12 +68,12 @@ export class Camera extends BaseAccessory<RingCamera> {
     this.registerCharacteristic(
       Characteristic.Manufacturer,
       Service.AccessoryInformation,
-      () => 'ring'
+      () => 'Ring'
     )
     this.registerCharacteristic(
       Characteristic.Model,
       Service.AccessoryInformation,
-      data => data.kind
+      data => `${device.model} (${data.kind})`
     )
     this.registerCharacteristic(
       Characteristic.SerialNumber,

@@ -3,6 +3,7 @@ import {
   CameraData,
   CameraHealth,
   HistoricalDingGlobal,
+  RingCameraModel,
   SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
@@ -23,6 +24,7 @@ const maxSnapshotRefreshAttempts = 60,
 export class RingCamera {
   id = this.initialData.id
   deviceType = this.initialData.kind
+  model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
   hasLight = this.initialData.led_status !== undefined
   hasSiren = this.initialData.siren_status !== undefined
 

@@ -20,10 +20,48 @@ export enum RingDeviceType {
   BeamsTransformerSwitch = 'switch.transformer.beams'
 }
 
-// TODO: get all camera kinds
 export enum RingCameraKind {
-  DoorbellPro = 'lpd_v2',
-  Floodlight = 'hp_cam_v1'
+  doorbot = 'doorbot',
+  doorbell = 'doorbell',
+  doorbell_v3 = 'doorbell_v3',
+  doorbell_v4 = 'doorbell_v4',
+  doorbell_v5 = 'doorbell_v5',
+  doorbell_portal = 'doorbell_portal',
+  lpd_v1 = 'lpd_v1',
+  lpd_v2 = 'lpd_v2',
+  jbox_v1 = 'jbox_v1',
+  stickup_cam = 'stickup_cam',
+  stickup_cam_v3 = 'stickup_cam_v3',
+  stickup_cam_elite = 'stickup_cam_elite',
+  stickup_cam_lunar = 'stickup_cam_lunar',
+  spotlightw_v2 = 'spotlightw_v2',
+  hp_cam_v1 = 'hp_cam_v1',
+  hp_cam_v2 = 'hp_cam_v2',
+  stickup_cam_v4 = 'stickup_cam_v4',
+  floodlight_v1 = 'floodlight_v1',
+  floodlight_v2 = 'floodlight_v2'
+}
+
+export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
+  doorbot: 'Doorbell',
+  doorbell: 'Doorbell',
+  doorbell_v3: 'Doorbell',
+  doorbell_v4: 'Doorbell 2',
+  doorbell_v5: 'Doorbell 2',
+  doorbell_portal: 'Door View Cam',
+  lpd_v1: 'Doorbell Pro',
+  lpd_v2: 'Doorbell Pro',
+  jbox_v1: 'Doorbell Elite',
+  stickup_cam: 'Stick Up Cam',
+  stickup_cam_v3: 'Stick Up Cam',
+  stickup_cam_elite: 'Stick Up Cam',
+  stickup_cam_lunar: 'Stick Up Cam',
+  spotlightw_v2: 'Spotlight Cam',
+  hp_cam_v1: 'Floodlight Cam',
+  hp_cam_v2: 'Spotlight Cam',
+  stickup_cam_v4: 'Spotlight Cam',
+  floodlight_v1: 'Floodlight Cam',
+  floodlight_v2: 'Floodlight Cam'
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
@@ -190,7 +228,7 @@ export interface CameraData {
   battery_life: number | string // 4003 or "100"
   external_connection: boolean
   firmware_version: Firmware
-  kind: RingCameraKind | string
+  kind: RingCameraKind
   latitude: number
   longitude: number
   address: string
@@ -338,7 +376,7 @@ export interface ActiveDing {
   protocol: 'sip'
   doorbot_id: number
   doorbot_description: string
-  device_kind: RingCameraKind | string
+  device_kind: RingCameraKind
   motion: boolean
   snapshot_url: ''
   kind: DingKind

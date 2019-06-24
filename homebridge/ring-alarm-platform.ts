@@ -15,7 +15,10 @@ import { MultiLevelSwitch } from './multi-level-switch'
 import { Camera } from './camera'
 
 const pluginName = 'homebridge-ring-alarm',
-  platformName = 'RingAlarm'
+  platformName = 'RingAlarm',
+  debug = false
+
+process.env.RING_DEBUG = debug ? 'true' : ''
 
 function getAccessoryClass(device: RingDevice | RingCamera) {
   const { deviceType } = device
@@ -109,9 +112,10 @@ export class RingAlarmPlatform {
         allDevices.forEach(device => {
           const isCamera = device instanceof RingCamera,
             AccessoryClass = isCamera ? Camera : getAccessoryClass(device),
-            id = device.id,
+            debugPrefix = debug ? 'TEST ' : '',
             cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
-            uuid = hap.UUIDGen.generate(id.toString() + cameraIdDifferentiator)
+            id = debugPrefix + device.id.toString() + cameraIdDifferentiator,
+            uuid = hap.UUIDGen.generate(id)
 
           if (
             !AccessoryClass ||
@@ -123,7 +127,7 @@ export class RingAlarmPlatform {
 
           const createHomebridgeAccessory = () => {
               const accessory = new hap.PlatformAccessory(
-                device.name,
+                debugPrefix + device.name,
                 uuid,
                 isCamera
                   ? hap.AccessoryCategories.CAMERA
@@ -131,7 +135,8 @@ export class RingAlarmPlatform {
               )
 
               this.log.info(
-                `Adding new accessory ${device.deviceType} ${device.name}`
+                `Adding new accessory ${device.deviceType} ${debugPrefix +
+                  device.name}`
               )
 
               if (isCamera) {

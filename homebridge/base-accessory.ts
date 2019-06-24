@@ -12,6 +12,10 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
   abstract readonly config: RingAlarmPlatformConfig
 
   getService(serviceType: HAP.Service, name = this.device.name) {
+    if (process.env.RING_DEBUG) {
+      name = 'TEST ' + name
+    }
+
     return (
       this.accessory.getService(serviceType) ||
       this.accessory.addService(serviceType, name)

@@ -68,7 +68,7 @@ export abstract class BaseDeviceAccessory extends BaseAccessory<RingDevice> {
     this.registerCharacteristic(
       Characteristic.Manufacturer,
       Service.AccessoryInformation,
-      data => data.manufacturerName || 'ring'
+      data => data.manufacturerName || 'Ring'
     )
     this.registerCharacteristic(
       Characteristic.Model,
@@ -78,7 +78,7 @@ export abstract class BaseDeviceAccessory extends BaseAccessory<RingDevice> {
     this.registerCharacteristic(
       Characteristic.SerialNumber,
       Service.AccessoryInformation,
-      data => data.serialNumber || 'unknown'
+      data => data.serialNumber || 'Unknown'
     )
 
     if ('volume' in initialData && 'setVolume' in device) {

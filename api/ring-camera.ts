@@ -18,9 +18,6 @@ import {
 } from 'rxjs/operators'
 import { delay, logError } from './util'
 
-const maxSnapshotRefreshAttempts = 60,
-  snapshotRefreshDelay = 500
-
 export class RingCamera {
   id = this.initialData.id
   deviceType = this.initialData.kind
@@ -177,12 +174,18 @@ export class RingCamera {
   }
 
   private refreshSnapshotInProgress?: Promise<void>
+  hasSlowSnapshotRefresh = this.deviceType === 'doorbell_v3' // only refreshes timestamp every 10 minutes
+  private snapshotRefreshDelay = this.hasSlowSnapshotRefresh ? 2000 : 500
+  private maxSnapshotRefreshSeconds = this.hasSlowSnapshotRefresh ? 600 : 30 // 10 minutes or 30 seconds
+  private maxSnapshotRefreshAttempts =
+    (this.maxSnapshotRefreshSeconds * 1000) / this.snapshotRefreshDelay
 
   private async refreshSnapshot() {
     const initialTimestamp = await this.updateTimestamp()
+    await delay(500)
 
-    for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      await delay(snapshotRefreshDelay)
+    for (let i = 0; i < this.maxSnapshotRefreshAttempts; i++) {
+      await delay(this.snapshotRefreshDelay)
 
       const newTimestamp = await this.updateTimestamp()
       if (newTimestamp > initialTimestamp) {
@@ -191,7 +194,7 @@ export class RingCamera {
     }
 
     throw new Error(
-      `Snapshot failed to refresh after ${maxSnapshotRefreshAttempts} attempts`
+      `Snapshot failed to refresh after ${this.maxSnapshotRefreshAttempts} attempts`
     )
   }
 

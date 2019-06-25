@@ -1,6 +1,6 @@
 {
   "name": "@dgreif/ring-alarm",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "description": "API for ring doorbells, cameras, security alarm system and smart lighting",
   "main": "api/index.js",
   "scripts": {

@@ -83,6 +83,9 @@ Walk through the setup pages and when you are done, you should see several devic
   * Motion Sensor
   * Light (if camera is equipped)
   * Siren Switch (if camera is equipped)
+  * Programmable switch for doorbells (triggers `Single Press` actions)
+    * Note: doorbell event notifications should be configured via settings on the camera feed
+   
   
 **Please Note - there is not a live feed, just snapshots from the camera.**  The snapshots work great for seeing who is
 at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and

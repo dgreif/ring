@@ -26,12 +26,20 @@ export class Camera extends BaseAccessory<RingCamera> {
     )
 
     if (device.isDoorbot) {
+      const onPressed = device.onDoorbellPressed.pipe(
+        mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
+      )
+
       this.registerObservableCharacteristic(
         Characteristic.ProgrammableSwitchEvent,
         Service.Doorbell,
-        device.onDoorbellPressed.pipe(
-          mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
-        )
+        onPressed
+      )
+
+      this.registerObservableCharacteristic(
+        Characteristic.ProgrammableSwitchEvent,
+        Service.StatelessProgrammableSwitch,
+        onPressed
       )
     }
 

@@ -66,9 +66,9 @@ export class RingApi {
       camerasRequestUpdate$ = merge(
         ...cameras.map(camera => camera.onRequestUpdate)
       ).pipe(throttleTime(500)),
-      updateReceived$ = new Subject(),
-      pollForStatusUpdate$ = cameraStatusPollingSeconds
-        ? updateReceived$.pipe(debounceTime(cameraStatusPollingSeconds * 1000))
+      onUpdateReceived = new Subject(),
+      onPollForStatusUpdate = cameraStatusPollingSeconds
+        ? onUpdateReceived.pipe(debounceTime(cameraStatusPollingSeconds * 1000))
         : EMPTY,
       camerasById = cameras.reduce(
         (byId, camera) => {
@@ -82,7 +82,7 @@ export class RingApi {
       return
     }
 
-    merge(camerasRequestUpdate$, pollForStatusUpdate$)
+    merge(camerasRequestUpdate$, onPollForStatusUpdate)
       .pipe(
         throttleTime(500),
         switchMap(async () => {
@@ -91,7 +91,7 @@ export class RingApi {
         })
       )
       .subscribe(cameraData => {
-        updateReceived$.next()
+        onUpdateReceived.next()
 
         if (!cameraData) {
           return
@@ -106,13 +106,13 @@ export class RingApi {
       })
 
     if (cameraStatusPollingSeconds) {
-      updateReceived$.next() // kick off polling
+      onUpdateReceived.next() // kick off polling
     }
 
     if (cameraDingsPollingSeconds) {
-      const poolForActiveDings$ = new Subject()
+      const onPollForActiveDings = new Subject()
 
-      poolForActiveDings$
+      onPollForActiveDings
         .pipe(
           debounceTime(cameraDingsPollingSeconds * 1000),
           switchMap(() => {
@@ -120,7 +120,7 @@ export class RingApi {
           })
         )
         .subscribe(activeDings => {
-          poolForActiveDings$.next()
+          onPollForActiveDings.next()
 
           if (!activeDings || !activeDings.length) {
             return
@@ -134,7 +134,7 @@ export class RingApi {
           })
         })
 
-      poolForActiveDings$.next() // kick off pooling
+      onPollForActiveDings.next() // kick off polling
     }
   }
 

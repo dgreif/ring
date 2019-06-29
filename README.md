@@ -23,10 +23,10 @@ const ringApi = new RingApi({
   email: 'some.one@website.com',
   password: 'abc123!#',
 
-  // OPTIONAL. See below for details
+  // The following are all optional. See below for details
   locationIds: ['488e4800-fcde-4493-969b-d1a06f683102', '4bbed7a7-06df-4f18-b3af-291c89854d60'],
-  cameraStatusPollingSeconds: 30,
-  cameraDingsPollingSeconds: 5
+  cameraStatusPollingSeconds: 20,
+  cameraDingsPollingSeconds: 1
 });
 ```
 

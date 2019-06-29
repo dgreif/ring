@@ -33,7 +33,9 @@ and third party devices that connect to the Ring Alarm System.
       "alarmOnEntryDelay": false,
       "beamDurationSeconds": 60,
       "hideLightGroups": true,
-      "hideDoorbellSwitch": true
+      "hideDoorbellSwitch": true,
+      cameraStatusPollingSeconds: 20,
+      cameraDingsPollingSeconds: 1
     }
   ]
 }
@@ -71,10 +73,10 @@ You will still be able to receive _notifications_ from the doorbell even if the 
 (notifications can be configured in the settings for the doorbell camera in the Home app)
 
 `cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
-light/siren status do not update in real time and need to be requested periodically.  Defaults to `30`
+light/siren status do not update in real time and need to be requested periodically.  Defaults to `20`
 
 `cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
-doorbell presses.  Defaults to `5`
+doorbell presses.  Defaults to every `1` second. 
 
 ### Camera Setup
 

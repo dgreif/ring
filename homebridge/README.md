@@ -34,8 +34,8 @@ and third party devices that connect to the Ring Alarm System.
       "beamDurationSeconds": 60,
       "hideLightGroups": true,
       "hideDoorbellSwitch": true,
-      cameraStatusPollingSeconds: 20,
-      cameraDingsPollingSeconds: 1
+      "cameraStatusPollingSeconds": 20,
+      "cameraDingsPollingSeconds": 1
     }
   ]
 }

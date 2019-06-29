@@ -54,7 +54,7 @@ export class RingApi {
 
   fetchActiveDings() {
     return this.restClient.request<ActiveDing[]>({
-      url: clientApi('dings/active?burst=false ')
+      url: clientApi('dings/active?burst=false')
     })
   }
 

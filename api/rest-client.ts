@@ -1,16 +1,17 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios'
-import { delay, logError, logInfo } from './util'
+import { delay, generateRandomId, logError, logInfo } from './util'
 import * as querystring from 'querystring'
+import { AuthTokenResponse, SessionResponse } from './ring-types'
 
 const ringErrorCodes: { [code: number]: string } = {
-  7050: 'NO_ASSET',
-  7019: 'ASSET_OFFLINE',
-  7061: 'ASSET_CELL_BACKUP',
-  7062: 'UPDATING',
-  7063: 'MAINTENANCE'
-}
-
-const clientApiBaseUrl = 'https://api.ring.com/clients_api/'
+    7050: 'NO_ASSET',
+    7019: 'ASSET_OFFLINE',
+    7061: 'ASSET_CELL_BACKUP',
+    7062: 'UPDATING',
+    7063: 'MAINTENANCE'
+  },
+  clientApiBaseUrl = 'https://api.ring.com/clients_api/',
+  apiVersion = 11
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
@@ -34,14 +35,19 @@ async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
   }
 }
 
+interface Session {
+  hardwareId: string
+}
+
 export class RingRestClient {
-  private authTokenPromise = this.getAuthToken()
+  private authPromise = this.getAuthToken()
+  private sessionPromise = this.getSession()
 
   constructor(private email: string, private password: string) {}
 
   private async getAuthToken() {
     try {
-      const response = await requestWithRetry<{ access_token: string }>({
+      const response = await requestWithRetry<AuthTokenResponse>({
         url: 'https://oauth.ring.com/oauth/token',
         data: {
           client_id: 'ring_official_android',
@@ -50,10 +56,13 @@ export class RingRestClient {
           username: this.email,
           scope: 'client'
         },
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        }
       })
 
-      return response.access_token as string
+      return response
     } catch (requestError) {
       const errorMessage =
         'Failed to fetch oauth token from Ring.  Verify that your email and password are correct.'
@@ -63,6 +72,63 @@ export class RingRestClient {
     }
   }
 
+  private async fetchNewSession(
+    authToken: AuthTokenResponse
+  ): Promise<Session> {
+    const hardwareId = generateRandomId()
+
+    await requestWithRetry<SessionResponse>({
+      url: clientApi('session'),
+      data: {
+        device: {
+          hardware_id: hardwareId,
+          metadata: {
+            api_version: apiVersion
+          },
+          os: 'android'
+        }
+      },
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${authToken.access_token}`,
+        'content-type': 'application/json'
+      }
+    })
+
+    return { hardwareId }
+  }
+
+  getSession(): Promise<Session> {
+    return this.authPromise.then(async authToken => {
+      try {
+        return await this.fetchNewSession(authToken)
+      } catch (e) {
+        if (e && e.response && e.response.status === 429) {
+          const retryAfter = e.response.headers['retry-after'],
+            waitSeconds = isNaN(retryAfter) ? 200 : Number.parseInt(retryAfter)
+
+          logError(
+            `Session response rate limited. Waiting to retry for ${waitSeconds} seconds`
+          )
+          await delay((waitSeconds + 1) * 1000)
+
+          logInfo('Retrying session request')
+          return this.getSession()
+        }
+        throw e
+      }
+    })
+  }
+
+  private refreshAuth() {
+    this.authPromise = this.getAuthToken()
+    this.refreshSession()
+  }
+
+  private refreshSession() {
+    this.sessionPromise = this.getSession()
+  }
+
   async request<T = void>(options: {
     method?: 'GET' | 'POST' | 'PUT'
     url: string
@@ -70,14 +136,15 @@ export class RingRestClient {
     json?: boolean
     responseType?: ResponseType
   }): Promise<T> {
-    const token = await this.authTokenPromise,
-      { method, url, data, json, responseType } = options,
-      headers = {
+    const { method, url, data, json, responseType } = options,
+      authTokenResponse = await this.authPromise,
+      session = await this.sessionPromise,
+      headers: { [key: string]: string } = {
         'content-type': json
           ? 'application/json'
           : 'application/x-www-form-urlencoded',
-        authorization: `Bearer ${token}`,
-        'user-agent': 'android:com.ringapp:2.0.67(423)' // required to get active dings
+        authorization: `Bearer ${authTokenResponse.access_token}`,
+        hardware_id: session.hardwareId
       }
 
     try {
@@ -92,7 +159,7 @@ export class RingRestClient {
       const response = e.response || {}
 
       if (response.status === 401) {
-        this.authTokenPromise = this.getAuthToken()
+        this.refreshAuth()
         return this.request(options)
       }
 
@@ -119,6 +186,14 @@ export class RingRestClient {
             `http request failed.  ${url} returned unknown errors: (${errors}).`
           )
         }
+      }
+
+      if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {
+        logError(
+          'Session hardware_id not found.  Creating a new session and trying again.'
+        )
+        this.refreshSession()
+        return this.request(options)
       }
 
       logError(`Request to ${url} failed`)

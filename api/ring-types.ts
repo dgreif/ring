@@ -400,3 +400,32 @@ export interface SnapshotTimestamp {
   timestamp: number
   doorbot_id: number
 }
+
+export interface AuthTokenResponse {
+  access_token: string
+  expires_in: number
+  refresh_token: string
+  scope: 'client'
+  token_type: 'Bearer'
+}
+
+export interface SessionResponse {
+  profile: {
+    id: number
+    email: string
+    first_name: string
+    last_name: string
+    phone_number: string
+    authentication_token: string
+    features: { [name: string]: boolean | number | string | string[] }
+    hardware_id: string
+    explorer_program_terms: null
+    user_flow: string
+    app_brand: string
+    country: string
+    status: string
+    created_at: string
+    tfa_enabled: boolean
+    tfa_phone_number: null | string
+  }
+}

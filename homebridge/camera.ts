@@ -36,11 +36,15 @@ export class Camera extends BaseAccessory<RingCamera> {
         onPressed
       )
 
-      this.registerObservableCharacteristic(
-        Characteristic.ProgrammableSwitchEvent,
-        Service.StatelessProgrammableSwitch,
-        onPressed
-      )
+      if (config.hideDoorbellSwitch) {
+        accessory.removeService(Service.StatelessProgrammableSwitch)
+      } else {
+        this.registerObservableCharacteristic(
+          Characteristic.ProgrammableSwitchEvent,
+          Service.StatelessProgrammableSwitch,
+          onPressed
+        )
+      }
     }
 
     if (device.hasLight) {

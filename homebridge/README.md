@@ -32,7 +32,8 @@ and third party devices that connect to the Ring Alarm System.
       "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
       "alarmOnEntryDelay": false,
       "beamDurationSeconds": 60,
-      "hideLightGroups": true
+      "hideLightGroups": true,
+      "hideDoorbellSwitch": true
     }
   ]
 }
@@ -62,6 +63,12 @@ These groups are convenient for detecting motion in an area of your yard and tur
 in the group.  However, you may wish to group the lights differently in HomeKit and ignore the 
 groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor)
 will be ignored and will not show up in HomeKit.
+
+`hideDoorbellSwitch`: If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This
+switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care
+to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`.
+You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden
+(notifications can be configured in the settings for the doorbell camera in the Home app)
 
 `cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
 light/siren status do not update in real time and need to be requested periodically.  Defaults to `30`

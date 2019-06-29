@@ -8,9 +8,11 @@ async function example() {
       // Replace with your ring email/password
       email: env.RING_EMAIL!,
       password: env.RING_PASS!,
+      cameraDingsPollingSeconds: 1,
       locationIds: [env.RING_LOCATION_ID!] // Remove if you want all locations
     }),
-    locations = await ringApi.getLocations()
+    locations = await ringApi.getLocations(),
+    cameras = await ringApi.getCameras()
 
   console.log(`Found ${locations.length} location(s).`)
 
@@ -42,6 +44,27 @@ async function example() {
     for (let device of devices) {
       console.log(`- ${device.zid}: ${device.name} (${device.deviceType})`)
     }
+  }
+
+  if (cameras.length) {
+    cameras.forEach(camera => {
+      camera.onNewDing.subscribe(ding => {
+        const event =
+          ding.kind === 'motion'
+            ? 'Motion detected'
+            : ding.kind === 'ding'
+            ? 'Doorbell pressed'
+            : `Video started (${ding.kind})`
+
+        console.log(
+          `${event} on ${camera.name} camera. Ding id ${
+            ding.id_str
+          }.  Received at ${new Date()}`
+        )
+      })
+    })
+
+    console.log('Listening for motion and doorbell presses on your cameras.')
   }
 }
 

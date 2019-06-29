@@ -16,7 +16,7 @@ import { Camera } from './camera'
 
 const pluginName = 'homebridge-ring-alarm',
   platformName = 'RingAlarm',
-  debug = false
+  debug = __filename.includes('release-homebridge')
 
 process.env.RING_DEBUG = debug ? 'true' : ''
 

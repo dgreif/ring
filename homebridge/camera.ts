@@ -2,7 +2,7 @@ import { HAP, hap } from './hap'
 import { RingAlarmPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseAccessory } from './base-accessory'
-import { mapTo } from 'rxjs/operators'
+import { map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 
 export class Camera extends BaseAccessory<RingCamera> {
@@ -93,14 +93,29 @@ export class Camera extends BaseAccessory<RingCamera> {
       data => data.device_id
     )
 
-    this.registerCharacteristic(
-      Characteristic.StatusLowBattery,
-      Service.MotionSensor,
-      data => {
-        return data.alerts.battery === 'low'
-          ? StatusLowBattery.BATTERY_LEVEL_LOW
-          : StatusLowBattery.BATTERY_LEVEL_NORMAL
-      }
-    )
+    if (
+      (device.batteryLevel !== null && device.batteryLevel < 100) ||
+      accessory.getService(Service.BatteryService)
+    ) {
+      this.registerCharacteristic(
+        Characteristic.StatusLowBattery,
+        Service.BatteryService,
+        data => {
+          return data.alerts.battery === 'low'
+            ? StatusLowBattery.BATTERY_LEVEL_LOW
+            : StatusLowBattery.BATTERY_LEVEL_NORMAL
+        }
+      )
+
+      this.registerObservableCharacteristic(
+        Characteristic.BatteryLevel,
+        Service.BatteryService,
+        device.onBatteryLevel.pipe(
+          map(batteryLevel => {
+            return batteryLevel === null ? 100 : batteryLevel
+          })
+        )
+      )
+    }
   }
 }

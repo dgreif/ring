@@ -18,6 +18,19 @@ import {
 } from 'rxjs/operators'
 import { delay, logError } from './util'
 
+function getBatteryLevel(data: CameraData) {
+  const batteryLevel =
+    typeof data.battery_life === 'number'
+      ? data.battery_life
+      : Number.parseFloat(data.battery_life)
+
+  if (isNaN(batteryLevel)) {
+    return null
+  }
+
+  return batteryLevel
+}
+
 export class RingCamera {
   id = this.initialData.id
   deviceType = this.initialData.kind
@@ -36,6 +49,10 @@ export class RingCamera {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
+  )
+  onBatteryLevel = this.onData.pipe(
+    map(getBatteryLevel),
+    distinctUntilChanged()
   )
 
   constructor(
@@ -62,6 +79,10 @@ export class RingCamera {
 
   get activeDings() {
     return this.onActiveDings.getValue()
+  }
+
+  get batteryLevel() {
+    return getBatteryLevel(this.data)
   }
 
   doorbotUrl(path: string) {

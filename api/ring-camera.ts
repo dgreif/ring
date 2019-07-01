@@ -18,6 +18,8 @@ import {
 } from 'rxjs/operators'
 import { delay, logError } from './util'
 
+const snapshotTimestampGracePeriod = 10000
+
 function getBatteryLevel(data: CameraData) {
   const batteryLevel =
     typeof data.battery_life === 'number'
@@ -179,7 +181,7 @@ export class RingCamera {
   }
 
   private async updateTimestamp() {
-    const response = await this.restClient.request<{
+    const { timestamps, responseTimestamp } = await this.restClient.request<{
         timestamps: SnapshotTimestamp[]
       }>({
         url: clientApi(`snapshots/timestamps`),
@@ -189,9 +191,12 @@ export class RingCamera {
         },
         json: true
       }),
-      timestamp = response.timestamps[0]
+      timestamp = timestamps[0]
 
-    return timestamp ? timestamp.timestamp : 0
+    return {
+      timestamp: timestamp ? timestamp.timestamp : 0,
+      responseTimestamp
+    }
   }
 
   private refreshSnapshotInProgress?: Promise<void>
@@ -202,14 +207,13 @@ export class RingCamera {
     (this.maxSnapshotRefreshSeconds * 1000) / this.snapshotRefreshDelay
 
   private async refreshSnapshot() {
-    const initialTimestamp = await this.updateTimestamp()
-    await delay(500)
-
     for (let i = 0; i < this.maxSnapshotRefreshAttempts; i++) {
       await delay(this.snapshotRefreshDelay)
 
-      const newTimestamp = await this.updateTimestamp()
-      if (newTimestamp > initialTimestamp) {
+      const { timestamp, responseTimestamp } = await this.updateTimestamp(),
+        timestampAge = Math.abs(responseTimestamp - timestamp)
+
+      if (timestampAge < snapshotTimestampGracePeriod) {
         return
       }
     }

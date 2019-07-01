@@ -17,11 +17,22 @@ export function clientApi(path: string) {
   return clientApiBaseUrl + path
 }
 
-async function requestWithRetry<T>(options: AxiosRequestConfig): Promise<T> {
+export interface ExtendedResponse {
+  responseTimestamp: number
+}
+
+async function requestWithRetry<T>(
+  options: AxiosRequestConfig
+): Promise<T & ExtendedResponse> {
   try {
     logInfo(`Making request: ${JSON.stringify(options, null, 2)}`)
-    const response = await axios(options)
-    return response.data as T
+    const { data, headers } = await axios(options)
+
+    if (typeof data === 'object' && headers.date) {
+      data.responseTimestamp = new Date(headers.date).getTime()
+    }
+
+    return data as T & ExtendedResponse
   } catch (e) {
     if (!e.response) {
       logError(
@@ -135,7 +146,7 @@ export class RingRestClient {
     data?: any
     json?: boolean
     responseType?: ResponseType
-  }): Promise<T> {
+  }): Promise<T & ExtendedResponse> {
     const { method, url, data, json, responseType } = options,
       authTokenResponse = await this.authPromise,
       session = await this.sessionPromise,

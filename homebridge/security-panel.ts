@@ -47,19 +47,23 @@ export class SecurityPanel extends BaseDeviceAccessory {
       value => this.setTargetState(value)
     )
 
-    this.registerCharacteristic(
-      Characteristic.On,
-      Service.Switch,
-      data => data.siren && data.siren.state === 'on',
-      value => {
-        if (value) {
-          return this.device.location.soundSiren()
-        }
-        return this.device.location.silenceSiren()
-      },
-      0,
-      this.device.name + ' Siren'
-    )
+    if (config.hideAlarmSirenSwitch) {
+      accessory.removeService(Service.Switch)
+    } else {
+      this.registerCharacteristic(
+        Characteristic.On,
+        Service.Switch,
+        data => data.siren && data.siren.state === 'on',
+        value => {
+          if (value) {
+            return this.device.location.soundSiren()
+          }
+          return this.device.location.silenceSiren()
+        },
+        0,
+        this.device.name + ' Siren'
+      )
+    }
   }
 
   getCurrentState({ mode, alarmInfo }: RingDeviceData) {

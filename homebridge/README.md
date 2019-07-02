@@ -34,6 +34,7 @@ and third party devices that connect to the Ring Alarm System.
       "beamDurationSeconds": 60,
       "hideLightGroups": true,
       "hideDoorbellSwitch": true,
+      "hideAlarmSirenSwitch": true,
       "cameraStatusPollingSeconds": 20,
       "cameraDingsPollingSeconds": 1
     }
@@ -71,6 +72,10 @@ switch can be used to perform actions on when the doorbell is pressed using "Sin
 to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`.
 You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden
 (notifications can be configured in the settings for the doorbell camera in the Home app)
+
+`hideAlarmSirenSwitch`: If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren
+switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true`
+to hide the siren switch.
 
 `cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
 light/siren status do not update in real time and need to be requested periodically.  Defaults to `20`
@@ -153,6 +158,19 @@ These settings will automatically be used by HomeKit.
 
 **Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
 HomeKit should immediately switch to `Home` to match.  
+
+### Siri Commands for Alarm
+
+Siri Command | Outcome
+--- | ---
+`Set Ring Alarm to Away` | Away mode activated
+`Arm my security system` | Away mode activated
+`Set Ring Alarm to Stay` | Home mode activated
+`Arm my security system for stay` | Home mode activated
+`Disarm Ring Alarm` | Disarmed
+`Disarm my security system` | Disarmed
+`Turn on Ring Alarm` | Turns on Ring Alarm Siren (unless hideAlarmSirenSwitch is set)
+`Turn off Ring Alarm` | Turns off Ring Alarm Siren (unless hideAlarmSirenSwitch is set)
 
 ### Changes Modes on Arrive/Leave Home
 

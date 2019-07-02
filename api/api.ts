@@ -33,11 +33,13 @@ export class RingApi {
   async fetchRingDevices() {
     const {
       doorbots,
+      authorized_doorbots: authorizedDoorbots,
       stickup_cams: stickupCams,
       base_stations: baseStations,
       beams_bridges: beamBridges
     } = await this.restClient.request<{
       doorbots: CameraData[]
+      authorized_doorbots: CameraData[]
       stickup_cams: CameraData[]
       base_stations: BaseStation[]
       beams_bridges: BeamBridge[]
@@ -45,8 +47,9 @@ export class RingApi {
 
     return {
       doorbots,
+      authorizedDoorbots,
       stickupCams,
-      allCameras: doorbots.concat(stickupCams),
+      allCameras: doorbots.concat(stickupCams, authorizedDoorbots),
       baseStations,
       beamBridges
     }
@@ -150,18 +153,16 @@ export class RingApi {
     const rawLocations = await this.fetchRawLocations(),
       {
         doorbots,
-        stickupCams,
+        allCameras,
         baseStations,
         beamBridges
       } = await this.fetchRingDevices(),
       locationIdsWithHubs = [...baseStations, ...beamBridges].map(
         x => x.location_id
       ),
-      cameras = doorbots
-        .concat(stickupCams)
-        .map(
-          data => new RingCamera(data, doorbots.includes(data), this.restClient)
-        ),
+      cameras = allCameras.map(
+        data => new RingCamera(data, doorbots.includes(data), this.restClient)
+      ),
       locations = rawLocations
         .filter(location => {
           return (

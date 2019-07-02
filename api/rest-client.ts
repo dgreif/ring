@@ -50,22 +50,57 @@ interface Session {
   hardwareId: string
 }
 
+export interface EmailAuth {
+  email: string
+  password: string
+}
+
+export interface RefreshTokenAuth {
+  refreshToken: string
+}
+
+export type RingAuth = EmailAuth | RefreshTokenAuth
+
 export class RingRestClient {
+  // prettier-ignore
+  private refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private authPromise = this.getAuthToken()
   private sessionPromise = this.getSession()
 
-  constructor(private email: string, private password: string) {}
+  constructor(private authOptions: RingAuth) {}
 
-  private async getAuthToken() {
+  private getGrantData() {
+    if (this.refreshToken) {
+      return {
+        grant_type: 'refresh_token',
+        refresh_token: this.refreshToken
+      }
+    }
+
+    const { authOptions } = this
+    if ('email' in authOptions) {
+      return {
+        grant_type: 'password',
+        password: authOptions.password,
+        username: authOptions.email
+      }
+    }
+
+    throw new Error(
+      'Refresh token is not valid.  Unable to authenticate with Ring servers.'
+    )
+  }
+
+  private async getAuthToken(): Promise<AuthTokenResponse> {
+    const grantData = this.getGrantData()
+
     try {
       const response = await requestWithRetry<AuthTokenResponse>({
         url: 'https://oauth.ring.com/oauth/token',
         data: {
           client_id: 'ring_official_android',
-          grant_type: 'password',
-          password: this.password,
-          username: this.email,
-          scope: 'client'
+          scope: 'client',
+          ...grantData
         },
         method: 'POST',
         headers: {
@@ -73,11 +108,19 @@ export class RingRestClient {
         }
       })
 
+      this.refreshToken = response.refresh_token
+
       return response
     } catch (requestError) {
+      if (grantData.refresh_token) {
+        // failed request with refresh token, try again with username/password
+        this.refreshToken = undefined
+        return this.getAuthToken()
+      }
+
       const errorMessage =
         'Failed to fetch oauth token from Ring.  Verify that your email and password are correct.'
-      logError(requestError)
+      logError(requestError.response)
       logError(errorMessage)
       throw new Error(errorMessage)
     }

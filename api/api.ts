@@ -1,4 +1,4 @@
-import { clientApi, RingRestClient } from './rest-client'
+import { clientApi, RingAuth, RingRestClient } from './rest-client'
 import { Location } from './location'
 import {
   ActiveDing,
@@ -12,19 +12,14 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 
-export interface RingAlarmOptions {
-  email: string
-  password: string
+export type RingAlarmOptions = {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
-}
+} & RingAuth
 
 export class RingApi {
-  public readonly restClient = new RingRestClient(
-    this.options.email,
-    this.options.password
-  )
+  public readonly restClient = new RingRestClient(this.options)
 
   private locations = this.fetchAndBuildLocations()
 

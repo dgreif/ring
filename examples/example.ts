@@ -8,8 +8,10 @@ async function example() {
       // Replace with your ring email/password
       email: env.RING_EMAIL!,
       password: env.RING_PASS!,
-      cameraDingsPollingSeconds: 1,
-      locationIds: [env.RING_LOCATION_ID!] // Remove if you want all locations
+      // Refresh token is used when 2fa is on
+      refreshToken: env.RING_REFRESH_TOKEN!,
+      // Listen for dings and motion events
+      cameraDingsPollingSeconds: 1
     }),
     locations = await ringApi.getLocations(),
     cameras = await ringApi.getCameras()

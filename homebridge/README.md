@@ -27,6 +27,9 @@ and third party devices that connect to the Ring Alarm System.
       "platform": "RingAlarm",
       "email": "some.one@website.com",
       "password": "abc123!#",
+      
+      // For 2fa accounts only.  See below for details
+      "refreshToken": "TOKEN GENERATED FOR 2fa ACCOUNTS",
 
       // Optional. DO NOT INCLUDE UNLESS NEEDED.  See below for details
       "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
@@ -85,6 +88,14 @@ light/siren status do not update in real time and need to be requested periodica
 
 `cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
 doorbell presses.  Defaults to every `1` second. 
+
+### 2-Factor Authentication (2fa)
+
+If you have 2fa turned on for your Ring account, start by running the homebridge plugin with your email and password in `config.json`.
+You will be prompted to enter the 2fa code that you received via text message.  Type the code into your terminal, and then
+press enter.  Homebridge will exit with an error, but a message will log out your `refreshToken`.  Copy this refresh token
+and in your homebridge `config.json` add `"refreshToken": "REFERSH TOKEN LOGGED AFTER ENTERING YOUR 2fa CODE"` to the RingPlatform
+config section.  You can delete `email` and `password` as these will no longer be used.
 
 ### Camera Setup
 

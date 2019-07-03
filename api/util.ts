@@ -1,6 +1,7 @@
 import debug = require('debug')
 import { red } from 'colors'
 import { randomBytes } from 'crypto'
+import { createInterface } from 'readline'
 
 const logger = debug('ring-alarm')
 
@@ -31,4 +32,18 @@ export function generateRandomId() {
     '-' +
     id.substr(20, 12)
   )
+}
+
+export async function requestInput(question: string) {
+  const lineReader = createInterface({
+      input: process.stdin,
+      output: process.stdout
+    }),
+    answer = await new Promise<string>(resolve => {
+      lineReader.question(question, resolve)
+    })
+
+  lineReader.close()
+
+  return answer.trim()
 }

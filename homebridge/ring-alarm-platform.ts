@@ -13,6 +13,7 @@ import { RingAlarmPlatformConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Camera } from './camera'
+import { RingAuth } from '../api/rest-client'
 
 const pluginName = 'homebridge-ring-alarm',
   platformName = 'RingAlarm',
@@ -61,7 +62,7 @@ export class RingAlarmPlatform {
 
   constructor(
     public log: HAP.Log,
-    public config: RingAlarmPlatformConfig,
+    public config: RingAlarmPlatformConfig & RingAuth,
     public api: HAP.Platform
   ) {
     if (!config) {

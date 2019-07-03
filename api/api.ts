@@ -12,18 +12,18 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 
-export type RingAlarmOptions = {
+export interface RingAlarmOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
-} & RingAuth
+}
 
 export class RingApi {
   public readonly restClient = new RingRestClient(this.options)
 
   private locations = this.fetchAndBuildLocations()
 
-  constructor(public readonly options: RingAlarmOptions) {}
+  constructor(public readonly options: RingAlarmOptions & RingAuth) {}
 
   async fetchRingDevices() {
     const {
@@ -39,6 +39,16 @@ export class RingApi {
       base_stations: BaseStation[]
       beams_bridges: BeamBridge[]
     }>({ url: clientApi('ring_devices') })
+
+    if (this.restClient.using2fa && this.restClient.refreshToken) {
+      console.error(
+        'Your Ring account is configured to use 2-factor authentication (2fa).'
+      )
+      console.error(
+        `Please change your Ring configuration to include "refreshToken": "${this.restClient.refreshToken}"`
+      )
+      process.exit(1)
+    }
 
     return {
       doorbots,

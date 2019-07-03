@@ -1,5 +1,11 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios'
-import { delay, generateRandomId, logError, logInfo } from './util'
+import {
+  delay,
+  generateRandomId,
+  logError,
+  logInfo,
+  requestInput
+} from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 
@@ -63,14 +69,15 @@ export type RingAuth = EmailAuth | RefreshTokenAuth
 
 export class RingRestClient {
   // prettier-ignore
-  private refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
+  public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private authPromise = this.getAuthToken()
   private sessionPromise = this.getSession()
+  public using2fa = false
 
   constructor(private authOptions: RingAuth) {}
 
-  private getGrantData() {
-    if (this.refreshToken) {
+  private getGrantData(twoFactorAuthCode?: string) {
+    if (this.refreshToken && !twoFactorAuthCode) {
       return {
         grant_type: 'refresh_token',
         refresh_token: this.refreshToken
@@ -91,8 +98,16 @@ export class RingRestClient {
     )
   }
 
-  private async getAuthToken(): Promise<AuthTokenResponse> {
-    const grantData = this.getGrantData()
+  private async getAuthToken(
+    twoFactorAuthCode?: string
+  ): Promise<AuthTokenResponse> {
+    const grantData = this.getGrantData(twoFactorAuthCode),
+      twoFactorAuthHeaders = twoFactorAuthCode
+        ? {
+            '2fa-code': twoFactorAuthCode,
+            '2fa-Support': 'true'
+          }
+        : {}
 
     try {
       const response = await requestWithRetry<AuthTokenResponse>({
@@ -104,7 +119,8 @@ export class RingRestClient {
         },
         method: 'POST',
         headers: {
-          'content-type': 'application/json'
+          'content-type': 'application/json',
+          ...twoFactorAuthHeaders
         }
       })
 
@@ -118,8 +134,30 @@ export class RingRestClient {
         return this.getAuthToken()
       }
 
-      const errorMessage =
-        'Failed to fetch oauth token from Ring.  Verify that your email and password are correct.'
+      const response = requestError.response || {},
+        responseData = response.data || {},
+        responseError =
+          typeof responseData.error === 'string' ? responseData.error : ''
+
+      if (
+        response.status === 412 || // need 2fa code
+        (response.status === 400 &&
+          responseError.startsWith('Verification Code')) // invalid 2fa code entered
+      ) {
+        const code = await requestInput(
+          'Ring 2fa enabled.  Please enter code from text message: '
+        )
+        this.using2fa = true
+        return this.getAuthToken(code)
+      }
+
+      const authTypeMessage =
+          'refreshToken' in this.authOptions
+            ? 'refresh token is'
+            : 'email and password are',
+        errorMessage =
+          `Failed to fetch oauth token from Ring. Verify that your ${authTypeMessage} correct. ` +
+          responseError
       logError(requestError.response)
       logError(errorMessage)
       throw new Error(errorMessage)

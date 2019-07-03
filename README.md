@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/dgreif/ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/ring-alarm)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
-This is a TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
+This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
 [Ring Cameras](https://shop.ring.com/pages/security-cameras),
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),

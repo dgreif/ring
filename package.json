@@ -1,7 +1,7 @@
 {
   "name": "@dgreif/ring-alarm",
   "version": "3.7.0",
-  "description": "API for ring doorbells, cameras, security alarm system and smart lighting",
+  "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "api/index.js",
   "scripts": {
     "test": "tslint **/*.ts",

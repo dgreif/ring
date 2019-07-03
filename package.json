@@ -7,15 +7,18 @@
     "test": "tslint **/*.ts",
     "lint": "tslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
-    "pre-release": "npm run build && npm test",
-    "release-api": "./build/publish-api.sh",
-    "package-homebridge": "./build/package-homebridge.sh",
-    "release-homebridge": "npm run package-homebridge && ./build/publish-homebridge.sh",
-    "release": "./build/publish-api.sh && npm run release-homebridge",
-    "patch": "npm run pre-release && npm version patch && npm run release",
-    "minor": "npm run pre-release && npm version minor && npm run release",
-    "major": "npm run pre-release && npm version major && npm run release",
-    "test-homebridge": "npm run build && npm run package-homebridge && homebridge -P ./release-homebridge"
+    "example": "npm run build && node ./lib/examples/example.js",
+    "test-homebridge": "npm run build && npm run package-homebridge && homebridge -P ./release-homebridge",
+    "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
+    "push-with-tags": "git push --follow-tags",
+    "deploy": "standard-version && npm publish release-api && npm publish release-homebridge && npm run push-with-tags",
+    "deploy-alpha": "standard-version --prerelease alpha && npm publish --tag alpha release-api && npm publish --tag alpha release-homebridge && npm run push-with-tags"
+  },
+  "standard-version": {
+    "scripts": {
+      "prerelease": "npm run build && npm test",
+      "posttag": "npm run prepare-npm-packages"
+    }
   },
   "repository": {
     "type": "git",
@@ -48,7 +51,7 @@
     "dotenv": "^8.0.0",
     "homebridge": "^0.4.50",
     "prettier": "^1.18.2",
-    "ts-node": "^8.3.0",
+    "standard-version": "^6.0.1",
     "tslint": "^5.17.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",

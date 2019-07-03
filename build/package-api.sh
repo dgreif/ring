@@ -9,4 +9,3 @@ rm -rf release-api/homebridge
 rm -rf release-api/examples
 cp package.json release-api
 cp README.md release-api
-npm publish --access public release-api

@@ -36,7 +36,7 @@ export class CameraSource {
     callback: (err?: Error, snapshot?: Buffer) => void
   ) {
     try {
-      const snapshot = await this.ringCamera.getSnapshot()
+      const snapshot = await this.ringCamera.getSnapshot(true)
       // Not currently resizing the image.
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
       callback(undefined, snapshot)

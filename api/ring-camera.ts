@@ -14,6 +14,7 @@ import {
   map,
   publishReplay,
   refCount,
+  share,
   take
 } from 'rxjs/operators'
 import { delay, logError } from './util'
@@ -45,7 +46,10 @@ export class RingCamera {
 
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
-  onDoorbellPressed = this.onNewDing.pipe(filter(ding => ding.kind === 'ding'))
+  onDoorbellPressed = this.onNewDing.pipe(
+    filter(ding => ding.kind === 'ding'),
+    share()
+  )
   onMotionDetected = this.onActiveDings.pipe(
     map(dings => dings.some(ding => ding.motion || ding.kind === 'motion')),
     distinctUntilChanged(),
@@ -201,31 +205,37 @@ export class RingCamera {
 
   private refreshSnapshotInProgress?: Promise<void>
   hasSlowSnapshotRefresh = this.deviceType === 'doorbell_v3' // only refreshes timestamp every 10 minutes
-  private snapshotRefreshDelay = this.hasSlowSnapshotRefresh ? 2000 : 500
-  private maxSnapshotRefreshSeconds = this.hasSlowSnapshotRefresh ? 600 : 30 // 10 minutes or 30 seconds
-  private maxSnapshotRefreshAttempts =
-    (this.maxSnapshotRefreshSeconds * 1000) / this.snapshotRefreshDelay
 
-  private async refreshSnapshot() {
-    for (let i = 0; i < this.maxSnapshotRefreshAttempts; i++) {
-      await delay(this.snapshotRefreshDelay)
+  private async refreshSnapshot(allowStale: boolean) {
+    const slowSnapshots = this.hasSlowSnapshotRefresh && !allowStale,
+      snapshotRefreshDelay = slowSnapshots ? 2000 : 500,
+      maxSnapshotRefreshSeconds = slowSnapshots
+        ? 600 // 10 minutes if waiting for slow snapshots
+        : this.hasSlowSnapshotRefresh
+        ? 5 // fail quickly for slow snapshot devices when stale images are ok
+        : 30, // wait 30 seconds for normal devices
+      maxSnapshotRefreshAttempts =
+        (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
 
+    for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
       const { timestamp, responseTimestamp } = await this.updateTimestamp(),
         timestampAge = Math.abs(responseTimestamp - timestamp)
 
       if (timestampAge < snapshotTimestampGracePeriod) {
         return
       }
+
+      await delay(snapshotRefreshDelay)
     }
 
     throw new Error(
-      `Snapshot failed to refresh after ${this.maxSnapshotRefreshAttempts} attempts`
+      `Snapshot failed to refresh after ${maxSnapshotRefreshAttempts} attempts`
     )
   }
 
-  async getSnapshot() {
+  async getSnapshot(allowStale = false) {
     this.refreshSnapshotInProgress =
-      this.refreshSnapshotInProgress || this.refreshSnapshot()
+      this.refreshSnapshotInProgress || this.refreshSnapshot(allowStale)
 
     try {
       await this.refreshSnapshotInProgress

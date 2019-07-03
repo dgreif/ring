@@ -132,3 +132,16 @@ Since these are global across all locations, it no longer made sense to export a
 ## homebridge-ring-alarm
 
 The `homebridge-ring-alarm` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)
+
+## Credits
+
+I'd like to give a big thanks to a number developers who have put a lot of hard work into analyzing the
+Ring api and building similar libraries which were extremely valuable in my creation of this project.  Thank you all
+for your hard work!
+
+ * @davglass - https://github.com/davglass/doorbot - The original node project that proved we can interact with Ring's api
+ * @jimhigson - https://github.com/jimhigson/ring-api - A promisified api for Ring's original line of products
+ * @tchellomello - https://github.com/tchellomello/python-ring-doorbell - A python api which is widely used for Ring integrations
+ * @mrose17 - https://github.com/homespun/homebridge-platform-ring-video-doorbell - The original Ring camera homebridge plugin
+ * @codahq - Thanks for all your help debugging the Ring api
+ * @joeyberkovitz - Great discovery work on the Ring Alarm websockets api

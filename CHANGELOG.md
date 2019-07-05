@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.8.1](https://github.com/dgreif/ring-alarm/compare/v3.8.0...v3.8.1) (2019-07-05)
+
+
+### Bug Fixes
+
+* **homebridge:** correctly remove existing services based on hide config ([50b9937](https://github.com/dgreif/ring-alarm/commit/50b9937))
+
+
+
 ## [3.8.0](https://github.com/dgreif/ring-alarm/compare/v3.7.2...v3.8.0) (2019-07-05)
 
 

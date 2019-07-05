@@ -152,6 +152,7 @@ export class RingApi {
   async fetchAndBuildLocations() {
     const rawLocations = await this.fetchRawLocations(),
       {
+        authorizedDoorbots,
         doorbots,
         allCameras,
         baseStations,
@@ -161,7 +162,12 @@ export class RingApi {
         x => x.location_id
       ),
       cameras = allCameras.map(
-        data => new RingCamera(data, doorbots.includes(data), this.restClient)
+        data =>
+          new RingCamera(
+            data,
+            doorbots.includes(data) || authorizedDoorbots.includes(data),
+            this.restClient
+          )
       ),
       locations = rawLocations
         .filter(location => {

@@ -34,6 +34,7 @@ and third party devices that connect to the Ring Alarm System.
       "beamDurationSeconds": 60,
       "hideLightGroups": true,
       "hideDoorbellSwitch": true,
+      "hideCameraMotionSensor": true,
       "hideAlarmSirenSwitch": true,
       "cameraStatusPollingSeconds": 20,
       "cameraDingsPollingSeconds": 1
@@ -72,6 +73,8 @@ switch can be used to perform actions on when the doorbell is pressed using "Sin
 to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`.
 You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden
 (notifications can be configured in the settings for the doorbell camera in the Home app)
+
+`hideCameraMotionSensor`: If `true`, hides the motion sensor for Ring cameras in HomeKit.
 
 `hideAlarmSirenSwitch`: If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren
 switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true`

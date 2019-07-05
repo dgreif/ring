@@ -19,11 +19,15 @@ export class Camera extends BaseAccessory<RingCamera> {
 
     accessory.configureCameraSource(cameraSource)
 
-    this.registerObservableCharacteristic(
-      Characteristic.MotionDetected,
-      Service.MotionSensor,
-      device.onMotionDetected
-    )
+    if (config.hideCameraMotionSensor) {
+      accessory.removeService(Service.MotionSensor)
+    } else {
+      this.registerObservableCharacteristic(
+        Characteristic.MotionDetected,
+        Service.MotionSensor,
+        device.onMotionDetected
+      )
+    }
 
     if (device.isDoorbot) {
       const onPressed = device.onDoorbellPressed.pipe(

@@ -5,5 +5,6 @@ export interface RingAlarmPlatformConfig extends RingAlarmOptions {
   beamDurationSeconds?: number
   hideLightGroups?: boolean
   hideDoorbellSwitch?: boolean
+  hideCameraMotionSensor?: boolean
   hideAlarmSirenSwitch?: boolean
 }

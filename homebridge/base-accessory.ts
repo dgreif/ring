@@ -117,4 +117,12 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
       characteristic.updateValue(value)
     })
   }
+
+  removeService(service: Service) {
+    const existingService = this.accessory.getService(service)
+
+    if (existingService) {
+      this.accessory.removeService(existingService)
+    }
+  }
 }

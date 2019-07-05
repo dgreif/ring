@@ -20,7 +20,7 @@ export class Camera extends BaseAccessory<RingCamera> {
     accessory.configureCameraSource(cameraSource)
 
     if (config.hideCameraMotionSensor) {
-      accessory.removeService(Service.MotionSensor)
+      this.removeService(Service.MotionSensor)
     } else {
       this.registerObservableCharacteristic(
         Characteristic.MotionDetected,
@@ -41,7 +41,7 @@ export class Camera extends BaseAccessory<RingCamera> {
       )
 
       if (config.hideDoorbellSwitch) {
-        accessory.removeService(Service.StatelessProgrammableSwitch)
+        this.removeService(Service.StatelessProgrammableSwitch)
       } else {
         this.registerObservableCharacteristic(
           Characteristic.ProgrammableSwitchEvent,

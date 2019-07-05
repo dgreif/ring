@@ -8,7 +8,7 @@
     "lint": "tslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
     "example": "npm run build && node ./lib/examples/example.js",
-    "test-homebridge": "npm run build && npm run package-homebridge && homebridge -P ./release-homebridge",
+    "test-homebridge": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge",
     "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags",
     "deploy": "standard-version && npm publish release-api && npm publish release-homebridge && npm run push-with-tags",

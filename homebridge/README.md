@@ -1,4 +1,4 @@
-# homebridge-ring-alarm
+# homebridge-ring
  
 [![CircleCI](https://circleci.com/gh/dgreif/ring.svg?style=svg)](https://circleci.com/gh/dgreif/ring)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
@@ -14,17 +14,17 @@ and third party devices that connect to the Ring Alarm System.
  
  Assuming a global installation of `homebridge`:
  
- `npm i -g homebridge-ring-alarm`
+ `npm i -g homebridge-ring`
  
  ## Homebridge Configuration
  
- Add the `RingAlarm` platform in your homebridge `config.json` file.
+ Add the `Ring` platform in your homebridge `config.json` file.
  
  ```js
 {
   "platforms": [
     {
-      "platform": "RingAlarm",
+      "platform": "Ring",
       "email": "some.one@website.com",
       "password": "abc123!#",
       

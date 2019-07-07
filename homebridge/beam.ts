@@ -1,6 +1,6 @@
 import { RingDevice, RingDeviceType } from '../api'
 import { HAP, hap } from './hap'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 import { BaseDeviceAccessory } from './base-device-accessory'
 
 export class Beam extends BaseDeviceAccessory {
@@ -12,7 +12,7 @@ export class Beam extends BaseDeviceAccessory {
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
-    public readonly config: RingAlarmPlatformConfig
+    public readonly config: RingPlatformConfig
   ) {
     super()
 

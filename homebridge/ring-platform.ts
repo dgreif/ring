@@ -9,15 +9,14 @@ import { Lock } from './lock'
 import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Camera } from './camera'
 import { RingAuth } from '../api/rest-client'
+import { platformName, pluginName } from './plugin-info'
 
-const pluginName = 'homebridge-ring-alarm',
-  platformName = 'RingAlarm',
-  debug = __filename.includes('release-homebridge')
+const debug = __filename.includes('release-homebridge')
 
 process.env.RING_DEBUG = debug ? 'true' : ''
 
@@ -57,16 +56,16 @@ function getAccessoryClass(device: RingDevice | RingCamera) {
   return null
 }
 
-export class RingAlarmPlatform {
+export class RingPlatform {
   private readonly homebridgeAccessories: { [uuid: string]: HAP.Accessory } = {}
 
   constructor(
     public log: HAP.Log,
-    public config: RingAlarmPlatformConfig & RingAuth,
+    public config: RingPlatformConfig & RingAuth,
     public api: HAP.Platform
   ) {
     if (!config) {
-      this.log.info('No configuration found for platform RingAlarm')
+      this.log.info('No configuration found for platform Ring')
       return
     }
 

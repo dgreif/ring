@@ -3,7 +3,7 @@ import { red } from 'colors'
 import { randomBytes } from 'crypto'
 import { createInterface } from 'readline'
 
-const logger = debug('ring-alarm')
+const logger = debug('ring')
 
 export function delay(milliseconds: number) {
   return new Promise(resolve => {

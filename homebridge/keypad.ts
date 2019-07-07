@@ -1,14 +1,14 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { HAP } from './hap'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 
 export class Keypad extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
-    public readonly config: RingAlarmPlatformConfig
+    public readonly config: RingPlatformConfig
   ) {
     super()
   }

@@ -2,7 +2,7 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice, RingDeviceData, AlarmState } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 
 export class SecurityPanel extends BaseDeviceAccessory {
   private targetState: any
@@ -14,7 +14,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
-    public readonly config: RingAlarmPlatformConfig
+    public readonly config: RingPlatformConfig
   ) {
     super()
 

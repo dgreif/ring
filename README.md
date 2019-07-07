@@ -1,4 +1,4 @@
-# ring-alarm
+# ring-client-api
  
 [![CircleCI](https://circleci.com/gh/dgreif/ring.svg?style=svg)](https://circleci.com/gh/dgreif/ring)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
@@ -8,16 +8,16 @@ This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
-Built to support the [homebridge-ring-alarm Plugin](./homebridge)
+Built to support the [homebridge-ring Plugin](./homebridge)
  
 ## Installation
 
-`npm i @dgreif/ring-alarm`
+`npm i ring-client-api`
 
 
 ## Setup and Config
 ```js
-import { RingApi } from '@dgreif/ring-alarm'
+import { RingApi } from 'ring-client-api'
 
 const ringApi = new RingApi({
   email: 'some.one@website.com',
@@ -32,7 +32,7 @@ const ringApi = new RingApi({
 
 ### Optional Parameters
 `locationIds`: Allows you to limit the results to a specific set of locations.
-This is mainly useful for the [homebridge-ring-alarm Plugin](./homebridge), but can also be used if you only care about
+This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about
 listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations.
 This will also limit the results for `ringApi.getCameras()` to the configured locations.
 If this option is not included, all locations will be returned.
@@ -65,7 +65,7 @@ Once you have acquired the desired location, you can start
 to interact with associated devices. These devices include ring alarm, ring lighting,
 and third party devices connected to ring alarm
 ```js
-import { RingDeviceType } from '@dgreif/ring-alarm'
+import { RingDeviceType } from 'ring-client-api'
 
 const devices = await location.getDevices()
 const baseStation = devices.find(device => device.data.deviceType === RingDeviceType.BaseStation)
@@ -116,11 +116,11 @@ v3 exports a full `RingApi` object instead of a single `getLocations` method.
 
 ```typescript
 // v2
-import { getLocations } from '@dgreif/ring-alarm'
+import { getLocations } from 'ring-client-api'
 const locations = await getLocations(options)
 
 // v3
-import { RingApi } from '@dgreif/ring-alarm'
+import { RingApi } from 'ring-client-api'
 const ringApi = new RingApi(options),
   locations = await ringApi.getLocations(), // same locations object form v2
   cameras = await ringApi.getCameras() // new! all cameras from all locations
@@ -129,9 +129,9 @@ const ringApi = new RingApi(options),
 v3 also exposes some other top level methods like `ringApi.getHistory()` and `ringApi.fetchRingDevices()`.
 Since these are global across all locations, it no longer made sense to export a single `getLocations` method.
 
-## homebridge-ring-alarm
+## homebridge-ring
 
-The `homebridge-ring-alarm` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)
+The `homebridge-ring` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)
 
 ## Credits
 

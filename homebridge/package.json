@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-ring-alarm",
+  "name": "homebridge-ring",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "homebridge/index.js",
   "keywords": [
@@ -12,7 +12,8 @@
     "alarm",
     "smart",
     "light",
-    "beam"
+    "beam",
+    "security"
   ],
   "engines": {
     "node": ">=8.3.0",

@@ -1,5 +1,5 @@
 import { HAP, hap } from './hap'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { map, mapTo } from 'rxjs/operators'
@@ -10,7 +10,7 @@ export class Camera extends BaseAccessory<RingCamera> {
     public readonly device: RingCamera,
     public readonly accessory: HAP.Accessory,
     public readonly logger: HAP.Log,
-    public readonly config: RingAlarmPlatformConfig
+    public readonly config: RingPlatformConfig
   ) {
     super()
     const { Characteristic, Service } = hap,

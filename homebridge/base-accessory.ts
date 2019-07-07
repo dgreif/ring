@@ -3,13 +3,13 @@ import { HAP } from './hap'
 import Service = HAP.Service
 import { debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators'
 import { Observable, Subject } from 'rxjs'
-import { RingAlarmPlatformConfig } from './config'
+import { RingPlatformConfig } from './config'
 
 export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
   abstract readonly device: T
   abstract readonly accessory: HAP.Accessory
   abstract readonly logger: HAP.Log
-  abstract readonly config: RingAlarmPlatformConfig
+  abstract readonly config: RingPlatformConfig
 
   getService(serviceType: HAP.Service, name = this.device.name) {
     if (process.env.RING_DEBUG) {

@@ -1,5 +1,5 @@
 {
-  "name": "@dgreif/ring-alarm",
+  "name": "ring-client-api",
   "version": "3.9.0",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "api/index.js",
@@ -33,6 +33,8 @@
     "smart",
     "light",
     "beam",
+    "security",
+    "client",
     "api"
   ],
   "author": "dgreif",

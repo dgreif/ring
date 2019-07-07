@@ -12,7 +12,7 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 
-export interface RingAlarmOptions {
+export interface RingApiOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
@@ -23,7 +23,7 @@ export class RingApi {
 
   private locations = this.fetchAndBuildLocations()
 
-  constructor(public readonly options: RingAlarmOptions & RingAuth) {}
+  constructor(public readonly options: RingApiOptions & RingAuth) {}
 
   async fetchRingDevices() {
     const {

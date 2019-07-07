@@ -1,6 +1,6 @@
-import { RingAlarmOptions } from '../api'
+import { RingApiOptions } from '../api'
 
-export interface RingAlarmPlatformConfig extends RingAlarmOptions {
+export interface RingPlatformConfig extends RingApiOptions {
   alarmOnEntryDelay?: boolean
   beamDurationSeconds?: number
   hideLightGroups?: boolean

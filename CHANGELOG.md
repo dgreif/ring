@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.9.0](https://github.com/dgreif/ring-alarm/compare/v3.8.1...v3.9.0) (2019-07-07)
+
+
+### Features
+
+* 2fa support ([8e3cb7f](https://github.com/dgreif/ring-alarm/commit/8e3cb7f)), closes [#26](https://github.com/dgreif/ring-alarm/issues/26) [#39](https://github.com/dgreif/ring-alarm/issues/39)
+* refresh tokens ([4e78cb5](https://github.com/dgreif/ring-alarm/commit/4e78cb5))
+
+
+
 ### [3.8.1](https://github.com/dgreif/ring-alarm/compare/v3.8.0...v3.8.1) (2019-07-05)
 
 

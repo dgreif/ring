@@ -1,6 +1,6 @@
 # ring-alarm
  
-[![CircleCI](https://circleci.com/gh/dgreif/ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/ring-alarm)
+[![CircleCI](https://circleci.com/gh/dgreif/ring.svg?style=svg)](https://circleci.com/gh/dgreif/ring)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
 This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),

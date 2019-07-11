@@ -20,7 +20,7 @@
   },
   "scripts": {},
   "bugs": {
-    "url": "https://github.com/dgreif/ring-alarm/issues"
+    "url": "https://github.com/dgreif/ring/issues"
   },
-  "homepage": "https://github.com/dgreif/ring-alarm/tree/master/homebridge"
+  "homepage": "https://github.com/dgreif/ring/tree/master/homebridge"
 }

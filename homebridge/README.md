@@ -1,6 +1,6 @@
 # homebridge-ring-alarm
  
-[![CircleCI](https://circleci.com/gh/dgreif/ring-alarm.svg?style=svg)](https://circleci.com/gh/dgreif/ring-alarm)
+[![CircleCI](https://circleci.com/gh/dgreif/ring.svg?style=svg)](https://circleci.com/gh/dgreif/ring)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
  
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for
@@ -117,7 +117,7 @@ Walk through the setup pages and when you are done, you should see several devic
 
 **Please Note - there is not a live feed, just snapshots from the camera.**  The snapshots work great for seeing who is
 at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and
-are not functional at this time.  Please see https://github.com/dgreif/ring-alarm/issues/35 if you want more details.
+are not functional at this time.  Please see https://github.com/dgreif/ring/issues/35 if you want more details.
 
 **"Video Doorbell" (aka `doorbot_v3`) Users** - This particular camera model from Ring has some drawbacks.  In particular,
 it only refreshes its snapshot image every 10 minutes or so.  To avoid "No Response" messages from HomeKit while it waits

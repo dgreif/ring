@@ -101,13 +101,7 @@ export class RingRestClient {
   private async getAuthToken(
     twoFactorAuthCode?: string
   ): Promise<AuthTokenResponse> {
-    const grantData = this.getGrantData(twoFactorAuthCode),
-      twoFactorAuthHeaders = twoFactorAuthCode
-        ? {
-            '2fa-code': twoFactorAuthCode,
-            '2fa-Support': 'true'
-          }
-        : {}
+    const grantData = this.getGrantData(twoFactorAuthCode)
 
     try {
       const response = await requestWithRetry<AuthTokenResponse>({
@@ -120,7 +114,8 @@ export class RingRestClient {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          ...twoFactorAuthHeaders
+          '2fa-support': 'true',
+          '2fa-code': twoFactorAuthCode || ''
         }
       })
 

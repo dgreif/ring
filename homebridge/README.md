@@ -40,7 +40,7 @@ and third party devices that connect to the Ring Alarm System.
       "hideCameraMotionSensor": true,
       "hideAlarmSirenSwitch": true,
       "cameraStatusPollingSeconds": 20,
-      "cameraDingsPollingSeconds": 1
+      "cameraDingsPollingSeconds": 2
     }
   ]
 }
@@ -87,7 +87,7 @@ to hide the siren switch.
 light/siren status do not update in real time and need to be requested periodically.  Defaults to `20`
 
 `cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
-doorbell presses.  Defaults to every `1` second. 
+doorbell presses.  Defaults to every `2` second. 
 
 ### 2-Factor Authentication (2fa)
 

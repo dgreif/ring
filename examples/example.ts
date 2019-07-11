@@ -11,7 +11,7 @@ async function example() {
       // Refresh token is used when 2fa is on
       refreshToken: env.RING_REFRESH_TOKEN!,
       // Listen for dings and motion events
-      cameraDingsPollingSeconds: 1
+      cameraDingsPollingSeconds: 2
     }),
     locations = await ringApi.getLocations(),
     cameras = await ringApi.getCameras()

@@ -71,7 +71,7 @@ export class RingAlarmPlatform {
     }
 
     config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds || 20
-    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 1
+    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 2
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')

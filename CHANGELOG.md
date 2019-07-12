@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/dgreif/ring/compare/v3.9.0...v4.0.0) (2019-07-12)
+
+
+### Bug Fixes
+
+* match ring app 2fa headers ([237e651](https://github.com/dgreif/ring/commit/237e651))
+* match ring app polling delay for dings ([b567be7](https://github.com/dgreif/ring/commit/b567be7))
+
+
+### Features
+
+* rename npm modules to match functionality ([8e7c387](https://github.com/dgreif/ring/commit/8e7c387))
+
+
+### BREAKING CHANGES
+
+* `homebridge-ring-alarm` renamed to `homebridge-ring`.  The config for homebridge should now be `"platform": "Ring"` instead of `"platform": "RingAlarm"`.  This config change will happen automatically the first time you start homebridge with the new version, but it will cause homebridge to error out after the config is changed.  You will see a log that the config has changed and you can restart homebridge.
+* `@dgreif/ring-alarm` renamed to `ring-client-api`.  The exported class is now `RingApi` instead of `RingAlarmApi`.  Proper usage now looks like `import { RingApi } from "ring-client-api"`.
+
+
+
 ## [3.9.0](https://github.com/dgreif/ring/compare/v3.8.1...v3.9.0) (2019-07-07)
 
 

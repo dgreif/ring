@@ -41,6 +41,10 @@ export enum RingCameraKind {
   floodlight_v1 = 'floodlight_v1',
   floodlight_v2 = 'floodlight_v2'
 }
+export const slowSnapshotCameraKinds: RingCameraKind[] = [
+  RingCameraKind.doorbell_v3,
+  RingCameraKind.doorbell_portal
+]
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbot: 'Doorbell',

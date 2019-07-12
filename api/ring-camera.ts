@@ -4,6 +4,7 @@ import {
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
+  slowSnapshotCameraKinds,
   SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
@@ -204,7 +205,7 @@ export class RingCamera {
   }
 
   private refreshSnapshotInProgress?: Promise<void>
-  hasSlowSnapshotRefresh = this.deviceType === 'doorbell_v3' // only refreshes timestamp every 10 minutes
+  hasSlowSnapshotRefresh = slowSnapshotCameraKinds.includes(this.deviceType) // only refreshes timestamp every 10 minutes
 
   private async refreshSnapshot(allowStale: boolean) {
     const slowSnapshots = this.hasSlowSnapshotRefresh && !allowStale,

@@ -110,24 +110,9 @@ Some other useful propeties
 
 See the `examples` directory for additional code examples.
 
-## Breaking changes from v2 to v3
+## Upgrading from v3 to v4
 
-v3 exports a full `RingApi` object instead of a single `getLocations` method.
-
-```typescript
-// v2
-import { getLocations } from 'ring-client-api'
-const locations = await getLocations(options)
-
-// v3
-import { RingApi } from 'ring-client-api'
-const ringApi = new RingApi(options),
-  locations = await ringApi.getLocations(), // same locations object form v2
-  cameras = await ringApi.getCameras() // new! all cameras from all locations
-```  
-
-v3 also exposes some other top level methods like `ringApi.getHistory()` and `ringApi.fetchRingDevices()`.
-Since these are global across all locations, it no longer made sense to export a single `getLocations` method.
+See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4
 
 ## homebridge-ring
 

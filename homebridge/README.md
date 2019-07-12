@@ -223,3 +223,7 @@ People Arrive | Turn on "Arrived Home"
 People Leave | Turn on "Left Home"
 "Arrived Home" turns on | Set Ring Alarm mode to Off
 "Left Home" turns on | Set Ring Alarm mode to Away
+
+## Upgrading from v3 to v4
+
+See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4

@@ -1,6 +1,6 @@
 {
   "name": "ring-client-api",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "api/index.js",
   "scripts": {

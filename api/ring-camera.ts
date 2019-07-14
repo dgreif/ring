@@ -4,7 +4,7 @@ import {
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
-  slowSnapshotCameraKinds,
+  batteryCameraKinds,
   SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
@@ -41,6 +41,7 @@ export class RingCamera {
   model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
   hasLight = this.initialData.led_status !== undefined
   hasSiren = this.initialData.siren_status !== undefined
+  hasBattery = batteryCameraKinds.includes(this.deviceType)
 
   onData = new BehaviorSubject<CameraData>(this.initialData)
   onRequestUpdate = new Subject()
@@ -205,7 +206,7 @@ export class RingCamera {
   }
 
   private refreshSnapshotInProgress?: Promise<void>
-  hasSlowSnapshotRefresh = slowSnapshotCameraKinds.includes(this.deviceType) // only refreshes timestamp every 10 minutes
+  hasSlowSnapshotRefresh = this.hasBattery // only refreshes timestamp every 10 minutes
 
   private async refreshSnapshot(allowStale: boolean) {
     const slowSnapshots = this.hasSlowSnapshotRefresh && !allowStale,

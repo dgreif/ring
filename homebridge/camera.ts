@@ -98,6 +98,7 @@ export class Camera extends BaseAccessory<RingCamera> {
     )
 
     if (
+      device.hasBattery ||
       (device.batteryLevel !== null && device.batteryLevel < 100) ||
       accessory.getService(Service.BatteryService)
     ) {

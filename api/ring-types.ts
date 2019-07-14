@@ -32,18 +32,26 @@ export enum RingCameraKind {
   jbox_v1 = 'jbox_v1',
   stickup_cam = 'stickup_cam',
   stickup_cam_v3 = 'stickup_cam_v3',
+  stickup_cam_v4 = 'stickup_cam_v4',
   stickup_cam_elite = 'stickup_cam_elite',
   stickup_cam_lunar = 'stickup_cam_lunar',
   spotlightw_v2 = 'spotlightw_v2',
   hp_cam_v1 = 'hp_cam_v1',
   hp_cam_v2 = 'hp_cam_v2',
-  stickup_cam_v4 = 'stickup_cam_v4',
   floodlight_v1 = 'floodlight_v1',
   floodlight_v2 = 'floodlight_v2'
 }
-export const slowSnapshotCameraKinds: RingCameraKind[] = [
+export const batteryCameraKinds: RingCameraKind[] = [
+  RingCameraKind.doorbot,
+  RingCameraKind.doorbell,
   RingCameraKind.doorbell_v3,
-  RingCameraKind.doorbell_portal
+  RingCameraKind.doorbell_v4,
+  RingCameraKind.doorbell_v5,
+  RingCameraKind.doorbell_portal,
+  RingCameraKind.stickup_cam,
+  RingCameraKind.stickup_cam_v3,
+  RingCameraKind.stickup_cam_v4,
+  RingCameraKind.stickup_cam_lunar
 ]
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {

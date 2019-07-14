@@ -119,8 +119,8 @@ Walk through the setup pages and when you are done, you should see several devic
 at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and
 are not functional at this time.  Please see https://github.com/dgreif/ring/issues/35 if you want more details.
 
-**"Video Doorbell" (aka `doorbot_v3`) Users** - This particular camera model from Ring has some drawbacks.  In particular,
-it only refreshes its snapshot image every 10 minutes or so.  To avoid "No Response" messages from HomeKit while it waits
+**Battery Camera Limitations** - Ring cameras that run on batteries only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras)
+To avoid "No Response" messages from HomeKit while it waits
 several minutes for the snapshots to update, the homebridge plugin instead returns the last snapshot after 5 seconds of waiting.  Snapshots
 that you see in Home and in notifications are _most likely old, even if they say they are from "now"_.  This is a limitation
 of the camera and I don't see any possible workarounds.

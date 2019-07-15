@@ -8,7 +8,7 @@ function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
     return batteryLevel
   } else if (batteryStatus === 'full' || batteryStatus === 'charged') {
     return 100
-  } else if (batteryStatus === 'ok') {
+  } else if (batteryStatus === 'ok' || batteryStatus === 'charging') {
     return 50
   }
   return 0

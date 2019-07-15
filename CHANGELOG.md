@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.4](https://github.com/dgreif/ring/compare/v4.0.3...v4.0.4) (2019-07-15)
+
+
+### Bug Fixes
+
+* avoid creating new sessions unless necessary ([7b76147](https://github.com/dgreif/ring/commit/7b76147))
+
+
+
 ### [4.0.3](https://github.com/dgreif/ring/compare/v4.0.2...v4.0.3) (2019-07-14)
 
 

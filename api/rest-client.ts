@@ -17,7 +17,8 @@ const ringErrorCodes: { [code: number]: string } = {
     7063: 'MAINTENANCE'
   },
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
-  apiVersion = 11
+  apiVersion = 11,
+  hardwareId = generateRandomId()
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
@@ -50,10 +51,6 @@ async function requestWithRetry<T>(
 
     throw e
   }
-}
-
-interface Session {
-  hardwareId: string
 }
 
 export interface EmailAuth {
@@ -159,12 +156,8 @@ export class RingRestClient {
     }
   }
 
-  private async fetchNewSession(
-    authToken: AuthTokenResponse
-  ): Promise<Session> {
-    const hardwareId = generateRandomId()
-
-    await requestWithRetry<SessionResponse>({
+  private fetchNewSession(authToken: AuthTokenResponse) {
+    return requestWithRetry<SessionResponse>({
       url: clientApi('session'),
       data: {
         device: {
@@ -181,11 +174,9 @@ export class RingRestClient {
         'content-type': 'application/json'
       }
     })
-
-    return { hardwareId }
   }
 
-  getSession(): Promise<Session> {
+  getSession(): Promise<SessionResponse> {
     return this.authPromise.then(async authToken => {
       try {
         return await this.fetchNewSession(authToken)
@@ -209,7 +200,6 @@ export class RingRestClient {
 
   private refreshAuth() {
     this.authPromise = this.getAuthToken()
-    this.refreshSession()
   }
 
   private refreshSession() {
@@ -223,15 +213,15 @@ export class RingRestClient {
     json?: boolean
     responseType?: ResponseType
   }): Promise<T & ExtendedResponse> {
+    await this.sessionPromise
     const { method, url, data, json, responseType } = options,
       authTokenResponse = await this.authPromise,
-      session = await this.sessionPromise,
       headers: { [key: string]: string } = {
         'content-type': json
           ? 'application/json'
           : 'application/x-www-form-urlencoded',
         authorization: `Bearer ${authTokenResponse.access_token}`,
-        hardware_id: session.hardwareId
+        hardware_id: hardwareId
       }
 
     try {

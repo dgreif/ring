@@ -1,15 +1,12 @@
 import { RingDevice, RingDeviceData } from '../api'
 import { HAP, hap } from './hap'
-import Service = HAP.Service
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
-import { Subject } from 'rxjs'
 import { RingPlatformConfig } from './config'
 import { BaseAccessory } from './base-accessory'
 
 function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
   if (batteryLevel !== undefined) {
     return batteryLevel
-  } else if (batteryStatus === 'full') {
+  } else if (batteryStatus === 'full' || batteryStatus === 'charged') {
     return 100
   } else if (batteryStatus === 'ok') {
     return 50
@@ -28,16 +25,23 @@ function getStatusLowBattery(data: RingDeviceData) {
 
 function getBatteryChargingState({
   batteryStatus,
-  batteryBackup
+  batteryBackup,
+  acStatus
 }: RingDeviceData) {
   const { ChargingState } = hap.Characteristic
 
   if (
     batteryStatus === 'charging' ||
+    batteryStatus === 'charged' ||
     batteryBackup === 'charged' ||
-    batteryBackup === 'charging'
+    batteryBackup === 'charging' ||
+    acStatus === 'ok'
   ) {
     return ChargingState.CHARGING
+  }
+
+  if (batteryBackup === 'inUse' || acStatus === 'error') {
+    return ChargingState.NOT_CHARGING
   }
 
   return ChargingState.NOT_CHARGEABLE

@@ -122,8 +122,9 @@ export interface RingDeviceData {
   name: string
   deviceType: RingDeviceType
   batteryLevel?: number
-  batteryStatus: 'full' | 'ok' | 'low' | 'none' | 'charging'
-  batteryBackup?: 'charged' | 'charging'
+  batteryStatus: 'full' | 'charged' | 'ok' | 'low' | 'none' | 'charging'
+  batteryBackup?: 'charged' | 'charging' | 'inUse'
+  acStatus?: 'error' | 'ok'
   manufacturerName?: string
   serialNumber?: string
   tamperStatus: 'ok' | 'tamper'

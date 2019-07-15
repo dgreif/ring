@@ -1,28 +1,28 @@
 import { connect as connectSocketIo } from 'socket.io-client'
 import { BehaviorSubject, Subject } from 'rxjs'
 import {
-  filter,
-  take,
-  map,
   concatMap,
   distinctUntilChanged,
+  filter,
+  map,
   publishReplay,
+  refCount,
   scan,
-  refCount
+  take
 } from 'rxjs/operators'
 import { delay, logError, logInfo } from './util'
 import {
   AlarmMode,
-  RingDeviceData,
+  AssetSession,
   deviceTypesWithVolume,
+  LocationEvent,
+  MessageDataType,
+  MessageType,
+  RingDeviceData,
   RingDeviceType,
   SocketIoMessage,
-  MessageType,
-  UserLocation,
   TicketAsset,
-  MessageDataType,
-  AssetSession,
-  LocationEvent
+  UserLocation
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { RingCamera } from './ring-camera'

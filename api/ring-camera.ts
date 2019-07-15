@@ -20,7 +20,10 @@ import {
 } from 'rxjs/operators'
 import { delay, logError } from './util'
 
-const snapshotTimestampGracePeriod = 10000
+const snapshotRefreshDelay = 500,
+  maxSnapshotRefreshSeconds = 30,
+  maxSnapshotRefreshAttempts =
+    (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
 
 function getBatteryLevel(data: CameraData) {
   const batteryLevel =
@@ -186,7 +189,7 @@ export class RingCamera {
     return response.url
   }
 
-  private async updateTimestamp() {
+  private async getTimestampAge() {
     const { timestamps, responseTimestamp } = await this.restClient.request<{
         timestamps: SnapshotTimestamp[]
       }>({
@@ -197,33 +200,30 @@ export class RingCamera {
         },
         json: true
       }),
-      timestamp = timestamps[0]
+      deviceTimestamp = timestamps[0],
+      timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0
 
-    return {
-      timestamp: timestamp ? timestamp.timestamp : 0,
-      responseTimestamp
-    }
+    return Math.abs(responseTimestamp - timestamp)
   }
 
   private refreshSnapshotInProgress?: Promise<void>
-  hasSlowSnapshotRefresh = this.hasBattery // only refreshes timestamp every 10 minutes
+  private snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
 
   private async refreshSnapshot(allowStale: boolean) {
-    const slowSnapshots = this.hasSlowSnapshotRefresh && !allowStale,
-      snapshotRefreshDelay = slowSnapshots ? 2000 : 500,
-      maxSnapshotRefreshSeconds = slowSnapshots
-        ? 600 // 10 minutes if waiting for slow snapshots
-        : this.hasSlowSnapshotRefresh
-        ? 5 // fail quickly for slow snapshot devices when stale images are ok
-        : 30, // wait 30 seconds for normal devices
-      maxSnapshotRefreshAttempts =
-        (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
+    const initialTimestampAge = await this.getTimestampAge()
+
+    if (initialTimestampAge < this.snapshotLifeTime) {
+      if (allowStale || initialTimestampAge) {
+        return
+      }
+
+      await delay(this.snapshotLifeTime - initialTimestampAge)
+    }
 
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      const { timestamp, responseTimestamp } = await this.updateTimestamp(),
-        timestampAge = Math.abs(responseTimestamp - timestamp)
+      const timestampAge = await this.getTimestampAge()
 
-      if (timestampAge < snapshotTimestampGracePeriod) {
+      if (timestampAge < initialTimestampAge) {
         return
       }
 
@@ -242,7 +242,10 @@ export class RingCamera {
     try {
       await this.refreshSnapshotInProgress
     } catch (e) {
-      logError(e)
+      if (!allowStale) {
+        logError(e)
+        throw e
+      }
     }
 
     this.refreshSnapshotInProgress = undefined

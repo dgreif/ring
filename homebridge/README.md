@@ -25,11 +25,13 @@ and third party devices that connect to the Ring Alarm System.
   "platforms": [
     {
       "platform": "Ring",
-      "email": "some.one@website.com",
-      "password": "abc123!#",
       
-      // For 2fa accounts only.  See below for details
-      "refreshToken": "TOKEN GENERATED FOR 2fa ACCOUNTS",
+      // without 2fa
+      email: 'some.one@website.com',
+      password: 'abc123!#',
+      
+      // with 2fa or if you don't want to store your email/password in your config
+      refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth',
 
       // Optional. DO NOT INCLUDE UNLESS NEEDED.  See below for details
       "alarmOnEntryDelay": false,
@@ -47,12 +49,15 @@ and third party devices that connect to the Ring Alarm System.
 }
 ```
 
+For accounts with 2fa enabled, see the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
+
 ### Optional Parameters
 Only include an optional parameter if you actually need it.  Default behavior 
 without any of the optional parameters should be sufficient for most users.
 
 Option | Default | Explanation
 --- | --- | ---
+`refreshToken` | `undefined` | An alternate authentication method for accounts with 2fa enabled, or if you don't want to store your email/password in a config file.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth).
 `alarmOnEntryDelay` | `false` | if `true`, HomeKit will register a delayed entry event as a triggered alarm.  There are some households where this is a nice feature as a heads up if you have other people who enter your house and you want an alert so that you can disable the alarm for them before it actually goes off. This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
 `beamDurationSeconds` | `60` for light groups, previous from Ring app for individual lights | Ring smart lighting has a default behavior of only staying on for 60 seconds when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit, set this option to a specific number of seconds. If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app. For light groups, this will default to 60 seconds. The maximum value is `32767`, which is ~9.1 hours.
 `hideLightGroups` | `false` | Ring smart lighting allows you to create lighting groups within the Ring app. These groups are convenient for detecting motion in an area of your yard and turning on/off all lights in the group.  However, you may wish to group the lights differently in HomeKit and ignore the groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor) will be ignored and will not show up in HomeKit.
@@ -63,14 +68,6 @@ Option | Default | Explanation
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses. 
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).  
-
-### 2-Factor Authentication (2fa)
-
-If you have 2fa turned on for your Ring account, start by running the homebridge plugin with your email and password in `config.json`.
-You will be prompted to enter the 2fa code that you received via text message.  Type the code into your terminal, and then
-press enter.  Homebridge will exit with an error, but a message will log out your `refreshToken`.  Copy this refresh token
-and in your homebridge `config.json` add `"refreshToken": "REFERSH TOKEN LOGGED AFTER ENTERING YOUR 2fa CODE"` to the RingPlatform
-config section.  You can delete `email` and `password` as these will no longer be used.
 
 ### Camera Setup
 

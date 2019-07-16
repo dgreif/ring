@@ -20,8 +20,12 @@ Built to support the [homebridge-ring Plugin](./homebridge)
 import { RingApi } from 'ring-client-api'
 
 const ringApi = new RingApi({
+  // without 2fa
   email: 'some.one@website.com',
   password: 'abc123!#',
+  
+  // with 2fa or if you dont want to store your email/password in your config
+  refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth',
 
   // The following are all optional. See below for details
   cameraStatusPollingSeconds: 20,
@@ -30,10 +34,13 @@ const ringApi = new RingApi({
 });
 ```
 
+For accounts with 2fa enabled, see the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
+
 ### Optional Parameters
 
 Option | Default | Explanation
 --- | --- | ---
+`refreshToken` | `undefined` | An alternate authentication method for accounts with 2fa enabled, or if you don't want to store your email/password in a config file.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth).
 `cameraStatusPollingSeconds` | `undefined` (No Polling) | How frequently to poll for updates to your cameras (in seconds).  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `undefined` (No Polling) | How frequently to poll for new events from your cameras (in seconds).  These include motion and doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.  
 `locationIds` | All Locations | Allows you to limit the results to a specific set of locations. This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations. This will also limit the results for `ringApi.getCameras()` to the configured locations. If this option is not included, all locations will be returned.

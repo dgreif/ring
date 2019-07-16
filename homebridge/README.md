@@ -32,15 +32,16 @@ and third party devices that connect to the Ring Alarm System.
       "refreshToken": "TOKEN GENERATED FOR 2fa ACCOUNTS",
 
       // Optional. DO NOT INCLUDE UNLESS NEEDED.  See below for details
-      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
       "alarmOnEntryDelay": false,
       "beamDurationSeconds": 60,
       "hideLightGroups": true,
       "hideDoorbellSwitch": true,
       "hideCameraMotionSensor": true,
+      "hideCameraSirenSwitch": true,
       "hideAlarmSirenSwitch": true,
       "cameraStatusPollingSeconds": 20,
-      "cameraDingsPollingSeconds": 2
+      "cameraDingsPollingSeconds": 2,
+      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]         
     }
   ]
 }
@@ -50,44 +51,18 @@ and third party devices that connect to the Ring Alarm System.
 Only include an optional parameter if you actually need it.  Default behavior 
 without any of the optional parameters should be sufficient for most users.
 
-`locationIds`: Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, 
-all of your locations will be added to HomeKit (which is what most users will want to do).  
-
-`alarmOnEntryDelay`: if `true`, HomeKit will register a delayed entry event as a triggered alarm.  
-There are some households where this is a nice feature as a heads up if you have other people who
-enter your house and you want an alert so that you can disable the alarm for them before it actually goes off.
-This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
-
-`beamDurationSeconds`: Ring smart lighting has a default behavior of only staying on for 60 seconds
-when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit,
-set this option to a specific number of seconds.
-If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app.
-For light groups, this will default to 60 seconds.
-The maximum value is `32767`, which is ~9.1 hours.
-
-`hideLightGroups`: Ring smart lighting allows you to create lighting groups within the Ring app.
-These groups are convenient for detecting motion in an area of your yard and turning on/off all lights
-in the group.  However, you may wish to group the lights differently in HomeKit and ignore the 
-groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor)
-will be ignored and will not show up in HomeKit.
-
-`hideDoorbellSwitch`: If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This
-switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care
-to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`.
-You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden
-(notifications can be configured in the settings for the doorbell camera in the Home app)
-
-`hideCameraMotionSensor`: If `true`, hides the motion sensor for Ring cameras in HomeKit.
-
-`hideAlarmSirenSwitch`: If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren
-switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true`
-to hide the siren switch.
-
-`cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
-light/siren status do not update in real time and need to be requested periodically.  Defaults to `20`
-
-`cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
-doorbell presses.  Defaults to every `2` second. 
+Option | Default | Explanation
+--- | --- | ---
+`alarmOnEntryDelay` | `false` | if `true`, HomeKit will register a delayed entry event as a triggered alarm.  There are some households where this is a nice feature as a heads up if you have other people who enter your house and you want an alert so that you can disable the alarm for them before it actually goes off. This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
+`beamDurationSeconds` | `60` for light groups, previous from Ring app for individual lights | Ring smart lighting has a default behavior of only staying on for 60 seconds when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit, set this option to a specific number of seconds. If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app. For light groups, this will default to 60 seconds. The maximum value is `32767`, which is ~9.1 hours.
+`hideLightGroups` | `false` | Ring smart lighting allows you to create lighting groups within the Ring app. These groups are convenient for detecting motion in an area of your yard and turning on/off all lights in the group.  However, you may wish to group the lights differently in HomeKit and ignore the groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor) will be ignored and will not show up in HomeKit.
+`hideDoorbellSwitch` | `false` | If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`. You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden (notifications can be configured in the settings for the doorbell camera in the Home app)
+`hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit.
+`hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
+`hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
+`cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
+`cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses. 
+`locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).  
 
 ### 2-Factor Authentication (2fa)
 
@@ -119,7 +94,7 @@ Walk through the setup pages and when you are done, you should see several devic
 at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and
 are not functional at this time.  Please see https://github.com/dgreif/ring/issues/35 if you want more details.
 
-**Battery Camera Limitations** - Ring cameras that run on batteries only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras)
+**Battery Camera Limitations** - Ring cameras that have batteries (even if they are wired) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras)
 To avoid "No Response" messages from HomeKit while it waits
 several minutes for the snapshots to update, the homebridge plugin instead returns the last snapshot after 5 seconds of waiting.  Snapshots
 that you see in Home and in notifications are _most likely old, even if they say they are from "now"_.  This is a limitation

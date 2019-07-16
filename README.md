@@ -24,24 +24,19 @@ const ringApi = new RingApi({
   password: 'abc123!#',
 
   // The following are all optional. See below for details
-  locationIds: ['488e4800-fcde-4493-969b-d1a06f683102', '4bbed7a7-06df-4f18-b3af-291c89854d60'],
   cameraStatusPollingSeconds: 20,
-  cameraDingsPollingSeconds: 2
+  cameraDingsPollingSeconds: 2,
+  locationIds: ['488e4800-fcde-4493-969b-d1a06f683102', '4bbed7a7-06df-4f18-b3af-291c89854d60']
 });
 ```
 
 ### Optional Parameters
-`locationIds`: Allows you to limit the results to a specific set of locations.
-This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about
-listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations.
-This will also limit the results for `ringApi.getCameras()` to the configured locations.
-If this option is not included, all locations will be returned.
 
-`cameraStatusPollingSeconds`: How frequently to poll for updates to your cameras.  Information like 
-light/siren status do not update in real time and need to be requested periodically
-
-`cameraDingsPollingSeconds`: How frequently to poll for new events from your cameras.  These include motion and
-doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.  
+Option | Default | Explanation
+--- | --- | ---
+`cameraStatusPollingSeconds` | `undefined` (No Polling) | How frequently to poll for updates to your cameras (in seconds).  Information like light/siren status do not update in real time and need to be requested periodically.
+`cameraDingsPollingSeconds` | `undefined` (No Polling) | How frequently to poll for new events from your cameras (in seconds).  These include motion and doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.  
+`locationIds` | All Locations | Allows you to limit the results to a specific set of locations. This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations. This will also limit the results for `ringApi.getCameras()` to the configured locations. If this option is not included, all locations will be returned.
 
 ## Locations
 ```typescript

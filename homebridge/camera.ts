@@ -65,7 +65,7 @@ export class Camera extends BaseAccessory<RingCamera> {
       )
     }
 
-    if (device.hasSiren) {
+    if (device.hasSiren && !config.hideCameraSirenSwitch) {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Switch,
@@ -79,6 +79,8 @@ export class Camera extends BaseAccessory<RingCamera> {
         device.name + ' Siren',
         () => device.requestUpdate()
       )
+    } else {
+      this.removeService(Service.Switch)
     }
 
     this.registerCharacteristic(

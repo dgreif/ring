@@ -3,10 +3,11 @@ set -euo pipefail
 IFS=$'\n\t'
 
 rm -rf release-api
-mkdir release-api
-cp -R lib/* release-api
-rm -rf release-api/homebridge
-rm -rf release-api/examples
+mkdir -p release-api/lib
+cp -R lib/* release-api/lib
+rm -rf release-api/lib/homebridge
+rm -rf release-api/lib/examples
+cp ring-auth-cli.js release-api
 cp package.json release-api
 cp LICENSE release-api
 cp README.md release-api

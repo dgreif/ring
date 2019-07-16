@@ -40,16 +40,6 @@ export class RingApi {
       beams_bridges: BeamBridge[]
     }>({ url: clientApi('ring_devices') })
 
-    if (this.restClient.using2fa && this.restClient.refreshToken) {
-      console.error(
-        'Your Ring account is configured to use 2-factor authentication (2fa).'
-      )
-      console.error(
-        `Please change your Ring configuration to include "refreshToken": "${this.restClient.refreshToken}"`
-      )
-      process.exit(1)
-    }
-
     return {
       doorbots,
       authorizedDoorbots,

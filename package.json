@@ -2,12 +2,16 @@
   "name": "ring-client-api",
   "version": "4.1.0",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
-  "main": "api/index.js",
+  "main": "lib/api/index.js",
+  "bin": {
+    "ring-auth-cli": "ring-auth-cli.js"
+  },
   "scripts": {
     "test": "tslint **/*.ts",
     "lint": "tslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
     "example": "npm run build && node ./lib/examples/example.js",
+    "cli": "npm run build && ./ring-auth-cli.js",
     "test-homebridge": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge",
     "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags",

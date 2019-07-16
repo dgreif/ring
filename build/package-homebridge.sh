@@ -3,9 +3,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 rm -rf release-homebridge
-mkdir release-homebridge
-cp -R lib/* release-homebridge
-rm -rf release-homebridge/examples
+mkdir -p release-homebridge/lib
+cp -R lib/* release-homebridge/lib
+rm -rf release-homebridge/lib/examples
+cp ring-auth-cli.js release-homebridge
 cp package.json release-homebridge
 cp LICENSE release-homebridge
 cp homebridge/README.md release-homebridge

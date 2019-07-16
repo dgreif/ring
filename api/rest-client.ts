@@ -1,11 +1,5 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios'
-import {
-  delay,
-  generateRandomId,
-  logError,
-  logInfo,
-  requestInput
-} from './util'
+import { delay, generateRandomId, logError, logInfo } from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 
@@ -67,7 +61,7 @@ export type RingAuth = EmailAuth | RefreshTokenAuth
 export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
-  private authPromise = this.getAuthToken()
+  private authPromise = this.getAuth()
   private sessionPromise = this.getSession()
   public using2fa = false
 
@@ -95,9 +89,7 @@ export class RingRestClient {
     )
   }
 
-  private async getAuthToken(
-    twoFactorAuthCode?: string
-  ): Promise<AuthTokenResponse> {
+  async getAuth(twoFactorAuthCode?: string): Promise<AuthTokenResponse> {
     const grantData = this.getGrantData(twoFactorAuthCode)
 
     try {
@@ -123,7 +115,7 @@ export class RingRestClient {
       if (grantData.refresh_token) {
         // failed request with refresh token, try again with username/password
         this.refreshToken = undefined
-        return this.getAuthToken()
+        return this.getAuth()
       }
 
       const response = requestError.response || {},
@@ -136,11 +128,10 @@ export class RingRestClient {
         (response.status === 400 &&
           responseError.startsWith('Verification Code')) // invalid 2fa code entered
       ) {
-        const code = await requestInput(
-          'Ring 2fa enabled.  Please enter code from text message: '
-        )
         this.using2fa = true
-        return this.getAuthToken(code)
+        throw new Error(
+          'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth for details.'
+        )
       }
 
       const authTypeMessage =
@@ -199,7 +190,7 @@ export class RingRestClient {
   }
 
   private refreshAuth() {
-    this.authPromise = this.getAuthToken()
+    this.authPromise = this.getAuth()
   }
 
   private refreshSession() {
@@ -277,5 +268,9 @@ export class RingRestClient {
 
       throw e
     }
+  }
+
+  getCurrentAuth() {
+    return this.authPromise
   }
 }

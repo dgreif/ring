@@ -8,4 +8,5 @@ cp -R lib/* release-api
 rm -rf release-api/homebridge
 rm -rf release-api/examples
 cp package.json release-api
+cp LICENSE release-api
 cp README.md release-api

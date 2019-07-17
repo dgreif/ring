@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.1](https://github.com/dgreif/ring/compare/v4.2.0...v4.2.1) (2019-07-17)
+
+
+### Bug Fixes
+
+* handle 401 response for sessions ([49b7f38](https://github.com/dgreif/ring/commit/49b7f38))
+
+
+
 ## [4.2.0](https://github.com/dgreif/ring/compare/v4.1.0...v4.2.0) (2019-07-16)
 
 

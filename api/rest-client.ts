@@ -104,7 +104,8 @@ export class RingRestClient {
         headers: {
           'content-type': 'application/json',
           '2fa-support': 'true',
-          '2fa-code': twoFactorAuthCode || ''
+          '2fa-code': twoFactorAuthCode || '',
+          hardware_id: hardwareId
         }
       })
 
@@ -172,7 +173,14 @@ export class RingRestClient {
       try {
         return await this.fetchNewSession(authToken)
       } catch (e) {
-        if (e && e.response && e.response.status === 429) {
+        const response = e.response || {}
+
+        if (response.status === 401) {
+          this.refreshAuth()
+          return this.getSession()
+        }
+
+        if (response.status === 429) {
           const retryAfter = e.response.headers['retry-after'],
             waitSeconds = isNaN(retryAfter) ? 200 : Number.parseInt(retryAfter)
 
@@ -204,18 +212,19 @@ export class RingRestClient {
     json?: boolean
     responseType?: ResponseType
   }): Promise<T & ExtendedResponse> {
-    await this.sessionPromise
-    const { method, url, data, json, responseType } = options,
-      authTokenResponse = await this.authPromise,
-      headers: { [key: string]: string } = {
-        'content-type': json
-          ? 'application/json'
-          : 'application/x-www-form-urlencoded',
-        authorization: `Bearer ${authTokenResponse.access_token}`,
-        hardware_id: hardwareId
-      }
+    const { method, url, data, json, responseType } = options
 
     try {
+      await this.sessionPromise
+      const authTokenResponse = await this.authPromise,
+        headers: { [key: string]: string } = {
+          'content-type': json
+            ? 'application/json'
+            : 'application/x-www-form-urlencoded',
+          authorization: `Bearer ${authTokenResponse.access_token}`,
+          hardware_id: hardwareId
+        }
+
       return await requestWithRetry<T>({
         method: method || 'GET',
         url,

@@ -81,8 +81,10 @@ Walk through the setup pages and when you are done, you should see several devic
 
   * Camera Feed
   * Motion Sensor
-  * Light (if camera is equipped)
+    * Can be hidden with `hideCameraMotionSensor`
+ * Light (if camera is equipped)
   * Siren Switch (if camera is equipped)
+    * Can be hidden with `hideCameraSirenSwitch`
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`

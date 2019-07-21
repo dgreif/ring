@@ -19,6 +19,7 @@ import {
   take
 } from 'rxjs/operators'
 import { delay, logError } from './util'
+const sharp = require('sharp')
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 30,
@@ -209,7 +210,7 @@ export class RingCamera {
   private refreshSnapshotInProgress?: Promise<void>
   private snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
 
-  private async refreshSnapshot(allowStale: boolean) {
+  private async refreshSnapshot(allowStale = false) {
     const initialTimestampAge = await this.getTimestampAge()
 
     if (initialTimestampAge < this.snapshotLifeTime) {
@@ -235,14 +236,19 @@ export class RingCamera {
     )
   }
 
-  async getSnapshot(allowStale = false) {
+  async getSnapshot(
+    options: {
+      allowStale?: boolean
+      resize?: { width: number; height: number }
+    } = {}
+  ) {
     this.refreshSnapshotInProgress =
-      this.refreshSnapshotInProgress || this.refreshSnapshot(allowStale)
+      this.refreshSnapshotInProgress || this.refreshSnapshot(options.allowStale)
 
     try {
       await this.refreshSnapshotInProgress
     } catch (e) {
-      if (!allowStale) {
+      if (!options.allowStale) {
         logError(e)
         throw e
       }
@@ -250,9 +256,17 @@ export class RingCamera {
 
     this.refreshSnapshotInProgress = undefined
 
-    return this.restClient.request<Buffer>({
+    const snapshot = await this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),
       responseType: 'arraybuffer'
     })
+
+    if (!options.resize) {
+      return snapshot
+    }
+
+    return sharp(snapshot)
+      .resize(options.resize.width, options.resize.height)
+      .toBuffer()
   }
 }

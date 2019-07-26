@@ -11,6 +11,7 @@ export function delay(milliseconds: number) {
   })
 }
 
+// TODO: use homebridge logger if available
 export function logInfo(message: any) {
   logger(message)
 }

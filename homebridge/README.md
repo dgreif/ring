@@ -80,6 +80,8 @@ the output when you start homebridge, or in your homebridge `config.json` file.
 Walk through the setup pages and when you are done, you should see several devices related to the camera:
 
   * Camera Feed
+    * Shows a snapshot from the camera while viewing the room in Home
+    * (**NEW**) Shows a live feed from the camera if you click on it.  This still has some kinks to work out, like lack of sound and only staying active for about 30 seconds.  I will be tweaking live feeds over the coming weeks.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
  * Light (if camera is equipped)
@@ -89,15 +91,9 @@ Walk through the setup pages and when you are done, you should see several devic
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`
 
-**Please Note - there is not a live feed, just snapshots from the camera.**  The snapshots work great for seeing who is
-at the door, or what's going on when motion is detected.  Live feeds are much more complicated to implement and
-are not functional at this time.  Please see https://github.com/dgreif/ring/issues/35 if you want more details.
-
-**Battery Camera Limitations** - Ring cameras that have batteries (even if they are wired) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras)
-To avoid "No Response" messages from HomeKit while it waits
-several minutes for the snapshots to update, the homebridge plugin instead returns the last snapshot after 5 seconds of waiting.  Snapshots
-that you see in Home and in notifications are _most likely old, even if they say they are from "now"_.  This is a limitation
-of the camera and I don't see any possible workarounds.
+**Battery Camera Limitations** - Ring cameras that have batteries (even if they are wired) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras).
+Because of this limitation, most snapshots for these cameras will be stale (meaning they could have been taken minutes or hours in the past).
+This is limitation of the Ring api does not have a good workaround at this point.
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera

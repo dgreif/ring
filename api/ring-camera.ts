@@ -19,6 +19,7 @@ import {
   take
 } from 'rxjs/operators'
 import { delay, logError } from './util'
+import { RtpOptions, SipSession } from './sip-session'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 30,
@@ -254,5 +255,30 @@ export class RingCamera {
       url: clientApi(`snapshots/image/${this.id}`),
       responseType: 'arraybuffer'
     })
+  }
+
+  sipUsedDingIds: string[] = []
+
+  async getSipOptions() {
+    const activeDings = this.onActiveDings.getValue(),
+      existingDing = activeDings
+        .slice()
+        .reverse()
+        .find(x => !this.sipUsedDingIds.includes(x.id_str)),
+      targetDing = existingDing || (await this.getSipConnectionDetails())
+
+    return {
+      to: targetDing.sip_to,
+      from: targetDing.sip_from,
+      dingId: targetDing.id_str
+    }
+  }
+
+  async createSipSession(rtpOptions: RtpOptions) {
+    const sipOptions = await this.getSipOptions()
+
+    this.sipUsedDingIds.push(sipOptions.dingId)
+
+    return new SipSession(sipOptions, rtpOptions)
   }
 }

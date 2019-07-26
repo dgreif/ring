@@ -15,7 +15,7 @@ export class Camera extends BaseAccessory<RingCamera> {
     super()
     const { Characteristic, Service } = hap,
       { StatusLowBattery } = Characteristic,
-      cameraSource = new CameraSource(device)
+      cameraSource = new CameraSource(device, logger)
 
     accessory.configureCameraSource(cameraSource)
 

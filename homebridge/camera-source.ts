@@ -1,23 +1,65 @@
-import { RingCamera } from '../api'
+import { RingCamera, RtpOptions, SipSession } from '../api'
 import { hap, HAP } from './hap'
+import { bindProxyPorts, getExternalConfig, getOpenPorts } from './rtp-utils'
+import { ReplaySubject } from 'rxjs'
+import { take } from 'rxjs/operators'
 import Service = HAP.Service
 
-// SOMEDAY: implement stream prepareStream and handleStreamRequest
+const ip = require('ip')
+
+interface HapRtpConfig {
+  port: number
+  proxy_rtp: number
+  proxy_rtcp: number
+  srtp_key: Buffer
+  srtp_salt: Buffer
+}
+
+interface PrepareStreamRequest {
+  sessionID: Buffer
+  targetAddress: string
+  video: HapRtpConfig
+  audio: HapRtpConfig
+}
+
 export class CameraSource {
   services: Service[] = []
   streamControllers: any[] = []
+  sessions: {
+    [sessionKey: string]: {
+      sipSession: SipSession
+      stop: () => any
+    }
+  } = {}
 
-  constructor(private ringCamera: RingCamera) {
+  constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
     let options = {
+      // proxy: true,
+      srtp: true,
       video: {
-        resolutions: [],
+        resolutions: [
+          [1280, 720, 30],
+          [1024, 768, 30],
+          [640, 480, 30],
+          [640, 360, 30],
+          [480, 360, 30],
+          [480, 270, 30],
+          [320, 240, 30],
+          [320, 240, 15], // Apple Watch requires this configuration
+          [320, 180, 30]
+        ],
         codec: {
-          profiles: [],
-          levels: []
+          profiles: [0],
+          levels: [0]
         }
       },
       audio: {
-        codecs: []
+        codecs: [
+          {
+            type: 'AAC-eld',
+            samplerate: 16
+          }
+        ]
       }
     }
 
@@ -36,6 +78,7 @@ export class CameraSource {
     callback: (err?: Error, snapshot?: Buffer) => void
   ) {
     try {
+      this.logger.info(`Snapshot Requested for ${this.ringCamera.name}`)
       const snapshot = await this.ringCamera.getSnapshot(true)
       // Not currently resizing the image.
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
@@ -45,11 +88,129 @@ export class CameraSource {
     }
   }
 
-  handleCloseConnection(connectionID: any) {}
-
-  prepareStream(request: any, callback: (response: any) => void) {
-    // intentionally ignore the request.  This prevents "No Response" overlay for about 20s
+  handleCloseConnection(connectionID: any) {
+    this.streamControllers.forEach(controller => {
+      controller.handleCloseConnection(connectionID)
+    })
   }
 
-  handleStreamRequest(request: any) {}
+  async prepareStream(
+    request: PrepareStreamRequest,
+    callback: (response: any) => void
+  ) {
+    this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
+
+    const {
+        sessionID,
+        targetAddress,
+        audio: {
+          port: audioPort,
+          srtp_key: audioSrtpKey,
+          srtp_salt: audioSrtpSalt
+        },
+        video: {
+          port: videoPort,
+          srtp_key: videoSrtpKey,
+          srtp_salt: videoSrtpSalt
+        }
+      } = request,
+      externalConfigPromise = getExternalConfig(),
+      [
+        localRingAudioPort,
+        localHomeKitAudioPort,
+        localRingVideoPort,
+        localHomeKitVideoPort
+      ] = await getOpenPorts(4, 10000 + Object.keys(this.sessions).length * 20),
+      onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
+      audioProxy = bindProxyPorts(
+        localRingAudioPort,
+        localHomeKitAudioPort,
+        audioPort,
+        targetAddress,
+        'audio',
+        onRingRtpOptions
+      ),
+      videoProxy = bindProxyPorts(
+        localRingVideoPort,
+        localHomeKitVideoPort,
+        videoPort,
+        targetAddress,
+        'video',
+        onRingRtpOptions
+      ),
+      externalConfig = await externalConfigPromise,
+      sipSession = await this.ringCamera.createSipSession({
+        address: externalConfig.address,
+        audio: {
+          port: localRingAudioPort,
+          srtpKey: audioSrtpKey,
+          srtpSalt: audioSrtpSalt
+        },
+        video: {
+          port: localRingVideoPort,
+          srtpKey: videoSrtpKey,
+          srtpSalt: videoSrtpSalt
+        }
+      }),
+      rtpOptions = await sipSession.getRemoteRtpOptions()
+
+    onRingRtpOptions.next(rtpOptions)
+
+    this.sessions[hap.UUIDGen.unparse(sessionID)] = {
+      sipSession,
+      stop: () => {
+        sipSession.stop()
+        audioProxy.stop()
+        videoProxy.stop()
+      }
+    }
+
+    this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
+    const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
+    const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
+    this.logger.info(`Received stream data from ${this.ringCamera.name}`)
+
+    const currentAddress = ip.address()
+    callback({
+      address: {
+        address: currentAddress,
+        type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
+      },
+      audio: {
+        port: localHomeKitAudioPort,
+        ssrc: audioSsrc,
+        srtp_key: rtpOptions.audio.srtpKey,
+        srtp_salt: rtpOptions.audio.srtpSalt
+      },
+      video: {
+        port: localHomeKitVideoPort,
+        ssrc: videoSsrc,
+        srtp_key: rtpOptions.video.srtpKey,
+        srtp_salt: rtpOptions.video.srtpSalt
+      }
+    })
+  }
+
+  handleStreamRequest(request: any) {
+    const sessionID = request.sessionID,
+      sessionKey = hap.UUIDGen.unparse(sessionID),
+      session = this.sessions[sessionKey],
+      requestType = request.type
+
+    if (!session) {
+      return
+    }
+
+    if (requestType === 'start') {
+      this.logger.info(`Streaming active for ${this.ringCamera.name}`)
+      session.sipSession.startRtp().catch(e => {
+        this.logger.error(`Failed stream ${this.ringCamera.name}`)
+        console.error(e)
+      })
+    } else if (requestType === 'stop') {
+      this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
+      session.stop()
+      delete this.sessions[sessionKey]
+    }
+  }
 }

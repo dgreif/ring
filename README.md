@@ -91,7 +91,8 @@ camera.onData.subscribe(data => {
 camera.setLight(true) // turn light on/off
 camera.setSiren(true) // turn siren on/off
 camera.getHealth() // fetch health info like wifi status
-camera.startVideoOnDemand() // ask the camera to start a new video stream.  currently does _not_ pass back the sip info
+camera.startVideoOnDemand() // ask the camera to start a new video stream
+camera.createSipSession() // creates a new SipSession which allows you to control RTP flow
 camera.getHistory(50) // fetch ding history (like motion and doorbell presses)
 camera.getRecording()
 camera.getSnapshot() // returns a Promise<Buffer> of the latest snapshot from the camera 

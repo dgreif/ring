@@ -86,6 +86,7 @@ class Hap {
   // @ts-ignore
   public UUIDGen: {
     generate(input: string): string
+    unparse(input: Buffer): string
   }
   // @ts-ignore
   public AccessoryCategories: {

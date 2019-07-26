@@ -101,94 +101,102 @@ export class CameraSource {
   ) {
     this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
 
-    const {
-        sessionID,
-        targetAddress,
-        audio: {
-          port: audioPort,
-          srtp_key: audioSrtpKey,
-          srtp_salt: audioSrtpSalt
-        },
-        video: {
-          port: videoPort,
-          srtp_key: videoSrtpKey,
-          srtp_salt: videoSrtpSalt
-        }
-      } = request,
-      publicIpPromise = getPublicIp(),
-      [
-        localRingAudioPort,
-        localHomeKitAudioPort,
-        localRingVideoPort,
-        localHomeKitVideoPort
-      ] = await getOpenPorts(4, 10000 + Object.keys(this.sessions).length * 20),
-      onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
-      audioProxy = bindProxyPorts(
-        localRingAudioPort,
-        localHomeKitAudioPort,
-        audioPort,
-        targetAddress,
-        'audio',
-        onRingRtpOptions
-      ),
-      videoProxy = bindProxyPorts(
-        localRingVideoPort,
-        localHomeKitVideoPort,
-        videoPort,
-        targetAddress,
-        'video',
-        onRingRtpOptions
-      ),
-      sipSession = await this.ringCamera.createSipSession({
-        address: await publicIpPromise,
-        audio: {
-          port: localRingAudioPort,
-          srtpKey: audioSrtpKey,
-          srtpSalt: audioSrtpSalt
-        },
-        video: {
-          port: localRingVideoPort,
-          srtpKey: videoSrtpKey,
-          srtpSalt: videoSrtpSalt
-        }
-      }),
-      rtpOptions = await sipSession.getRemoteRtpOptions()
+    try {
+      const {
+          sessionID,
+          targetAddress,
+          audio: {
+            port: audioPort,
+            srtp_key: audioSrtpKey,
+            srtp_salt: audioSrtpSalt
+          },
+          video: {
+            port: videoPort,
+            srtp_key: videoSrtpKey,
+            srtp_salt: videoSrtpSalt
+          }
+        } = request,
+        publicIpPromise = getPublicIp(),
+        [
+          localRingAudioPort,
+          localHomeKitAudioPort,
+          localRingVideoPort,
+          localHomeKitVideoPort
+        ] = await getOpenPorts(
+          4,
+          10000 + Object.keys(this.sessions).length * 20
+        ),
+        onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
+        audioProxy = bindProxyPorts(
+          localRingAudioPort,
+          localHomeKitAudioPort,
+          audioPort,
+          targetAddress,
+          'audio',
+          onRingRtpOptions
+        ),
+        videoProxy = bindProxyPorts(
+          localRingVideoPort,
+          localHomeKitVideoPort,
+          videoPort,
+          targetAddress,
+          'video',
+          onRingRtpOptions
+        ),
+        sipSession = await this.ringCamera.createSipSession({
+          address: await publicIpPromise,
+          audio: {
+            port: localRingAudioPort,
+            srtpKey: audioSrtpKey,
+            srtpSalt: audioSrtpSalt
+          },
+          video: {
+            port: localRingVideoPort,
+            srtpKey: videoSrtpKey,
+            srtpSalt: videoSrtpSalt
+          }
+        }),
+        rtpOptions = await sipSession.getRemoteRtpOptions()
 
-    onRingRtpOptions.next(rtpOptions)
+      onRingRtpOptions.next(rtpOptions)
 
-    this.sessions[hap.UUIDGen.unparse(sessionID)] = {
-      sipSession,
-      stop: () => {
-        sipSession.stop()
-        audioProxy.stop()
-        videoProxy.stop()
+      this.sessions[hap.UUIDGen.unparse(sessionID)] = {
+        sipSession,
+        stop: () => {
+          sipSession.stop()
+          audioProxy.stop()
+          videoProxy.stop()
+        }
       }
+
+      this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
+      const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
+      const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
+      this.logger.info(`Received stream data from ${this.ringCamera.name}`)
+
+      const currentAddress = ip.address()
+      callback({
+        address: {
+          address: currentAddress,
+          type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
+        },
+        audio: {
+          port: localHomeKitAudioPort,
+          ssrc: audioSsrc,
+          srtp_key: rtpOptions.audio.srtpKey,
+          srtp_salt: rtpOptions.audio.srtpSalt
+        },
+        video: {
+          port: localHomeKitVideoPort,
+          ssrc: videoSsrc,
+          srtp_key: rtpOptions.video.srtpKey,
+          srtp_salt: rtpOptions.video.srtpSalt
+        }
+      })
+    } catch (e) {
+      this.logger.error(`Failed to prepare stream for ${this.ringCamera.name}`)
+      this.logger.error(e)
     }
-
-    this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
-    const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
-    const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
-    this.logger.info(`Received stream data from ${this.ringCamera.name}`)
-
-    const currentAddress = ip.address()
-    callback({
-      address: {
-        address: currentAddress,
-        type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
-      },
-      audio: {
-        port: localHomeKitAudioPort,
-        ssrc: audioSsrc,
-        srtp_key: rtpOptions.audio.srtpKey,
-        srtp_salt: rtpOptions.audio.srtpSalt
-      },
-      video: {
-        port: localHomeKitVideoPort,
-        ssrc: videoSsrc,
-        srtp_key: rtpOptions.video.srtpKey,
-        srtp_salt: rtpOptions.video.srtpSalt
-      }
-    })
   }
 
   handleStreamRequest(request: any) {

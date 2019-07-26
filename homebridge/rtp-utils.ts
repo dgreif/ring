@@ -1,7 +1,6 @@
-import { createSocket, Socket } from 'dgram'
+import { createSocket } from 'dgram'
 import { Observable, ReplaySubject } from 'rxjs'
 import { RtpOptions } from '../api'
-const stun = require('stun')
 const getports = require('getports')
 
 export function isRtpMessage(message: Buffer) {
@@ -12,22 +11,6 @@ export function isRtpMessage(message: Buffer) {
 export function getSsrc(message: Buffer) {
   const isRtp = isRtpMessage(message)
   return message.readUInt32BE(isRtp ? 8 : 4)
-}
-
-export function getExternalConfig(socket?: Socket) {
-  return new Promise<{ address: string; port: number }>((resolve, reject) => {
-    stun.request(
-      'stun.l.google.com:19302',
-      { socket },
-      (err: Error, response: any) => {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve(response.getXorAddress())
-      }
-    )
-  })
 }
 
 export function getOpenPorts(count = 1, start = 10000) {

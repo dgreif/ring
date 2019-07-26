@@ -1,8 +1,9 @@
 import { RingCamera, RtpOptions, SipSession } from '../api'
 import { hap, HAP } from './hap'
-import { bindProxyPorts, getExternalConfig, getOpenPorts } from './rtp-utils'
+import { bindProxyPorts, getOpenPorts } from './rtp-utils'
 import { ReplaySubject } from 'rxjs'
 import { take } from 'rxjs/operators'
+import { v4 as getPublicIp } from 'public-ip'
 import Service = HAP.Service
 
 const ip = require('ip')
@@ -114,7 +115,7 @@ export class CameraSource {
           srtp_salt: videoSrtpSalt
         }
       } = request,
-      externalConfigPromise = getExternalConfig(),
+      publicIpPromise = getPublicIp(),
       [
         localRingAudioPort,
         localHomeKitAudioPort,
@@ -138,9 +139,8 @@ export class CameraSource {
         'video',
         onRingRtpOptions
       ),
-      externalConfig = await externalConfigPromise,
       sipSession = await this.ringCamera.createSipSession({
-        address: externalConfig.address,
+        address: await publicIpPromise,
         audio: {
           port: localRingAudioPort,
           srtpKey: audioSrtpKey,

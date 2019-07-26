@@ -1,33 +1,29 @@
-import { createSocket } from 'dgram'
+import { createSocket, Socket } from 'dgram'
 import { Observable, ReplaySubject } from 'rxjs'
 import { RtpOptions } from '../api'
-const getports = require('getports')
+import { AddressInfo } from 'net'
 
-export function isRtpMessage(message: Buffer) {
+function isRtpMessage(message: Buffer) {
   const payloadType = message.readUInt8(1) & 0x7f
   return payloadType > 90 || payloadType === 0
 }
 
-export function getSsrc(message: Buffer) {
+function getSsrc(message: Buffer) {
   const isRtp = isRtpMessage(message)
   return message.readUInt32BE(isRtp ? 8 : 4)
 }
 
-export function getOpenPorts(count = 1, start = 10000) {
-  return new Promise<number[]>((resolve, reject) => {
-    getports(count, { start }, (error: Error | null, ports: number[]) => {
-      if (error) {
-        return reject(error)
-      }
-
-      resolve(ports)
+function bindToRandomPort(socket: Socket) {
+  return new Promise<number>(resolve => {
+    // 0 means select a random open port
+    socket.bind(0, () => {
+      const { port } = socket.address() as AddressInfo
+      resolve(port)
     })
   })
 }
 
-export function bindProxyPorts(
-  localRingPort: number,
-  localHomeKitPort: number,
+export async function bindProxyPorts(
   remoteHomeKitPort: number,
   remoteHomeKitAddress: string,
   type: 'audio' | 'video',
@@ -60,11 +56,15 @@ export function bindProxyPorts(
     }
   })
 
-  ringSocket.bind(localRingPort)
-  homeKitSocket.bind(localHomeKitPort)
+  const [localRingPort, localHomeKitPort] = await Promise.all([
+    bindToRandomPort(ringSocket),
+    bindToRandomPort(homeKitSocket)
+  ])
 
   return {
     onSsrc,
+    localRingPort,
+    localHomeKitPort,
     stop: () => {
       ringSocket.close()
       homeKitSocket.close()

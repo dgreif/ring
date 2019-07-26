@@ -1,6 +1,6 @@
 import { RingCamera, RtpOptions, SipSession } from '../api'
 import { hap, HAP } from './hap'
-import { bindProxyPorts, getOpenPorts } from './rtp-utils'
+import { bindProxyPorts } from './rtp-utils'
 import { ReplaySubject } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { v4 as getPublicIp } from 'public-ip'
@@ -117,41 +117,20 @@ export class CameraSource {
           }
         } = request,
         publicIpPromise = getPublicIp(),
-        [
-          localRingAudioPort,
-          localHomeKitAudioPort,
-          localRingVideoPort,
-          localHomeKitVideoPort
-        ] = await getOpenPorts(
-          4,
-          10000 + Object.keys(this.sessions).length * 20
-        ),
         onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
-        audioProxy = bindProxyPorts(
-          localRingAudioPort,
-          localHomeKitAudioPort,
-          audioPort,
-          targetAddress,
-          'audio',
-          onRingRtpOptions
-        ),
-        videoProxy = bindProxyPorts(
-          localRingVideoPort,
-          localHomeKitVideoPort,
-          videoPort,
-          targetAddress,
-          'video',
-          onRingRtpOptions
-        ),
+        [audioProxy, videoProxy] = await Promise.all([
+          bindProxyPorts(audioPort, targetAddress, 'audio', onRingRtpOptions),
+          bindProxyPorts(videoPort, targetAddress, 'video', onRingRtpOptions)
+        ]),
         sipSession = await this.ringCamera.createSipSession({
           address: await publicIpPromise,
           audio: {
-            port: localRingAudioPort,
+            port: audioProxy.localRingPort,
             srtpKey: audioSrtpKey,
             srtpSalt: audioSrtpSalt
           },
           video: {
-            port: localRingVideoPort,
+            port: videoProxy.localRingPort,
             srtpKey: videoSrtpKey,
             srtpSalt: videoSrtpSalt
           }
@@ -181,13 +160,13 @@ export class CameraSource {
           type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
         },
         audio: {
-          port: localHomeKitAudioPort,
+          port: audioProxy.localHomeKitPort,
           ssrc: audioSsrc,
           srtp_key: rtpOptions.audio.srtpKey,
           srtp_salt: rtpOptions.audio.srtpSalt
         },
         video: {
-          port: localHomeKitVideoPort,
+          port: videoProxy.localHomeKitPort,
           ssrc: videoSsrc,
           srtp_key: rtpOptions.video.srtpKey,
           srtp_salt: rtpOptions.video.srtpSalt

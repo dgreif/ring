@@ -211,13 +211,17 @@ export class RingCamera {
   private snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
 
   private async refreshSnapshot(allowStale: boolean) {
-    const initialTimestampAge = await this.getTimestampAge()
+    const initialTimestampAge = await this.getTimestampAge(),
+      snapshotInLifeTime = initialTimestampAge < this.snapshotLifeTime
 
-    if (initialTimestampAge < this.snapshotLifeTime) {
-      if (allowStale || initialTimestampAge) {
-        return
-      }
+    if (allowStale && (this.hasBattery || snapshotInLifeTime)) {
+      // battery cameras take a long time to refresh snapshots.  Just return the stale one immediately.
+      // for non battery, stale snapshots can be used if they are within the last 30 seconds
+      return
+    }
 
+    if (snapshotInLifeTime) {
+      // not allowing stale, so wait until a new snapshot should be available
       await delay(this.snapshotLifeTime - initialTimestampAge)
     }
 

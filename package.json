@@ -51,7 +51,8 @@
     "rxjs": "^6.5.2",
     "sdp": "^2.9.0",
     "sip": "0.0.5",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "stun": "^2.0.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.4",

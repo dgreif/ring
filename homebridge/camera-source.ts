@@ -1,11 +1,9 @@
 import { RingCamera, RtpOptions, SipSession } from '../api'
 import { hap, HAP } from './hap'
-import { bindProxyPorts } from './rtp-utils'
+import { bindProxyPorts, getPublicIp } from './rtp-utils'
 import { ReplaySubject } from 'rxjs'
 import { take } from 'rxjs/operators'
-import { v4 as getPublicIp } from 'public-ip'
 import Service = HAP.Service
-
 const ip = require('ip')
 
 interface HapRtpConfig {

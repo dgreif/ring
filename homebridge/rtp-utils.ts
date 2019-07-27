@@ -2,6 +2,32 @@ import { createSocket, Socket } from 'dgram'
 import { Observable, ReplaySubject } from 'rxjs'
 import { RtpOptions } from '../api'
 import { AddressInfo } from 'net'
+import { v4 as getPublicIpViaHttp } from 'public-ip'
+const stun = require('stun')
+
+export function getPublicIpViaStun() {
+  return new Promise<string>((resolve, reject) => {
+    stun.request('stun.l.google.com:19302', (err: Error, response: any) => {
+      if (err) {
+        return reject(err)
+      }
+
+      resolve(response.getXorAddress().address)
+    })
+  })
+}
+
+export async function getPublicIp() {
+  try {
+    return await getPublicIpViaHttp()
+  } catch (_) {
+    try {
+      return await getPublicIpViaStun()
+    } catch (__) {
+      throw new Error('Failed to retrieve public ip address')
+    }
+  }
+}
 
 function isRtpMessage(message: Buffer) {
   const payloadType = message.readUInt8(1) & 0x7f

@@ -12,6 +12,7 @@ import { SmokeCoListener } from './smoke-co-listener'
 import { RingPlatformConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
+import { Switch } from './switch'
 import { Camera } from './camera'
 import { RingAuth } from '../api/rest-client'
 import { platformName, pluginName } from './plugin-info'
@@ -46,7 +47,10 @@ function getAccessoryClass(device: RingDevice | RingCamera) {
     case RingDeviceType.BeamsLightGroupSwitch:
       return Beam
     case RingDeviceType.MultiLevelSwitch:
+    case RingDeviceType.MultiLevelBulb:
       return MultiLevelSwitch
+    case RingDeviceType.Switch:
+      return Switch
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

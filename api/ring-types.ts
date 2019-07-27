@@ -14,6 +14,8 @@ export enum RingDeviceType {
   CoAlarm = 'alarm.co',
   SmokeCoListener = 'listener.smoke-co',
   MultiLevelSwitch = 'switch.multilevel',
+  MultiLevelBulb = 'switch.multilevel.bulb',
+  Switch = 'switch',
   BeamsMotionSensor = 'motion-sensor.beams',
   BeamsSwitch = 'switch.multilevel.beams',
   BeamsLightGroupSwitch = 'group.light-group.beams',

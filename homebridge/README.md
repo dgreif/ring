@@ -129,7 +129,7 @@ HomeKit with a snapshot from the camera
   * Smart Locks
   * Lights/Switches
     * On/Off
-    * Brightness Level
+    * Brightness Level (if applicable)
     * Hue/Sat/Color Temp are _possible_, but currently not supported.
       Please open an issue if you have a device that you would be able to
       test these on.

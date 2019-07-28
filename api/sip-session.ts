@@ -99,6 +99,7 @@ export class SipSession {
   private fromParams = { tag: getRandomId() }
   private toParams: any = {}
   private callId = getRandomId()
+  private interval?: number = undefined
 
   videoStream = {
     onRtpPacket: new Subject()
@@ -171,7 +172,7 @@ export class SipSession {
     this.audioSocket.send('', rtpOptions.audio.port, rtpOptions.address)
 
     // Keep alive.
-    setInterval(() => {
+    this.interval = <any>setInterval(() => {
       this.videoSocket.send('', rtpOptions.video.port, rtpOptions.address)
       this.audioSocket.send('', rtpOptions.audio.port, rtpOptions.address)
     }, 15 * 1000)
@@ -314,6 +315,9 @@ export class SipSession {
   }
 
   async stop() {
-    await this.sipRequest({ method: 'BYE' })
+    clearInterval(this.interval)
+    try {
+      await this.sipRequest({ method: 'BYE' })
+    } catch {} // Don't care if we get an exception here.
   }
 }

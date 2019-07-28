@@ -13,7 +13,7 @@ async function example() {
     // Listen for dings and motion events
     cameraDingsPollingSeconds: 2
   })
-  
+
   const cameras = await ringApi.getCameras()
   const camera = cameras.find(camera => camera.data.description === 'Backyard')
 
@@ -30,7 +30,7 @@ async function example() {
 
   const videoPort = await bindToRandomPort(videoSocket)
   const audioPort = await bindToRandomPort(audioSocket)
-  
+
   const rtpOptions = {
     address: await getPublicIp(),
     audio: {
@@ -49,7 +49,7 @@ async function example() {
   sipSession.startRtp()
   setInterval(() => {
     videoSocket.send('', ringRtpOptions.video.port, ringRtpOptions.address)
-  }, 15 * 1000);
+  }, 15 * 1000)
 }
 
 example()

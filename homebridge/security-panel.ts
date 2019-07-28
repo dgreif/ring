@@ -112,13 +112,13 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
     if (state === State.AWAY_ARM) {
       this.logger.info(`Arming (Away) ${this.device.name}`)
-      location.armAway()
+      return location.armAway()
     } else if (state === State.DISARM) {
       this.logger.info(`Disarming ${this.device.name}`)
-      location.disarm()
+      return location.disarm()
     } else {
       this.logger.info(`Arming (Home) ${this.device.name}`)
-      location.armHome()
+      return location.armHome()
     }
   }
 

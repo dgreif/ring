@@ -8,6 +8,7 @@ import {
   publishReplay,
   refCount,
   scan,
+  skip,
   take
 } from 'rxjs/operators'
 import { delay, logError, logInfo } from './util'
@@ -329,14 +330,30 @@ export class Location {
 
   async sendCommandToSecurityPanel(commandType: string, data?: {}) {
     const securityPanel = await this.getSecurityPanel()
-    return securityPanel.sendCommand(commandType, data)
+    securityPanel.sendCommand(commandType, data)
   }
 
-  setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
-    return this.sendCommandToSecurityPanel('security-panel.switch-mode', {
+  async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
+    const securityPanel = await this.getSecurityPanel(),
+      updatedDataPromise = securityPanel.onData
+        .pipe(
+          skip(1),
+          take(1)
+        )
+        .toPromise()
+
+    await this.sendCommandToSecurityPanel('security-panel.switch-mode', {
       mode: alarmMode,
       bypass: bypassSensorZids
     })
+
+    const updatedData = await updatedDataPromise
+
+    if (updatedData.mode !== alarmMode) {
+      throw new Error(
+        `Failed to set alarm mode to "${alarmMode}".  Sensors may require bypass, which can only be done in the Ring app.`
+      )
+    }
   }
 
   soundSiren() {

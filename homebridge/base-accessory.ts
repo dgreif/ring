@@ -48,15 +48,25 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
       }
     })
 
-    if (setValue) {
+    if (setValue && setValueDebounceTime) {
       const onValueToSet = new Subject<any>()
 
-      characteristic.on('set', async (newValue, callback) => {
+      characteristic.on('set', (newValue, callback) => {
         onValueToSet.next(newValue)
         callback()
       })
 
       onValueToSet.pipe(debounceTime(setValueDebounceTime)).subscribe(setValue)
+    } else if (setValue) {
+      characteristic.on('set', async (newValue, callback) => {
+        try {
+          await Promise.resolve(setValue(newValue))
+          callback()
+        } catch (e) {
+          this.logger.error(e)
+          callback(e)
+        }
+      })
     }
 
     ;(this.device.onData as Observable<T['data']>)

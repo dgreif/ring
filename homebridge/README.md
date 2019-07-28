@@ -97,6 +97,8 @@ This is limitation of the Ring api does not have a good workaround at this point
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera
+
+If you are having issues with your cameras in the Home app, please see the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting)
   
 ### Supported Devices via Ring Alarm and Ring Smart Lighting Hubs
   * Security Panel

@@ -21,7 +21,7 @@ import {
 import { createSocket } from 'dgram'
 import { bindToRandomPort, getPublicIp } from '../homebridge/rtp-utils'
 import { delay, logError } from './util'
-import { SipSession } from './sip-session'
+import { SipOptions, SipSession } from './sip-session'
 
 const getPort = require('get-port')
 
@@ -267,7 +267,7 @@ export class RingCamera {
 
   sipUsedDingIds: string[] = []
 
-  async getSipOptions() {
+  async getSipOptions(): Promise<SipOptions> {
     const activeDings = this.onActiveDings.getValue(),
       existingDing = activeDings
         .slice()

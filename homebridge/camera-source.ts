@@ -11,6 +11,7 @@ import { take } from 'rxjs/operators'
 import Service = HAP.Service
 import { createSocket } from 'dgram'
 const ip = require('ip')
+const getPort = require('get-port')
 
 interface HapRtpConfig {
   port: number
@@ -133,6 +134,9 @@ export class CameraSource {
       const localHomekitAudioPort = await bindToRandomPort(homekitAudioSocket)
 
       const sipOptions = await this.ringCamera.getSipOptions()
+
+      const openPort = await getPort() // get a random port, this can still cause race conditions.
+      sipOptions.tlsPort = openPort
 
       const sipSession = new SipSession(
         sipOptions,

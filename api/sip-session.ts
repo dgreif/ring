@@ -11,6 +11,7 @@ export interface SipOptions {
   from: string
   dingId: string
   port?: number
+  tlsPort?: number
 }
 
 export interface StreamRtpOptions {
@@ -119,12 +120,13 @@ export class SipSession {
     private videoSocket: Socket,
     private audioSocket: Socket
   ) {
-    const { port } = sipOptions
+    const { port, tlsPort } = sipOptions
 
     const host = ip.address() // I feel like host should be extracted into SIP options as well?
     sip.start(
       {
         port: port,
+        tls_port: tlsPort,
         host,
         hostname: host,
         tls: {
@@ -161,7 +163,7 @@ export class SipSession {
 
   async start() {
     const res = await this.invite()
-    const rtpOptions = parseRtpOptions(res)
+    this.remoteRtpOptions = parseRtpOptions(res)
     this.videoSocket.on('message', message => {
       this.videoStream.onRtpPacket.next(message)
     })
@@ -170,13 +172,29 @@ export class SipSession {
       this.audioStream.onRtpPacket.next(message)
     })
 
-    this.videoSocket.send('', rtpOptions.video.port, rtpOptions.address)
-    this.audioSocket.send('', rtpOptions.audio.port, rtpOptions.address)
+    this.videoSocket.send(
+      '',
+      this.remoteRtpOptions.video.port,
+      this.remoteRtpOptions.address
+    )
+    this.audioSocket.send(
+      '',
+      this.remoteRtpOptions.audio.port,
+      this.remoteRtpOptions.address
+    )
 
     // Keep alive.
     this.interval = <any>setInterval(() => {
-      this.videoSocket.send('', rtpOptions.video.port, rtpOptions.address)
-      this.audioSocket.send('', rtpOptions.audio.port, rtpOptions.address)
+      this.videoSocket.send(
+        '',
+        this.remoteRtpOptions!.video.port,
+        this.remoteRtpOptions!.address
+      )
+      this.audioSocket.send(
+        '',
+        this.remoteRtpOptions!.audio.port,
+        this.remoteRtpOptions!.address
+      )
     }, 15 * 1000)
   }
 

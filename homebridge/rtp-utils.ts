@@ -32,12 +32,12 @@ function isRtpMessage(message: Buffer) {
   return payloadType > 90 || payloadType === 0
 }
 
-function getSsrc(message: Buffer) {
+export function getSsrc(message: Buffer) {
   const isRtp = isRtpMessage(message)
   return message.readUInt32BE(isRtp ? 8 : 4)
 }
 
-function bindToRandomPort(socket: Socket) {
+export function bindToRandomPort(socket: Socket) {
   return new Promise<number>(resolve => {
     // 0 means select a random open port
     socket.bind(0, () => {

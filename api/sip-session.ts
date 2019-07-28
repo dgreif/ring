@@ -193,6 +193,7 @@ export class SipSession {
             if (method === 'INVITE' && !this.stopped) {
               const headers = {
                 ...this.defaultHeaders,
+                to: response.headers.to,
                 cseq: { seq: response.headers.cseq.seq, method: 'ACK' },
                 'X-Ding': undefined,
                 'X-Authorization': undefined

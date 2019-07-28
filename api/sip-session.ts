@@ -3,6 +3,7 @@ import { logError } from './util'
 const ip = require('ip')
 const sip = require('sip')
 const sdp = require('sdp')
+const getPort = require('get-port');
 
 const dialogs: any = {}
 
@@ -82,10 +83,11 @@ function getRtpDescription(
 }
 
 let sipStarted = false
-function startSip() {
+async function startSip() {
   const host = ip.address()
   sip.start(
     {
+      port: await getPort(), // get a random port, this can still cause race conditions.
       host,
       hostname: host,
       tls: {
@@ -155,6 +157,7 @@ export class SipSession {
     contentLines?: string[]
   }) {
     const { to } = this.sipOptions
+    console.log('making sip request')
 
     return new Promise<SipResponse>((resolve, reject) => {
       function failWithMessage(message: string) {
@@ -217,7 +220,7 @@ export class SipSession {
 
   async getRemoteRtpOptions(): Promise<RtpOptions> {
     if (!sipStarted) {
-      startSip()
+      await startSip()
     }
 
     const { from } = this.sipOptions,

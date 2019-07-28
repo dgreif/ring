@@ -39,7 +39,7 @@ function getSsrc(message: Buffer) {
   return message.readUInt32BE(isRtp ? 8 : 4)
 }
 
-function bindToRandomPort(socket: Socket) {
+export function bindToRandomPort(socket: Socket) {
   return new Promise<number>(resolve => {
     // 0 means select a random open port
     socket.bind(0, () => {

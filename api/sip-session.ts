@@ -101,6 +101,8 @@ export class SipSession {
   private callId = getRandomId()
   private interval?: number = undefined
 
+  remoteRtpOptions?: RtpOptions
+
   videoStream = {
     onRtpPacket: new Subject()
   }

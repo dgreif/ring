@@ -34,7 +34,7 @@ function isRtpMessage(message: Buffer) {
   return payloadType > 90 || payloadType === 0
 }
 
-function getSsrc(message: Buffer) {
+export function getSsrc(message: Buffer) {
   const isRtp = isRtpMessage(message)
   return message.readUInt32BE(isRtp ? 8 : 4)
 }

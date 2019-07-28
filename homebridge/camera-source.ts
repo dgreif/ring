@@ -99,103 +99,101 @@ export class CameraSource {
   ) {
     this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
 
-    try {
-      const {
-          sessionID,
-          targetAddress,
-          audio: {
-            port: audioPort,
-            srtp_key: audioSrtpKey,
-            srtp_salt: audioSrtpSalt
-          },
-          video: {
-            port: videoPort,
-            srtp_key: videoSrtpKey,
-            srtp_salt: videoSrtpSalt
-          }
-        } = request,
-        publicIpPromise = getPublicIp(),
-        onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
-        [audioProxy, videoProxy] = await Promise.all([
-          bindProxyPorts(audioPort, targetAddress, 'audio', onRingRtpOptions),
-          bindProxyPorts(videoPort, targetAddress, 'video', onRingRtpOptions)
-        ]),
-        sipSession = await this.ringCamera.createSipSession({
-          address: await publicIpPromise,
-          audio: {
-            port: audioProxy.localRingPort,
-            srtpKey: audioSrtpKey,
-            srtpSalt: audioSrtpSalt
-          },
-          video: {
-            port: videoProxy.localRingPort,
-            srtpKey: videoSrtpKey,
-            srtpSalt: videoSrtpSalt
-          }
-        }),
-        rtpOptions = await sipSession.getRemoteRtpOptions()
+    // try {
+    //   const {
+    //       sessionID,
+    //       targetAddress,
+    //       audio: {
+    //         port: audioPort,
+    //         srtp_key: audioSrtpKey,
+    //         srtp_salt: audioSrtpSalt
+    //       },
+    //       video: {
+    //         port: videoPort,
+    //         srtp_key: videoSrtpKey,
+    //         srtp_salt: videoSrtpSalt
+    //       }
+    //     } = request,
+    //     publicIpPromise = getPublicIp(),
+    //     onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
+    //     [audioProxy, videoProxy] = await Promise.all([
+    //       bindProxyPorts(audioPort, targetAddress, 'audio', onRingRtpOptions),
+    //       bindProxyPorts(videoPort, targetAddress, 'video', onRingRtpOptions)
+    //     ]),
+    //     sipSession = await this.ringCamera.createSipSession({
+    //       address: await publicIpPromise,
+    //       audio: {
+    //         port: audioProxy.localRingPort,
+    //         srtpKey: audioSrtpKey,
+    //         srtpSalt: audioSrtpSalt
+    //       },
+    //       video: {
+    //         port: videoProxy.localRingPort,
+    //         srtpKey: videoSrtpKey,
+    //         srtpSalt: videoSrtpSalt
+    //       }
+    //     }),
+    //     rtpOptions = await sipSession.getRemoteRtpOptions()
 
-      onRingRtpOptions.next(rtpOptions)
+    //   onRingRtpOptions.next(rtpOptions)
 
-      this.sessions[hap.UUIDGen.unparse(sessionID)] = {
-        sipSession,
-        stop: () => {
-          sipSession.stop()
-          audioProxy.stop()
-          videoProxy.stop()
-        }
-      }
+    //   this.sessions[hap.UUIDGen.unparse(sessionID)] = {
+    //     sipSession,
+    //     stop: () => {
+    //       sipSession.stop()
+    //       audioProxy.stop()
+    //       videoProxy.stop()
+    //     }
+    //   }
 
-      this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
-      const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
-      const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
-      this.logger.info(`Received stream data from ${this.ringCamera.name}`)
+    //   this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
+    //   const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
+    //   const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
+    //   this.logger.info(`Received stream data from ${this.ringCamera.name}`)
 
-      const currentAddress = ip.address()
-      callback({
-        address: {
-          address: currentAddress,
-          type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
-        },
-        audio: {
-          port: audioProxy.localHomeKitPort,
-          ssrc: audioSsrc,
-          srtp_key: rtpOptions.audio.srtpKey,
-          srtp_salt: rtpOptions.audio.srtpSalt
-        },
-        video: {
-          port: videoProxy.localHomeKitPort,
-          ssrc: videoSsrc,
-          srtp_key: rtpOptions.video.srtpKey,
-          srtp_salt: rtpOptions.video.srtpSalt
-        }
-      })
-    } catch (e) {
-      this.logger.error(`Failed to prepare stream for ${this.ringCamera.name}`)
-      this.logger.error(e)
-    }
+    //   const currentAddress = ip.address()
+    //   callback({
+    //     address: {
+    //       address: currentAddress,
+    //       type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
+    //     },
+    //     audio: {
+    //       port: audioProxy.localHomeKitPort,
+    //       ssrc: audioSsrc,
+    //       srtp_key: rtpOptions.audio.srtpKey,
+    //       srtp_salt: rtpOptions.audio.srtpSalt
+    //     },
+    //     video: {
+    //       port: videoProxy.localHomeKitPort,
+    //       ssrc: videoSsrc,
+    //       srtp_key: rtpOptions.video.srtpKey,
+    //       srtp_salt: rtpOptions.video.srtpSalt
+    //     }
+    //   })
+    // } catch (e) {
+    //   this.logger.error(`Failed to prepare stream for ${this.ringCamera.name}`)
+    //   this.logger.error(e)
+    // }
   }
 
   handleStreamRequest(request: any) {
-    const sessionID = request.sessionID,
-      sessionKey = hap.UUIDGen.unparse(sessionID),
-      session = this.sessions[sessionKey],
-      requestType = request.type
-
-    if (!session) {
-      return
-    }
-
-    if (requestType === 'start') {
-      this.logger.info(`Streaming active for ${this.ringCamera.name}`)
-      session.sipSession.startRtp().catch(e => {
-        this.logger.error(`Failed stream ${this.ringCamera.name}`)
-        console.error(e)
-      })
-    } else if (requestType === 'stop') {
-      this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
-      session.stop()
-      delete this.sessions[sessionKey]
-    }
+    // const sessionID = request.sessionID,
+    //   sessionKey = hap.UUIDGen.unparse(sessionID),
+    //   session = this.sessions[sessionKey],
+    //   requestType = request.type
+    // if (!session) {
+    //   return
+    // }
+    // if (requestType === 'start') {
+    //   this.logger.info(`Streaming active for ${this.ringCamera.name}`)
+    //   session.sipSession.startRtp().catch(e => {
+    //     this.logger.error(`Failed stream ${this.ringCamera.name}`)
+    //     console.error(e)
+    //   })
+    // } else if (requestType === 'stop') {
+    //   this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
+    //   session.stop()
+    //   delete this.sessions[sessionKey]
+    // }
   }
 }

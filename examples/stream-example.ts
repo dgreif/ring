@@ -1,7 +1,5 @@
 import 'dotenv/config'
-import { createSocket } from 'dgram'
 import { RingApi } from '../api'
-import { bindToRandomPort, getPublicIp } from '../homebridge/rtp-utils'
 
 async function example() {
   const ringApi = new RingApi({
@@ -21,35 +19,21 @@ async function example() {
     return
   }
 
-  const videoSocket = createSocket('udp4')
-  const audioSocket = createSocket('udp4')
+  const sipSession = await camera.createSipSession()
 
-  videoSocket.on('message', message => {
-    console.log(message)
+  sipSession.audioStream.onRtpPacket.subscribe(rtpPacket => {})
+  sipSession.videoStream.onRtpPacket.subscribe(rtpPacket => {
+    console.log(rtpPacket)
+  })
+  sipSession.onEndDone.subscribe(() => {
+    process.exit()
   })
 
-  const videoPort = await bindToRandomPort(videoSocket)
-  const audioPort = await bindToRandomPort(audioSocket)
+  await sipSession.start()
 
-  const rtpOptions = {
-    address: await getPublicIp(),
-    audio: {
-      port: audioPort
-    },
-    video: {
-      port: videoPort
-    }
-  }
-
-  const sipSession = await camera.createSipSession(rtpOptions)
-
-  const ringRtpOptions = await sipSession.getRemoteRtpOptions()
-
-  videoSocket.send('', ringRtpOptions.video.port, ringRtpOptions.address)
-  sipSession.startRtp()
-  setInterval(() => {
-    videoSocket.send('', ringRtpOptions.video.port, ringRtpOptions.address)
-  }, 15 * 1000)
+  setTimeout(function() {
+    sipSession.stop()
+  }, 2 * 60 * 1000) // Stop after 2 minutes.
 }
 
 example()

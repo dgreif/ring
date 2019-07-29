@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.2](https://github.com/dgreif/ring/compare/v4.5.1...v4.5.2) (2019-07-29)
+
+
+### Bug Fixes
+
+* **homebridge:** add https fallback for getting public ip ([916014c](https://github.com/dgreif/ring/commit/916014c)), closes [#81](https://github.com/dgreif/ring/issues/81)
+
+
+
 ### [4.5.1](https://github.com/dgreif/ring/compare/v4.5.0...v4.5.1) (2019-07-29)
 
 

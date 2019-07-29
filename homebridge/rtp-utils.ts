@@ -2,11 +2,12 @@ import { createSocket, Socket } from 'dgram'
 import { Observable, ReplaySubject } from 'rxjs'
 import { RtpOptions } from '../api'
 import { AddressInfo } from 'net'
-import { v4 as getPublicIpViaHttp } from 'public-ip'
+import { v4 as fetchPublicIp } from 'public-ip'
 const stun = require('stun')
 
 export function getPublicIpViaStun() {
   return new Promise<string>((resolve, reject) => {
+    reject(new Error('test'))
     stun.request('stun.l.google.com:19302', (err: Error, response: any) => {
       if (err) {
         return reject(err)
@@ -17,16 +18,13 @@ export function getPublicIpViaStun() {
   })
 }
 
-export async function getPublicIp() {
-  try {
-    return await getPublicIpViaHttp()
-  } catch (_) {
-    try {
-      return await getPublicIpViaStun()
-    } catch (__) {
+export function getPublicIp() {
+  return fetchPublicIp()
+    .catch(() => fetchPublicIp({ https: true }))
+    .catch(() => getPublicIpViaStun())
+    .catch(() => {
       throw new Error('Failed to retrieve public ip address')
-    }
-  }
+    })
 }
 
 function isRtpMessage(message: Buffer) {

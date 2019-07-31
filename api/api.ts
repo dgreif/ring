@@ -61,12 +61,21 @@ export class RingApi {
         cameraStatusPollingSeconds,
         cameraDingsPollingSeconds
       } = this.options,
-      camerasRequestUpdate$ = merge(
+      onCamerasRequestUpdate = merge(
         ...cameras.map(camera => camera.onRequestUpdate)
-      ).pipe(throttleTime(500)),
+      ),
+      onCamerasRequestActiveDings = merge(
+        ...cameras.map(camera => camera.onRequestActiveDings)
+      ),
       onUpdateReceived = new Subject(),
+      onActiveDingsReceived = new Subject(),
       onPollForStatusUpdate = cameraStatusPollingSeconds
         ? onUpdateReceived.pipe(debounceTime(cameraStatusPollingSeconds * 1000))
+        : EMPTY,
+      onPollForActiveDings = cameraDingsPollingSeconds
+        ? onActiveDingsReceived.pipe(
+            debounceTime(cameraDingsPollingSeconds * 1000)
+          )
         : EMPTY,
       camerasById = cameras.reduce(
         (byId, camera) => {
@@ -80,7 +89,7 @@ export class RingApi {
       return
     }
 
-    merge(camerasRequestUpdate$, onPollForStatusUpdate)
+    merge(onCamerasRequestUpdate, onPollForStatusUpdate)
       .pipe(
         throttleTime(500),
         switchMap(async () => {
@@ -107,32 +116,26 @@ export class RingApi {
       onUpdateReceived.next() // kick off polling
     }
 
-    if (cameraDingsPollingSeconds) {
-      const onPollForActiveDings = new Subject()
+    merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
+      async () => {
+        const activeDings = await this.fetchActiveDings().catch(() => null)
+        onActiveDingsReceived.next()
 
-      onPollForActiveDings
-        .pipe(
-          debounceTime(cameraDingsPollingSeconds * 1000),
-          switchMap(() => {
-            return this.fetchActiveDings().catch(() => null)
-          })
-        )
-        .subscribe(activeDings => {
-          onPollForActiveDings.next()
+        if (!activeDings || !activeDings.length) {
+          return
+        }
 
-          if (!activeDings || !activeDings.length) {
-            return
+        activeDings.forEach(activeDing => {
+          const camera = camerasById[activeDing.doorbot_id]
+          if (camera) {
+            camera.processActiveDing(activeDing)
           }
-
-          activeDings.forEach(activeDing => {
-            const camera = camerasById[activeDing.doorbot_id]
-            if (camera) {
-              camera.processActiveDing(activeDing)
-            }
-          })
         })
+      }
+    )
 
-      onPollForActiveDings.next() // kick off polling
+    if (cameraDingsPollingSeconds) {
+      onActiveDingsReceived.next() // kick off polling
     }
   }
 

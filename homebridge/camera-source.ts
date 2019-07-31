@@ -1,17 +1,8 @@
-import { RingCamera, RtpOptions, SipSession } from '../api'
+import { RingCamera, SipSession } from '../api'
 import { hap, HAP } from './hap'
-import {
-  bindProxyPorts,
-  getPublicIp,
-  bindToRandomPort,
-  getSsrc
-} from './rtp-utils'
-import { ReplaySubject } from 'rxjs'
-import { take } from 'rxjs/operators'
 import Service = HAP.Service
-import { createSocket } from 'dgram'
+import { bindProxyPorts } from './rtp-proxy'
 const ip = require('ip')
-const getPort = require('get-port')
 
 interface HapRtpConfig {
   port: number
@@ -31,12 +22,7 @@ interface PrepareStreamRequest {
 export class CameraSource {
   services: Service[] = []
   streamControllers: any[] = []
-  sessions: {
-    [sessionKey: string]: {
-      sipSession: SipSession
-      stop: () => any
-    }
-  } = {}
+  sessions: { [sessionKey: string]: SipSession } = {}
 
   constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
     let options = {
@@ -108,104 +94,42 @@ export class CameraSource {
 
     try {
       const {
-        sessionID,
-        targetAddress,
-        audio: {
-          port: audioPort,
-          srtp_key: audioSrtpKey,
-          srtp_salt: audioSrtpSalt
-        },
-        video: {
-          port: videoPort,
-          srtp_key: videoSrtpKey,
-          srtp_salt: videoSrtpSalt
-        }
-      } = request
-      const publicIpPromise = getPublicIp()
-
-      const videoSocket = createSocket('udp4')
-      const audioSocket = createSocket('udp4')
-      const homekitVideoSocket = createSocket('udp4')
-      const homekitAudioSocket = createSocket('udp4')
-
-      const localVideoPort = await bindToRandomPort(videoSocket)
-      const localAudioPort = await bindToRandomPort(audioSocket)
-      const localHomekitVideoPort = await bindToRandomPort(homekitVideoSocket)
-      const localHomekitAudioPort = await bindToRandomPort(homekitAudioSocket)
-
-      const sipOptions = await this.ringCamera.getSipOptions()
-
-      const openPort = await getPort() // get a random port, this can still cause race conditions.
-      sipOptions.tlsPort = openPort
-
-      const sipSession = new SipSession(
-        sipOptions,
-        {
-          address: await publicIpPromise,
+          sessionID,
+          targetAddress,
           audio: {
-            port: localAudioPort,
+            port: audioPort,
+            srtp_key: audioSrtpKey,
+            srtp_salt: audioSrtpSalt
+          },
+          video: {
+            port: videoPort,
+            srtp_key: videoSrtpKey,
+            srtp_salt: videoSrtpSalt
+          }
+        } = request,
+        sipSession = await this.ringCamera.createSipSession({
+          audio: {
             srtpKey: audioSrtpKey,
             srtpSalt: audioSrtpSalt
           },
           video: {
-            port: localVideoPort,
             srtpKey: videoSrtpKey,
             srtpSalt: videoSrtpSalt
           }
-        },
-        videoSocket,
-        audioSocket
-      )
+        }),
+        [rtpOptions, audioProxy, videoProxy] = await Promise.all([
+          sipSession.start(),
+          bindProxyPorts(audioPort, targetAddress, 'audio', sipSession),
+          bindProxyPorts(videoPort, targetAddress, 'video', sipSession)
+        ])
 
-      const onVideoSsrc = new ReplaySubject<number>(1)
-      const onAudioSsrc = new ReplaySubject<number>(1)
-
-      sipSession.videoStream.onRtpPacket.subscribe(rtpPacket => {
-        onVideoSsrc.next(getSsrc(rtpPacket as Buffer))
-        homekitVideoSocket.send(rtpPacket as Buffer, videoPort, targetAddress)
-      })
-
-      sipSession.audioStream.onRtpPacket.subscribe(rtpPacket => {
-        onAudioSsrc.next(getSsrc(rtpPacket as Buffer))
-        homekitAudioSocket.send(rtpPacket as Buffer, audioPort, targetAddress)
-      })
-
-      homekitVideoSocket.on('message', message => {
-        if (sipSession.remoteRtpOptions) {
-          videoSocket.send(
-            message,
-            sipSession.remoteRtpOptions.video.port,
-            sipSession.remoteRtpOptions.address
-          )
-        }
-      })
-
-      homekitAudioSocket.on('message', message => {
-        if (sipSession.remoteRtpOptions) {
-          audioSocket.send(
-            message,
-            sipSession.remoteRtpOptions.audio.port,
-            sipSession.remoteRtpOptions.address
-          )
-        }
-      })
-
-      await sipSession.start()
-
-      this.sessions[hap.UUIDGen.unparse(sessionID)] = {
-        sipSession,
-        stop: () => {
-          sipSession.stop()
-          videoSocket.close()
-          audioSocket.close()
-          homekitVideoSocket.close()
-          homekitAudioSocket.close()
-        }
-      }
+      this.sessions[hap.UUIDGen.unparse(sessionID)] = sipSession
 
       this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
-      const audioSsrc = await onAudioSsrc.pipe(take(1)).toPromise()
-      const videoSsrc = await onVideoSsrc.pipe(take(1)).toPromise()
+      const [audioSsrc, videoSsrc] = await Promise.all([
+        audioProxy.ssrcPromise,
+        videoProxy.ssrcPromise
+      ])
       this.logger.info(`Received stream data from ${this.ringCamera.name}`)
 
       const currentAddress = ip.address()
@@ -215,16 +139,16 @@ export class CameraSource {
           type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
         },
         audio: {
-          port: localHomekitAudioPort,
+          port: audioProxy.localPort,
           ssrc: audioSsrc,
-          srtp_key: sipSession.remoteRtpOptions!.audio.srtpKey, // -> we should have this for sure by now.
-          srtp_salt: sipSession.remoteRtpOptions!.audio.srtpSalt
+          srtp_key: rtpOptions.audio.srtpKey,
+          srtp_salt: rtpOptions.audio.srtpSalt
         },
         video: {
-          port: localHomekitVideoPort,
+          port: videoProxy.localPort,
           ssrc: videoSsrc,
-          srtp_key: sipSession.remoteRtpOptions!.video.srtpKey,
-          srtp_salt: sipSession.remoteRtpOptions!.video.srtpSalt
+          srtp_key: rtpOptions.video.srtpKey,
+          srtp_salt: rtpOptions.video.srtpSalt
         }
       })
     } catch (e) {
@@ -238,12 +162,14 @@ export class CameraSource {
       sessionKey = hap.UUIDGen.unparse(sessionID),
       session = this.sessions[sessionKey],
       requestType = request.type
+
     if (!session) {
       return
     }
+
     if (requestType === 'start') {
       this.logger.info(`Streaming active for ${this.ringCamera.name}`)
-      // rtp is already started if we have have ssrc info.
+      // sip/rtp already started at this point
     } else if (requestType === 'stop') {
       this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()

@@ -19,9 +19,9 @@ import {
   take
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
-import { bindToRandomPort, getPublicIp } from '../homebridge/rtp-utils'
+import { bindToRandomPort, getPublicIp } from './rtp-utils'
 import { delay, logError } from './util'
-import { SipOptions, SipSession } from './sip-session'
+import { SipSession, SrtpOptions } from './sip-session'
 
 const getPort = require('get-port')
 
@@ -53,6 +53,7 @@ export class RingCamera {
 
   onData = new BehaviorSubject<CameraData>(this.initialData)
   onRequestUpdate = new Subject()
+  onRequestActiveDings = new Subject()
 
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
@@ -164,6 +165,7 @@ export class RingCamera {
       )
       .toPromise()
     await this.startVideoOnDemand()
+    this.onRequestActiveDings.next()
     return vodPromise
   }
 
@@ -267,7 +269,7 @@ export class RingCamera {
 
   sipUsedDingIds: string[] = []
 
-  async getSipOptions(): Promise<SipOptions> {
+  async getSipOptions() {
     const activeDings = this.onActiveDings.getValue(),
       existingDing = activeDings
         .slice()
@@ -275,37 +277,46 @@ export class RingCamera {
         .find(x => !this.sipUsedDingIds.includes(x.id_str)),
       targetDing = existingDing || (await this.getSipConnectionDetails())
 
-    const openPort = await getPort() // get a random port, this can still cause race conditions.
+    this.sipUsedDingIds.push(targetDing.id_str)
 
     return {
       to: targetDing.sip_to,
       from: targetDing.sip_from,
-      dingId: targetDing.id_str,
-      port: openPort
+      dingId: targetDing.id_str
     }
   }
 
-  async createSipSession() {
-    const videoSocket = createSocket('udp4')
-    const audioSocket = createSocket('udp4')
-
-    const videoPort = await bindToRandomPort(videoSocket)
-    const audioPort = await bindToRandomPort(audioSocket)
-
-    const rtpOptions = {
-      address: await getPublicIp(),
-      audio: {
-        port: audioPort
-      },
-      video: {
-        port: videoPort
+  async createSipSession(
+    srtpOption: { audio?: SrtpOptions; video?: SrtpOptions } = {}
+  ) {
+    const videoSocket = createSocket('udp4'),
+      audioSocket = createSocket('udp4'),
+      [sipOptions, publicIpPromise, videoPort, audioPort] = await Promise.all([
+        this.getSipOptions(),
+        getPublicIp(),
+        bindToRandomPort(videoSocket),
+        bindToRandomPort(audioSocket)
+      ]),
+      rtpOptions = {
+        address: await publicIpPromise,
+        audio: {
+          port: audioPort,
+          ...srtpOption.audio
+        },
+        video: {
+          port: videoPort,
+          ...srtpOption.video
+        }
       }
-    }
 
-    const sipOptions = await this.getSipOptions()
-
-    this.sipUsedDingIds.push(sipOptions.dingId)
-
-    return new SipSession(sipOptions, rtpOptions, videoSocket, audioSocket)
+    return new SipSession(
+      {
+        ...sipOptions,
+        tlsPort: await getPort() // get a random port, this can still cause race conditions.
+      },
+      rtpOptions,
+      videoSocket,
+      audioSocket
+    )
   }
 }

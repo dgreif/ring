@@ -111,7 +111,7 @@ export class RingPlatform {
           allDevices = [...devices, ...cameras]
 
         this.log.info(
-          `Configuring ${cameras.length} cameras and ${devices.length} devices for locationId ${location.locationId}`
+          `Configuring ${cameras.length} cameras and ${devices.length} devices for locationId ${location.locationId} (${location.locationDetails.name})`
         )
         allDevices.forEach(device => {
           const isCamera = device instanceof RingCamera,

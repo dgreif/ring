@@ -10,4 +10,5 @@ cp ring-auth-cli.js release-homebridge
 cp package.json release-homebridge
 cp LICENSE release-homebridge
 cp homebridge/README.md release-homebridge
+cp homebridge/config.schema.json release-homebridge
 node ./build/package-homebridge

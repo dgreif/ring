@@ -73,5 +73,9 @@
   },
   "engines": {
     "node": ">=8.3.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/dgreif/ring/issues"
+  },
+  "homepage": "https://github.com/dgreif/ring#readme"
 }

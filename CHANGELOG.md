@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/dgreif/ring/compare/v5.0.0...v5.1.0) (2019-08-01)
+
+
+### Features
+
+* **homebridge:** config schema for homebridge settings ui ([56011e3](https://github.com/dgreif/ring/commit/56011e3)), closes [#86](https://github.com/dgreif/ring/issues/86)
+
+
+
 ## [5.0.0](https://github.com/dgreif/ring/compare/v4.5.2...v5.0.0) (2019-08-01)
 
 

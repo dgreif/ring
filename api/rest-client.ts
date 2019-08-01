@@ -26,7 +26,6 @@ async function requestWithRetry<T>(
   options: AxiosRequestConfig
 ): Promise<T & ExtendedResponse> {
   try {
-    logInfo(`Making request: ${JSON.stringify(options, null, 2)}`)
     const { data, headers } = await axios(options)
 
     if (typeof data === 'object' && headers.date) {

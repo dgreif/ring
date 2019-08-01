@@ -19,6 +19,10 @@ interface PrepareStreamRequest {
   audio: HapRtpConfig
 }
 
+function getDurationSeconds(start: number) {
+  return (Date.now() - start) / 1000
+}
+
 export class CameraSource {
   services: Service[] = []
   streamControllers: any[] = []
@@ -70,8 +74,15 @@ export class CameraSource {
     callback: (err?: Error, snapshot?: Buffer) => void
   ) {
     try {
+      const start = Date.now()
       this.logger.info(`Snapshot Requested for ${this.ringCamera.name}`)
-      const snapshot = await this.ringCamera.getSnapshot(true)
+      const snapshot = await this.ringCamera.getSnapshot(true),
+        duration = (Date.now() - start) / 1000
+      this.logger.info(
+        `Snapshot Received for ${this.ringCamera.name} (${getDurationSeconds(
+          start
+        )}s)`
+      )
       // Not currently resizing the image.
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
       callback(undefined, snapshot)
@@ -90,6 +101,7 @@ export class CameraSource {
     request: PrepareStreamRequest,
     callback: (response: any) => void
   ) {
+    const start = Date.now()
     this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
 
     try {
@@ -125,12 +137,20 @@ export class CameraSource {
 
       this.sessions[hap.UUIDGen.unparse(sessionID)] = sipSession
 
-      this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
+      this.logger.info(
+        `Waiting for stream data from ${
+          this.ringCamera.name
+        } (${getDurationSeconds(start)}s)`
+      )
       const [audioSsrc, videoSsrc] = await Promise.all([
         audioProxy.ssrcPromise,
         videoProxy.ssrcPromise
       ])
-      this.logger.info(`Received stream data from ${this.ringCamera.name}`)
+      this.logger.info(
+        `Received stream data from ${
+          this.ringCamera.name
+        } (${getDurationSeconds(start)}s)`
+      )
 
       const currentAddress = ip.address()
       callback({
@@ -152,7 +172,11 @@ export class CameraSource {
         }
       })
     } catch (e) {
-      this.logger.error(`Failed to prepare stream for ${this.ringCamera.name}`)
+      this.logger.error(
+        `Failed to prepare stream for ${
+          this.ringCamera.name
+        } (${getDurationSeconds(start)}s)`
+      )
       this.logger.error(e)
     }
   }

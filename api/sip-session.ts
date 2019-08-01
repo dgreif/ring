@@ -290,9 +290,11 @@ export class SipSession {
           }
 
           if (response.status >= 300) {
-            logError(
-              `sip ${method} request failed with status ` + response.status
-            )
+            if (response.status !== 408 || method !== 'BYE') {
+              logError(
+                `sip ${method} request failed with status ` + response.status
+              )
+            }
             reject(
               new Error(
                 `sip ${method} request failed with status ` + response.status

@@ -3,7 +3,21 @@ import { red } from 'colors'
 import { randomBytes } from 'crypto'
 import { createInterface } from 'readline'
 
-const logger = debug('ring')
+const debugLogger = debug('ring')
+
+interface Logger {
+  logInfo: (message: string) => void
+  logError: (message: string) => void
+}
+
+let logger: Logger = {
+  logInfo(message) {
+    debugLogger(message)
+  },
+  logError(message) {
+    debugLogger(red(message))
+  }
+}
 
 export function delay(milliseconds: number) {
   return new Promise(resolve => {
@@ -11,13 +25,16 @@ export function delay(milliseconds: number) {
   })
 }
 
-// TODO: use homebridge logger if available
 export function logInfo(message: any) {
-  logger(message)
+  logger.logInfo(message)
 }
 
 export function logError(message: any) {
-  logger(red(message))
+  logger.logError(message)
+}
+
+export function useLogger(newLogger: Logger) {
+  logger = newLogger
 }
 
 export function generateRandomId() {

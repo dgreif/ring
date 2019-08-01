@@ -16,6 +16,7 @@ import { Switch } from './switch'
 import { Camera } from './camera'
 import { RingAuth } from '../api/rest-client'
 import { platformName, pluginName } from './plugin-info'
+import { useLogger } from '../api/util'
 
 const debug = __filename.includes('release-homebridge')
 
@@ -68,6 +69,15 @@ export class RingPlatform {
     public config: RingPlatformConfig & RingAuth,
     public api: HAP.Platform
   ) {
+    useLogger({
+      logInfo(message) {
+        log.info(message)
+      },
+      logError(message) {
+        log.error(message)
+      }
+    })
+
     if (!config) {
       this.log.info('No configuration found for platform Ring')
       return

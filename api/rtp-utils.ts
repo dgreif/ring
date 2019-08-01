@@ -2,6 +2,7 @@ import { Socket } from 'dgram'
 import { AddressInfo } from 'net'
 import { v4 as fetchPublicIp } from 'public-ip'
 const stun = require('stun')
+const portControl = require('nat-puncher')
 
 export function getPublicIpViaStun() {
   return new Promise<string>((resolve, reject) => {
@@ -51,8 +52,11 @@ export function bindToRandomPort(socket: Socket) {
 
 export function sendUdpHolePunch(
   socket: Socket,
-  port: number,
-  address: string
+  localPort: number,
+  remotePort: number,
+  remoteAddress: string,
+  lifetimeSeconds: number
 ) {
-  socket.send('', port, address)
+  socket.send('', remotePort, remoteAddress)
+  portControl.addMapping(localPort, localPort, lifetimeSeconds)
 }

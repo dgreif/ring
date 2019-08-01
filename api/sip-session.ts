@@ -207,16 +207,22 @@ export class SipSession {
 
     const remoteRtpOptions = await this.invite(),
       { address: remoteAddress } = remoteRtpOptions,
+      keepAliveInterval = 15,
+      portMappingLifetime = keepAliveInterval + 5,
       holePunch = () => {
         sendUdpHolePunch(
           this.audioSocket,
+          this.audioStream.port,
           remoteRtpOptions.audio.port,
-          remoteAddress
+          remoteAddress,
+          portMappingLifetime
         )
         sendUdpHolePunch(
           this.videoSocket,
+          this.videoStream.port,
           remoteRtpOptions.video.port,
-          remoteAddress
+          remoteAddress,
+          portMappingLifetime
         )
       }
 
@@ -230,8 +236,10 @@ export class SipSession {
     // punch to begin with to make sure we get through NAT
     holePunch()
 
-    // hole punch every 15 seconds to keep stream alive
-    this.subscriptions.push(interval(15 * 1000).subscribe(holePunch))
+    // hole punch every 15 seconds to keep stream alive and port open
+    this.subscriptions.push(
+      interval(keepAliveInterval * 1000).subscribe(holePunch)
+    )
 
     return remoteRtpOptions
   }

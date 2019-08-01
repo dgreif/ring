@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.2.0](https://github.com/dgreif/ring/compare/v5.1.0...v5.2.0) (2019-08-01)
+
+
+### Features
+
+* **homebridge:** include changelog for homebridge ui ([46387a5](https://github.com/dgreif/ring/commit/46387a5)), closes [#86](https://github.com/dgreif/ring/issues/86)
+
+
+
 ## [5.1.0](https://github.com/dgreif/ring/compare/v5.0.0...v5.1.0) (2019-08-01)
 
 

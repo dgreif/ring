@@ -1,9 +1,7 @@
-import { RingCamera, RtpOptions, SipSession } from '../api'
+import { RingCamera, SipSession } from '../api'
 import { hap, HAP } from './hap'
-import { bindProxyPorts, getPublicIp } from './rtp-utils'
-import { ReplaySubject } from 'rxjs'
-import { take } from 'rxjs/operators'
 import Service = HAP.Service
+import { bindProxyPorts } from './rtp-proxy'
 const ip = require('ip')
 
 interface HapRtpConfig {
@@ -24,12 +22,7 @@ interface PrepareStreamRequest {
 export class CameraSource {
   services: Service[] = []
   streamControllers: any[] = []
-  sessions: {
-    [sessionKey: string]: {
-      sipSession: SipSession
-      stop: () => any
-    }
-  } = {}
+  sessions: { [sessionKey: string]: SipSession } = {}
 
   constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
     let options = {
@@ -114,41 +107,29 @@ export class CameraSource {
             srtp_salt: videoSrtpSalt
           }
         } = request,
-        publicIpPromise = getPublicIp(),
-        onRingRtpOptions = new ReplaySubject<RtpOptions>(1),
-        [audioProxy, videoProxy] = await Promise.all([
-          bindProxyPorts(audioPort, targetAddress, 'audio', onRingRtpOptions),
-          bindProxyPorts(videoPort, targetAddress, 'video', onRingRtpOptions)
-        ]),
         sipSession = await this.ringCamera.createSipSession({
-          address: await publicIpPromise,
           audio: {
-            port: audioProxy.localRingPort,
             srtpKey: audioSrtpKey,
             srtpSalt: audioSrtpSalt
           },
           video: {
-            port: videoProxy.localRingPort,
             srtpKey: videoSrtpKey,
             srtpSalt: videoSrtpSalt
           }
         }),
-        rtpOptions = await sipSession.getRemoteRtpOptions()
+        [rtpOptions, audioProxy, videoProxy] = await Promise.all([
+          sipSession.start(),
+          bindProxyPorts(audioPort, targetAddress, 'audio', sipSession),
+          bindProxyPorts(videoPort, targetAddress, 'video', sipSession)
+        ])
 
-      onRingRtpOptions.next(rtpOptions)
-
-      this.sessions[hap.UUIDGen.unparse(sessionID)] = {
-        sipSession,
-        stop: () => {
-          sipSession.stop()
-          audioProxy.stop()
-          videoProxy.stop()
-        }
-      }
+      this.sessions[hap.UUIDGen.unparse(sessionID)] = sipSession
 
       this.logger.info(`Waiting for stream data from ${this.ringCamera.name}`)
-      const audioSsrc = await audioProxy.onSsrc.pipe(take(1)).toPromise()
-      const videoSsrc = await videoProxy.onSsrc.pipe(take(1)).toPromise()
+      const [audioSsrc, videoSsrc] = await Promise.all([
+        audioProxy.ssrcPromise,
+        videoProxy.ssrcPromise
+      ])
       this.logger.info(`Received stream data from ${this.ringCamera.name}`)
 
       const currentAddress = ip.address()
@@ -158,13 +139,13 @@ export class CameraSource {
           type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
         },
         audio: {
-          port: audioProxy.localHomeKitPort,
+          port: audioProxy.localPort,
           ssrc: audioSsrc,
           srtp_key: rtpOptions.audio.srtpKey,
           srtp_salt: rtpOptions.audio.srtpSalt
         },
         video: {
-          port: videoProxy.localHomeKitPort,
+          port: videoProxy.localPort,
           ssrc: videoSsrc,
           srtp_key: rtpOptions.video.srtpKey,
           srtp_salt: rtpOptions.video.srtpSalt
@@ -188,10 +169,7 @@ export class CameraSource {
 
     if (requestType === 'start') {
       this.logger.info(`Streaming active for ${this.ringCamera.name}`)
-      session.sipSession.startRtp().catch(e => {
-        this.logger.error(`Failed stream ${this.ringCamera.name}`)
-        console.error(e)
-      })
+      // sip/rtp already started at this point
     } else if (requestType === 'stop') {
       this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()

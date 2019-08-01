@@ -1,33 +1,57 @@
 import { logError } from './util'
+import { RemoteInfo, Socket } from 'dgram'
+import {
+  interval,
+  Observable,
+  ReplaySubject,
+  Subject,
+  Subscription
+} from 'rxjs'
+import { sendUdpHolePunch } from './rtp-utils'
 
 const ip = require('ip')
 const sip = require('sip')
 const sdp = require('sdp')
 
-const dialogs: any = {}
-
 export interface SipOptions {
   to: string
   from: string
   dingId: string
+  host?: string
+  port?: number
+  tlsPort?: number
 }
 
-export interface StreamRtpOptions {
+export interface SrtpOptions {
+  srtpKey: Buffer
+  srtpSalt: Buffer
+}
+
+export interface RtpStreamOptions extends Partial<SrtpOptions> {
   port: number
-  srtpKey?: Buffer
-  srtpSalt?: Buffer
+}
+
+export interface RtpPacket {
+  message: Buffer
+  info: RemoteInfo
+}
+
+export interface RtpStream {
+  socket: Socket
+  port: number
+  onRtpPacket: Observable<RtpPacket>
 }
 
 export interface RtpOptions {
   address: string
-  audio: StreamRtpOptions
-  video: StreamRtpOptions
+  audio: RtpStreamOptions
+  video: RtpStreamOptions
 }
 
 interface UriOptions {
   name?: string
   uri: string
-  params?: any
+  params?: { tag?: string }
 }
 
 interface SipHeaders {
@@ -37,7 +61,13 @@ interface SipHeaders {
   from: UriOptions
   contact?: UriOptions[]
   via?: UriOptions[]
-  contentLength: number
+}
+
+export interface SipRequest {
+  uri: UriOptions | string
+  method: string
+  headers: SipHeaders
+  content: string
 }
 
 export interface SipResponse {
@@ -47,11 +77,24 @@ export interface SipResponse {
   content: string
 }
 
+export interface SipClient {
+  send: (
+    request: SipRequest | SipResponse,
+    handler?: (response: SipResponse) => void
+  ) => void
+  destroy: () => void
+  makeResponse: (
+    response: SipRequest,
+    status: number,
+    method: string
+  ) => SipResponse
+}
+
 function getRandomId() {
   return Math.floor(Math.random() * 1e6).toString()
 }
 
-function createCryptoLine({ srtpKey, srtpSalt }: StreamRtpOptions) {
+function createCryptoLine({ srtpKey, srtpSalt }: RtpStreamOptions) {
   if (!srtpKey || !srtpSalt) {
     return ''
   }
@@ -62,7 +105,7 @@ function createCryptoLine({ srtpKey, srtpSalt }: StreamRtpOptions) {
 function getRtpDescription(
   sections: string[],
   mediaType: 'audio' | 'video'
-): StreamRtpOptions {
+): RtpStreamOptions {
   const section = sections.find(s => s.startsWith('m=' + mediaType)),
     { port } = sdp.parseMLine(section),
     lines = sdp.splitLines(section),
@@ -81,94 +124,149 @@ function getRtpDescription(
   }
 }
 
-let sipStarted = false
-function startSip() {
-  const host = ip.address()
-  sip.start(
-    {
-      host,
-      hostname: host,
-      tls: {
-        rejectUnauthorized: false
-      }
-    },
-    function(rq: SipResponse & { method: 'string' }) {
-      // todo: this has method: 'BYE' instead of `response`
-      // console.log('DIALOG', rq)
-
-      // TODO: handle BYE from other end
-
-      if (rq.headers.to.params.tag) {
-        // check if it's an in dialog request
-        var id = [
-          rq.headers['call-id'],
-          rq.headers.to.params.tag,
-          rq.headers.from.params.tag
-        ].join(':')
-
-        if (dialogs[id]) {
-          dialogs[id](rq)
-        } else {
-          sip.send(sip.makeResponse(rq, 481, "Call doesn't exists"))
-        }
-      } else {
-        sip.send(sip.makeResponse(rq, 405, 'Method not allowed'))
-      }
-    }
-  )
-
-  sipStarted = true
+function parseRtpOptions(inviteResponse: { content: string }) {
+  const sections: string[] = sdp.splitSections(inviteResponse.content)
+  const oLine = sdp.parseOLine(sections[0])
+  const rtpOptions = {
+    address: oLine.address,
+    audio: getRtpDescription(sections, 'audio'),
+    video: getRtpDescription(sections, 'video')
+  }
+  return rtpOptions
 }
 
+let sipSessionActive = false
 export class SipSession {
-  private readonly defaultHeaders: Partial<SipHeaders>
   private seq = 20
-  private stopped = false
+  private fromParams = { tag: getRandomId() }
+  private toParams: { tag?: string } = {}
+  private callId = getRandomId()
+  private hasStarted = false
+  private hasCallEnded = false
+  private sipClient: SipClient
+  private onAudioPacket = new Subject<RtpPacket>()
+  private onVideoPacket = new Subject<RtpPacket>()
+  private onCallEndedSubject = new ReplaySubject(1)
+  private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
+  private subscriptions: Subscription[] = []
+  onCallEnded = this.onCallEndedSubject.asObservable()
+  onRemoteRtpOptions = this.onRemoteRtpOptionsSubject.asObservable()
 
-  constructor(private sipOptions: SipOptions, private rtpOptions: RtpOptions) {
-    const { to, from, dingId } = this.sipOptions
+  audioStream: RtpStream = {
+    socket: this.audioSocket,
+    port: this.rtpOptions.audio.port,
+    onRtpPacket: this.onAudioPacket.asObservable()
+  }
+  videoStream: RtpStream = {
+    socket: this.videoSocket,
+    port: this.rtpOptions.video.port,
+    onRtpPacket: this.onVideoPacket.asObservable()
+  }
 
-    this.defaultHeaders = {
-      to: {
-        name: '"FS Doorbot"',
-        uri: to
-      },
-      from: {
-        uri: from,
-        params: { tag: getRandomId() }
-      },
-      'max-forwards': 70,
-      'call-id': getRandomId(),
-      'X-Ding': dingId,
-      'X-Authorization': '',
-      'User-Agent': 'Android/3.15.3 (belle-sip/1.4.2)'
+  constructor(
+    private sipOptions: SipOptions,
+    private rtpOptions: RtpOptions,
+    private videoSocket: Socket,
+    private audioSocket: Socket
+  ) {
+    if (sipSessionActive) {
+      throw new Error('Only one sip session can be active at a time.')
     }
+    const { tlsPort } = sipOptions
+
+    const host = sipOptions.host || ip.address()
+    this.sipClient = sip.create(
+      {
+        host,
+        hostname: host,
+        tls_port: tlsPort,
+        tls: {
+          rejectUnauthorized: false
+        },
+        tcp: false,
+        udp: false
+      },
+      (request: SipRequest) => {
+        if (request.method === 'BYE') {
+          this.sipClient.send(this.sipClient.makeResponse(request, 200, 'Ok'))
+          this.callEnded(false)
+        }
+      }
+    )
+  }
+
+  async start() {
+    if (this.hasStarted) {
+      throw new Error('SIP Session has already been started')
+    }
+    this.hasStarted = true
+
+    if (this.hasCallEnded) {
+      throw new Error('SIP Session has already ended')
+    }
+
+    const remoteRtpOptions = await this.invite(),
+      { address: remoteAddress } = remoteRtpOptions,
+      holePunch = () => {
+        sendUdpHolePunch(
+          this.audioSocket,
+          remoteRtpOptions.audio.port,
+          remoteAddress
+        )
+        sendUdpHolePunch(
+          this.videoSocket,
+          remoteRtpOptions.video.port,
+          remoteAddress
+        )
+      }
+
+    this.audioSocket.on('message', (message, info) => {
+      this.onAudioPacket.next({ message, info })
+    })
+    this.videoSocket.on('message', (message, info) => {
+      this.onVideoPacket.next({ message, info })
+    })
+
+    // punch to begin with to make sure we get through NAT
+    holePunch()
+
+    // hole punch every 15 seconds to keep stream alive
+    this.subscriptions.push(interval(15 * 1000).subscribe(holePunch))
+
+    return remoteRtpOptions
   }
 
   sipRequest({
     method,
     headers,
-    contentLines
+    contentLines,
+    seq
   }: {
     method: string
-    headers: Partial<SipHeaders>
+    headers?: Partial<SipHeaders>
     contentLines?: string[]
+    seq?: number
   }) {
-    const { to } = this.sipOptions
-
     return new Promise<SipResponse>((resolve, reject) => {
-      function failWithMessage(message: string) {
-        logError(message)
-        reject(new Error(message))
-      }
-
-      sip.send(
+      seq = seq || this.seq++
+      this.sipClient.send(
         {
           method,
-          uri: to,
+          uri: this.sipOptions.to,
           headers: {
-            ...this.defaultHeaders,
-            cseq: { seq: this.seq++, method },
+            to: {
+              name: '"FS Doorbot"',
+              uri: this.sipOptions.to,
+              params: this.toParams
+            },
+            from: {
+              uri: this.sipOptions.from,
+              params: this.fromParams
+            },
+            'max-forwards': 70,
+            'call-id': this.callId,
+            'User-Agent': 'Android/3.15.3 (belle-sip/1.4.2)',
+            cseq: { seq, method },
             ...headers
           },
           content: contentLines
@@ -176,38 +274,33 @@ export class SipSession {
                 .filter(l => l)
                 .map(line => line + '\r\n')
                 .join('')
-            : undefined
+            : ''
         },
         (response: SipResponse) => {
-          // if (!this.stopped) {
-          //   console.log('RESP', response)
-          // }
+          if (response.headers.to.params && response.headers.to.params.tag) {
+            this.toParams.tag = response.headers.to.params.tag
+          }
+
           if (response.status >= 300) {
-            failWithMessage(
+            logError(
               `sip ${method} request failed with status ` + response.status
+            )
+            reject(
+              new Error(
+                `sip ${method} request failed with status ` + response.status
+              )
             )
           } else if (response.status < 200) {
             // call made progress, do nothing and wait for another response
             // console.log('call progress status ' + response.status)
           } else {
-            if (method === 'INVITE' && !this.stopped) {
-              const headers = {
-                ...this.defaultHeaders,
-                to: response.headers.to,
-                cseq: { seq: response.headers.cseq.seq, method: 'ACK' },
-                'X-Ding': undefined,
-                'X-Authorization': undefined
-              }
-              delete headers['X-Ding']
-              delete headers['X-Authorization']
-
-              sip.send({
-                method: 'ACK',
-                uri: to,
-                headers
+            if (method === 'INVITE') {
+              // The ACK must be sent with every OK to keep the connection alive.
+              this.ackWithInfo(seq!).catch(e => {
+                logError('Failed to send SDP ACK and INFO')
+                logError(e)
               })
             }
-
             resolve(response)
           }
         }
@@ -215,15 +308,10 @@ export class SipSession {
     })
   }
 
-  async getRemoteRtpOptions(): Promise<RtpOptions> {
-    if (!sipStarted) {
-      startSip()
-    }
-
-    const { from } = this.sipOptions,
-      { address, audio, video } = this.rtpOptions
-
-    const inviteResponse = await this.sipRequest({
+  async invite(rtpOptions = this.rtpOptions) {
+    const { address, audio, video } = rtpOptions,
+      { from } = this.sipOptions,
+      inviteResponse = await this.sipRequest({
         method: 'INVITE',
         headers: {
           supported: 'replaces, outbound',
@@ -249,36 +337,25 @@ export class SipSession {
           `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
           'a=rtpmap:99 H264/90000',
           'a=fmtp:99 profile-level-id=42A01E; packetization-mode=1',
-          // 'a=fmtp:96 profile-level-id=42801F', // todo: profiles and bit rates
+          // 'a=fmtp:96 profile-level-id=42801F', // TODO: profiles and bit rates
           createCryptoLine(video),
           'a=rtcp-mux'
         ]
-
-        // { codec: 'AAC-eld',
-        //   channel: 1,
-        //   bit_rate: 0,
-        //   sample_rate: 16,
-        //   packet_time: 30,
-        //   pt: 110,
-        //   ssrc: 3329507484,
-        //   max_bit_rate: 24,
-        //   rtcp_interval: 1084227584,
-        //   comfort_pt: 13 } }
       }),
-      sections: string[] = sdp.splitSections(inviteResponse.content),
-      oLine = sdp.parseOLine(sections[0]),
-      rtpOptions = {
-        address: oLine.address,
-        audio: getRtpDescription(sections, 'audio'),
-        video: getRtpDescription(sections, 'video')
-      }
+      remoteRtpOptions = parseRtpOptions(inviteResponse)
 
-    // TODO: need to figure out how to keep the stream alive by watching the app on android
-
-    return rtpOptions
+    this.onRemoteRtpOptionsSubject.next(remoteRtpOptions)
+    return remoteRtpOptions
   }
 
-  async startRtp() {
+  private async ackWithInfo(seq: number) {
+    // Don't wait for ack, it won't ever come back.
+    this.sipRequest({
+      method: 'ACK',
+      seq // The ACK must have the original sequence number.
+    })
+
+    // SIP session will be terminated after 30 seconds if INFO isn't sent.
     await this.sipRequest({
       method: 'INFO',
       headers: {
@@ -298,18 +375,27 @@ export class SipSession {
     })
   }
 
-  stop() {
-    if (this.stopped) {
+  private callEnded(sendBye: boolean) {
+    if (this.hasCallEnded) {
       return
     }
+    this.hasCallEnded = true
 
-    this.stopped = true
+    if (sendBye) {
+      this.sipRequest({ method: 'BYE' }).catch(() => {
+        // Don't care if we get an exception here.
+      })
+    }
 
-    this.sipRequest({
-      method: 'BYE',
-      headers: {}
-    }).catch(() => {
-      // Do nothing if BYE fails
-    })
+    // clean up
+    this.onCallEndedSubject.next()
+    this.sipClient.destroy()
+    this.videoSocket.close()
+    this.audioSocket.close()
+    this.subscriptions.forEach(subscription => subscription.unsubscribe())
+  }
+
+  stop() {
+    this.callEnded(true)
   }
 }

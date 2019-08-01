@@ -177,12 +177,14 @@ export class SipSession {
     const host = sipOptions.host || ip.address()
     this.sipClient = sip.create(
       {
-        tls_port: tlsPort,
         host,
         hostname: host,
+        tls_port: tlsPort,
         tls: {
           rejectUnauthorized: false
-        }
+        },
+        tcp: false,
+        udp: false
       },
       (request: SipRequest) => {
         if (request.method === 'BYE') {

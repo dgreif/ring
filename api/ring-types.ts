@@ -14,12 +14,18 @@ export enum RingDeviceType {
   CoAlarm = 'alarm.co',
   SmokeCoListener = 'listener.smoke-co',
   MultiLevelSwitch = 'switch.multilevel',
+  Fan = 'switch.multilevel',
   MultiLevelBulb = 'switch.multilevel.bulb',
   Switch = 'switch',
   BeamsMotionSensor = 'motion-sensor.beams',
   BeamsSwitch = 'switch.multilevel.beams',
   BeamsLightGroupSwitch = 'group.light-group.beams',
   BeamsTransformerSwitch = 'switch.transformer.beams'
+}
+
+export enum RingDeviceCategory {
+  Fan = 17,
+  MultiLevelSwitch = 2
 }
 
 export enum RingCameraKind {
@@ -123,6 +129,7 @@ export interface RingDeviceData {
   zid: string
   name: string
   deviceType: RingDeviceType
+  categoryId: number
   batteryLevel?: number
   batteryStatus: 'full' | 'charged' | 'ok' | 'low' | 'none' | 'charging'
   batteryBackup?: 'charged' | 'charging' | 'inUse'

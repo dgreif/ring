@@ -1,4 +1,10 @@
-import { RingApi, RingCamera, RingDevice, RingDeviceType } from '../api'
+import {
+  RingApi,
+  RingCamera,
+  RingDevice,
+  RingDeviceType,
+  RingDeviceCategory
+} from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
@@ -12,6 +18,7 @@ import { SmokeCoListener } from './smoke-co-listener'
 import { RingPlatformConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
+import { Fan } from './fan'
 import { Switch } from './switch'
 import { Camera } from './camera'
 import { RingAuth } from '../api/rest-client'
@@ -48,6 +55,10 @@ function getAccessoryClass(device: RingDevice | RingCamera) {
     case RingDeviceType.BeamsLightGroupSwitch:
       return Beam
     case RingDeviceType.MultiLevelSwitch:
+      return device instanceof RingDevice &&
+        device.categoryId === RingDeviceCategory.Fan
+        ? Fan
+        : MultiLevelSwitch
     case RingDeviceType.MultiLevelBulb:
       return MultiLevelSwitch
     case RingDeviceType.Switch:

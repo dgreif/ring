@@ -10,54 +10,71 @@ the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
 
- ## Installation
+ 
+## Installation
 
- Assuming a global installation of `homebridge`:
+Assuming a global installation of `homebridge`:
 
- `npm i -g homebridge-ring`
+`npm i -g homebridge-ring`
+ 
+## Homebridge Configuration
+ 
+Add the `Ring` platform in your homebridge `config.json` file.
+ 
+### Basic Configuration
 
- ## Homebridge Configuration
-
- Add the `Ring` platform in your homebridge `config.json` file.
-
- ```js
+If you _do not have_ 2fa enabled, this is all that you need to get up and running.  It will enable all devices from Ring and no other configuration is required.  [See below](https://github.com/dgreif/ring/tree/master/homebridge#camera-setup) for instructions to add cameras to HomeKit.
+ 
+ ```json
 {
   "platforms": [
     {
       "platform": "Ring",
-
-      // without 2fa
-      email: 'some.one@website.com',
-      password: 'abc123!#',
-
-      // with 2fa or if you don't want to store your email/password in your config
-      refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth',
-
-      // Optional. DO NOT INCLUDE UNLESS NEEDED.  See below for details
-      "alarmOnEntryDelay": false,
-      "beamDurationSeconds": 60,
-      "hideLightGroups": true,
-      "hideDoorbellSwitch": true,
-      "hideCameraMotionSensor": true,
-      "hideCameraSirenSwitch": true,
-      "hideAlarmSirenSwitch": true,
-      "cameraStatusPollingSeconds": 20,
-      "cameraDingsPollingSeconds": 2,
-      "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
+      "email": "some.one@website.com",
+      "password": "abc123!#"
     }
   ]
 }
 ```
 
-For accounts with 2fa enabled, see the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
+### Alternate Basic Config (2fa)
+
+If you _have_ 2fa enable, you _must_ use a `refreshToken` instead of email/password.  It also works without 2fa if you simply don't want your email/password in your homebridge `config.json`.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth) for details on generating a `refreshToken`.
+ 
+ ```json
+{
+  "platforms": [
+    {
+      "platform": "Ring",
+      "refreshToken": "token generated with ring-auth-cli"
+    }
+  ]
+}
+```
 
 ### Optional Parameters
-Only include an optional parameter if you actually need it.  Default behavior
-without any of the optional parameters should be sufficient for most users.
+Only include an optional parameter if you actually need it.  Default behavior without any of the optional parameters should be sufficient for most users.
+
+ ```json
+{
+  "email": "some.one@website.com",
+  "password": "abc123!#",
+
+  "alarmOnEntryDelay": true,
+  "beamDurationSeconds": 60,
+  "hideLightGroups": true,
+  "hideDoorbellSwitch": true,
+  "hideCameraMotionSensor": true,
+  "hideCameraSirenSwitch": true,
+  "hideAlarmSirenSwitch": true,
+  "cameraStatusPollingSeconds": 20,
+  "cameraDingsPollingSeconds": 2,
+  "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
+}
+```
 
 Option | Default | Explanation
 --- | --- | ---
-`refreshToken` | `undefined` | An alternate authentication method for accounts with 2fa enabled, or if you don't want to store your email/password in a config file.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth).
 `alarmOnEntryDelay` | `false` | if `true`, HomeKit will register a delayed entry event as a triggered alarm.  There are some households where this is a nice feature as a heads up if you have other people who enter your house and you want an alert so that you can disable the alarm for them before it actually goes off. This works well if you automatically arm/disarm on leave/arrive (see setup instructions below)
 `beamDurationSeconds` | `60` for light groups, previous from Ring app for individual lights | Ring smart lighting has a default behavior of only staying on for 60 seconds when you turn on a light via the Ring app.  To force a duration when the light is turned on from HomeKit, set this option to a specific number of seconds. If this option is not set, the lights will use the duration from the previous time the light was turned on in the Ring app. For light groups, this will default to 60 seconds. The maximum value is `32767`, which is ~9.1 hours.
 `hideLightGroups` | `false` | Ring smart lighting allows you to create lighting groups within the Ring app. These groups are convenient for detecting motion in an area of your yard and turning on/off all lights in the group.  However, you may wish to group the lights differently in HomeKit and ignore the groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor) will be ignored and will not show up in HomeKit.
@@ -178,16 +195,18 @@ can then use these dummy switches to trigger your other automation (e.g. Arm/Dis
 
 #### Example Dummy Config
 ```json
-"accessories": [
-    {
-      "accessory": "DummySwitch",
-      "name": "Arrived Home"
-    },
-    {
-      "accessory": "DummySwitch",
-      "name": "Left Home"
-    }
-]
+{
+    "accessories": [
+        {
+          "accessory": "DummySwitch",
+          "name": "Arrived Home"
+        },
+        {
+          "accessory": "DummySwitch",
+          "name": "Left Home"
+        }
+    ]
+}
 ```
 
 #### Example Home Automations

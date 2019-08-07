@@ -1,14 +1,15 @@
 # homebridge-ring
- 
+
 [![CircleCI](https://circleci.com/gh/dgreif/ring.svg?style=svg)](https://circleci.com/gh/dgreif/ring)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
- 
+
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for
 [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
 [Ring Cameras](https://shop.ring.com/pages/security-cameras),
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
+
  
 ## Installation
 
@@ -82,8 +83,8 @@ Option | Default | Explanation
 `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
 `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
-`cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses. 
-`locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).  
+`cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
+`locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
 
 ### Camera Setup
 
@@ -92,7 +93,7 @@ Don't worry, it's really easy. Due to homebridge/HAP limitations, the cameras ca
 Configure the homebridge plugin like normal, then click on the "+" in the upper right in
 the Home app, then "Don't have a Code or Can't Scan?", then you should see the cameras listed as individual devices which
 which you can add.  The code that you need for each is the same code you used when setting up homebridge.  It should be in
-the output when you start homebridge, or in your homebridge `config.json` file. 
+the output when you start homebridge, or in your homebridge `config.json` file.
 Walk through the setup pages and when you are done, you should see several devices related to the camera:
 
   * Camera Feed
@@ -115,7 +116,7 @@ If you turn on notifications for the motion sensors, or for any doorbell camera,
 HomeKit with a snapshot from the camera
 
 If you are having issues with your cameras in the Home app, please see the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting)
-  
+
 ### Supported Devices via Ring Alarm and Ring Smart Lighting Hubs
   * Security Panel
     * This is a software device that represents the alarm for a Ring location
@@ -145,6 +146,9 @@ If you are having issues with your cameras in the Home app, please see the [Came
   * Carbon Monoxide Alarm
   * Smoke/Carbon Monoxide Listener
   * Smart Locks
+  * Fans
+    * On/Off
+    * Speed
   * Lights/Switches
     * On/Off
     * Brightness Level (if applicable)
@@ -165,7 +169,7 @@ Entry delays and bypassed sensors (ex. for Home mode) are all controlled in the 
 These settings will automatically be used by HomeKit.
 
 **Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
-HomeKit should immediately switch to `Home` to match.  
+HomeKit should immediately switch to `Home` to match.
 
 ### Siri Commands for Alarm
 

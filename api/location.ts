@@ -43,6 +43,7 @@ export class RingDevice {
   zid = this.initialData.zid
   id = this.zid
   deviceType = this.initialData.deviceType
+  categoryId = this.initialData.categoryId
 
   constructor(
     private initialData: RingDeviceData,

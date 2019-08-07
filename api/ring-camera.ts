@@ -102,6 +102,14 @@ export class RingCamera {
     return getBatteryLevel(this.data)
   }
 
+  get hasLowBattery() {
+    return this.data.alerts.battery === 'low'
+  }
+
+  get isOffline() {
+    return this.data.alerts.connection === 'offline'
+  }
+
   doorbotUrl(path: string) {
     return clientApi(`doorbots/${this.id}/${path}`)
   }

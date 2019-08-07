@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios'
-import { delay, generateRandomId, logError, logInfo } from './util'
+import { delay, generateRandomId, logError, logInfo, stringify } from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 
@@ -184,7 +184,7 @@ export class RingRestClient {
             waitSeconds = isNaN(retryAfter) ? 200 : Number.parseInt(retryAfter)
 
           logError(
-            `Session response rate limited. Waiting to retry for ${waitSeconds} seconds`
+            `Session response rate limited. Waiting to retry after ${waitSeconds} seconds`
           )
           await delay((waitSeconds + 1) * 1000)
 
@@ -265,11 +265,16 @@ export class RingRestClient {
       }
 
       if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {
-        logError(
-          'Session hardware_id not found.  Creating a new session and trying again.'
-        )
-        this.refreshSession()
-        return this.request(options)
+        logError('404 from endpoint ' + url)
+        if (response.data === '') {
+          logError(
+            'Session hardware_id not found.  Creating a new session and trying again.'
+          )
+          this.refreshSession()
+          return this.request(options)
+        }
+
+        throw new Error('Not found with response: ' + stringify(response.data))
       }
 
       logError(`Request to ${url} failed`)

@@ -65,3 +65,15 @@ export async function requestInput(question: string) {
 
   return answer.trim()
 }
+
+export function stringify(data: any) {
+  if (typeof data === 'string') {
+    return data
+  }
+
+  if (typeof data === 'object' && Buffer.isBuffer(data)) {
+    return data.toString()
+  }
+
+  return JSON.stringify(data) + ''
+}

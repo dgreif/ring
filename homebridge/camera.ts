@@ -107,8 +107,8 @@ export class Camera extends BaseAccessory<RingCamera> {
       this.registerCharacteristic(
         Characteristic.StatusLowBattery,
         Service.BatteryService,
-        data => {
-          return data.alerts.battery === 'low'
+        () => {
+          return device.hasLowBattery
             ? StatusLowBattery.BATTERY_LEVEL_LOW
             : StatusLowBattery.BATTERY_LEVEL_NORMAL
         }

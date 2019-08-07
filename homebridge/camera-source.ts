@@ -73,9 +73,18 @@ export class CameraSource {
     request: { width: number; height: number },
     callback: (err?: Error, snapshot?: Buffer) => void
   ) {
+    const start = Date.now()
     try {
-      const start = Date.now()
       this.logger.info(`Snapshot Requested for ${this.ringCamera.name}`)
+
+      if (this.ringCamera.isOffline) {
+        this.logger.error(
+          `Cannot retrieve snapshot because ${this.ringCamera.name} is offline.  Make sure it has power and a good wifi connection.`
+        )
+        callback(new Error('Offline'))
+        return
+      }
+
       const snapshot = await this.ringCamera.getSnapshot(true),
         duration = (Date.now() - start) / 1000
       this.logger.info(
@@ -87,6 +96,16 @@ export class CameraSource {
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
       callback(undefined, snapshot)
     } catch (e) {
+      this.logger.error(
+        `Failed to retrieve snapshot for ${
+          this.ringCamera.name
+        } (${getDurationSeconds(
+          start
+        )}s).  Make sure the camera has power and a good wifi connection. The camera currently reports that is it ${
+          this.ringCamera.isOffline ? 'offline' : 'online'
+        }`
+      )
+      this.logger.error(e)
       callback(e)
     }
   }

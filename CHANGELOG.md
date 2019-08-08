@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.4.0](https://github.com/dgreif/ring/compare/v5.3.1...v5.4.0) (2019-08-08)
+
+
+### Bug Fixes
+
+* **homebridge:** automatically prune unused services ([6496aa1](https://github.com/dgreif/ring/commit/6496aa1))
+
+
+### Features
+
+* **homebridge:** add support for fans ([#94](https://github.com/dgreif/ring/issues/94)) ([15cca9a](https://github.com/dgreif/ring/commit/15cca9a))
+
+
+
 ### [5.3.1](https://github.com/dgreif/ring/compare/v5.3.0...v5.3.1) (2019-08-07)
 
 

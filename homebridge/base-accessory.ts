@@ -1,5 +1,5 @@
 import { RingCamera, RingDevice } from '../api'
-import { HAP } from './hap'
+import { HAP, hap } from './hap'
 import Service = HAP.Service
 import { debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators'
 import { Observable, Subject } from 'rxjs'
@@ -10,16 +10,26 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
   abstract readonly accessory: HAP.Accessory
   abstract readonly logger: HAP.Log
   abstract readonly config: RingPlatformConfig
+  private servicesInUse: Service[] = []
+
+  initBase() {
+    this.pruneUnusedServices()
+  }
 
   getService(serviceType: HAP.Service, name = this.device.name) {
     if (process.env.RING_DEBUG) {
       name = 'TEST ' + name
     }
 
-    return (
+    const service =
       this.accessory.getService(serviceType) ||
       this.accessory.addService(serviceType, name)
-    )
+
+    if (!this.servicesInUse.includes(service)) {
+      this.servicesInUse.push(service)
+    }
+
+    return service
   }
 
   registerCharacteristic(
@@ -128,11 +138,26 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     })
   }
 
-  removeService(service: Service) {
-    const existingService = this.accessory.getService(service)
+  pruneUnusedServices() {
+    const { Service } = hap,
+      safeServiceUUIDs = [
+        Service.CameraRTPStreamManagement.UUID,
+        Service.CameraControl.UUID
+      ]
 
-    if (existingService) {
-      this.accessory.removeService(existingService)
-    }
+    this.accessory.services.forEach(service => {
+      if (
+        !this.servicesInUse.includes(service) &&
+        !safeServiceUUIDs.includes(service.UUID)
+      ) {
+        this.logger.info(
+          'Pruning unused service',
+          service.UUID,
+          service.displayName
+        )
+
+        this.accessory.removeService(service)
+      }
+    })
   }
 }

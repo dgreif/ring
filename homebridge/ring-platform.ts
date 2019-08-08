@@ -56,7 +56,7 @@ function getAccessoryClass(device: RingDevice | RingCamera) {
       return Beam
     case RingDeviceType.MultiLevelSwitch:
       return device instanceof RingDevice &&
-        device.categoryId === RingDeviceCategory.Fan
+        device.categoryId === RingDeviceCategory.Fans
         ? Fan
         : MultiLevelSwitch
     case RingDeviceType.MultiLevelBulb:
@@ -175,12 +175,13 @@ export class RingPlatform {
             homebridgeAccessory =
               this.homebridgeAccessories[uuid] || createHomebridgeAccessory()
 
-          new AccessoryClass(
+          const accessory = new AccessoryClass(
             device as any,
             homebridgeAccessory,
             this.log,
             this.config
           )
+          accessory.initBase()
 
           this.homebridgeAccessories[uuid] = homebridgeAccessory
           activeAccessoryIds.push(uuid)

@@ -24,8 +24,23 @@ export enum RingDeviceType {
 }
 
 export enum RingDeviceCategory {
-  Fan = 17,
-  MultiLevelSwitch = 2
+  Outlets = 1,
+  Lights = 2,
+  Sensors = 5,
+  Appliances = 7,
+  Locks = 10,
+  Thermostats = 11,
+  Cameras = 12,
+  Alarms = 15,
+  Fans = 17,
+  Security = 22,
+  Unknown = 29,
+  SensorsMotion = 30,
+  Controller = 31,
+  RangeExtenders = 32,
+  Keypads = 33,
+  Sirens = 34,
+  PanicButtons = 35
 }
 
 export enum RingCameraKind {

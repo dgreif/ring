@@ -17,6 +17,7 @@ export namespace HAP {
 
   export interface Service {
     AccessoryInformation: void
+    displayName?: string
     UUID: string
     subtype?: string
 

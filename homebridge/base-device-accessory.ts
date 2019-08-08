@@ -57,12 +57,7 @@ export abstract class BaseDeviceAccessory extends BaseAccessory<RingDevice> {
   abstract readonly logger: HAP.Log
   abstract readonly config: RingPlatformConfig
 
-  protected constructor() {
-    super()
-    setTimeout(() => this.initBase())
-  }
-
-  private initBase() {
+  initBase() {
     const {
         device: { data: initialData },
         device
@@ -120,6 +115,8 @@ export abstract class BaseDeviceAccessory extends BaseAccessory<RingDevice> {
         getBatteryChargingState
       )
     }
+
+    super.initBase()
   }
 
   initSensorService(SensorService: HAP.Service) {

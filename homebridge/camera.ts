@@ -19,9 +19,7 @@ export class Camera extends BaseAccessory<RingCamera> {
 
     accessory.configureCameraSource(cameraSource)
 
-    if (config.hideCameraMotionSensor) {
-      this.removeService(Service.MotionSensor)
-    } else {
+    if (!config.hideCameraMotionSensor) {
       this.registerObservableCharacteristic(
         Characteristic.MotionDetected,
         Service.MotionSensor,
@@ -40,9 +38,7 @@ export class Camera extends BaseAccessory<RingCamera> {
         onPressed
       )
 
-      if (config.hideDoorbellSwitch) {
-        this.removeService(Service.StatelessProgrammableSwitch)
-      } else {
+      if (!config.hideDoorbellSwitch) {
         this.registerObservableCharacteristic(
           Characteristic.ProgrammableSwitchEvent,
           Service.StatelessProgrammableSwitch,
@@ -79,8 +75,6 @@ export class Camera extends BaseAccessory<RingCamera> {
         device.name + ' Siren',
         () => device.requestUpdate()
       )
-    } else {
-      this.removeService(Service.Switch)
     }
 
     this.registerCharacteristic(

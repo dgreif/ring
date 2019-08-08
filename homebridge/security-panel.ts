@@ -47,9 +47,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
       value => this.setTargetState(value)
     )
 
-    if (config.hideAlarmSirenSwitch) {
-      this.removeService(Service.Switch)
-    } else {
+    if (!config.hideAlarmSirenSwitch) {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Switch,

@@ -148,8 +148,6 @@ export class RingPlatform {
             }
           })
 
-        hapDevices.length = 0
-
         if (this.config.showPanicButtons && securityPanel) {
           hapDevices.push({
             device: securityPanel,

@@ -1,10 +1,10 @@
 import {
   ActiveDing,
+  batteryCameraKinds,
   CameraData,
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
-  batteryCameraKinds,
   SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
@@ -20,7 +20,7 @@ import {
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToRandomPort, getPublicIp } from './rtp-utils'
-import { delay, logError } from './util'
+import { delay, logError, logInfo } from './util'
 import { SipSession, SrtpOptions } from './sip-session'
 
 const getPort = require('get-port')
@@ -204,7 +204,11 @@ export class RingCamera {
     return response.url
   }
 
-  private async getTimestampAge() {
+  private isTimestampInLifeTime(timestampAge: number) {
+    return timestampAge < this.snapshotLifeTime
+  }
+
+  private async getSnapshotTimestamp() {
     const { timestamps, responseTimestamp } = await this.restClient.request<{
         timestamps: SnapshotTimestamp[]
       }>({
@@ -216,34 +220,44 @@ export class RingCamera {
         json: true
       }),
       deviceTimestamp = timestamps[0],
-      timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0
+      timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0,
+      timestampAge = Math.abs(responseTimestamp - timestamp)
 
-    return Math.abs(responseTimestamp - timestamp)
+    this.lastSnapshotTimestampLocal = timestamp ? Date.now() - timestampAge : 0
+
+    return {
+      timestamp,
+      inLifeTime: this.isTimestampInLifeTime(timestampAge)
+    }
   }
 
-  private refreshSnapshotInProgress?: Promise<void>
+  private refreshSnapshotInProgress?: Promise<boolean>
   private snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
+  private lastSnapshotTimestampLocal = 0
+  private lastSnapshotPromise?: Promise<Buffer>
 
-  private async refreshSnapshot(allowStale: boolean) {
-    const initialTimestampAge = await this.getTimestampAge(),
-      snapshotInLifeTime = initialTimestampAge < this.snapshotLifeTime
-
-    if (allowStale && (this.hasBattery || snapshotInLifeTime)) {
-      // battery cameras take a long time to refresh snapshots.  Just return the stale one immediately.
-      // for non battery, stale snapshots can be used if they are within the last 30 seconds
-      return
-    }
-
-    if (snapshotInLifeTime) {
-      // not allowing stale, so wait until a new snapshot should be available
-      await delay(this.snapshotLifeTime - initialTimestampAge)
+  private async refreshSnapshot() {
+    const currentTimestampAge = Date.now() - this.lastSnapshotTimestampLocal
+    if (this.isTimestampInLifeTime(currentTimestampAge)) {
+      logInfo(
+        `Snapshot for ${
+          this.name
+        } is still within it's life time (${currentTimestampAge / 1000}s old)`
+      )
+      return true
     }
 
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      const timestampAge = await this.getTimestampAge()
+      const { timestamp, inLifeTime } = await this.getSnapshotTimestamp()
 
-      if (timestampAge < initialTimestampAge) {
-        return
+      if (!timestamp && this.isOffline) {
+        throw new Error(
+          `No snapshot available and device ${this.name} is offline`
+        )
+      }
+
+      if (inLifeTime) {
+        return false
       }
 
       await delay(snapshotRefreshDelay)
@@ -256,23 +270,35 @@ export class RingCamera {
 
   async getSnapshot(allowStale = false) {
     this.refreshSnapshotInProgress =
-      this.refreshSnapshotInProgress || this.refreshSnapshot(allowStale)
+      this.refreshSnapshotInProgress || this.refreshSnapshot()
 
     try {
-      await this.refreshSnapshotInProgress
+      const useLastSnapshot = await this.refreshSnapshotInProgress
+
+      if (useLastSnapshot && this.lastSnapshotPromise) {
+        this.refreshSnapshotInProgress = undefined
+        return this.lastSnapshotPromise
+      }
     } catch (e) {
+      logError(e.message)
       if (!allowStale) {
-        logError(e)
         throw e
       }
     }
 
     this.refreshSnapshotInProgress = undefined
 
-    return this.restClient.request<Buffer>({
+    this.lastSnapshotPromise = this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),
       responseType: 'arraybuffer'
     })
+
+    this.lastSnapshotPromise.catch(() => {
+      // snapshot request failed, don't use it again
+      this.lastSnapshotPromise = undefined
+    })
+
+    return this.lastSnapshotPromise
   }
 
   sipUsedDingIds: string[] = []

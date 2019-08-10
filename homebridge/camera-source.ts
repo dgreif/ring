@@ -75,20 +75,12 @@ export class CameraSource {
   ) {
     const start = Date.now()
     try {
-      this.logger.info(`Snapshot Requested for ${this.ringCamera.name}`)
-
-      if (this.ringCamera.isOffline) {
-        this.logger.error(
-          `Cannot retrieve snapshot because ${this.ringCamera.name} is offline.  Make sure it has power and a good wifi connection.`
-        )
-        callback(new Error('Offline'))
-        return
-      }
+      this.logger.info(`Snapshot for ${this.ringCamera.name} Requested`)
 
       const snapshot = await this.ringCamera.getSnapshot(true),
         duration = (Date.now() - start) / 1000
       this.logger.info(
-        `Snapshot Received for ${this.ringCamera.name} (${getDurationSeconds(
+        `Snapshot for ${this.ringCamera.name} Received (${getDurationSeconds(
           start
         )}s)`
       )
@@ -101,7 +93,7 @@ export class CameraSource {
           this.ringCamera.name
         } (${getDurationSeconds(
           start
-        )}s).  Make sure the camera has power and a good wifi connection. The camera currently reports that is it ${
+        )}s).  The camera currently reports that is it ${
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )

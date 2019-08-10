@@ -98,19 +98,18 @@ Walk through the setup pages and when you are done, you should see several devic
 
   * Camera Feed
     * Shows a snapshot from the camera while viewing the room in Home
-    * (**NEW**) Shows a live feed from the camera if you click on it.  This still has some kinks to work out, like lack of sound and only staying active for about 30 seconds.  I will be tweaking live feeds over the coming weeks.
+    * Shows a live feed from the camera if you click on it.  The feed is **video only** and may not work on some networks with strict NAT settings.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
- * Light (if camera is equipped)
+  * Light (if camera is equipped)
   * Siren Switch (if camera is equipped)
     * Can be hidden with `hideCameraSirenSwitch`
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`
 
-**Battery Camera Limitations** - Ring cameras that have batteries (even if they are wired) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras).
-Because of this limitation, most snapshots for these cameras will be stale (meaning they could have been taken minutes or hours in the past).
-This is limitation of the Ring api does not have a good workaround at this point.
+**Battery Camera Limitations** - Ring cameras that have batteries (even if they are plugged in or using solar) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras).
+Because of this limitation, snapshots from these cameras may be up to 10 minutes old.  This is a limitation of the Ring api and there is no way to work around it.
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera

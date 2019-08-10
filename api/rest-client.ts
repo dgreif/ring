@@ -11,11 +11,16 @@ const ringErrorCodes: { [code: number]: string } = {
     7063: 'MAINTENANCE'
   },
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
+  appApiBaseUrl = 'https://app.ring.com/api/v1/',
   apiVersion = 11,
   hardwareId = generateRandomId()
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
+}
+
+export function appApi(path: string) {
+  return appApiBaseUrl + path
 }
 
 export interface ExtendedResponse {

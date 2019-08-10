@@ -140,6 +140,18 @@ export type AlarmState =
   | 'burglar-accelerated-alarm' // Alarming - Police Response Requested
   | 'fire-accelerated-alarm' // Alarming - Fire Department Response Requested
 
+export const allAlarmStates: AlarmState[] = [
+  'burglar-alarm',
+  'entry-delay',
+  'fire-alarm',
+  'co-alarm',
+  'panic',
+  'user-verified-burglar-alarm',
+  'user-verified-co-or-fire-alarm',
+  'burglar-accelerated-alarm',
+  'fire-accelerated-alarm'
+]
+
 export interface RingDeviceData {
   zid: string
   name: string
@@ -465,4 +477,28 @@ export interface SessionResponse {
     tfa_enabled: boolean
     tfa_phone_number: null | string
   }
+}
+
+export interface AccountMonitoringStatus {
+  accountUuid: string
+  externalServiceConfigType: 'rrms' | string
+  accountState: 'PROFESSIONAL' | string
+  eligibleForDispatch: boolean
+  addressComplete: boolean
+  contactsComplete: boolean
+  codewordComplete: boolean
+  alarmSignalSent: boolean
+  professionallyMonitored: boolean
+  userAcceptDispatch: boolean
+  installationDate: number
+  externalId: string
+  vrRequired: false
+  vrUserOptIn: false
+  cmsMonitoringType: 'full' | string
+  dispatchSetupComplete: boolean
+}
+
+export enum DispatchSignalType {
+  Burglar = 'user-verified-burglar-xa',
+  Fire = 'user-verified-fire-xa'
 }

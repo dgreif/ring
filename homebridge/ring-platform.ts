@@ -21,6 +21,7 @@ import { MultiLevelSwitch } from './multi-level-switch'
 import { Fan } from './fan'
 import { Switch } from './switch'
 import { Camera } from './camera'
+import { PanicButtons } from './panic-buttons'
 import { RingAuth } from '../api/rest-client'
 import { platformName, pluginName } from './plugin-info'
 import { useLogger } from '../api/util'
@@ -29,7 +30,7 @@ const debug = __filename.includes('release-homebridge')
 
 process.env.RING_DEBUG = debug ? 'true' : ''
 
-function getAccessoryClass(device: RingDevice | RingCamera) {
+function getAccessoryClass(device: RingDevice | RingCamera): any {
   const { deviceType } = device
 
   switch (deviceType) {
@@ -129,18 +130,42 @@ export class RingPlatform {
       locations.map(async location => {
         const devices = await location.getDevices(),
           cameras = location.cameras,
-          allDevices = [...devices, ...cameras]
+          allDevices = [...devices, ...cameras],
+          securityPanel = devices.find(
+            x => x.deviceType === RingDeviceType.SecurityPanel
+          ),
+          debugPrefix = debug ? 'TEST ' : '',
+          hapDevices = allDevices.map(device => {
+            const isCamera = device instanceof RingCamera,
+              cameraIdDifferentiator = isCamera ? 'camera' : '' // this forces bridged cameras from old version of the plugin to be seen as "stale"
+
+            return {
+              device,
+              isCamera,
+              id: device.id.toString() + cameraIdDifferentiator,
+              name: device.name,
+              AccessoryClass: isCamera ? Camera : getAccessoryClass(device)
+            }
+          })
+
+        hapDevices.length = 0
+
+        if (this.config.showPanicButtons && securityPanel) {
+          hapDevices.push({
+            device: securityPanel,
+            isCamera: false,
+            id: securityPanel.id.toString() + 'panic',
+            name: 'Panic Buttons',
+            AccessoryClass: PanicButtons
+          })
+        }
 
         this.log.info(
-          `Configuring ${cameras.length} cameras and ${devices.length} devices for locationId ${location.locationId} (${location.locationDetails.name})`
+          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.locationDetails.name}" - locationId: ${location.locationId}`
         )
-        allDevices.forEach(device => {
-          const isCamera = device instanceof RingCamera,
-            AccessoryClass = isCamera ? Camera : getAccessoryClass(device),
-            debugPrefix = debug ? 'TEST ' : '',
-            cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
-            id = debugPrefix + device.id.toString() + cameraIdDifferentiator,
-            uuid = hap.UUIDGen.generate(id)
+        hapDevices.forEach(({ device, isCamera, id, name, AccessoryClass }) => {
+          const uuid = hap.UUIDGen.generate(debugPrefix + id),
+            displayName = debugPrefix + name
 
           if (
             !AccessoryClass ||
@@ -152,7 +177,7 @@ export class RingPlatform {
 
           const createHomebridgeAccessory = () => {
               const accessory = new hap.PlatformAccessory(
-                debugPrefix + device.name,
+                displayName,
                 uuid,
                 isCamera
                   ? hap.AccessoryCategories.CAMERA
@@ -160,8 +185,7 @@ export class RingPlatform {
               )
 
               this.log.info(
-                `Adding new accessory ${device.deviceType} ${debugPrefix +
-                  device.name}`
+                `Adding new accessory ${device.deviceType} ${displayName}`
               )
 
               if (isCamera) {

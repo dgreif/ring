@@ -16,14 +16,24 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     this.pruneUnusedServices()
   }
 
-  getService(serviceType: HAP.Service, name = this.device.name) {
+  getService(
+    serviceType: HAP.Service,
+    name = this.device.name,
+    subType?: string
+  ) {
+    if (typeof (serviceType as any) === 'object') {
+      return serviceType
+    }
+
     if (process.env.RING_DEBUG) {
       name = 'TEST ' + name
     }
 
-    const service =
-      this.accessory.getService(serviceType) ||
-      this.accessory.addService(serviceType, name)
+    const existingService = subType
+        ? this.accessory.getServiceByUUIDAndSubType(serviceType, subType)
+        : this.accessory.getService(serviceType),
+      service =
+        existingService || this.accessory.addService(serviceType, name, subType)
 
     if (!this.servicesInUse.includes(service)) {
       this.servicesInUse.push(service)

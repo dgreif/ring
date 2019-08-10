@@ -1,5 +1,5 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice, RingDeviceData, AlarmState } from '../api'
+import { RingDevice, RingDeviceData, AlarmState, allAlarmStates } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
@@ -7,8 +7,8 @@ import { RingPlatformConfig } from './config'
 export class SecurityPanel extends BaseDeviceAccessory {
   private targetState: any
   private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
-    ? ['entry-delay', 'burglar-alarm']
-    : ['burglar-alarm']
+    ? allAlarmStates
+    : allAlarmStates.filter(x => x !== 'entry-delay')
 
   constructor(
     public readonly device: RingDevice,

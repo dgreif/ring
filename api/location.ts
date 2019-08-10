@@ -11,11 +11,13 @@ import {
   skip,
   take
 } from 'rxjs/operators'
-import { delay, logError, logInfo } from './util'
+import { delay, generateRandomId, logError, logInfo } from './util'
 import {
+  AccountMonitoringStatus,
   AlarmMode,
   AssetSession,
   deviceTypesWithVolume,
+  DispatchSignalType,
   LocationEvent,
   MessageDataType,
   MessageType,
@@ -25,7 +27,7 @@ import {
   TicketAsset,
   UserLocation
 } from './ring-types'
-import { clientApi, RingRestClient } from './rest-client'
+import { appApi, clientApi, RingRestClient } from './rest-client'
 import { RingCamera } from './ring-camera'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
@@ -243,8 +245,7 @@ export class Location {
       host: string
       ticket: string
     }>({
-      url:
-        'https://app.ring.com/api/v1/clap/tickets?locationID=' + this.locationId
+      url: appApi('clap/tickets?locationID=' + this.locationId)
     })
     this.assets = assets
     this.receivedAssetDeviceLists.length = 0
@@ -456,5 +457,46 @@ export class Location {
         `locations/${this.locationId}/events?limit=${limit}${paginationKey}`
       )
     })
+  }
+
+  getAccountMonitoringStatus() {
+    return this.restClient.request<AccountMonitoringStatus>({
+      url: appApi('rs/monitoring/accounts/' + this.locationId)
+    })
+  }
+
+  private triggerAlarm(signalType: DispatchSignalType) {
+    const now = Date.now(),
+      alarmSessionUuid = generateRandomId(),
+      baseStationAsset =
+        this.assets && this.assets.find(x => x.kind === 'base_station_v1')
+
+    if (!baseStationAsset) {
+      throw new Error(
+        'Cannot dispatch panic events without an alarm base station'
+      )
+    }
+
+    return this.restClient.request<AccountMonitoringStatus>({
+      method: 'POST',
+      url: appApi(
+        `rs/monitoring/accounts/${this.locationId}/assets/${baseStationAsset.uuid}/userAlarm`
+      ),
+      json: true,
+      data: {
+        alarmSessionUuid,
+        currentTsMs: now,
+        eventOccurredTime: now,
+        signalType
+      }
+    })
+  }
+
+  triggerBurglarAlarm() {
+    return this.triggerAlarm(DispatchSignalType.Burglar)
+  }
+
+  triggerFireAlarm() {
+    return this.triggerAlarm(DispatchSignalType.Fire)
   }
 }

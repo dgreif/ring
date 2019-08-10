@@ -82,6 +82,7 @@ Option | Default | Explanation
 `hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit.
 `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
 `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
+`showPanicButtons` | `false` | Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
@@ -154,6 +155,11 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Hue/Sat/Color Temp are _possible_, but currently not supported.
       Please open an issue if you have a device that you would be able to
       test these on.
+  * Panic Buttons
+    * These can be added by setting `showPanicButtons: true` in your config
+    * Creates `Burglar Alarm` and `Fire Alarm` switches in a new `Panic Buttons` device in HomeKit
+    * Use these at your own risk.  **I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**
+    * If either switch is turned on, you will receive a call from Ring monitoring to verify the emergency, and then authorities will be dispatched 
 
 ### Alarm Modes
 

@@ -50,6 +50,11 @@
         "type": "boolean",
         "description": "Hides switch that allows you to turn on the siren of the Ring Alarm.  Enable this is your Siri commands keep setting off the siren and you don't care about having the switch"
       },
+      "showPanicButtons": {
+        "title": "Show Panic Buttons",
+        "type": "boolean",
+        "description": "Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app."
+      },
       "beamDurationSeconds": {
         "title": "Ring Smart Lighting Timer",
         "type": "integer",
@@ -120,6 +125,7 @@
         "hideCameraMotionSensor",
         "hideCameraSirenSwitch",
         "hideAlarmSirenSwitch",
+        "showPanicButtons",
         "beamDurationSeconds",
         "cameraStatusPollingSeconds",
         "cameraDingsPollingSeconds",

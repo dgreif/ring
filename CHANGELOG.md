@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.0](https://github.com/dgreif/ring/compare/v5.4.1...v5.5.0) (2019-08-10)
+
+
+### Features
+
+* **homebridge:** panic buttons for burglar and fire ([c87a83a](https://github.com/dgreif/ring/commit/c87a83a)), closes [#83](https://github.com/dgreif/ring/issues/83)
+
+
+
 ### [5.4.1](https://github.com/dgreif/ring/compare/v5.4.0...v5.4.1) (2019-08-10)
 
 

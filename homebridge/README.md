@@ -109,8 +109,7 @@ Walk through the setup pages and when you are done, you should see several devic
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`
 
-**Battery Camera Limitations** - Ring cameras that have batteries (even if they are plugged in or using solar) only refresh their snapshot image every 10 minutes (vs 30 seconds for wired cameras).
-Because of this limitation, snapshots from these cameras may be up to 10 minutes old.  This is a limitation of the Ring api and there is no way to work around it.
+**Battery Camera Limitations** - There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details. 
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera

@@ -64,9 +64,9 @@ export class Lock extends BaseDeviceAccessory {
 
   setTargetState(state: any) {
     const {
-      Characteristic: { LockTargetState: State }
-    } = hap
-    const command = state === State.SECURED ? 'lock' : 'unlock'
+        Characteristic: { LockTargetState: State }
+      } = hap,
+      command = state === State.SECURED ? 'lock' : 'unlock'
 
     this.targetState =
       state === getCurrentState(this.device.data) ? undefined : state

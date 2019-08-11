@@ -3,14 +3,13 @@ import { RingApi } from '../api'
 
 async function example() {
   const ringApi = new RingApi({
-    // Replace with your ring email/password
-    email: process.env.RING_EMAIL!,
-    password: process.env.RING_PASS!,
-    // Refresh token is used when 2fa is on
-    refreshToken: process.env.RING_REFRESH_TOKEN!
-  })
-
-  const [camera] = await ringApi.getCameras()
+      // Replace with your ring email/password
+      email: process.env.RING_EMAIL!,
+      password: process.env.RING_PASS!,
+      // Refresh token is used when 2fa is on
+      refreshToken: process.env.RING_REFRESH_TOKEN!
+    }),
+    [camera] = await ringApi.getCameras()
 
   if (!camera) {
     console.log('No cameras found')

@@ -12,8 +12,8 @@ export class Fan extends BaseDeviceAccessory {
   ) {
     super()
 
-    const { Characteristic, Service } = hap
-    const { data: initialData } = this.device
+    const { Characteristic, Service } = hap,
+      { data: initialData } = this.device
 
     this.registerCharacteristic(
       Characteristic.On,

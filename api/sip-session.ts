@@ -9,9 +9,9 @@ import {
 } from 'rxjs'
 import { sendUdpHolePunch } from './rtp-utils'
 
-const ip = require('ip')
-const sip = require('sip')
-const sdp = require('sdp')
+const ip = require('ip'),
+  sip = require('sip'),
+  sdp = require('sdp')
 
 export interface SipOptions {
   to: string
@@ -125,17 +125,17 @@ function getRtpDescription(
 }
 
 function parseRtpOptions(inviteResponse: { content: string }) {
-  const sections: string[] = sdp.splitSections(inviteResponse.content)
-  const oLine = sdp.parseOLine(sections[0])
-  const rtpOptions = {
-    address: oLine.address,
-    audio: getRtpDescription(sections, 'audio'),
-    video: getRtpDescription(sections, 'video')
-  }
+  const sections: string[] = sdp.splitSections(inviteResponse.content),
+    oLine = sdp.parseOLine(sections[0]),
+    rtpOptions = {
+      address: oLine.address,
+      audio: getRtpDescription(sections, 'audio'),
+      video: getRtpDescription(sections, 'video')
+    }
   return rtpOptions
 }
 
-let sipSessionActive = false
+const sipSessionActive = false
 export class SipSession {
   private seq = 20
   private fromParams = { tag: getRandomId() }
@@ -172,9 +172,8 @@ export class SipSession {
     if (sipSessionActive) {
       throw new Error('Only one sip session can be active at a time.')
     }
-    const { tlsPort } = sipOptions
-
-    const host = sipOptions.host || ip.address()
+    const { tlsPort } = sipOptions,
+      host = sipOptions.host || ip.address()
     this.sipClient = sip.create(
       {
         host,
@@ -339,7 +338,7 @@ export class SipSession {
           't=0 0',
           'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
           `m=audio ${audio.port} RTP/${audio.srtpKey ? 'S' : ''}AVP 110 0 101`,
-          'a=rtpmap:110 mpeg4-generic/16000', // TODO: figure out aac-eld sdp
+          'a=rtpmap:110 mpeg4-generic/16000', // SOMEDAY: figure out aac-eld sdp
           'a=fmtp:110 mode=AAC-eld',
           'a=rtpmap:101 telephone-event/48000',
           createCryptoLine(audio),
@@ -347,7 +346,7 @@ export class SipSession {
           `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
           'a=rtpmap:99 H264/90000',
           'a=fmtp:99 profile-level-id=42A01E; packetization-mode=1',
-          // 'a=fmtp:96 profile-level-id=42801F', // TODO: profiles and bit rates
+          // 'a=fmtp:96 profile-level-id=42801F', // SOMEDAY: profiles and bit rates
           createCryptoLine(video),
           'a=rtcp-mux'
         ]

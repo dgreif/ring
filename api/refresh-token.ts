@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { RingRestClient } from './rest-client'
 import { requestInput } from './util'
 import { AuthTokenResponse } from './ring-types'
@@ -7,7 +8,6 @@ export async function acquireRefreshToken() {
     'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
   )
 
-  let auth: AuthTokenResponse
   const email = await requestInput('Email: '),
     password = await requestInput('Password: '),
     restClient = new RingRestClient({ email, password }),
@@ -19,17 +19,18 @@ export async function acquireRefreshToken() {
         console.log('Incorrect 2fa code. Please try again.')
         return getAuthWith2fa()
       }
-    }
+    },
+    auth: AuthTokenResponse = await restClient.getCurrentAuth().catch(e => {
+      if (restClient.using2fa) {
+        console.log(
+          'Ring 2fa is enabled.  Please enter code from text message.'
+        )
+        return getAuthWith2fa()
+      }
 
-  auth = await restClient.getCurrentAuth().catch(e => {
-    if (restClient.using2fa) {
-      console.log('Ring 2fa is enabled.  Please enter code from text message.')
-      return getAuthWith2fa()
-    }
-
-    console.error(e)
-    process.exit(1)
-  })
+      console.error(e)
+      process.exit(1)
+    })
 
   console.log(
     '\nSuccessfully logged in to Ring. Please remove your email/password from your config and add the following instead:\n'

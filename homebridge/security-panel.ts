@@ -114,10 +114,9 @@ export class SecurityPanel extends BaseDeviceAccessory {
     } else if (state === State.DISARM) {
       this.logger.info(`Disarming ${this.device.name}`)
       return location.disarm()
-    } else {
-      this.logger.info(`Arming (Home) ${this.device.name}`)
-      return location.armHome()
     }
+    this.logger.info(`Arming (Home) ${this.device.name}`)
+    return location.armHome()
   }
 
   getTargetState(data: RingDeviceData) {

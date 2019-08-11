@@ -212,8 +212,8 @@ export class Location {
     // watch for sessions to come online
     this.onSessionInfo.subscribe(sessions => {
       sessions.forEach(({ connectionStatus, assetUuid }) => {
-        const assetWasOffline = this.offlineAssets.includes(assetUuid)
-        const asset = this.assets && this.assets.find(x => x.uuid === assetUuid)
+        const assetWasOffline = this.offlineAssets.includes(assetUuid),
+          asset = this.assets && this.assets.find(x => x.uuid === assetUuid)
 
         if (!asset) {
           // we don't know about this asset, so don't worry about it
@@ -258,24 +258,23 @@ export class Location {
     }
 
     const connection = connectSocketIo(
-      `wss://${host}/?authcode=${ticket}&ack=false&EIO=3`,
-      { transports: ['websocket'] }
-    )
+        `wss://${host}/?authcode=${ticket}&ack=false&EIO=3`,
+        { transports: ['websocket'] }
+      ),
+      reconnect = () => {
+        if (this.reconnecting && this.connectionPromise) {
+          return this.connectionPromise
+        }
 
-    const reconnect = () => {
-      if (this.reconnecting && this.connectionPromise) {
-        return this.connectionPromise
+        this.onConnected.next(false)
+
+        logInfo('Reconnecting location socket.io connection')
+        this.reconnecting = true
+        connection.close()
+        return (this.connectionPromise = delay(1000).then(() => {
+          return this.createConnection()
+        }))
       }
-
-      this.onConnected.next(false)
-
-      logInfo('Reconnecting location socket.io connection')
-      this.reconnecting = true
-      connection.close()
-      return (this.connectionPromise = delay(1000).then(() => {
-        return this.createConnection()
-      }))
-    }
 
     this.reconnecting = false
     connection.on('DataUpdate', (message: SocketIoMessage) => {
@@ -304,10 +303,12 @@ export class Location {
     }).catch(reconnect)
   }
 
-  async getConnection() {
+  getConnection() {
     if (!this.hasHubs) {
-      throw new Error(
-        `Location ${this.locationDetails.name} does not have any hubs`
+      return Promise.reject(
+        new Error(
+          `Location ${this.locationDetails.name} does not have any hubs`
+        )
       )
     }
 
@@ -420,10 +421,10 @@ export class Location {
       return this.securityPanel
     }
 
-    const devices = await this.getDevices()
-    const securityPanel = devices.find(device => {
-      return device.data.deviceType === RingDeviceType.SecurityPanel
-    })
+    const devices = await this.getDevices(),
+      securityPanel = devices.find(device => {
+        return device.data.deviceType === RingDeviceType.SecurityPanel
+      })
 
     if (!securityPanel) {
       throw new Error(

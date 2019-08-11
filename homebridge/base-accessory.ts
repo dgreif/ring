@@ -149,11 +149,10 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
   }
 
   pruneUnusedServices() {
-    const { Service } = hap,
-      safeServiceUUIDs = [
-        Service.CameraRTPStreamManagement.UUID,
-        Service.CameraControl.UUID
-      ]
+    const safeServiceUUIDs = [
+      hap.Service.CameraRTPStreamManagement.UUID,
+      hap.Service.CameraControl.UUID
+    ]
 
     this.accessory.services.forEach(service => {
       if (

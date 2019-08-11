@@ -16,11 +16,11 @@ export class Beam extends BaseDeviceAccessory {
   ) {
     super()
 
-    const { Characteristic, Service } = hap
-    const { MotionSensor } = Service
-    const {
-      data: { deviceType }
-    } = this.device
+    const { Characteristic, Service } = hap,
+      { MotionSensor } = Service,
+      {
+        data: { deviceType }
+      } = this.device
 
     if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
       this.registerCharacteristic(
@@ -53,10 +53,10 @@ export class Beam extends BaseDeviceAccessory {
   setOnState(on: boolean) {
     this.logger.info(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
 
-    const { beamDurationSeconds } = this.config
-    const duration = beamDurationSeconds
-      ? Math.min(beamDurationSeconds, 32767)
-      : undefined
+    const { beamDurationSeconds } = this.config,
+      duration = beamDurationSeconds
+        ? Math.min(beamDurationSeconds, 32767)
+        : undefined
 
     if (this.isLightGroup && this.groupId) {
       return this.device.location.setLightGroup(this.groupId, on, duration)

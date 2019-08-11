@@ -29,7 +29,7 @@ export class CameraSource {
   sessions: { [sessionKey: string]: SipSession } = {}
 
   constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
-    let options = {
+    const options = {
       // proxy: true,
       srtp: true,
       video: {
@@ -77,8 +77,7 @@ export class CameraSource {
     try {
       this.logger.info(`Snapshot for ${this.ringCamera.name} Requested`)
 
-      const snapshot = await this.ringCamera.getSnapshot(true),
-        duration = (Date.now() - start) / 1000
+      const snapshot = await this.ringCamera.getSnapshot(true)
       this.logger.info(
         `Snapshot for ${this.ringCamera.name} Received (${getDurationSeconds(
           start

@@ -12,8 +12,8 @@ export class MultiLevelSwitch extends BaseDeviceAccessory {
   ) {
     super()
 
-    const { Characteristic, Service } = hap
-    const { data: initialData } = this.device
+    const { Characteristic, Service } = hap,
+      { data: initialData } = this.device
 
     this.registerCharacteristic(
       Characteristic.On,
@@ -31,7 +31,7 @@ export class MultiLevelSwitch extends BaseDeviceAccessory {
       )
     }
 
-    // TODO: Hue/Sat/Color Temp
+    // SOMEDAY: Hue/Sat/Color Temp
   }
 
   setOnState(on: boolean) {

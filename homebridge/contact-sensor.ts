@@ -14,15 +14,19 @@ export class ContactSensor extends BaseDeviceAccessory {
 
     const {
       Characteristic: { ContactSensorState },
-      Service: { ContactSensor }
+      Service
     } = hap
 
-    this.registerCharacteristic(ContactSensorState, ContactSensor, data => {
-      return data.faulted
-        ? ContactSensorState.CONTACT_NOT_DETECTED
-        : ContactSensorState.CONTACT_DETECTED
-    })
+    this.registerCharacteristic(
+      ContactSensorState,
+      Service.ContactSensor,
+      data => {
+        return data.faulted
+          ? ContactSensorState.CONTACT_NOT_DETECTED
+          : ContactSensorState.CONTACT_DETECTED
+      }
+    )
 
-    this.initSensorService(ContactSensor)
+    this.initSensorService(Service.ContactSensor)
   }
 }

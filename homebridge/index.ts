@@ -8,6 +8,7 @@ import {
   oldPlatformName,
   oldPluginName
 } from './plugin-info'
+import { logError } from '../api/util'
 
 export default function(homebridge: any) {
   hap.PlatformAccessory = homebridge.platformAccessory
@@ -48,12 +49,14 @@ export default function(homebridge: any) {
     }
 
     if (filesChanged) {
-      console.error(
+      logError(
         'Your Ring Alarm config has been updated to new Ring config.  This is a one time thing, and you do not need to do anything.  Just restart homebridge and everything should start normally.'
       )
       process.exit(1)
     }
-  } catch (_) {}
+  } catch (_) {
+    void _
+  }
 
   homebridge.registerPlatform(pluginName, platformName, RingPlatform, true)
 }

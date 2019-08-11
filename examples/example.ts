@@ -14,11 +14,13 @@ async function example() {
       cameraDingsPollingSeconds: 2
     }),
     locations = await ringApi.getLocations(),
-    cameras = await ringApi.getCameras()
+    allCameras = await ringApi.getCameras()
 
-  console.log(`Found ${locations.length} location(s).`)
+  console.log(
+    `Found ${locations.length} location(s) with ${allCameras.length} camera(s).`
+  )
 
-  for (let location of locations) {
+  for (const location of locations) {
     location.onConnected.pipe(skip(1)).subscribe(connected => {
       const status = connected ? 'Connected to' : 'Disconnected from'
       console.log(
@@ -27,7 +29,7 @@ async function example() {
     })
   }
 
-  for (let location of locations) {
+  for (const location of locations) {
     const cameras = location.cameras,
       devices = await location.getDevices()
 
@@ -35,7 +37,7 @@ async function example() {
       `\nLocation ${location.locationDetails.name} has the following ${cameras.length} camera(s):`
     )
 
-    for (let camera of cameras) {
+    for (const camera of cameras) {
       console.log(`- ${camera.id}: ${camera.name} (${camera.deviceType})`)
     }
 
@@ -43,13 +45,13 @@ async function example() {
       `\nLocation ${location.locationDetails.name} has the following ${devices.length} device(s):`
     )
 
-    for (let device of devices) {
+    for (const device of devices) {
       console.log(`- ${device.zid}: ${device.name} (${device.deviceType})`)
     }
   }
 
-  if (cameras.length) {
-    cameras.forEach(camera => {
+  if (allCameras.length) {
+    allCameras.forEach(camera => {
       camera.onNewDing.subscribe(ding => {
         const event =
           ding.kind === 'motion'

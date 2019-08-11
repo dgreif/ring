@@ -12,14 +12,14 @@ export class MotionSensor extends BaseDeviceAccessory {
   ) {
     super()
 
-    const { MotionSensor } = hap.Service
+    const { Service } = hap
 
     this.registerCharacteristic(
       hap.Characteristic.MotionDetected,
-      MotionSensor,
+      Service.MotionSensor,
       data => data.faulted
     )
 
-    this.initSensorService(MotionSensor)
+    this.initSensorService(Service.MotionSensor)
   }
 }

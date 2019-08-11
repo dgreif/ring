@@ -186,7 +186,9 @@ export class RingRestClient {
 
         if (response.status === 429) {
           const retryAfter = e.response.headers['retry-after'],
-            waitSeconds = isNaN(retryAfter) ? 200 : Number.parseInt(retryAfter)
+            waitSeconds = isNaN(retryAfter)
+              ? 200
+              : Number.parseInt(retryAfter, 10)
 
           logError(
             `Session response rate limited. Waiting to retry after ${waitSeconds} seconds`
@@ -262,11 +264,10 @@ export class RingRestClient {
 
           await delay(20000)
           return this.request(options)
-        } else {
-          logError(
-            `http request failed.  ${url} returned unknown errors: (${errors}).`
-          )
         }
+        logError(
+          `http request failed.  ${url} returned unknown errors: (${errors}).`
+        )
       }
 
       if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {

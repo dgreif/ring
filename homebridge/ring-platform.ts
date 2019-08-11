@@ -195,14 +195,13 @@ export class RingPlatform {
               return accessory
             },
             homebridgeAccessory =
-              this.homebridgeAccessories[uuid] || createHomebridgeAccessory()
-
-          const accessory = new AccessoryClass(
-            device as any,
-            homebridgeAccessory,
-            this.log,
-            this.config
-          )
+              this.homebridgeAccessories[uuid] || createHomebridgeAccessory(),
+            accessory = new AccessoryClass(
+              device as any,
+              homebridgeAccessory,
+              this.log,
+              this.config
+            )
           accessory.initBase()
 
           this.homebridgeAccessories[uuid] = homebridgeAccessory

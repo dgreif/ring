@@ -212,7 +212,7 @@ export class RingCamera {
     const { timestamps, responseTimestamp } = await this.restClient.request<{
         timestamps: SnapshotTimestamp[]
       }>({
-        url: clientApi(`snapshots/timestamps`),
+        url: clientApi('snapshots/timestamps'),
         method: 'POST',
         data: {
           doorbot_ids: [this.id]

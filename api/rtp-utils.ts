@@ -1,8 +1,8 @@
 import { Socket } from 'dgram'
 import { AddressInfo } from 'net'
 import { v4 as fetchPublicIp } from 'public-ip'
-const stun = require('stun')
-const portControl = require('nat-puncher')
+const stun = require('stun'),
+  portControl = require('nat-puncher')
 
 export function getPublicIpViaStun() {
   return new Promise<string>((resolve, reject) => {

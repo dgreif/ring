@@ -8,8 +8,8 @@ import fs = require('fs');
 async function example() {
   const ringApi = new RingApi({
       // Replace with your ring email/password
-      email: "juanjser@gmail.com",
-      password: "g00dpassw0rdabc123",
+      email: process.env.RING_EMAIL!,
+      password: process.env.RING_PASS!,
       // Refresh token is used when 2fa is on
       refreshToken: process.env.RING_REFRESH_TOKEN!
     }),

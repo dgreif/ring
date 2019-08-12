@@ -5,3 +5,4 @@ node_modules
 .env
 release-*
 json-data
+examples/recordings

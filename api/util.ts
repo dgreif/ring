@@ -19,6 +19,13 @@ let logger: Logger = {
   }
 }
 
+/**
+ * Returns a Promise that will resolve after the number of milliseconds provided. Useful
+ * for keeping the async/await patterns in functions that require a simple sleep.
+ * 
+ * @param milliseconds the number of milliseconds that this function will take to resolve.
+ * @return {Promise<void>} a Promise that will resolve after the number of milliseconds provided.
+ */
 export function delay(milliseconds: number) {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds)
@@ -76,17 +83,4 @@ export function stringify(data: any) {
   }
 
   return JSON.stringify(data) + ''
-}
-
-/**
- * Returns a Promise that will resolve after the number of seconds provided. Useful
- * for keeping the async/await patterns in functions that require a simple sleep.
- * 
- * @param numberOfSeconds the number of seconds that this function will take to exit.
- * @return {Promise<void>} a Promise that will resolve after the number of seconds provided.
- */
-export function timeout(numberOfSeconds:number) : Promise<void>{
-  return new Promise((resolve) => {
-    setTimeout(()=>resolve(), numberOfSeconds*1000);
-  })
 }

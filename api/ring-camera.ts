@@ -20,7 +20,7 @@ import {
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToRandomPort, getPublicIp } from './rtp-utils'
-import { delay, logError, logInfo, timeout } from './util'
+import { delay, logError, logInfo } from './util'
 import { SipSession, SrtpOptions } from './sip-session'
 import { H264Builder } from '.';
 const util = require('util');
@@ -374,7 +374,7 @@ export class RingCamera {
       h264builder.packetReceived(rtpPacket.message);
     })
     await sipSession.start()
-    await timeout(duration);
+    await delay(duration*1000);
     sipSession.stop();
     h264builder.end();
     await exec(require('@ffmpeg-installer/ffmpeg').path+' -i '+filename+'.h264 '+filename+'.mp4 ');

@@ -10,5 +10,8 @@
     "module": "commonjs",
     "outDir": "./lib",
     "strict": true
-  }
+  },
+  "exclude": [
+    "public"
+  ]
 }

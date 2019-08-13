@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
-import fs = require('fs');
-const path = require('path');
+import fs = require('fs')
+const path = require('path')
 /**
  * An example using the RingCamera's recordLiveVideoToFile function.
  */
@@ -20,18 +20,18 @@ async function example() {
     return
   }
   // Get the absolute path to the examples directory.
-  const parsedDirname = path.parse(__dirname);
+  const parsedDirname = path.parse(__dirname)
   parsedDirname.dir = path.resolve(parsedDirname.dir, '../examples/recordings')
-  parsedDirname.base = "my_recording";
+  parsedDirname.base = 'my_recording'
   // Create the 'recordings' directory if it doesn't already exist
-  !fs.existsSync(parsedDirname.dir) && fs.mkdirSync(parsedDirname.dir);
+  !fs.existsSync(parsedDirname.dir) && fs.mkdirSync(parsedDirname.dir)
   // Create the fully qualified filename without the extension, as it is appended automatically.
-  console.log("Starting to record live video to file...")
-  const pathToVideo = path.format(parsedDirname);
+  console.log('Starting to record live video to file...')
+  const pathToVideo = path.format(parsedDirname)
   await camera.recordLiveVideoToFile(pathToVideo, 10)
-  console.log("Completed recording.");
-  console.log("Your video can be found here: " + pathToVideo+".mp4");
-  process.exit();
+  console.log('Completed recording.')
+  console.log('Your video can be found here: ' + pathToVideo + '.mp4')
+  process.exit()
 }
 
 example()

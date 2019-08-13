@@ -22,11 +22,11 @@ import { createSocket } from 'dgram'
 import { bindToRandomPort, getPublicIp } from './rtp-utils'
 import { delay, logError, logInfo } from './util'
 import { SipSession, SrtpOptions } from './sip-session'
-import { H264Builder } from '.';
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
-const fs = require('fs');
-const getPort = require('get-port')
+import { H264Builder } from '.'
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
+const fs = require('fs'),
+  getPort = require('get-port')
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 30,
@@ -359,25 +359,34 @@ export class RingCamera {
 
   /**
    * Records a live video to the file system in mp4 format.
-   * 
+   *
    * @param {string} filename the fully qualified path to the filename not including the
    * extension. E.g. '/Users/<username>/path/to/<filename>'.
    * @param {number} duration the duration of the video in seconds
    */
-  async recordLiveVideoToFile(filename:string, duration:number=30 ){
-    if(!filename){
-      throw new Error("A fully qualified filename must be provided in order to record a video.")
+  async recordLiveVideoToFile(filename: string, duration: number = 30) {
+    if (!filename) {
+      throw new Error(
+        'A fully qualified filename must be provided in order to record a video.'
+      )
     }
-    const sipSession = await this.createSipSession();
-    const h264builder = new H264Builder(filename+'.h264'); 
+    const sipSession = await this.createSipSession(),
+      h264builder = new H264Builder(filename + '.h264')
     sipSession.videoStream.onRtpPacket.subscribe(rtpPacket => {
-      h264builder.packetReceived(rtpPacket.message);
+      h264builder.packetReceived(rtpPacket.message)
     })
     await sipSession.start()
-    await delay(duration*1000);
-    sipSession.stop();
-    h264builder.end();
-    await exec(require('@ffmpeg-installer/ffmpeg').path+' -i '+filename+'.h264 '+filename+'.mp4 ');
-    fs.unlinkSync(filename+'.h264');
+    await delay(duration * 1000)
+    sipSession.stop()
+    h264builder.end()
+    await exec(
+      require('@ffmpeg-installer/ffmpeg').path +
+        ' -i ' +
+        filename +
+        '.h264 ' +
+        filename +
+        '.mp4 '
+    )
+    fs.unlinkSync(filename + '.h264')
   }
 }

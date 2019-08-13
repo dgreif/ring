@@ -4,9 +4,19 @@ import { createSocket } from 'dgram'
 import { spawn } from 'child_process'
 import PacketParser from './packet-parser'
 const fs = require('fs'),
-  path = require('path')
+  path = require('path'),
+  express = require('express')
 
-const OUTPUT_PATH = 'output'
+const app = express()
+app.use('/', express.static('public'))
+app.listen(3000, () => {
+  console.log('listening on port 3000')
+})
+
+const OUTPUT_PATH = path.join('public', 'output')
+if (!fs.existsSync(OUTPUT_PATH)) {
+  fs.mkdirSync(OUTPUT_PATH)
+}
 
 async function example() {
   const ringApi = new RingApi({
@@ -27,33 +37,25 @@ async function example() {
   const sipSession = await camera.createSipSession()
   console.log('Got SIP details.  Ready to start SIP Call...')
 
-  try {
-    fs.unlinkSync(OUTPUT_PATH)
-  } catch {
-    // do nothing.
-  }
-  fs.mkdirSync(OUTPUT_PATH)
-
   const ffmpegSocket = createSocket('udp4'),
-    // ffmpeg save clip into 10 second parts so the mp4s are playable and not
-    // corrupted:
-    // https://superuser.com/questions/999400/how-to-use-ffmpeg-to-extract-live-stream-into-a-sequence-of-mp4
     ffmpeg = spawn('ffmpeg', [
       '-i',
       'udp://0.0.0.0:11111',
-      '-c',
-      'copy',
-      '-flags',
-      '+global_header',
+      '-preset',
+      'veryfast',
+      '-g',
+      '25',
+      '-sc_threshold',
+      '0',
       '-f',
-      'segment',
-      '-segment_time',
-      '10',
-      '-segment_format_options',
-      'movflags=+faststart',
-      '-reset_timestamps',
-      '1',
-      path.join(OUTPUT_PATH, 'part%d.mp4')
+      'hls',
+      '-hls_time',
+      '2',
+      '-hls_list_size',
+      '6',
+      '-hls_flags',
+      'delete_segments',
+      path.join(OUTPUT_PATH, 'stream.m3u8')
     ])
 
   ffmpeg.stderr.on('data', (data: any) => {

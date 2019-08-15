@@ -86,6 +86,7 @@ Option | Default | Explanation
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
+`debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
 
 ### Camera Setup
 
@@ -99,7 +100,7 @@ Walk through the setup pages and when you are done, you should see several devic
 
   * Camera Feed
     * Shows a snapshot from the camera while viewing the room in Home
-    * Shows a live feed from the camera if you click on it.  The feed is **video only** and may not work on some networks with strict NAT settings.
+    * Shows a live feed from the camera if you click on it.  The feed supports video out of the box, and will supply audio as well if you have `ffmpeg` with `libfdk_aac` installed.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg#homebridge-audio-support) for details on audio support. Camera streams may not work on some networks with strict NAT settings.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
   * Light (if camera is equipped)

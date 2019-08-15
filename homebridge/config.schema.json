@@ -62,6 +62,11 @@
         "maximum": 32767,
         "description": "Ring Smart Lighting will only stay on for a set amount of time.  You can specify that duration here (in seconds).  If not specified, the light will stay on for the last duration used within the Ring app for individual lights, and 60 seconds for lighting groups.  Max value is 32767 which is ~9.1 hours"
       },
+      "debug": {
+        "title": "Debug Logging",
+        "type": "boolean",
+        "description": "Turns on additional logging.  In particular, ffmpeg logging."
+      },
       "cameraStatusPollingSeconds": {
         "title": "Camera Status Polling",
         "type": "integer",
@@ -127,6 +132,7 @@
         "hideAlarmSirenSwitch",
         "showPanicButtons",
         "beamDurationSeconds",
+        "debug",
         "cameraStatusPollingSeconds",
         "cameraDingsPollingSeconds",
         {

@@ -1,7 +1,12 @@
 import { RingCamera, SipSession } from '../api'
 import { hap, HAP } from './hap'
 import Service = HAP.Service
-import { bindProxyPorts } from './rtp-proxy'
+import {
+  generateSsrc,
+  bindProxyPorts,
+  doesFfmpegSupportCodec,
+  getSrtpValue
+} from '../api/rtp-utils'
 const ip = require('ip')
 
 interface HapRtpConfig {
@@ -19,6 +24,35 @@ interface PrepareStreamRequest {
   audio: HapRtpConfig
 }
 
+interface HandleStreamRequest {
+  sessionID: Buffer
+  type: 'start' | 'stop' | 'reconfigure'
+  video: {
+    profile: number
+    level: number
+    width: number
+    height: number
+    fps: number
+    ssrc: number
+    pt: number
+    max_bit_rate: number
+    rtcp_interval: number
+    mtu: number
+  }
+  audio: {
+    codec: 'AAC-eld' | string
+    channel: number
+    bit_rate: number
+    sample_rate: number
+    packet_time: number
+    pt: number
+    ssrc: number
+    max_bit_rate: number
+    rtcp_interval: number
+    comfort_pt: number
+  }
+}
+
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000
 }
@@ -30,7 +64,6 @@ export class CameraSource {
 
   constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
     const options = {
-      // proxy: true,
       srtp: true,
       video: {
         resolutions: [
@@ -129,19 +162,88 @@ export class CameraSource {
             srtp_salt: videoSrtpSalt
           }
         } = request,
-        sipSession = await this.ringCamera.createSipSession({
-          audio: {
-            srtpKey: audioSrtpKey,
-            srtpSalt: audioSrtpSalt
-          },
-          video: {
-            srtpKey: videoSrtpKey,
-            srtpSalt: videoSrtpSalt
-          }
-        }),
-        [rtpOptions, audioProxy, videoProxy] = await Promise.all([
-          sipSession.start(),
-          bindProxyPorts(audioPort, targetAddress, 'audio', sipSession),
+        [sipSession, libfdkAacInstalled] = await Promise.all([
+          this.ringCamera.createSipSession({
+            audio: {
+              srtpKey: audioSrtpKey,
+              srtpSalt: audioSrtpSalt
+            },
+            video: {
+              srtpKey: videoSrtpKey,
+              srtpSalt: videoSrtpSalt
+            }
+          }),
+          doesFfmpegSupportCodec('libfdk_aac')
+            .then(supported => {
+              if (!supported) {
+                this.logger.error(
+                  'Streaming video only - found ffmpeg, but libfdk_aac is not installed.'
+                )
+              }
+              return supported
+            })
+            .catch(() => {
+              this.logger.error('Streaming video only - ffmpeg was not found')
+              return false
+            })
+        ]),
+        audioSsrc = generateSsrc(),
+        proxyAudioPort = await sipSession.reservePort(),
+        [rtpOptions, videoProxy] = await Promise.all([
+          sipSession.start(
+            libfdkAacInstalled
+              ? {
+                  audio: [
+                    '-map',
+                    '0:0',
+
+                    // OPUS specific - it works, but audio is very choppy
+                    // '-acodec',
+                    // 'libopus',
+                    // '-vbr',
+                    // 'on',
+                    // '-frame_duration',
+                    // 20,
+                    // '-application',
+                    // 'lowdelay',
+
+                    // AAC-eld specific
+                    '-acodec',
+                    'libfdk_aac',
+                    '-profile:a',
+                    'aac_eld',
+
+                    // Shared options
+                    '-flags',
+                    '+global_header',
+                    '-ac',
+                    1,
+                    '-ar',
+                    '16k',
+                    '-b:a',
+                    '24k',
+                    '-bufsize',
+                    '24k',
+                    '-payload_type',
+                    110,
+                    '-ssrc',
+                    audioSsrc,
+                    '-f',
+                    'rtp',
+                    '-srtp_out_suite',
+                    'AES_CM_128_HMAC_SHA1_80',
+                    '-srtp_out_params',
+                    getSrtpValue({
+                      srtpKey: audioSrtpKey,
+                      srtpSalt: audioSrtpSalt
+                    }),
+                    `srtp://${targetAddress}:${audioPort}?localrtcpport=${proxyAudioPort}&pkt_size=188`
+                  ],
+                  video: false,
+                  output: []
+                }
+              : undefined
+          ),
           bindProxyPorts(videoPort, targetAddress, 'video', sipSession)
         ])
 
@@ -152,10 +254,8 @@ export class CameraSource {
           this.ringCamera.name
         } (${getDurationSeconds(start)}s)`
       )
-      const [audioSsrc, videoSsrc] = await Promise.all([
-        audioProxy.ssrcPromise,
-        videoProxy.ssrcPromise
-      ])
+      const videoSsrc = await videoProxy.ssrcPromise
+
       this.logger.info(
         `Received stream data from ${
           this.ringCamera.name
@@ -169,10 +269,10 @@ export class CameraSource {
           type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
         },
         audio: {
-          port: audioProxy.localPort,
+          port: proxyAudioPort,
           ssrc: audioSsrc,
-          srtp_key: rtpOptions.audio.srtpKey,
-          srtp_salt: rtpOptions.audio.srtpSalt
+          srtp_key: audioSrtpKey,
+          srtp_salt: audioSrtpSalt
         },
         video: {
           port: videoProxy.localPort,
@@ -191,7 +291,7 @@ export class CameraSource {
     }
   }
 
-  handleStreamRequest(request: any) {
+  handleStreamRequest(request: HandleStreamRequest) {
     const sessionID = request.sessionID,
       sessionKey = hap.UUIDGen.unparse(sessionID),
       session = this.sessions[sessionKey],

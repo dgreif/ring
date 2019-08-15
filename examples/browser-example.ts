@@ -1,22 +1,14 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
-import { createSocket } from 'dgram'
-import { spawn } from 'child_process'
-import PacketParser from './packet-parser'
+import { promisify } from 'util'
 const fs = require('fs'),
   path = require('path'),
   express = require('express')
 
-const app = express()
-app.use('/', express.static('public'))
-app.listen(3000, () => {
-  console.log('listening on port 3000')
-})
-
-const OUTPUT_PATH = path.join('public', 'output')
-if (!fs.existsSync(OUTPUT_PATH)) {
-  fs.mkdirSync(OUTPUT_PATH)
-}
+/**
+ * This example creates an hls stream which is viewable in a browser
+ * It also starts web app to view the stream at http://localhost:3000
+ **/
 
 async function example() {
   const ringApi = new RingApi({
@@ -24,7 +16,8 @@ async function example() {
       email: process.env.RING_EMAIL!,
       password: process.env.RING_PASS!,
       // Refresh token is used when 2fa is on
-      refreshToken: process.env.RING_REFRESH_TOKEN!
+      refreshToken: process.env.RING_REFRESH_TOKEN!,
+      debug: true
     }),
     [camera] = await ringApi.getCameras()
 
@@ -33,14 +26,22 @@ async function example() {
     return
   }
 
-  console.log('Creating SIP Session...')
-  const sipSession = await camera.createSipSession()
-  console.log('Got SIP details.  Ready to start SIP Call...')
+  const app = express(),
+    publicOutputDirectory = path.join('public', 'output')
 
-  const ffmpegSocket = createSocket('udp4'),
-    ffmpeg = spawn('ffmpeg', [
-      '-i',
-      'udp://0.0.0.0:11111',
+  app.use('/', express.static('public'))
+  app.listen(3000, () => {
+    console.log(
+      'Listening on port 3000.  Go to http://localhost:3000 in your browser'
+    )
+  })
+
+  if (!(await promisify(fs.exists)(publicOutputDirectory))) {
+    await promisify(fs.mkdir)(publicOutputDirectory)
+  }
+
+  const sipSession = await camera.streamVideo({
+    output: [
       '-preset',
       'veryfast',
       '-g',
@@ -55,33 +56,8 @@ async function example() {
       '6',
       '-hls_flags',
       'delete_segments',
-      path.join(OUTPUT_PATH, 'stream.m3u8')
-    ])
-
-  ffmpeg.stderr.on('data', (data: any) => {
-    console.log(`stderr: ${data}`)
-  })
-
-  ffmpeg.on('close', code => {
-    console.log(`child process exited with code ${code}`)
-  })
-
-  const exitHandler = () => {
-    ffmpeg.stderr.pause()
-    ffmpeg.stdout.pause()
-    ffmpeg.kill()
-    process.exit()
-  }
-
-  process.on('SIGINT', exitHandler)
-  process.on('exit', exitHandler)
-
-  const packetParser = new PacketParser()
-  sipSession.videoStream.onRtpPacket.subscribe(rtpPacket => {
-    const decoded = packetParser.packetReceived(rtpPacket.message)
-    if (decoded) {
-      ffmpegSocket.send(decoded, 11111)
-    }
+      path.join(publicOutputDirectory, 'stream.m3u8')
+    ]
   })
 
   sipSession.onCallEnded.subscribe(() => {
@@ -89,14 +65,10 @@ async function example() {
     process.exit()
   })
 
-  console.log('Starting SIP call')
-  const rtpOptions = await sipSession.start()
-  console.log('Call Started.  Remote RTP details:', rtpOptions)
-
   setTimeout(function() {
     console.log('Stopping call...')
     sipSession.stop()
-  }, 2 * 60 * 1000) // Stop after 2 minutes.
+  }, 5 * 60 * 1000) // Stop after 5 minutes.
 }
 
 example()

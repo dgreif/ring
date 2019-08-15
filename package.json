@@ -11,6 +11,7 @@
     "lint": "eslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
     "example": "npm run build && node ./lib/examples/example.js",
+    "record-example": "npm run build && node ./lib/examples/record-example.js",
     "stream-example": "npm run build && node ./lib/examples/stream-example.js",
     "browser-example": "npm run build && node ./lib/examples/browser-example.js",
     "cli": "npm run build && ./ring-auth-cli.js",
@@ -49,6 +50,7 @@
     "axios": "^0.19.0",
     "colors": "^1.3.3",
     "debug": "^4.1.1",
+    "execa": "^2.0.4",
     "get-port": "^5.0.0",
     "nat-puncher": "^0.1.3",
     "public-ip": "^3.1.0",
@@ -73,6 +75,7 @@
     "homebridge": "^0.4.50",
     "homebridge-config-ui-x": "^4.5.1",
     "prettier": "^1.18.2",
+    "rimraf": "^2.6.3",
     "standard-version": "^6.0.1",
     "typescript": "^3.5.3"
   },

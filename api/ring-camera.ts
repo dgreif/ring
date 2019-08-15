@@ -19,11 +19,14 @@ import {
   take
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
-import { bindToRandomPort, getPublicIp } from './rtp-utils'
+import {
+  bindToRandomPort,
+  getPublicIp,
+  reservePorts,
+  SrtpOptions
+} from './rtp-utils'
 import { delay, logError, logInfo } from './util'
-import { SipSession, SrtpOptions } from './sip-session'
-
-const getPort = require('get-port')
+import { FfmpegOptions, SipSession } from './sip-session'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 30,
@@ -325,11 +328,18 @@ export class RingCamera {
   ) {
     const videoSocket = createSocket('udp4'),
       audioSocket = createSocket('udp4'),
-      [sipOptions, publicIpPromise, videoPort, audioPort] = await Promise.all([
+      [
+        sipOptions,
+        publicIpPromise,
+        videoPort,
+        audioPort,
+        [tlsPort]
+      ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
         bindToRandomPort(videoSocket),
-        bindToRandomPort(audioSocket)
+        bindToRandomPort(audioSocket),
+        reservePorts()
       ]),
       rtpOptions = {
         address: await publicIpPromise,
@@ -346,11 +356,29 @@ export class RingCamera {
     return new SipSession(
       {
         ...sipOptions,
-        tlsPort: await getPort() // get a random port, this can still cause race conditions.
+        tlsPort
       },
       rtpOptions,
       videoSocket,
       audioSocket
     )
   }
+
+  async recordToFile(outputPath: string, duration = 30) {
+    const sipSession = await this.streamVideo({
+      output: ['-t', duration.toString(), outputPath]
+    })
+
+    await sipSession.onCallEnded.pipe(take(1)).toPromise()
+  }
+
+  async streamVideo(ffmpegOptions: FfmpegOptions) {
+    // SOMEDAY: generate random SRTP key/salt
+    const sipSession = await this.createSipSession()
+    await sipSession.start(ffmpegOptions)
+    return sipSession
+  }
 }
+
+// SOMEDAY: extract image from video file?
+// ffmpeg -i input.mp4 -r 1 -f image2 image-%2d.png

@@ -1,4 +1,4 @@
-import { logError } from './util'
+import { logDebug, logError } from './util'
 import { RemoteInfo, Socket } from 'dgram'
 import {
   interval,
@@ -7,7 +7,15 @@ import {
   Subject,
   Subscription
 } from 'rxjs'
-import { sendUdpHolePunch } from './rtp-utils'
+import {
+  bindProxyPorts,
+  getSrtpValue,
+  releasePort,
+  reservePorts,
+  sendUdpHolePunch,
+  SrtpOptions
+} from './rtp-utils'
+import { spawn } from 'child_process'
 
 const ip = require('ip'),
   sip = require('sip'),
@@ -19,12 +27,7 @@ export interface SipOptions {
   dingId: string
   host?: string
   port?: number
-  tlsPort?: number
-}
-
-export interface SrtpOptions {
-  srtpKey: Buffer
-  srtpSalt: Buffer
+  tlsPort: number
 }
 
 export interface RtpStreamOptions extends Partial<SrtpOptions> {
@@ -46,6 +49,14 @@ export interface RtpOptions {
   address: string
   audio: RtpStreamOptions
   video: RtpStreamOptions
+}
+
+type SpawnInput = string | number
+export interface FfmpegOptions {
+  input?: SpawnInput[]
+  video?: SpawnInput[] | false
+  audio?: SpawnInput[]
+  output: SpawnInput[]
 }
 
 interface UriOptions {
@@ -94,11 +105,13 @@ function getRandomId() {
   return Math.floor(Math.random() * 1e6).toString()
 }
 
-function createCryptoLine({ srtpKey, srtpSalt }: RtpStreamOptions) {
-  if (!srtpKey || !srtpSalt) {
+function createCryptoLine(rtpStreamOptions: RtpStreamOptions) {
+  const srtpValue = getSrtpValue(rtpStreamOptions)
+
+  if (!srtpValue) {
     return ''
   }
-  const srtpValue = Buffer.concat([srtpKey, srtpSalt]).toString('base64')
+
   return `a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:${srtpValue}`
 }
 
@@ -124,7 +137,7 @@ function getRtpDescription(
   }
 }
 
-function parseRtpOptions(inviteResponse: { content: string }) {
+function parseRtpOptions(inviteResponse: { content: string }): RtpOptions {
   const sections: string[] = sdp.splitSections(inviteResponse.content),
     oLine = sdp.parseOLine(sections[0]),
     rtpOptions = {
@@ -149,8 +162,10 @@ export class SipSession {
   private onCallEndedSubject = new ReplaySubject(1)
   private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
   private subscriptions: Subscription[] = []
+  private reservedPorts = [this.sipOptions.tlsPort!]
   onCallEnded = this.onCallEndedSubject.asObservable()
   onRemoteRtpOptions = this.onRemoteRtpOptionsSubject.asObservable()
+  sdp: string
 
   audioStream: RtpStream = {
     socket: this.audioSocket,
@@ -173,6 +188,8 @@ export class SipSession {
       throw new Error('Only one sip session can be active at a time.')
     }
     const { tlsPort } = sipOptions,
+      { address, audio, video } = rtpOptions,
+      { from } = this.sipOptions,
       host = sipOptions.host || ip.address()
     this.sipClient = sip.create(
       {
@@ -192,9 +209,30 @@ export class SipSession {
         }
       }
     )
+
+    this.sdp = [
+      'v=0',
+      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${address}`,
+      's=Talk',
+      `c=IN IP4 ${address}`,
+      'b=AS:380',
+      't=0 0',
+      'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
+
+      `m=audio ${audio.port} RTP/${audio.srtpKey ? 'S' : ''}AVP 0 101`,
+      'a=rtpmap:0 PCMU/8000',
+      createCryptoLine(audio),
+      'a=rtcp-mux',
+      `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
+      'a=rtpmap:99 H264/90000',
+      createCryptoLine(video),
+      'a=rtcp-mux'
+    ]
+      .filter(l => l)
+      .join('\r\n')
   }
 
-  async start() {
+  async start(ffmpegOptions?: FfmpegOptions) {
     if (this.hasStarted) {
       throw new Error('SIP Session has already been started')
     }
@@ -225,6 +263,10 @@ export class SipSession {
         )
       }
 
+    if (ffmpegOptions) {
+      this.startTranscoder(ffmpegOptions, remoteRtpOptions)
+    }
+
     this.audioSocket.on('message', (message, info) => {
       this.onAudioPacket.next({ message, info })
     })
@@ -246,12 +288,12 @@ export class SipSession {
   sipRequest({
     method,
     headers,
-    contentLines,
+    content,
     seq
   }: {
     method: string
     headers?: Partial<SipHeaders>
-    contentLines?: string[]
+    content?: string
     seq?: number
   }) {
     return new Promise<SipResponse>((resolve, reject) => {
@@ -276,12 +318,7 @@ export class SipSession {
             cseq: { seq, method },
             ...headers
           },
-          content: contentLines
-            ? contentLines
-                .filter(l => l)
-                .map(line => line + '\r\n')
-                .join('')
-            : ''
+          content: content || ''
         },
         (response: SipResponse) => {
           if (response.headers.to.params && response.headers.to.params.tag) {
@@ -317,9 +354,8 @@ export class SipSession {
     })
   }
 
-  async invite(rtpOptions = this.rtpOptions) {
-    const { address, audio, video } = rtpOptions,
-      { from } = this.sipOptions,
+  async invite() {
+    const { from } = this.sipOptions,
       inviteResponse = await this.sipRequest({
         method: 'INVITE',
         headers: {
@@ -329,27 +365,7 @@ export class SipSession {
           'content-type': 'application/sdp',
           contact: [{ uri: from }]
         },
-        contentLines: [
-          'v=0',
-          `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${address}`,
-          's=Talk',
-          `c=IN IP4 ${address}`,
-          'b=AS:380',
-          't=0 0',
-          'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
-          `m=audio ${audio.port} RTP/${audio.srtpKey ? 'S' : ''}AVP 110 0 101`,
-          'a=rtpmap:110 mpeg4-generic/16000', // SOMEDAY: figure out aac-eld sdp
-          'a=fmtp:110 mode=AAC-eld',
-          'a=rtpmap:101 telephone-event/48000',
-          createCryptoLine(audio),
-          'a=rtcp-mux',
-          `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
-          'a=rtpmap:99 H264/90000',
-          'a=fmtp:99 profile-level-id=42A01E; packetization-mode=1',
-          // 'a=fmtp:96 profile-level-id=42801F', // SOMEDAY: profiles and bit rates
-          createCryptoLine(video),
-          'a=rtcp-mux'
-        ]
+        content: this.sdp
       }),
       remoteRtpOptions = parseRtpOptions(inviteResponse)
 
@@ -370,7 +386,7 @@ export class SipSession {
       headers: {
         'Content-Type': 'application/dtmf-relay'
       },
-      contentLines: ['Signal=2', 'Duration=250']
+      content: 'Signal=2\r\nDuration=250'
     })
 
     await this.sipRequest({
@@ -378,10 +394,90 @@ export class SipSession {
       headers: {
         'Content-Type': 'application/media_control+xml'
       },
-      contentLines: [
+      content:
         '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>'
-      ]
     })
+  }
+
+  private async startTranscoder(
+    ffmpegOptions: FfmpegOptions,
+    remoteRtpOptions: RtpOptions
+  ) {
+    const transcodeVideoStream = ffmpegOptions.video !== false,
+      [audioPort, videoPort] = [
+        await this.reservePort(1),
+        await this.reservePort(1)
+      ],
+      input = this.sdp
+        .replace(
+          getSrtpValue(this.rtpOptions.audio),
+          getSrtpValue(remoteRtpOptions.audio)
+        )
+        .replace(
+          getSrtpValue(this.rtpOptions.video),
+          getSrtpValue(remoteRtpOptions.video)
+        )
+        .replace(this.audioStream.port.toString(), audioPort.toString())
+        .replace(this.videoStream.port.toString(), videoPort.toString()),
+      ffOptions = [
+        '-hide_banner',
+        '-protocol_whitelist',
+        'pipe,udp,rtp,file,crypto',
+        '-f',
+        'sdp',
+        ...(ffmpegOptions.input || []),
+        '-i',
+        'pipe:',
+        ...(ffmpegOptions.audio || ['-acodec', 'aac']),
+        ...(transcodeVideoStream
+          ? ffmpegOptions.video || ['-vcodec', 'copy']
+          : []),
+        ...(ffmpegOptions.output || [])
+      ],
+      ff = spawn('ffmpeg', ffOptions.map(x => x.toString()))
+
+    ff.stderr.on('data', (data: any) => {
+      logDebug(`ffmpeg stderr: ${data}`)
+    })
+
+    ff.on('close', code => {
+      this.callEnded(true)
+      logDebug(`ffmpeg exited with code ${code}`)
+    })
+
+    const exitHandler = () => {
+      ff.stderr.pause()
+      ff.stdout.pause()
+      ff.kill()
+
+      process.off('SIGINT', exitHandler)
+      process.off('exit', exitHandler)
+      releasePort(audioPort)
+      releasePort(videoPort)
+    }
+
+    process.on('SIGINT', exitHandler)
+    process.on('exit', exitHandler)
+    this.onCallEnded.subscribe(exitHandler)
+
+    ff.stdin.write(input)
+    ff.stdin.end()
+
+    const proxyPromises = [
+      bindProxyPorts(audioPort, '127.0.0.1', 'audio', this)
+    ]
+
+    if (transcodeVideoStream) {
+      proxyPromises.push(bindProxyPorts(videoPort, '127.0.0.1', 'video', this))
+    }
+
+    return Promise.all(proxyPromises)
+  }
+
+  async reservePort(bufferPorts = 0) {
+    const ports = await reservePorts(bufferPorts + 1)
+    this.reservedPorts.push(...ports)
+    return ports[0]
   }
 
   private callEnded(sendBye: boolean) {
@@ -402,6 +498,7 @@ export class SipSession {
     this.videoSocket.close()
     this.audioSocket.close()
     this.subscriptions.forEach(subscription => subscription.unsubscribe())
+    this.reservedPorts.forEach(releasePort)
   }
 
   stop() {

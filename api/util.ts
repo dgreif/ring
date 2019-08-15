@@ -11,18 +11,25 @@ interface Logger {
 }
 
 let logger: Logger = {
-  logInfo(message) {
-    debugLogger(message)
+    logInfo(message) {
+      debugLogger(message)
+    },
+    logError(message) {
+      debugLogger(red(message))
+    }
   },
-  logError(message) {
-    debugLogger(red(message))
-  }
-}
+  debugEnabled = false
 
 export function delay(milliseconds: number) {
   return new Promise(resolve => {
     setTimeout(resolve, milliseconds)
   })
+}
+
+export function logDebug(message: any) {
+  if (debugEnabled) {
+    logger.logInfo(message)
+  }
 }
 
 export function logInfo(message: any) {
@@ -35,6 +42,10 @@ export function logError(message: any) {
 
 export function useLogger(newLogger: Logger) {
   logger = newLogger
+}
+
+export function enableDebug() {
+  debugEnabled = true
 }
 
 export function generateRandomId() {

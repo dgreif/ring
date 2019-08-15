@@ -25,12 +25,15 @@ import { PanicButtons } from './panic-buttons'
 import { RingAuth } from '../api/rest-client'
 import { platformName, pluginName } from './plugin-info'
 import { useLogger } from '../api/util'
+import { BaseAccessory } from './base-accessory'
 
 const debug = __filename.includes('release-homebridge')
 
 process.env.RING_DEBUG = debug ? 'true' : ''
 
-function getAccessoryClass(device: RingDevice | RingCamera): any {
+function getAccessoryClass(
+  device: RingDevice | RingCamera
+): (new (...args: any[]) => BaseAccessory<RingDevice>) | null {
   const { deviceType } = device
 
   switch (deviceType) {

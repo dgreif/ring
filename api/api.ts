@@ -11,11 +11,13 @@ import {
 import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
+import { enableDebug } from './util'
 
 export interface RingApiOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
+  debug?: boolean
 }
 
 export class RingApi {
@@ -23,7 +25,11 @@ export class RingApi {
 
   private locations = this.fetchAndBuildLocations()
 
-  constructor(public readonly options: RingApiOptions & RingAuth) {}
+  constructor(public readonly options: RingApiOptions & RingAuth) {
+    if (options.debug) {
+      enableDebug()
+    }
+  }
 
   async fetchRingDevices() {
     const {

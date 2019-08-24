@@ -2,6 +2,7 @@ import axios, { AxiosRequestConfig, ResponseType } from 'axios'
 import { delay, generateRandomId, logError, logInfo, stringify } from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
+import { ReplaySubject } from 'rxjs'
 
 const ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
@@ -68,6 +69,10 @@ export class RingRestClient {
   private authPromise = this.getAuth()
   private sessionPromise = this.getSession()
   public using2fa = false
+  public onRefreshTokenUpdated = new ReplaySubject<{
+    oldRefreshToken?: string
+    newRefreshToken: string
+  }>(1)
 
   constructor(private authOptions: RingAuth) {}
 
@@ -113,6 +118,10 @@ export class RingRestClient {
         }
       })
 
+      this.onRefreshTokenUpdated.next({
+        oldRefreshToken: this.refreshToken,
+        newRefreshToken: response.refresh_token
+      })
       this.refreshToken = response.refresh_token
 
       return response

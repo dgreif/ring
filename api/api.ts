@@ -22,6 +22,7 @@ export interface RingApiOptions {
 
 export class RingApi {
   public readonly restClient = new RingRestClient(this.options)
+  public readonly onRefreshTokenUpdated = this.restClient.onRefreshTokenUpdated.asObservable()
 
   private locations = this.fetchAndBuildLocations()
 

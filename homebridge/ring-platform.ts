@@ -15,7 +15,7 @@ import { Lock } from './lock'
 import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
-import { RingPlatformConfig } from './config'
+import { RingPlatformConfig, updateHomebridgeConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Fan } from './fan'
@@ -241,5 +241,17 @@ export class RingPlatform {
         staleAccessories
       )
     }
+
+    ringApi.onRefreshTokenUpdated.subscribe(
+      ({ oldRefreshToken, newRefreshToken }) => {
+        if (!oldRefreshToken) {
+          return
+        }
+
+        updateHomebridgeConfig(this.api, config => {
+          return config.replace(oldRefreshToken, newRefreshToken)
+        })
+      }
+    )
   }
 }

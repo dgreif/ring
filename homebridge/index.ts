@@ -3,12 +3,13 @@ import { hap } from './hap'
 import { readFileSync, writeFileSync } from 'fs'
 import { join as joinPath } from 'path'
 import {
-  platformName,
-  pluginName,
   oldPlatformName,
-  oldPluginName
+  oldPluginName,
+  platformName,
+  pluginName
 } from './plugin-info'
 import { logError } from '../api/util'
+import { updateHomebridgeConfig } from './config'
 
 export default function(homebridge: any) {
   hap.PlatformAccessory = homebridge.platformAccessory
@@ -29,22 +30,14 @@ export default function(homebridge: any) {
       cachedAccessories = readFileSync(cachedAccessoriesPath).toString(),
       updatedAccessories = cachedAccessories
         .replace(new RegExp(oldPluginName, 'g'), pluginName)
-        .replace(new RegExp(oldPlatformName, 'g'), platformName),
-      configPath = homebridge.user.configPath(),
-      config = readFileSync(configPath).toString(),
-      updatedConfig = config.replace(
-        `"${oldPlatformName}"`,
-        `"${platformName}"`
-      )
-    let filesChanged = false
+        .replace(new RegExp(oldPlatformName, 'g'), platformName)
+
+    let filesChanged = updateHomebridgeConfig(homebridge, config => {
+      return config.replace(`"${oldPlatformName}"`, `"${platformName}"`)
+    })
 
     if (cachedAccessories !== updatedAccessories) {
       writeFileSync(cachedAccessoriesPath, updatedAccessories)
-      filesChanged = true
-    }
-
-    if (config !== updatedConfig) {
-      writeFileSync(configPath, updatedConfig)
       filesChanged = true
     }
 

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.6.1](https://github.com/dgreif/ring/compare/v5.6.0...v5.6.1) (2019-08-24)
+
+
+### Bug Fixes
+
+* **homebridge:** keep `refreshToken` up to date in config.json ([6719e4a](https://github.com/dgreif/ring/commit/6719e4a)), closes [#109](https://github.com/dgreif/ring/issues/109)
+* remove ffmpeg listeners with node 8 compatible method ([96c27ac](https://github.com/dgreif/ring/commit/96c27ac))
+
+
+
 ## [5.6.0](https://github.com/dgreif/ring/compare/v5.5.1...v5.6.0) (2019-08-24)
 
 

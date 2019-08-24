@@ -450,8 +450,8 @@ export class SipSession {
       ff.stdout.pause()
       ff.kill()
 
-      process.off('SIGINT', exitHandler)
-      process.off('exit', exitHandler)
+      process.removeListener('SIGINT', exitHandler)
+      process.removeListener('exit', exitHandler)
       releasePort(audioPort)
       releasePort(videoPort)
     }

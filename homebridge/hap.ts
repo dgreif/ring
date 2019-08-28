@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace HAP {
   export interface Accessory {

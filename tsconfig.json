@@ -9,6 +9,7 @@
     ],
     "module": "commonjs",
     "outDir": "./lib",
+    "esModuleInterop": true,
     "strict": true
   },
   "exclude": [

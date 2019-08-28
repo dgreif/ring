@@ -11,7 +11,7 @@ import {
   skip,
   take
 } from 'rxjs/operators'
-import { delay, generateRandomId, logError, logInfo } from './util'
+import { delay, generateUuid, logError, logInfo } from './util'
 import {
   AccountMonitoringStatus,
   AlarmMode,
@@ -376,7 +376,7 @@ export class Location {
 
   private triggerAlarm(signalType: DispatchSignalType) {
     const now = Date.now(),
-      alarmSessionUuid = generateRandomId(),
+      alarmSessionUuid = generateUuid(),
       baseStationAsset =
         this.assets && this.assets.find(x => x.kind === 'base_station_v1')
 

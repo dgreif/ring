@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, ResponseType } from 'axios'
-import { delay, generateRandomId, logError, logInfo, stringify } from './util'
+import { delay, getHardwareId, logError, logInfo, stringify } from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
@@ -14,7 +14,7 @@ const ringErrorCodes: { [code: number]: string } = {
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
   appApiBaseUrl = 'https://app.ring.com/api/v1/',
   apiVersion = 11,
-  hardwareId = generateRandomId()
+  hardwareIdPromise = getHardwareId()
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
@@ -114,7 +114,7 @@ export class RingRestClient {
           'content-type': 'application/json',
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
-          hardware_id: hardwareId
+          hardware_id: await hardwareIdPromise
         }
       })
 
@@ -161,12 +161,12 @@ export class RingRestClient {
     }
   }
 
-  private fetchNewSession(authToken: AuthTokenResponse) {
+  private async fetchNewSession(authToken: AuthTokenResponse) {
     return requestWithRetry<SessionResponse>({
       url: clientApi('session'),
       data: {
         device: {
-          hardware_id: hardwareId,
+          hardware_id: await hardwareIdPromise,
           metadata: {
             api_version: apiVersion
           },
@@ -237,7 +237,7 @@ export class RingRestClient {
             ? 'application/json'
             : 'application/x-www-form-urlencoded',
           authorization: `Bearer ${authTokenResponse.access_token}`,
-          hardware_id: hardwareId
+          hardware_id: await hardwareIdPromise
         }
 
       return await requestWithRetry<T>({

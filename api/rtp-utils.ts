@@ -5,8 +5,8 @@ import { RtpOptions, SipSession } from './sip-session'
 import { ReplaySubject } from 'rxjs'
 import { filter, map, take } from 'rxjs/operators'
 import { randomBytes } from 'crypto'
-import * as getPort from 'get-port'
-import * as execa from 'execa'
+import getPort from 'get-port'
+import execa from 'execa'
 const stun = require('stun'),
   portControl = require('nat-puncher')
 

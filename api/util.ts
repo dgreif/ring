@@ -1,9 +1,12 @@
 import debug = require('debug')
 import { red } from 'colors'
-import { randomBytes } from 'crypto'
 import { createInterface } from 'readline'
+import generateRandomUuid from 'uuid/v4'
+import generateUuidFromNamespace from 'uuid/v5'
+import { machineId } from 'node-machine-id'
 
-const debugLogger = debug('ring')
+const debugLogger = debug('ring'),
+  uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739c'
 
 interface Logger {
   logInfo: (message: string) => void
@@ -48,19 +51,17 @@ export function enableDebug() {
   debugEnabled = true
 }
 
-export function generateRandomId() {
-  const id = randomBytes(16).toString('hex')
-  return (
-    id.substr(0, 8) +
-    '-' +
-    id.substr(8, 4) +
-    '-' +
-    id.substr(12, 4) +
-    '-' +
-    id.substr(16, 4) +
-    '-' +
-    id.substr(20, 12)
-  )
+export function generateUuid(seed?: string) {
+  if (seed) {
+    return generateUuidFromNamespace(seed, uuidNamespace)
+  }
+
+  return generateRandomUuid()
+}
+
+export async function getHardwareId() {
+  const id = await machineId()
+  return generateUuid(id)
 }
 
 export async function requestInput(question: string) {

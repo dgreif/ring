@@ -54,6 +54,7 @@ location.hasHubs // does this location have an alarm and/or lighting bridge
 location.disarm()
 location.armHome([/* optional array of zids for devices to bypass */])
 location.armAway([/* bypass zids */])
+location.getAlarmMode() // returns Promise<'all' | 'some' | 'none'>
 location.soundSiren()
 location.silenceSiren()
 location.cameras // array of cameras at this location

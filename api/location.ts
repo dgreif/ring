@@ -267,6 +267,11 @@ export class Location {
     }
   }
 
+  async getAlarmMode() {
+    const securityPanel = await this.getSecurityPanel()
+    return securityPanel.data.mode as AlarmMode
+  }
+
   soundSiren() {
     return this.sendCommandToSecurityPanel('security-panel.sound-siren')
   }

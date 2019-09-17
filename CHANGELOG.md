@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.7.0](https://github.com/dgreif/ring/compare/v5.6.2...v5.7.0) (2019-09-17)
+
+
+### Features
+
+* **api:** location.getAlarmMode() to get current alarm mode ([248fccc](https://github.com/dgreif/ring/commit/248fccc))
+
 ### [5.6.2](https://github.com/dgreif/ring/compare/v5.6.1...v5.6.2) (2019-09-05)
 
 

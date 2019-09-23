@@ -9,6 +9,7 @@ rm -rf release-api/lib/homebridge
 rm -rf release-api/lib/examples
 cp ring-auth-cli.js release-api
 cp package.json release-api
+cp package-lock.json release-api
 cp LICENSE release-api
 cp README.md release-api
 cp CHANGELOG.md release-api

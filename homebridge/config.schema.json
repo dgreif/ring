@@ -8,13 +8,18 @@
       "email": {
         "title": "Email",
         "type": "string",
+        "required": true,
         "format": "email",
         "placeholder": "Email"
       },
       "password": {
         "title": "Password",
         "type": "string",
-        "placeholder": "Password"
+        "placeholder": "Password",
+        "required": true,
+        "options": {
+            "hidden": true
+        }
       },
       "refreshToken": {
         "title": "Refresh Token",

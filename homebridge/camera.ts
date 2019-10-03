@@ -2,7 +2,7 @@ import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseAccessory } from './base-accessory'
-import { map, mapTo } from 'rxjs/operators'
+import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 
 export class Camera extends BaseAccessory<RingCamera> {
@@ -25,12 +25,20 @@ export class Camera extends BaseAccessory<RingCamera> {
         Service.MotionSensor,
         device.onMotionDetected
       )
+
+      device.onMotionDetected.pipe(filter(motion => motion)).subscribe(() => {
+        this.logger.info(device.name + ' Detected Motion')
+      })
     }
 
     if (device.isDoorbot) {
       const onPressed = device.onDoorbellPressed.pipe(
         mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
       )
+
+      onPressed.subscribe(() => {
+        this.logger.info(device.name + ' Button Pressed')
+      })
 
       this.registerObservableCharacteristic(
         Characteristic.ProgrammableSwitchEvent,

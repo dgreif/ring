@@ -44,6 +44,7 @@ export enum RingDeviceCategory {
 }
 
 export enum RingCameraKind {
+  cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
   doorbot = 'doorbot',
   doorbell = 'doorbell',
   doorbell_v3 = 'doorbell_v3',
@@ -58,6 +59,7 @@ export enum RingCameraKind {
   stickup_cam_v4 = 'stickup_cam_v4',
   stickup_cam_elite = 'stickup_cam_elite',
   stickup_cam_lunar = 'stickup_cam_lunar',
+  stickup_cam_mini = 'stickup_cam_mini',
   spotlightw_v2 = 'spotlightw_v2',
   hp_cam_v1 = 'hp_cam_v1',
   hp_cam_v2 = 'hp_cam_v2',
@@ -78,6 +80,7 @@ export const batteryCameraKinds: RingCameraKind[] = [
 ]
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
+  cocoa_camera: 'Stick Up Cam',
   doorbot: 'Doorbell',
   doorbell: 'Doorbell',
   doorbell_v3: 'Doorbell',
@@ -91,6 +94,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   stickup_cam_v3: 'Stick Up Cam',
   stickup_cam_elite: 'Stick Up Cam',
   stickup_cam_lunar: 'Stick Up Cam',
+  stickup_cam_mini: 'Indoor Cam',
   spotlightw_v2: 'Spotlight Cam',
   hp_cam_v1: 'Floodlight Cam',
   hp_cam_v2: 'Spotlight Cam',
@@ -274,7 +278,7 @@ export interface CameraData {
   time_zone: string
   subscribed: boolean
   subscribed_motions: boolean
-  battery_life: number | string // 4003 or "100"
+  battery_life: number | string // 4003 or 100 or "100" or "71"
   external_connection: boolean
   firmware_version: Firmware
   kind: RingCameraKind

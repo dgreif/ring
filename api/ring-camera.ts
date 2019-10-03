@@ -52,7 +52,12 @@ export class RingCamera {
   model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
   hasLight = this.initialData.led_status !== undefined
   hasSiren = this.initialData.siren_status !== undefined
-  hasBattery = batteryCameraKinds.includes(this.deviceType)
+  hasBattery =
+    batteryCameraKinds.includes(this.deviceType) ||
+    (typeof this.initialData.battery_life === 'string' &&
+      this.batteryLevel !== null &&
+      this.batteryLevel < 100 &&
+      this.batteryLevel >= 0)
 
   onData = new BehaviorSubject<CameraData>(this.initialData)
   onRequestUpdate = new Subject()

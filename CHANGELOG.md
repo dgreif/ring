@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.8.0](https://github.com/dgreif/ring/compare/v5.7.0...v5.8.0) (2019-10-03)
+
+
+### Features
+
+* add new camera models ([b5e3591](https://github.com/dgreif/ring/commit/b5e3591))
+* fallback check for camera battery if unknown model ([5910524](https://github.com/dgreif/ring/commit/5910524))
+* **homebridge:** add logging for camera motion/doorbell events ([b4af8a0](https://github.com/dgreif/ring/commit/b4af8a0))
+
 ## [5.7.0](https://github.com/dgreif/ring/compare/v5.6.2...v5.7.0) (2019-09-17)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.8.2](https://github.com/dgreif/ring/compare/v5.8.1...v5.8.2) (2019-10-04)
+
+
+### Bug Fixes
+
+* additional logging on auth failure ([45ed068](https://github.com/dgreif/ring/commit/45ed068))
+
 ### [5.8.1](https://github.com/dgreif/ring/compare/v5.8.0...v5.8.1) (2019-10-04)
 
 

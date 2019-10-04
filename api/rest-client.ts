@@ -155,7 +155,7 @@ export class RingRestClient {
         errorMessage =
           `Failed to fetch oauth token from Ring. Verify that your ${authTypeMessage} correct. ` +
           responseError
-      logError(requestError.response)
+      logError(requestError.response || requestError)
       logError(errorMessage)
       throw new Error(errorMessage)
     }

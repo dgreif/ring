@@ -13,4 +13,6 @@ cp LICENSE release-homebridge
 cp homebridge/README.md release-homebridge
 cp CHANGELOG.md release-homebridge
 cp homebridge/config.schema.json release-homebridge
+mkdir -p release-homebridge/branding
+cp -R branding/* release-homebridge/branding
 node ./build/package-homebridge

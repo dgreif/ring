@@ -13,7 +13,12 @@
     "smart",
     "light",
     "beam",
-    "security"
+    "security",
+    "category-security",
+    "category-lighting",
+    "category-video",
+    "category-hubs",
+    "category-outdoor"
   ],
   "engines": {
     "node": ">=8.3.0",

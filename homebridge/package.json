@@ -1,10 +1,10 @@
 {
-  "name": "homebridge-ring",
-  "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
+  "name": "@hoobs/ring",
+  "description": "HOOBS plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/homebridge/index.js",
   "keywords": [
     "homebridge",
-    "homebridge-plugin",
+    "hoobs-certified",
     "ring",
     "doorbell",
     "doorbot",

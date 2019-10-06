@@ -14,7 +14,10 @@
       "password": {
         "title": "Password",
         "type": "string",
-        "placeholder": "Password"
+        "placeholder": "Password",
+        "options": {
+          "hidden": true
+        }
       },
       "refreshToken": {
         "title": "Refresh Token",
@@ -108,8 +111,14 @@
       "type": "flex",
       "flex-flow": "row wrap",
       "items": [
-        "email",
-        "password"
+        {
+          "key": "email",
+          "type": "email"
+        },
+        {
+          "key": "password",
+          "type": "password"
+        }
       ]
     },
     {

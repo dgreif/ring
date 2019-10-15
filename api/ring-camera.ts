@@ -47,17 +47,13 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
-function getExistingDoorbellType(data: CameraData): DoorbellType | undefined {
-  if (
-    !data ||
-    !data.settings ||
-    !data.settings.chime_settings ||
-    (!data.settings.chime_settings.type &&
-      data.settings.chime_settings.type !== 0)
-  ) {
+function getExistingDoorbellType({
+  settings: { chime_settings }
+}: CameraData): DoorbellType | undefined {
+  if (!chime_settings || (!chime_settings.type && chime_settings.type !== 0)) {
     return undefined
   }
-  return data.settings.chime_settings.type
+  return chime_settings.type
 }
 
 export class RingCamera {

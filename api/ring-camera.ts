@@ -5,7 +5,8 @@ import {
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
-  SnapshotTimestamp
+  SnapshotTimestamp,
+  DoorbellType
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -46,6 +47,19 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
+function getExistingDoorbellType(data: CameraData): DoorbellType | undefined {
+  if (
+    !data ||
+    !data.settings ||
+    !data.settings.chime_settings ||
+    (!data.settings.chime_settings.type &&
+      data.settings.chime_settings.type !== 0)
+  ) {
+    return undefined
+  }
+  return data.settings.chime_settings.type
+}
+
 export class RingCamera {
   id = this.initialData.id
   deviceType = this.initialData.kind
@@ -59,6 +73,7 @@ export class RingCamera {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
+  existingDoorbellType = getExistingDoorbellType(this.initialData)
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -152,6 +167,35 @@ export class RingCamera {
     })
 
     this.updateData({ ...this.data, siren_status: { seconds_remaining: 1 } })
+
+    return true
+  }
+
+  // Enable or disable the existing doorbell (if digital or mechanical)
+  async setExistingDoorbell(on: boolean) {
+    if (this.existingDoorbellType === undefined) {
+      return false
+    }
+
+    await this.restClient.request({
+      method: 'PUT',
+      url: clientApi(`doorbots/${this.id}`),
+      data: {
+        'doorbot[description]': this.name,
+        'doorbot[settings][chime_settings][enable]': on
+      }
+    })
+
+    this.updateData({
+      ...this.data,
+      settings: {
+        ...this.data.settings,
+        chime_settings: {
+          ...this.data.settings.chime_settings,
+          enable: on
+        }
+      }
+    })
 
     return true
   }

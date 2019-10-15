@@ -66,6 +66,7 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideDoorbellSwitch": true,
   "hideCameraMotionSensor": true,
   "hideCameraSirenSwitch": true,
+  "hideExistingDoorbellSwitch": true,
   "hideAlarmSirenSwitch": true,
   "cameraStatusPollingSeconds": 20,
   "cameraDingsPollingSeconds": 2,
@@ -81,6 +82,7 @@ Option | Default | Explanation
 `hideDoorbellSwitch` | `false` | If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`. You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden (notifications can be configured in the settings for the doorbell camera in the Home app)
 `hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit.
 `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
+`hideExistingDoorbellSwitch` | `false` | If `true`, hides the switch for existing doorbells in HomeKit.
 `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
 `showPanicButtons` | `false` | Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
@@ -106,6 +108,8 @@ Walk through the setup pages and when you are done, you should see several devic
   * Light (if camera is equipped)
   * Siren Switch (if camera is equipped)
     * Can be hidden with `hideCameraSirenSwitch`
+  * Existing Doorbell Switch (if doorbell is equipped)
+    * Can be hidden with `hideExistingDoorbellSwitch`
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`

@@ -85,6 +85,27 @@ export class Camera extends BaseAccessory<RingCamera> {
       )
     }
 
+    if (
+      device.existingDoorbellType !== undefined &&
+      !config.hideExistingDoorbellSwitch
+    ) {
+      this.registerCharacteristic(
+        Characteristic.On,
+        Service.Switch,
+        data => {
+          return Boolean(
+            data.settings &&
+              data.settings.chime_settings &&
+              data.settings.chime_settings.enable
+          )
+        },
+        value => device.setExistingDoorbell(value),
+        0,
+        device.name + ' Existing Doorbell',
+        () => device.requestUpdate()
+      )
+    }
+
     this.registerCharacteristic(
       Characteristic.Manufacturer,
       Service.AccessoryInformation,

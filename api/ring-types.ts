@@ -271,6 +271,12 @@ export interface TicketAsset {
   uuid: string
 }
 
+export enum DoorbellType {
+  Mechanical = 0,
+  Digital = 1,
+  None = 2
+}
+
 export interface CameraData {
   id: number
   description: string
@@ -295,26 +301,30 @@ export interface CameraData {
       zone1: any
       zone2: any
       zone3: any
-      motion_snooze_preset_profile: string
-      live_view_preset_profile: string
-      live_view_presets: string[]
-      motion_snooze_presets: string[]
-      doorbell_volume: number
-      chime_settings: any
-      video_settings: any
-      motion_announcement: boolean
-      stream_setting: number
-      advanced_motion_detection_enabled: boolean
-      advanced_motion_detection_human_only_mode: boolean
-      luma_night_threshold: number
-      enable_audio_recording: boolean | null
-      people_detection_eligible: false
-      pir_settings?: any
-      pir_motion_zones?: number[]
-      floodlight_settings?: any
-      light_schedule_settings?: any
-      luma_light_threshold?: number
     }
+    motion_snooze_preset_profile: string
+    live_view_preset_profile: string
+    live_view_presets: string[]
+    motion_snooze_presets: string[]
+    doorbell_volume: number
+    chime_settings: {
+      type: DoorbellType
+      enable: boolean
+      duration: number
+    }
+    video_settings: any
+    motion_announcement: boolean
+    stream_setting: number
+    advanced_motion_detection_enabled: boolean
+    advanced_motion_detection_human_only_mode: boolean
+    luma_night_threshold: number
+    enable_audio_recording: boolean | null
+    people_detection_eligible: false
+    pir_settings?: any
+    pir_motion_zones?: number[]
+    floodlight_settings?: any
+    light_schedule_settings?: any
+    luma_light_threshold?: number
   }
   features: {
     motions_enabled: boolean

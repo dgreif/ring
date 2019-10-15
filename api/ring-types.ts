@@ -307,7 +307,7 @@ export interface CameraData {
     live_view_presets: string[]
     motion_snooze_presets: string[]
     doorbell_volume: number
-    chime_settings: {
+    chime_settings?: {
       type: DoorbellType
       enable: boolean
       duration: number

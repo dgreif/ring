@@ -1,6 +1,6 @@
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { RingCamera } from '../api'
+import { RingCamera, DoorbellType } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
@@ -87,6 +87,7 @@ export class Camera extends BaseAccessory<RingCamera> {
 
     if (
       device.existingDoorbellType !== undefined &&
+      device.existingDoorbellType !== DoorbellType.None &&
       !config.hideExistingDoorbellSwitch
     ) {
       this.registerCharacteristic(

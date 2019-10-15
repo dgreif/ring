@@ -86,21 +86,19 @@ export class Camera extends BaseAccessory<RingCamera> {
     }
 
     if (
-      device.existingDoorbellType !== undefined &&
-      device.existingDoorbellType !== DoorbellType.None &&
-      !config.hideExistingDoorbellSwitch
+      device.inHomeDoorbellType !== undefined &&
+      device.inHomeDoorbellType !== DoorbellType.None &&
+      !config.hideInHomeDoorbellSwitch
     ) {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Switch,
         data => {
           return Boolean(
-            data.settings &&
-              data.settings.chime_settings &&
-              data.settings.chime_settings.enable
+            data.settings.chime_settings && data.settings.chime_settings.enable
           )
         },
-        value => device.setExistingDoorbell(value),
+        value => device.setInHomeDoorbell(value),
         0,
         device.name + ' Existing Doorbell',
         () => device.requestUpdate()

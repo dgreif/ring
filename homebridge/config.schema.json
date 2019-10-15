@@ -48,8 +48,8 @@
         "title": "Hide Camera Siren Switch",
         "type": "boolean"
       },
-      "hideExistingDoorbellSwitch": {
-        "title": "Hide Existing Doorbell Switch",
+      "hideInHomeDoorbellSwitch": {
+        "title": "Hide In-Home Doorbell Switch",
         "type": "booolean"
       },
       "hideAlarmSirenSwitch": {
@@ -135,7 +135,7 @@
         "hideDoorbellSwitch",
         "hideCameraMotionSensor",
         "hideCameraSirenSwitch",
-        "hideExistingDoorbellSwitch",
+        "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",
         "showPanicButtons",
         "beamDurationSeconds",

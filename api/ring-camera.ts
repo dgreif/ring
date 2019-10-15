@@ -47,7 +47,7 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
-function getExistingDoorbellType({
+function getInHomeDoorbellType({
   settings: { chime_settings }
 }: CameraData): DoorbellType | undefined {
   if (!chime_settings || (!chime_settings.type && chime_settings.type !== 0)) {
@@ -69,7 +69,7 @@ export class RingCamera {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
-  existingDoorbellType = getExistingDoorbellType(this.initialData)
+  inHomeDoorbellType = getInHomeDoorbellType(this.initialData)
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -167,9 +167,9 @@ export class RingCamera {
     return true
   }
 
-  // Enable or disable the existing doorbell (if digital or mechanical)
-  async setExistingDoorbell(on: boolean) {
-    if (this.existingDoorbellType === undefined) {
+  // Enable or disable the in-home doorbell (if digital or mechanical)
+  async setInHomeDoorbell(on: boolean) {
+    if (this.inHomeDoorbellType === undefined) {
       return false
     }
 

@@ -125,12 +125,21 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     )
   }
 
-  registerObservableCharacteristic(
-    characteristicType: HAP.Characteristic,
-    serviceType: Service,
-    onValue: Observable<any>,
+  registerObservableCharacteristic<T extends string | number | boolean>({
+    characteristicType,
+    serviceType,
+    onValue,
+    setValue,
+    name,
+    requestUpdate
+  }: {
+    characteristicType: HAP.Characteristic
+    serviceType: Service
+    onValue: Observable<T>
+    setValue?: (value: T) => any
     name?: string
-  ) {
+    requestUpdate?: () => any
+  }) {
     const service = this.getService(serviceType, name),
       characteristic = service.getCharacteristic(characteristicType)
 
@@ -138,6 +147,10 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
       try {
         const value = await onValue.pipe(take(1)).toPromise()
         callback(null, value)
+
+        if (requestUpdate) {
+          requestUpdate()
+        }
       } catch (e) {
         callback(e)
       }
@@ -146,6 +159,15 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     onValue.subscribe(value => {
       characteristic.updateValue(value)
     })
+
+    if (setValue) {
+      characteristic.on('set', (newValue, callback) => {
+        Promise.resolve(setValue(newValue)).catch(e => {
+          this.logger.error(e)
+        })
+        callback()
+      })
+    }
   }
 
   pruneUnusedServices() {

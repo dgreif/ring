@@ -1,6 +1,6 @@
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { RingCamera, CameraData, getInHomeDoorbellStatus } from '../api'
+import { RingCamera } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
@@ -22,11 +22,11 @@ export class Camera extends BaseAccessory<RingCamera> {
     accessory.configureCameraSource(cameraSource)
 
     if (!config.hideCameraMotionSensor) {
-      this.registerObservableCharacteristic(
-        Characteristic.MotionDetected,
-        Service.MotionSensor,
-        device.onMotionDetected
-      )
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.MotionDetected,
+        serviceType: Service.MotionSensor,
+        onValue: device.onMotionDetected
+      })
 
       device.onMotionDetected.pipe(filter(motion => motion)).subscribe(() => {
         this.logger.info(device.name + ' Detected Motion')
@@ -42,18 +42,18 @@ export class Camera extends BaseAccessory<RingCamera> {
         this.logger.info(device.name + ' Button Pressed')
       })
 
-      this.registerObservableCharacteristic(
-        Characteristic.ProgrammableSwitchEvent,
-        Service.Doorbell,
-        onPressed
-      )
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.ProgrammableSwitchEvent,
+        serviceType: Service.Doorbell,
+        onValue: onPressed
+      })
 
       if (!config.hideDoorbellSwitch) {
-        this.registerObservableCharacteristic(
-          Characteristic.ProgrammableSwitchEvent,
-          Service.StatelessProgrammableSwitch,
-          onPressed
-        )
+        this.registerObservableCharacteristic({
+          characteristicType: Characteristic.ProgrammableSwitchEvent,
+          serviceType: Service.StatelessProgrammableSwitch,
+          onValue: onPressed
+        })
       }
     }
 
@@ -93,20 +93,14 @@ export class Camera extends BaseAccessory<RingCamera> {
           this.inHomeDoorbellStatus = data
         }
       )
-      this.registerCharacteristic(
-        Characteristic.On,
-        Service.Switch,
-        (data: CameraData) =>
-          Boolean(
-            this.inHomeDoorbellStatus !== undefined
-              ? this.inHomeDoorbellStatus
-              : getInHomeDoorbellStatus(data)
-          ),
-        (value: boolean) => device.setInHomeDoorbell(value),
-        0,
-        device.name + ' In-Home Doorbell',
-        () => device.requestUpdate()
-      )
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: Service.Switch,
+        onValue: device.onInHomeDoorbellStatus,
+        setValue: value => device.setInHomeDoorbell(value),
+        name: device.name + ' In-Home Doorbell',
+        requestUpdate: () => device.requestUpdate()
+      })
     }
 
     this.registerCharacteristic(
@@ -140,15 +134,15 @@ export class Camera extends BaseAccessory<RingCamera> {
         }
       )
 
-      this.registerObservableCharacteristic(
-        Characteristic.BatteryLevel,
-        Service.BatteryService,
-        device.onBatteryLevel.pipe(
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.BatteryLevel,
+        serviceType: Service.BatteryService,
+        onValue: device.onBatteryLevel.pipe(
           map(batteryLevel => {
             return batteryLevel === null ? 100 : batteryLevel
           })
         )
-      )
+      })
     }
   }
 }

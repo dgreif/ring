@@ -109,6 +109,7 @@ Walk through the setup pages and when you are done, you should see several devic
   * Siren Switch (if camera is equipped)
     * Can be hidden with `hideCameraSirenSwitch`
   * In-Home Doorbell Switch (if doorbell is equipped)
+    * This will turn your physical in-home doorbell (mechanical/digital) on and off.  Useful for automating situations where you don't want your in-home doorbell to ring during certain situations, such as when a child's night light is on, or during certain hours of the night. 
     * Can be hidden with `hideInHomeDoorbellSwitch`
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed

@@ -3,10 +3,10 @@ import {
   batteryCameraKinds,
   CameraData,
   CameraHealth,
+  DoorbellType,
   HistoricalDingGlobal,
   RingCameraModel,
-  SnapshotTimestamp,
-  DoorbellType
+  SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -47,13 +47,6 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
-export function getInHomeDoorbellStatus(data: CameraData): boolean | undefined {
-  if (!data.settings.chime_settings) {
-    return undefined
-  }
-  return data.settings.chime_settings.enable
-}
-
 export class RingCamera {
   id = this.initialData.id
   deviceType = this.initialData.kind
@@ -67,12 +60,6 @@ export class RingCamera {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
-  hasInHomeDoorbell = Boolean(
-    this.initialData.settings.chime_settings &&
-      [DoorbellType.Mechanical, DoorbellType.Digital].includes(
-        this.initialData.settings.chime_settings.type
-      )
-  )
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -94,7 +81,9 @@ export class RingCamera {
     distinctUntilChanged()
   )
   onInHomeDoorbellStatus = this.onData.pipe(
-    map(getInHomeDoorbellStatus),
+    map(({ settings: { chime_settings } }: CameraData) => {
+      return Boolean(chime_settings && chime_settings.enable)
+    }),
     distinctUntilChanged()
   )
 
@@ -136,7 +125,18 @@ export class RingCamera {
     return this.data.alerts.connection === 'offline'
   }
 
-  doorbotUrl(path: string) {
+  get hasInHomeDoorbell() {
+    const { chime_settings } = this.data.settings
+
+    return Boolean(
+      chime_settings &&
+        [DoorbellType.Mechanical, DoorbellType.Digital].includes(
+          chime_settings.type
+        )
+    )
+  }
+
+  doorbotUrl(path = '') {
     return clientApi(`doorbots/${this.id}/${path}`)
   }
 
@@ -182,9 +182,8 @@ export class RingCamera {
 
     await this.restClient.request({
       method: 'PUT',
-      url: clientApi(`doorbots/${this.id}`),
+      url: this.doorbotUrl(),
       data: {
-        'doorbot[description]': this.name,
         'doorbot[settings][chime_settings][enable]': on
       }
     })

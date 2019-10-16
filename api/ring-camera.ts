@@ -5,8 +5,7 @@ import {
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
-  SnapshotTimestamp,
-  DoorbellType
+  SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -47,13 +46,11 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
-function getInHomeDoorbellType({
-  settings: { chime_settings }
-}: CameraData): DoorbellType | undefined {
-  if (!chime_settings || (!chime_settings.type && chime_settings.type !== 0)) {
+function getInHomeDoorbellStatus(data: CameraData): boolean | undefined {
+  if (!data.settings.chime_settings) {
     return undefined
   }
-  return chime_settings.type
+  return data.settings.chime_settings.enable
 }
 
 export class RingCamera {
@@ -69,7 +66,9 @@ export class RingCamera {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
-  inHomeDoorbellType = getInHomeDoorbellType(this.initialData)
+  hasInHomeDoorbell =
+    this.initialData.settings.chime_settings &&
+    this.initialData.settings.chime_settings.type
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -88,6 +87,10 @@ export class RingCamera {
   )
   onBatteryLevel = this.onData.pipe(
     map(getBatteryLevel),
+    distinctUntilChanged()
+  )
+  onInHomeDoorbellStatus = this.onData.pipe(
+    map(getInHomeDoorbellStatus),
     distinctUntilChanged()
   )
 
@@ -169,7 +172,7 @@ export class RingCamera {
 
   // Enable or disable the in-home doorbell (if digital or mechanical)
   async setInHomeDoorbell(on: boolean) {
-    if (this.inHomeDoorbellType === undefined) {
+    if (this.hasInHomeDoorbell === undefined) {
       return false
     }
 
@@ -182,16 +185,7 @@ export class RingCamera {
       }
     })
 
-    this.updateData({
-      ...this.data,
-      settings: {
-        ...this.data.settings,
-        chime_settings: {
-          ...this.data.settings.chime_settings,
-          enable: on
-        }
-      }
-    })
+    this.requestUpdate()
 
     return true
   }

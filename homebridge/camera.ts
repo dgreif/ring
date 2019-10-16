@@ -1,6 +1,6 @@
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { RingCamera, DoorbellType } from '../api'
+import { RingCamera, DoorbellType, CameraData } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
@@ -53,6 +53,19 @@ export class Camera extends BaseAccessory<RingCamera> {
           onPressed
         )
       }
+
+      if (!config.hideInHomeDoorbellSwitch) {
+        this.registerObservableCharacteristic(
+          Characteristic.On,
+          Service.Switch,
+          device.onInHomeDoorbellStatus.pipe(
+            map(inHomeDoorbellStatus => {
+              return Boolean(inHomeDoorbellStatus)
+            })
+          ),
+          device.name + ' Existing Doorbell'
+        )
+      }
     }
 
     if (device.hasLight) {
@@ -81,26 +94,6 @@ export class Camera extends BaseAccessory<RingCamera> {
         value => device.setSiren(value),
         0,
         device.name + ' Siren',
-        () => device.requestUpdate()
-      )
-    }
-
-    if (
-      device.inHomeDoorbellType !== undefined &&
-      device.inHomeDoorbellType !== DoorbellType.None &&
-      !config.hideInHomeDoorbellSwitch
-    ) {
-      this.registerCharacteristic(
-        Characteristic.On,
-        Service.Switch,
-        data => {
-          return Boolean(
-            data.settings.chime_settings && data.settings.chime_settings.enable
-          )
-        },
-        value => device.setInHomeDoorbell(value),
-        0,
-        device.name + ' Existing Doorbell',
         () => device.requestUpdate()
       )
     }

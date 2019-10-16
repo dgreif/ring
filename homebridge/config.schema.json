@@ -50,7 +50,7 @@
       },
       "hideInHomeDoorbellSwitch": {
         "title": "Hide In-Home Doorbell Switch",
-        "type": "booolean"
+        "type": "boolean"
       },
       "hideAlarmSirenSwitch": {
         "title": "Hide Alarm Siren Switch",

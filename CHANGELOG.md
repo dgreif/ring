@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.9.0](https://github.com/dgreif/ring/compare/v5.8.2...v5.9.0) (2019-10-16)
+
+
+### Bug Fixes
+
+* **homebridge:** change email & password field types in config.schema.json ([c065449](https://github.com/dgreif/ring/commit/c065449))
+
+
+### Features
+
+* **homebridge:** in-home doorbell switch for equipped doorbell cameras ([#152](https://github.com/dgreif/ring/issues/152)) ([3537646](https://github.com/dgreif/ring/commit/3537646))
+
 ### [5.8.2](https://github.com/dgreif/ring/compare/v5.8.1...v5.8.2) (2019-10-04)
 
 

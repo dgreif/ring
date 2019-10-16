@@ -48,6 +48,10 @@
         "title": "Hide Camera Siren Switch",
         "type": "boolean"
       },
+      "hideInHomeDoorbellSwitch": {
+        "title": "Hide In-Home Doorbell Switch",
+        "type": "boolean"
+      },
       "hideAlarmSirenSwitch": {
         "title": "Hide Alarm Siren Switch",
         "type": "boolean",
@@ -94,15 +98,10 @@
     },
     "oneOf": [
       {
-        "required": [
-          "email",
-          "password"
-        ]
+        "required": ["email", "password"]
       },
       {
-        "required": [
-          "refreshToken"
-        ]
+        "required": ["refreshToken"]
       }
     ]
   },
@@ -124,9 +123,7 @@
     {
       "type": "flex",
       "flex-flow": "row wrap",
-      "items": [
-        "refreshToken"
-      ]
+      "items": ["refreshToken"]
     },
     {
       "type": "fieldset",
@@ -138,6 +135,7 @@
         "hideDoorbellSwitch",
         "hideCameraMotionSensor",
         "hideCameraSirenSwitch",
+        "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",
         "showPanicButtons",
         "beamDurationSeconds",

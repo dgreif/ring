@@ -1,11 +1,13 @@
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { RingCamera } from '../api'
+import { RingCamera, CameraData, getInHomeDoorbellStatus } from '../api'
 import { BaseAccessory } from './base-accessory'
 import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 
 export class Camera extends BaseAccessory<RingCamera> {
+  private inHomeDoorbellStatus: boolean | undefined
+
   constructor(
     public readonly device: RingCamera,
     public readonly accessory: HAP.Accessory,
@@ -81,6 +83,28 @@ export class Camera extends BaseAccessory<RingCamera> {
         value => device.setSiren(value),
         0,
         device.name + ' Siren',
+        () => device.requestUpdate()
+      )
+    }
+
+    if (device.hasInHomeDoorbell && !config.hideInHomeDoorbellSwitch) {
+      this.device.onInHomeDoorbellStatus.subscribe(
+        (data: boolean | undefined) => {
+          this.inHomeDoorbellStatus = data
+        }
+      )
+      this.registerCharacteristic(
+        Characteristic.On,
+        Service.Switch,
+        (data: CameraData) =>
+          Boolean(
+            this.inHomeDoorbellStatus !== undefined
+              ? this.inHomeDoorbellStatus
+              : getInHomeDoorbellStatus(data)
+          ),
+        (value: boolean) => device.setInHomeDoorbell(value),
+        0,
+        device.name + ' In-Home Doorbell',
         () => device.requestUpdate()
       )
     }

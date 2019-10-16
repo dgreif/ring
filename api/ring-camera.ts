@@ -47,7 +47,7 @@ function getBatteryLevel(data: CameraData) {
   return batteryLevel
 }
 
-function getInHomeDoorbellStatus(data: CameraData): boolean | undefined {
+export function getInHomeDoorbellStatus(data: CameraData): boolean | undefined {
   if (!data.settings.chime_settings) {
     return undefined
   }

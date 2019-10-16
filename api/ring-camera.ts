@@ -5,7 +5,8 @@ import {
   CameraHealth,
   HistoricalDingGlobal,
   RingCameraModel,
-  SnapshotTimestamp
+  SnapshotTimestamp,
+  DoorbellType
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -66,9 +67,12 @@ export class RingCamera {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
-  hasInHomeDoorbell =
+  hasInHomeDoorbell = Boolean(
     this.initialData.settings.chime_settings &&
-    this.initialData.settings.chime_settings.type
+      [DoorbellType.Mechanical, DoorbellType.Digital].includes(
+        this.initialData.settings.chime_settings.type
+      )
+  )
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -172,7 +176,7 @@ export class RingCamera {
 
   // Enable or disable the in-home doorbell (if digital or mechanical)
   async setInHomeDoorbell(on: boolean) {
-    if (this.hasInHomeDoorbell === undefined) {
+    if (!this.hasInHomeDoorbell) {
       return false
     }
 

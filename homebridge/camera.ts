@@ -105,7 +105,7 @@ export class Camera extends BaseAccessory<RingCamera> {
         (value: boolean) => device.setInHomeDoorbell(value),
         0,
         device.name + ' In-Home Doorbell',
-        device.requestUpdate
+        () => device.requestUpdate()
       )
     }
 

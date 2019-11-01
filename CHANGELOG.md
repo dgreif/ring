@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.9.1](https://github.com/dgreif/ring/compare/v5.9.0...v5.9.1) (2019-11-01)
+
+
+### Bug Fixes
+
+* **homebridge:** prevent overlapping camera switch services ([c59623e](https://github.com/dgreif/ring/commit/c59623e))
+
 ## [5.9.0](https://github.com/dgreif/ring/compare/v5.8.2...v5.9.0) (2019-10-16)
 
 

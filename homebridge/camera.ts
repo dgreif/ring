@@ -83,7 +83,8 @@ export class Camera extends BaseAccessory<RingCamera> {
         value => device.setSiren(value),
         0,
         device.name + ' Siren',
-        () => device.requestUpdate()
+        () => device.requestUpdate(),
+        'Siren'
       )
     }
 
@@ -96,6 +97,7 @@ export class Camera extends BaseAccessory<RingCamera> {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.On,
         serviceType: Service.Switch,
+        serviceSubType: 'In-Home Doorbell',
         onValue: device.onInHomeDoorbellStatus,
         setValue: value => device.setInHomeDoorbell(value),
         name: device.name + ' In-Home Doorbell',

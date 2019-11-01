@@ -128,11 +128,14 @@ export class RingCamera {
   get hasInHomeDoorbell() {
     const { chime_settings } = this.data.settings
 
-    return Boolean(
-      chime_settings &&
-        [DoorbellType.Mechanical, DoorbellType.Digital].includes(
-          chime_settings.type
-        )
+    return (
+      this.isDoorbot &&
+      Boolean(
+        chime_settings &&
+          [DoorbellType.Mechanical, DoorbellType.Digital].includes(
+            chime_settings.type
+          )
+      )
     )
   }
 

@@ -3,6 +3,7 @@ import {
   batteryCameraKinds,
   CameraData,
   CameraHealth,
+  DoorbellType,
   HistoricalDingGlobal,
   RingCameraModel,
   SnapshotTimestamp
@@ -79,6 +80,12 @@ export class RingCamera {
     map(getBatteryLevel),
     distinctUntilChanged()
   )
+  onInHomeDoorbellStatus = this.onData.pipe(
+    map(({ settings: { chime_settings } }: CameraData) => {
+      return Boolean(chime_settings && chime_settings.enable)
+    }),
+    distinctUntilChanged()
+  )
 
   constructor(
     private initialData: CameraData,
@@ -118,7 +125,21 @@ export class RingCamera {
     return this.data.alerts.connection === 'offline'
   }
 
-  doorbotUrl(path: string) {
+  get hasInHomeDoorbell() {
+    const { chime_settings } = this.data.settings
+
+    return (
+      this.isDoorbot &&
+      Boolean(
+        chime_settings &&
+          [DoorbellType.Mechanical, DoorbellType.Digital].includes(
+            chime_settings.type
+          )
+      )
+    )
+  }
+
+  doorbotUrl(path = '') {
     return clientApi(`doorbots/${this.id}/${path}`)
   }
 
@@ -152,6 +173,25 @@ export class RingCamera {
     })
 
     this.updateData({ ...this.data, siren_status: { seconds_remaining: 1 } })
+
+    return true
+  }
+
+  // Enable or disable the in-home doorbell (if digital or mechanical)
+  async setInHomeDoorbell(on: boolean) {
+    if (!this.hasInHomeDoorbell) {
+      return false
+    }
+
+    await this.restClient.request({
+      method: 'PUT',
+      url: this.doorbotUrl(),
+      data: {
+        'doorbot[settings][chime_settings][enable]': on
+      }
+    })
+
+    this.requestUpdate()
 
     return true
   }

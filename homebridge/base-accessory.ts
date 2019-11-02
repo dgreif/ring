@@ -35,6 +35,16 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
       service =
         existingService || this.accessory.addService(serviceType, name, subType)
 
+    if (
+      existingService &&
+      existingService.displayName &&
+      name !== existingService.displayName
+    ) {
+      throw new Error(
+        `Overlapping services for device ${this.device.name} - ${name} != ${existingService.displayName} - ${serviceType}`
+      )
+    }
+
     if (!this.servicesInUse.includes(service)) {
       this.servicesInUse.push(service)
     }
@@ -49,9 +59,10 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     setValue?: (data: any) => any,
     setValueDebounceTime = 0,
     name?: string,
-    requestUpdate?: () => any
+    requestUpdate?: () => any,
+    serviceSubType?: string
   ) {
-    const service = this.getService(serviceType, name),
+    const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType),
       { device } = this
 
@@ -125,19 +136,34 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     )
   }
 
-  registerObservableCharacteristic(
-    characteristicType: HAP.Characteristic,
-    serviceType: Service,
-    onValue: Observable<any>,
+  registerObservableCharacteristic<T extends string | number | boolean>({
+    characteristicType,
+    serviceType,
+    serviceSubType,
+    onValue,
+    setValue,
+    name,
+    requestUpdate
+  }: {
+    characteristicType: HAP.Characteristic
+    serviceType: Service
+    serviceSubType?: string
+    onValue: Observable<T>
+    setValue?: (value: T) => any
     name?: string
-  ) {
-    const service = this.getService(serviceType, name),
+    requestUpdate?: () => any
+  }) {
+    const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType)
 
     characteristic.on('get', async callback => {
       try {
         const value = await onValue.pipe(take(1)).toPromise()
         callback(null, value)
+
+        if (requestUpdate) {
+          requestUpdate()
+        }
       } catch (e) {
         callback(e)
       }
@@ -146,6 +172,15 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     onValue.subscribe(value => {
       characteristic.updateValue(value)
     })
+
+    if (setValue) {
+      characteristic.on('set', (newValue, callback) => {
+        Promise.resolve(setValue(newValue)).catch(e => {
+          this.logger.error(e)
+        })
+        callback()
+      })
+    }
   }
 
   pruneUnusedServices() {

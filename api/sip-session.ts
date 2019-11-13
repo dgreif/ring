@@ -434,7 +434,10 @@ export class SipSession {
           : []),
         ...(ffmpegOptions.output || [])
       ],
-      ff = spawn('ffmpeg', ffOptions.map(x => x.toString()))
+      ff = spawn(
+        'ffmpeg',
+        ffOptions.map(x => x.toString())
+      )
 
     ff.stderr.on('data', (data: any) => {
       logDebug(`ffmpeg stderr: ${data}`)

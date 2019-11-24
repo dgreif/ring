@@ -101,10 +101,7 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
     }
 
     ;(this.device.onData as Observable<T['data']>)
-      .pipe(
-        map(getValue),
-        distinctUntilChanged()
-      )
+      .pipe(map(getValue), distinctUntilChanged())
       .subscribe(value => characteristic.updateValue(value))
   }
 

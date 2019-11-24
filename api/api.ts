@@ -84,13 +84,10 @@ export class RingApi {
             debounceTime(cameraDingsPollingSeconds * 1000)
           )
         : EMPTY,
-      camerasById = cameras.reduce(
-        (byId, camera) => {
-          byId[camera.id] = camera
-          return byId
-        },
-        {} as { [id: number]: RingCamera }
-      )
+      camerasById = cameras.reduce((byId, camera) => {
+        byId[camera.id] = camera
+        return byId
+      }, {} as { [id: number]: RingCamera })
 
     if (!cameras.length) {
       return

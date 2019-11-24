@@ -56,30 +56,27 @@ export class Location {
     filter(m => m.msg === deviceListMessageType)
   )
   onDevices = this.onDeviceList.pipe(
-    scan(
-      (devices, { body: deviceList, src }) => {
-        if (!deviceList) {
-          return devices
+    scan((devices, { body: deviceList, src }) => {
+      if (!deviceList) {
+        return devices
+      }
+
+      if (!this.receivedAssetDeviceLists.includes(src)) {
+        this.receivedAssetDeviceLists.push(src)
+      }
+
+      return deviceList.reduce((updatedDevices: RingDevice[], data) => {
+        const flatData = flattenDeviceData(data),
+          existingDevice = updatedDevices.find(x => x.zid === flatData.zid)
+
+        if (existingDevice) {
+          existingDevice.updateData(flatData)
+          return updatedDevices
         }
 
-        if (!this.receivedAssetDeviceLists.includes(src)) {
-          this.receivedAssetDeviceLists.push(src)
-        }
-
-        return deviceList.reduce((updatedDevices: RingDevice[], data) => {
-          const flatData = flattenDeviceData(data),
-            existingDevice = updatedDevices.find(x => x.zid === flatData.zid)
-
-          if (existingDevice) {
-            existingDevice.updateData(flatData)
-            return updatedDevices
-          }
-
-          return [...updatedDevices, new RingDevice(flatData, this, src)]
-        }, devices)
-      },
-      [] as RingDevice[]
-    ),
+        return [...updatedDevices, new RingDevice(flatData, this, src)]
+      }, devices)
+    }, [] as RingDevice[]),
     distinctUntilChanged((a, b) => a.length === b.length),
     filter(() => {
       return Boolean(
@@ -247,10 +244,7 @@ export class Location {
   async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
     const securityPanel = await this.getSecurityPanel(),
       updatedDataPromise = securityPanel.onData
-        .pipe(
-          skip(1),
-          take(1)
-        )
+        .pipe(skip(1), take(1))
         .toPromise()
 
     await this.sendCommandToSecurityPanel('security-panel.switch-mode', {

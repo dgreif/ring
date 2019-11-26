@@ -121,7 +121,7 @@ See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4
 
 ## homebridge-ring
 
-The `homebridge-ring` is also maintained in this repo.  It's readme can be found in [the `homebridge` directory](./homebridge)
+The `homebridge-ring` is also maintained in this repo.  Its readme can be found in [the `homebridge` directory](./homebridge)
 
 ## Credits
 

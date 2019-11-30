@@ -57,6 +57,11 @@
         "type": "boolean",
         "description": "Hides switch that allows you to turn on the siren of the Ring Alarm.  Enable this is your Siri commands keep setting off the siren and you don't care about having the switch"
       },
+      "hideUnsupportedServices": {
+        "title": "Hide Unsupported Services",
+        "type": "boolean",
+        "description": "Hides the alarm Base Station and Keypad devices in HomeKit.  These are only supported by third-party HomeKit apps, not the native Home app."
+      },
       "showPanicButtons": {
         "title": "Show Panic Buttons",
         "type": "boolean",
@@ -137,6 +142,7 @@
         "hideCameraSirenSwitch",
         "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",
+        "hideUnsupportedServices",
         "showPanicButtons",
         "beamDurationSeconds",
         "debug",

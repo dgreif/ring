@@ -3,7 +3,8 @@ import {
   RingCamera,
   RingDevice,
   RingDeviceType,
-  RingDeviceCategory
+  RingDeviceCategory,
+  RingCameraKind
 } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
@@ -27,7 +28,11 @@ import { platformName, pluginName } from './plugin-info'
 import { useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 
-const debug = __filename.includes('release-homebridge')
+const debug = __filename.includes('release-homebridge'),
+  unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
+    RingDeviceType.BaseStation,
+    RingDeviceType.Keypad
+  ]
 
 process.env.RING_DEBUG = debug ? 'true' : ''
 
@@ -171,7 +176,9 @@ export class RingPlatform {
           if (
             !AccessoryClass ||
             (this.config.hideLightGroups &&
-              device.deviceType === RingDeviceType.BeamsLightGroupSwitch)
+              device.deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
+            (this.config.hideUnsupportedServices &&
+              unsupportedDeviceTypes.includes(device.deviceType))
           ) {
             return
           }

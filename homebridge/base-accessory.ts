@@ -25,7 +25,9 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
       return serviceType
     }
 
-    if (process.env.RING_DEBUG) {
+    const debug = process.env.RING_DEBUG === 'true'
+
+    if (debug) {
       name = 'TEST ' + name
     }
 
@@ -36,6 +38,7 @@ export abstract class BaseAccessory<T extends RingDevice | RingCamera> {
         existingService || this.accessory.addService(serviceType, name, subType)
 
     if (
+      debug &&
       existingService &&
       existingService.displayName &&
       name !== existingService.displayName

@@ -68,6 +68,7 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideCameraSirenSwitch": true,
   "hideInHomeDoorbellSwitch": true,
   "hideAlarmSirenSwitch": true,
+  "hideUnsupportedServices": true,
   "cameraStatusPollingSeconds": 20,
   "cameraDingsPollingSeconds": 2,
   "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
@@ -84,6 +85,7 @@ Option | Default | Explanation
 `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
 `hideInHomeDoorbellSwitch` | `false` | If `true`, hides the switch for in-home doorbells in HomeKit.
 `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
+`hideUnsupportedServices` | `false` | If `true`, hides the alarm Base Station and Keypad devices in HomeKit.  These are only supported by third-party HomeKit apps, not the native Home app.
 `showPanicButtons` | `false` | Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
@@ -131,9 +133,11 @@ If you are having issues with your cameras in the Home app, please see the [Came
   * Base Station
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
     * Battery status
+    * Can be hidden with `hideUnsupportedServices`
   * Keypad
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
     * Battery status
+    * Can be hidden with `hideUnsupportedServices`
   * Contact Sensor
     * Detect if sensor is open or closed
     * Tamper status

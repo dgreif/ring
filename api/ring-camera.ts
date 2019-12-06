@@ -290,7 +290,7 @@ export class RingCamera {
       logInfo(
         `Snapshot for ${
           this.name
-        } is still within it's life time (${currentTimestampAge / 1000}s old)`
+        } is still within its life time (${currentTimestampAge / 1000}s old)`
       )
       return true
     }

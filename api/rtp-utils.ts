@@ -15,22 +15,13 @@ export interface SrtpOptions {
   srtpSalt: Buffer
 }
 
-export function getPublicIpViaStun() {
-  return new Promise<string>((resolve, reject) => {
-    reject(new Error('test'))
-    stun.request('stun.l.google.com:19302', (err: Error, response: any) => {
-      if (err) {
-        return reject(err)
-      }
-
-      resolve(response.getXorAddress().address)
-    })
-  })
+export async function getPublicIpViaStun() {
+  const response = await stun.request('stun.l.google.com:19302')
+  return response.getXorAddress().address
 }
 
 export function getPublicIp() {
   return fetchPublicIp()
-    .catch(() => fetchPublicIp({ https: true }))
     .catch(() => getPublicIpViaStun())
     .catch(() => {
       throw new Error('Failed to retrieve public ip address')

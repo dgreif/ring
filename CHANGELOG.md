@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.0](https://github.com/dgreif/ring/compare/v5.9.1...v5.10.0) (2019-11-30)
+
+
+### Features
+
+* `hideUnsupportedServices` option ([3c9e456](https://github.com/dgreif/ring/commit/3c9e456a0c8a43ac22cc9a407a845864cbdb128e)), closes [#169](https://github.com/dgreif/ring/issues/169) [#187](https://github.com/dgreif/ring/issues/187)
+
+
+### Bug Fixes
+
+* remove overlapping service check except during debug ([b7390dc](https://github.com/dgreif/ring/commit/b7390dc73d28190435b613661c0fddb00e475b16)), closes [#175](https://github.com/dgreif/ring/issues/175) [#190](https://github.com/dgreif/ring/issues/190)
+
 ### [5.9.1](https://github.com/dgreif/ring/compare/v5.9.0...v5.9.1) (2019-11-01)
 
 

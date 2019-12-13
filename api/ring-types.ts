@@ -6,6 +6,8 @@ export enum RingDeviceType {
   SecurityPanel = 'security-panel',
   ContactSensor = 'sensor.contact',
   MotionSensor = 'sensor.motion',
+  FloodFreezeSensor = 'sensor.flood-freeze',
+  FreezeSensor = 'sensor.freeze',
   RangeExtender = 'range-extender.zwave',
   ZigbeeAdapter = 'adapter.zigbee',
   AccessCodeVault = 'access-code.vault',
@@ -184,6 +186,8 @@ export interface RingDeviceData {
   alarmStatus?: 'active'
   co?: { alarmStatus?: 'active' }
   smoke?: { alarmStatus?: 'active' }
+  flood?: { faulted?: boolean }
+  freeze?: { faulted?: boolean }
   motionStatus?: 'clear' | 'faulted'
   groupId?: string
 

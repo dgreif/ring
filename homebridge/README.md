@@ -146,6 +146,18 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Detect motion
     * Tamper status
     * Battery status
+  * Flood/Freeze Sensor (**untested**)
+    * Detect water leak
+    * Detect freezing temperature
+      * Shows as a contact sensor in HomeKit because there is no "Freeze" sensor service
+    * Tamper status
+    * Battery status
+  * Freeze Sensor (**untested**)
+    * Detect freezing temperature
+    * Shows as a contact sensor in HomeKit because there is no "Freeze" sensor service
+    * Has not been confirmed to work yet.  Please open an issue on GitHub if you have a Freeze Sensor (not the flood/freeze sensor) and can test it out for me
+    * Tamper status
+    * Battery status
   * Ring Smart Lights (Motion Detector, Flood/Path/Spot Lights, Transformer)
     * On/Off
     * Brightness Level

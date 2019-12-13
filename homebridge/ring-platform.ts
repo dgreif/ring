@@ -27,6 +27,7 @@ import { RingAuth } from '../api/rest-client'
 import { platformName, pluginName } from './plugin-info'
 import { useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
+import { FloodFreezeSensor } from './flood-freeze-sensor'
 
 const debug = __filename.includes('release-homebridge'),
   unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
@@ -42,10 +43,13 @@ function getAccessoryClass(
   const { deviceType } = device
 
   switch (deviceType) {
+    case RingDeviceType.FreezeSensor:
     case RingDeviceType.ContactSensor:
       return ContactSensor
     case RingDeviceType.MotionSensor:
       return MotionSensor
+    case RingDeviceType.FloodFreezeSensor:
+      return FloodFreezeSensor
     case RingDeviceType.SecurityPanel:
       return SecurityPanel
     case RingDeviceType.BaseStation:

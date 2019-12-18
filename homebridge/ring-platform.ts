@@ -184,6 +184,9 @@ export class RingPlatform {
             (this.config.hideUnsupportedServices &&
               unsupportedDeviceTypes.includes(device.deviceType))
           ) {
+            this.log.info(
+              `Hidden accessory ${device.deviceType} ${displayName}`
+            )
             return
           }
 

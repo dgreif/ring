@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.0](https://github.com/dgreif/ring/compare/v5.11.0-alpha.1...v5.11.0) (2019-12-20)
+
+
+### Bug Fixes
+
+* **homebridge:** use occupancy sensor for freeze sensors ([c488820](https://github.com/dgreif/ring/commit/c488820035aeea3b390c745c09c50cd43d429207))
+
 ## [5.11.0-alpha.1](https://github.com/dgreif/ring/compare/v5.11.0-alpha.0...v5.11.0-alpha.1) (2019-12-18)
 
 

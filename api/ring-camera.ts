@@ -245,10 +245,11 @@ export class RingCamera {
     })
   }
 
-  async getRecording(dingIdStr: string) {
-    const response = await this.restClient.request<{ url: string }>({
-      url: clientApi(`dings/${dingIdStr}/share/play?disable_redirect=true`)
-    })
+  async getRecording(dingIdStr: string, transcoded = false) {
+    const path = transcoded ? 'recording' : 'share/play',
+      response = await this.restClient.request<{ url: string }>({
+        url: clientApi(`dings/${dingIdStr}/${path}?disable_redirect=true`)
+      })
     return response.url
   }
 

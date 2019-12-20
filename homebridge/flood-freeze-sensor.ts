@@ -2,6 +2,7 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
+import { distinctUntilChanged, filter, map } from 'rxjs/operators'
 
 export class FloodFreezeSensor extends BaseDeviceAccessory {
   constructor(
@@ -13,36 +14,49 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
     super()
 
     const {
-      Characteristic: { LeakDetected, ContactSensorState },
-      Service: { LeakSensor, CarbonMonoxideSensor }
-    } = hap
+        Characteristic: { LeakDetected, OccupancyDetected },
+        Service: { LeakSensor, OccupancySensor }
+      } = hap,
+      leakService = this.getService(LeakSensor, `${device.name} Flood Sensor`),
+      freezeService = this.getService(
+        OccupancySensor,
+        `${device.name} Freeze Sensor`
+      ),
+      onFloodDetected = device.onData.pipe(
+        map(data => {
+          return data.flood && data.flood.faulted
+            ? LeakDetected.LEAK_DETECTED
+            : LeakDetected.LEAK_NOT_DETECTED
+        }),
+        distinctUntilChanged()
+      ),
+      onFreezeDetected = device.onData.pipe(
+        map(data => {
+          return data.freeze && data.freeze.faulted
+            ? OccupancyDetected.OCCUPANCY_DETECTED
+            : OccupancyDetected.OCCUPANCY_NOT_DETECTED
+        }),
+        distinctUntilChanged()
+      )
 
-    this.registerCharacteristic(
-      LeakDetected,
-      LeakSensor,
-      data => {
-        return data.flood && data.flood.faulted
-          ? LeakDetected.LEAK_DETECTED
-          : LeakDetected.LEAK_NOT_DETECTED
-      },
-      undefined,
-      undefined,
-      'Flood Sensor'
-    )
-    this.registerCharacteristic(
-      ContactSensorState,
-      CarbonMonoxideSensor,
-      data => {
-        return data.freeze && data.freeze.faulted
-          ? ContactSensorState.CONTACT_NOT_DETECTED
-          : ContactSensorState.CONTACT_DETECTED
-      },
-      undefined,
-      undefined,
-      'Freeze Sensor'
-    )
+    this.initSensorService(leakService)
+    this.registerObservableCharacteristic({
+      characteristicType: LeakDetected,
+      serviceType: leakService,
+      onValue: onFloodDetected
+    })
+    onFloodDetected.pipe(filter(faulted => faulted)).subscribe(() => {
+      this.logger.info(device.name + ' Detected Flooding')
+    })
 
-    this.initSensorService(LeakSensor)
-    this.initSensorService(ContactSensorState)
+    this.initSensorService(freezeService)
+    this.registerObservableCharacteristic({
+      characteristicType: OccupancyDetected,
+      serviceType: freezeService,
+      onValue: onFreezeDetected
+    })
+    onFreezeDetected.pipe(filter(faulted => faulted)).subscribe(() => {
+      this.logger.info(device.name + ' Detected Freezing')
+    })
   }
 }

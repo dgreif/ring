@@ -10,21 +10,21 @@ the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
 
- 
+
 ## Installation
 
 Assuming a global installation of `homebridge`:
 
 `npm i -g homebridge-ring`
- 
+
 ## Homebridge Configuration
- 
+
 Add the `Ring` platform in your homebridge `config.json` file.
- 
+
 ### Basic Configuration
 
 If you _do not have_ 2fa enabled, this is all that you need to get up and running.  It will enable all devices from Ring and no other configuration is required.  [See below](https://github.com/dgreif/ring/tree/master/homebridge#camera-setup) for instructions to add cameras to HomeKit.
- 
+
  ```json
 {
   "platforms": [
@@ -40,7 +40,7 @@ If you _do not have_ 2fa enabled, this is all that you need to get up and runnin
 ### Alternate Basic Config (2fa)
 
 If you _have_ 2fa enable, you _must_ use a `refreshToken` instead of email/password.  It also works without 2fa if you simply don't want your email/password in your homebridge `config.json`.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth) for details on generating a `refreshToken`.
- 
+
  ```json
 {
   "platforms": [
@@ -111,13 +111,13 @@ Walk through the setup pages and when you are done, you should see several devic
   * Siren Switch (if camera is equipped)
     * Can be hidden with `hideCameraSirenSwitch`
   * In-Home Doorbell Switch (if doorbell is equipped)
-    * This will turn your physical in-home doorbell (mechanical/digital) on and off.  Useful for automating situations where you don't want your in-home doorbell to ring during certain situations, such as when a child's night light is on, or during certain hours of the night. 
+    * This will turn your physical in-home doorbell (mechanical/digital) on and off.  Useful for automating situations where you don't want your in-home doorbell to ring during certain situations, such as when a child's night light is on, or during certain hours of the night.
     * Can be hidden with `hideInHomeDoorbellSwitch`
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`
 
-**Battery Camera Limitations** - There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details. 
+**Battery Camera Limitations** - There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details.
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera
@@ -146,15 +146,15 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Detect motion
     * Tamper status
     * Battery status
-  * Flood/Freeze Sensor (**untested**)
+  * Flood/Freeze Sensor
     * Detect water leak
     * Detect freezing temperature
-      * Shows as a contact sensor in HomeKit because there is no "Freeze" sensor service
+      * Shows as an occupancy sensor in HomeKit because there is no "Freeze" sensor service.  "Occupied" indicates that freezing temperatures have been detected
     * Tamper status
     * Battery status
   * Freeze Sensor (**untested**)
     * Detect freezing temperature
-    * Shows as a contact sensor in HomeKit because there is no "Freeze" sensor service
+    * Shows as an occupancy sensor in HomeKit because there is no "Freeze" sensor service.  "Occupied" indicates that freezing temperatures have been detected
     * Has not been confirmed to work yet.  Please open an issue on GitHub if you have a Freeze Sensor (not the flood/freeze sensor) and can test it out for me
     * Tamper status
     * Battery status
@@ -180,7 +180,7 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * These can be added by setting `showPanicButtons: true` in your config
     * Creates `Burglar Alarm` and `Fire Alarm` switches in a new `Panic Buttons` device in HomeKit
     * Use these at your own risk.  **I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**
-    * If either switch is turned on, you will receive a call from Ring monitoring to verify the emergency, and then authorities will be dispatched 
+    * If either switch is turned on, you will receive a call from Ring monitoring to verify the emergency, and then authorities will be dispatched
 
 ### Alarm Modes
 

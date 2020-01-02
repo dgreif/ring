@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.12.1](https://github.com/dgreif/ring/compare/v5.12.0...v5.12.1) (2020-01-02)
+
+
+### Bug Fixes
+
+* use default gateway when opening live stream port ([be2cfe1](https://github.com/dgreif/ring/commit/be2cfe1afa40100f387e295b37a49f0e98cb4e82)), closes [#191](https://github.com/dgreif/ring/issues/191)
+
 ## [5.12.0](https://github.com/dgreif/ring/compare/v5.11.0...v5.12.0) (2019-12-20)
 
 

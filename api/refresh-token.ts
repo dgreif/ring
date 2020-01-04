@@ -38,4 +38,5 @@ export async function acquireRefreshToken() {
   console.log(`"refreshToken": "${auth.refresh_token}"`)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 process.on('unhandledRejection', () => {})

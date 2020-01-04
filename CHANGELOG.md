@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.12.1](https://github.com/dgreif/ring/compare/v5.12.0...v5.12.1) (2020-01-02)
+
+
+### Bug Fixes
+
+* use default gateway when opening live stream port ([be2cfe1](https://github.com/dgreif/ring/commit/be2cfe1afa40100f387e295b37a49f0e98cb4e82)), closes [#191](https://github.com/dgreif/ring/issues/191)
+
+## [5.12.0](https://github.com/dgreif/ring/compare/v5.11.0...v5.12.0) (2019-12-20)
+
+
+### Features
+
+* **api:** option to get transcoded recordings ([10a85da](https://github.com/dgreif/ring/commit/10a85da41a869530007313c34c0f36eaa03b9b88)), closes [#204](https://github.com/dgreif/ring/issues/204)
+
+## [5.11.0](https://github.com/dgreif/ring/compare/v5.11.0-alpha.1...v5.11.0) (2019-12-20)
+
+
+### Bug Fixes
+
+* **homebridge:** use occupancy sensor for freeze sensors ([c488820](https://github.com/dgreif/ring/commit/c488820035aeea3b390c745c09c50cd43d429207))
+
+## [5.11.0-alpha.1](https://github.com/dgreif/ring/compare/v5.11.0-alpha.0...v5.11.0-alpha.1) (2019-12-18)
+
+
+### Features
+
+* **homebridge:** log hidden accessories ([ae841fb](https://github.com/dgreif/ring/commit/ae841fb4b79dce09e7a5a835335920840b8b7cbd))
+
+## [5.11.0-alpha.0](https://github.com/dgreif/ring/compare/v5.10.0...v5.11.0-alpha.0) (2019-12-13)
+
+
+### Features
+
+* **homebridge:** flood/freeze and freeze sensors ([5ae4367](https://github.com/dgreif/ring/commit/5ae43678b23fa38a67f2c20916c284021615990c))
+
 ## [5.10.0](https://github.com/dgreif/ring/compare/v5.9.1...v5.10.0) (2019-11-30)
 
 

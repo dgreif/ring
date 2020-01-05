@@ -10,7 +10,7 @@ import {
 import {
   bindProxyPorts,
   getSrtpValue,
-  releasePort,
+  releasePorts,
   reservePorts,
   sendUdpHolePunch,
   SrtpOptions
@@ -162,7 +162,11 @@ export class SipSession {
   private onCallEndedSubject = new ReplaySubject(1)
   private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
   private subscriptions: Subscription[] = []
-  private reservedPorts = [this.sipOptions.tlsPort!]
+  reservedPorts = [
+    this.sipOptions.tlsPort,
+    this.rtpOptions.video.port,
+    this.rtpOptions.audio.port
+  ]
   onCallEnded = this.onCallEndedSubject.asObservable()
   onRemoteRtpOptions = this.onRemoteRtpOptionsSubject.asObservable()
   sdp: string
@@ -242,47 +246,51 @@ export class SipSession {
       throw new Error('SIP Session has already ended')
     }
 
-    const remoteRtpOptions = await this.invite(),
-      { address: remoteAddress } = remoteRtpOptions,
-      keepAliveInterval = 15,
-      portMappingLifetime = keepAliveInterval + 5,
-      holePunch = () => {
-        sendUdpHolePunch(
-          this.audioSocket,
-          this.audioStream.port,
-          remoteRtpOptions.audio.port,
-          remoteAddress,
-          portMappingLifetime
-        )
-        sendUdpHolePunch(
-          this.videoSocket,
-          this.videoStream.port,
-          remoteRtpOptions.video.port,
-          remoteAddress,
-          portMappingLifetime
-        )
+    try {
+      const remoteRtpOptions = await this.invite(),
+        { address: remoteAddress } = remoteRtpOptions,
+        keepAliveInterval = 15,
+        portMappingLifetime = keepAliveInterval + 5,
+        holePunch = () => {
+          sendUdpHolePunch(
+            this.audioSocket,
+            this.audioStream.port,
+            remoteRtpOptions.audio.port,
+            remoteAddress,
+            portMappingLifetime
+          )
+          sendUdpHolePunch(
+            this.videoSocket,
+            this.videoStream.port,
+            remoteRtpOptions.video.port,
+            remoteAddress,
+            portMappingLifetime
+          )
+        }
+
+      if (ffmpegOptions) {
+        this.startTranscoder(ffmpegOptions, remoteRtpOptions)
       }
 
-    if (ffmpegOptions) {
-      this.startTranscoder(ffmpegOptions, remoteRtpOptions)
+      this.audioSocket.on('message', (message, info) => {
+        this.onAudioPacket.next({ message, info })
+      })
+      this.videoSocket.on('message', (message, info) => {
+        this.onVideoPacket.next({ message, info })
+      })
+
+      // punch to begin with to make sure we get through NAT
+      holePunch()
+
+      // hole punch every 15 seconds to keep stream alive and port open
+      this.subscriptions.push(
+        interval(keepAliveInterval * 1000).subscribe(holePunch)
+      )
+      return remoteRtpOptions
+    } catch (e) {
+      this.callEnded(true)
+      throw e
     }
-
-    this.audioSocket.on('message', (message, info) => {
-      this.onAudioPacket.next({ message, info })
-    })
-    this.videoSocket.on('message', (message, info) => {
-      this.onVideoPacket.next({ message, info })
-    })
-
-    // punch to begin with to make sure we get through NAT
-    holePunch()
-
-    // hole punch every 15 seconds to keep stream alive and port open
-    this.subscriptions.push(
-      interval(keepAliveInterval * 1000).subscribe(holePunch)
-    )
-
-    return remoteRtpOptions
   }
 
   sipRequest({
@@ -417,8 +425,14 @@ export class SipSession {
           getSrtpValue(this.rtpOptions.video),
           getSrtpValue(remoteRtpOptions.video)
         )
-        .replace(this.audioStream.port.toString(), audioPort.toString())
-        .replace(this.videoStream.port.toString(), videoPort.toString()),
+        .replace(
+          'm=audio ' + this.audioStream.port.toString(),
+          'm=audio ' + audioPort.toString()
+        )
+        .replace(
+          'm=video ' + this.videoStream.port.toString(),
+          'm=video ' + videoPort.toString()
+        ),
       ffOptions = [
         '-hide_banner',
         '-protocol_whitelist',
@@ -455,8 +469,6 @@ export class SipSession {
 
       process.removeListener('SIGINT', exitHandler)
       process.removeListener('exit', exitHandler)
-      releasePort(audioPort)
-      releasePort(videoPort)
     }
 
     process.on('SIGINT', exitHandler)
@@ -478,7 +490,7 @@ export class SipSession {
   }
 
   async reservePort(bufferPorts = 0) {
-    const ports = await reservePorts(bufferPorts + 1)
+    const ports = await reservePorts({ count: bufferPorts + 1 })
     this.reservedPorts.push(...ports)
     return ports[0]
   }
@@ -501,7 +513,7 @@ export class SipSession {
     this.videoSocket.close()
     this.audioSocket.close()
     this.subscriptions.forEach(subscription => subscription.unsubscribe())
-    this.reservedPorts.forEach(releasePort)
+    releasePorts(this.reservedPorts)
   }
 
   stop() {

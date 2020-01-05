@@ -20,12 +20,7 @@ import {
   take
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
-import {
-  bindToRandomPort,
-  getPublicIp,
-  reservePorts,
-  SrtpOptions
-} from './rtp-utils'
+import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 
@@ -383,8 +378,8 @@ export class RingCamera {
       ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
-        bindToRandomPort(videoSocket),
-        bindToRandomPort(audioSocket),
+        bindToPort(videoSocket, { forExternalUse: true }),
+        bindToPort(audioSocket, { forExternalUse: true }),
         reservePorts()
       ]),
       rtpOptions = {

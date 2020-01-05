@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.13.0-alpha.0](https://github.com/dgreif/ring/compare/v5.12.1...v5.13.0-alpha.0) (2020-01-05)
+
+
+### Features
+
+* configurable external port range ([a5255f8](https://github.com/dgreif/ring/commit/a5255f89b36a5b15b24164270058e3d9f2e43073))
+
 ### [5.12.1](https://github.com/dgreif/ring/compare/v5.12.0...v5.12.1) (2020-01-02)
 
 

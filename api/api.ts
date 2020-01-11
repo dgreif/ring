@@ -109,9 +109,6 @@ export class RingApi {
       onCamerasRequestUpdate = merge(
         ...cameras.map(camera => camera.onRequestUpdate)
       ),
-      onCamerasRequestActiveDings = merge(
-        ...cameras.map(camera => camera.onRequestActiveDings)
-      ),
       onUpdateReceived = new Subject(),
       onActiveDingsReceived = new Subject(),
       onPollForStatusUpdate = cameraStatusPollingSeconds
@@ -158,23 +155,21 @@ export class RingApi {
       onUpdateReceived.next() // kick off polling
     }
 
-    merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
-      async () => {
-        const activeDings = await this.fetchActiveDings().catch(() => null)
-        onActiveDingsReceived.next()
+    onPollForActiveDings.subscribe(async () => {
+      const activeDings = await this.fetchActiveDings().catch(() => null)
+      onActiveDingsReceived.next()
 
-        if (!activeDings || !activeDings.length) {
-          return
-        }
-
-        activeDings.forEach(activeDing => {
-          const camera = camerasById[activeDing.doorbot_id]
-          if (camera) {
-            camera.processActiveDing(activeDing)
-          }
-        })
+      if (!activeDings || !activeDings.length) {
+        return
       }
-    )
+
+      activeDings.forEach(activeDing => {
+        const camera = camerasById[activeDing.doorbot_id]
+        if (camera) {
+          camera.processActiveDing(activeDing)
+        }
+      })
+    })
 
     if (cameraDingsPollingSeconds) {
       onActiveDingsReceived.next() // kick off polling

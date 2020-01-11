@@ -57,7 +57,6 @@ export class RingCamera {
       this.batteryLevel >= 0)
 
   onRequestUpdate = new Subject()
-  onRequestActiveDings = new Subject()
 
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
@@ -220,22 +219,10 @@ export class RingCamera {
   }
 
   startVideoOnDemand() {
-    return this.restClient.request({
+    return this.restClient.request<ActiveDing>({
       method: 'POST',
-      url: this.doorbotUrl('vod')
+      url: this.doorbotUrl('live_view')
     })
-  }
-
-  async getSipConnectionDetails() {
-    const vodPromise = this.onNewDing
-      .pipe(
-        filter(x => x.kind === 'on_demand'),
-        take(1)
-      )
-      .toPromise()
-    await this.startVideoOnDemand()
-    this.onRequestActiveDings.next()
-    return vodPromise
   }
 
   processActiveDing(ding: ActiveDing) {
@@ -363,22 +350,13 @@ export class RingCamera {
     return this.lastSnapshotPromise
   }
 
-  sipUsedDingIds: string[] = []
-
   async getSipOptions() {
-    const activeDings = this.onActiveDings.getValue(),
-      existingDing = activeDings
-        .slice()
-        .reverse()
-        .find(x => !this.sipUsedDingIds.includes(x.id_str)),
-      targetDing = existingDing || (await this.getSipConnectionDetails())
-
-    this.sipUsedDingIds.push(targetDing.id_str)
+    const ding = await this.startVideoOnDemand()
 
     return {
-      to: targetDing.sip_to,
-      from: targetDing.sip_from,
-      dingId: targetDing.id_str
+      to: ding.sip_to,
+      from: ding.sip_from,
+      dingId: ding.id_str
     }
   }
 

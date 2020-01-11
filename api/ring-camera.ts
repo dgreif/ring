@@ -86,7 +86,25 @@ export class RingCamera {
     private initialData: CameraData,
     public isDoorbot: boolean,
     private restClient: RingRestClient
-  ) {}
+  ) {
+    if (!initialData.subscribed) {
+      this.subscribeToDingEvents().catch(e => {
+        logError(
+          'Failed to subscribe ' + initialData.description + ' to ding events'
+        )
+        logError(e)
+      })
+    }
+
+    if (!initialData.subscribed_motions) {
+      this.subscribeToMotionEvents().catch(e => {
+        logError(
+          'Failed to subscribe ' + initialData.description + ' to motion events'
+        )
+        logError(e)
+      })
+    }
+  }
 
   updateData(update: CameraData) {
     this.onData.next(update)
@@ -418,6 +436,34 @@ export class RingCamera {
     const sipSession = await this.createSipSession()
     await sipSession.start(ffmpegOptions)
     return sipSession
+  }
+
+  subscribeToDingEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('subscribe')
+    })
+  }
+
+  unsubscribeFromDingEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('unsubscribe')
+    })
+  }
+
+  subscribeToMotionEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('motions_subscribe')
+    })
+  }
+
+  unsubscribeFromMotionEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('motions_unsubscribe')
+    })
   }
 }
 

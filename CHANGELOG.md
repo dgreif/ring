@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.13.0](https://github.com/dgreif/ring/compare/v5.13.0-alpha.0...v5.13.0) (2020-01-11)
+
+
+### Bug Fixes
+
+* automatically subscribe cameras to motion and dings ([7bf4260](https://github.com/dgreif/ring/commit/7bf4260a7056a8eea87becd92d156fff914c45e5)), closes [#210](https://github.com/dgreif/ring/issues/210)
+* get or create active ding via new live_view endpoint ([4fb837e](https://github.com/dgreif/ring/commit/4fb837e1647c9bbc629cdf236680376d6451e546))
+
 ## [5.13.0-alpha.0](https://github.com/dgreif/ring/compare/v5.12.1...v5.13.0-alpha.0) (2020-01-05)
 
 

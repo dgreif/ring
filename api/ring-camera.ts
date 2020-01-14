@@ -57,6 +57,7 @@ export class RingCamera {
       this.batteryLevel >= 0)
 
   onRequestUpdate = new Subject()
+  onRequestActiveDings = new Subject()
 
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
@@ -76,7 +77,7 @@ export class RingCamera {
   )
   onInHomeDoorbellStatus = this.onData.pipe(
     map(({ settings: { chime_settings } }: CameraData) => {
-      return Boolean(chime_settings && chime_settings.enable)
+      return Boolean(chime_settings?.enable)
     }),
     distinctUntilChanged()
   )
@@ -219,10 +220,24 @@ export class RingCamera {
   }
 
   startVideoOnDemand() {
-    return this.restClient.request<ActiveDing>({
+    return this.restClient.request<ActiveDing | ''>({
       method: 'POST',
       url: this.doorbotUrl('live_view')
     })
+  }
+
+  async getSipConnectionDetails() {
+    const vodPromise = this.onNewDing.pipe(take(1)).toPromise(),
+      videoOnDemandDing = await this.startVideoOnDemand()
+
+    if (videoOnDemandDing && 'sip_from' in videoOnDemandDing) {
+      // wired cams return a ding from live_view so we don't need to wait
+      return videoOnDemandDing
+    }
+
+    // battery cams return '' from live_view so we need to request active dings and wait
+    this.onRequestActiveDings.next()
+    return vodPromise
   }
 
   processActiveDing(ding: ActiveDing) {
@@ -351,7 +366,9 @@ export class RingCamera {
   }
 
   async getSipOptions() {
-    const ding = await this.startVideoOnDemand()
+    const activeDings = this.onActiveDings.getValue(),
+      existingDing = activeDings.slice().reverse()[0],
+      ding = existingDing || (await this.getSipConnectionDetails())
 
     return {
       to: ding.sip_to,

@@ -220,8 +220,8 @@ export class SipSession {
       ff.stdout.pause()
       ff.kill()
 
-      process.removeListener('SIGINT', exitHandler)
-      process.removeListener('exit', exitHandler)
+      process.off('SIGINT', exitHandler)
+      process.off('exit', exitHandler)
     }
 
     process.on('SIGINT', exitHandler)

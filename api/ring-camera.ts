@@ -9,7 +9,7 @@ import {
   SnapshotTimestamp
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, Subject } from 'rxjs'
+import { BehaviorSubject, interval, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -17,12 +17,14 @@ import {
   publishReplay,
   refCount,
   share,
-  take
+  take,
+  takeUntil
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
+import { SipOptions } from './sip-call'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 30,
@@ -222,34 +224,57 @@ export class RingCamera {
   startVideoOnDemand() {
     return this.restClient.request<ActiveDing | ''>({
       method: 'POST',
-      url: this.doorbotUrl('live_view')
+      url: this.doorbotUrl('live_view') // Ring app uses vod for battery cams, but doesn't appear to be necessary
     })
   }
 
+  private pollForActiveDing() {
+    // try every second until a new ding is received
+    interval(1000)
+      .pipe(takeUntil(this.onNewDing))
+      .subscribe(() => {
+        this.onRequestActiveDings.next()
+      })
+  }
+
+  private expiredDingIds: string[] = []
   async getSipConnectionDetails() {
     const vodPromise = this.onNewDing.pipe(take(1)).toPromise(),
       videoOnDemandDing = await this.startVideoOnDemand()
 
-    if (videoOnDemandDing && 'sip_from' in videoOnDemandDing) {
+    if (
+      videoOnDemandDing &&
+      'sip_from' in videoOnDemandDing &&
+      !this.expiredDingIds.includes(videoOnDemandDing.id_str)
+    ) {
       // wired cams return a ding from live_view so we don't need to wait
       return videoOnDemandDing
     }
 
     // battery cams return '' from live_view so we need to request active dings and wait
-    this.onRequestActiveDings.next()
+    this.pollForActiveDing()
     return vodPromise
   }
 
+  private removeDingById(idToRemove: string) {
+    const allActiveDings = this.activeDings,
+      otherDings = allActiveDings.filter(ding => ding.id_str !== idToRemove)
+
+    this.onActiveDings.next(otherDings)
+  }
+
   processActiveDing(ding: ActiveDing) {
-    const activeDings = this.activeDings
+    const activeDings = this.activeDings,
+      dingId = ding.id_str
 
     this.onNewDing.next(ding)
-    this.onActiveDings.next(activeDings.concat([ding]))
+    this.onActiveDings.next(
+      activeDings.filter(d => d.id_str !== dingId).concat([ding])
+    )
 
     setTimeout(() => {
-      const allActiveDings = this.activeDings,
-        otherDings = allActiveDings.filter(oldDing => oldDing !== ding)
-      this.onActiveDings.next(otherDings)
+      this.removeDingById(ding.id_str)
+      this.expiredDingIds = this.expiredDingIds.filter(id => id !== dingId)
     }, 65 * 1000) // dings last ~1 minute
   }
 
@@ -365,16 +390,31 @@ export class RingCamera {
     return this.lastSnapshotPromise
   }
 
-  async getSipOptions() {
+  async getSipOptions(): Promise<SipOptions> {
     const activeDings = this.onActiveDings.getValue(),
-      existingDing = activeDings.slice().reverse()[0],
+      existingDing = activeDings
+        .filter(ding => !this.expiredDingIds.includes(ding.id_str))
+        .slice()
+        .reverse()[0],
       ding = existingDing || (await this.getSipConnectionDetails())
+
+    if (this.expiredDingIds.includes(ding.id_str)) {
+      logInfo('Waiting for a new live stream to start...')
+      await delay(500)
+      return this.getSipOptions()
+    }
 
     return {
       to: ding.sip_to,
       from: ding.sip_from,
       dingId: ding.id_str
     }
+  }
+
+  getUpdatedSipOptions(expiredDingId: string) {
+    // Got a 480 from sip session, which means it's no longer active
+    this.expiredDingIds.push(expiredDingId)
+    return this.getSipOptions()
   }
 
   async createSipSession(
@@ -408,13 +448,12 @@ export class RingCamera {
       }
 
     return new SipSession(
-      {
-        ...sipOptions,
-        tlsPort
-      },
+      sipOptions,
       rtpOptions,
       videoSocket,
-      audioSocket
+      audioSocket,
+      tlsPort,
+      this
     )
   }
 

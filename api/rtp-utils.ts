@@ -1,7 +1,7 @@
 import { createSocket, Socket } from 'dgram'
 import { AddressInfo } from 'net'
 import { v4 as fetchPublicIp } from 'public-ip'
-import { RtpOptions, SipSession } from './sip-session'
+import { SipSession } from './sip-session'
 import { ReplaySubject } from 'rxjs'
 import { filter, map, take } from 'rxjs/operators'
 import { randomBytes } from 'crypto'
@@ -22,6 +22,16 @@ export function setPreferredExternalPorts(start: number, end: number) {
 export interface SrtpOptions {
   srtpKey: Buffer
   srtpSalt: Buffer
+}
+
+export interface RtpStreamOptions extends Partial<SrtpOptions> {
+  port: number
+}
+
+export interface RtpOptions {
+  address: string
+  audio: RtpStreamOptions
+  video: RtpStreamOptions
 }
 
 export async function getPublicIpViaStun() {

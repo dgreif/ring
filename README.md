@@ -117,10 +117,6 @@ Some other useful propeties
 
 See the `examples` directory for additional code examples.
 
-## Upgrading from v3 to v4
-
-See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4
-
 ## homebridge-ring
 
 The `homebridge-ring` is also maintained in this repo.  Its readme can be found in [the `homebridge` directory](./homebridge)

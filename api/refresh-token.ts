@@ -1,13 +1,11 @@
 /* eslint-disable no-console */
-import 'dotenv/config'
 import { RingRestClient } from './rest-client'
 import { requestInput } from './util'
 import { AuthTokenResponse } from './ring-types'
 
 export async function acquireRefreshToken() {
-  const { env } = process,
-    email = env.RING_EMAIL || (await requestInput('Email: ')),
-    password = env.RING_PASS || (await requestInput('Password: ')),
+  const email = await requestInput('Email: '),
+    password = await requestInput('Password: '),
     restClient = new RingRestClient({ email, password }),
     getAuthWith2fa = async (): Promise<any> => {
       const code = await requestInput('2fa Code: ')

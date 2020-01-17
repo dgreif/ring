@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://github.com/dgreif/ring/compare/v5.13.1...v6.0.0) (2020-01-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** Conversion step to change from `homebridge-ring-alarm` to `homebridge-ring` has been removed.  If you are updating from v2, please first upgrade to version `5.13.1` before upgrading to version 6+
+* **api:** api.getHistory has been removed in favor of location.getCameraEvents
+* **api:** location.getEvents has been replaced with location.getCameraEvents
+* **api:** camera.getHistory has been replaced with camera.getEvents
+* **api:** camera.getRecording has been renamed to camera.getRecordingUrl and takes a second optional param `{ transcoded: true }` instead of `true`.  This allows for additional options if we decide to add any down the road
+* Node.js 10+ now required
+
+### Features
+
+* `ring-device-data-cli` for discovering new device types and data structures ([de3c23a](https://github.com/dgreif/ring/commit/de3c23a4769403f40cf8f491ff9278d37be4236d))
+* **api:** updated history/event methods for locations and cameras ([e415605](https://github.com/dgreif/ring/commit/e415605d8f4e96386d416efa783f541ab524a3e7))
+
+
+* **homebridge:** remove v3 conversion step to update homebridge plugin name ([c6c6057](https://github.com/dgreif/ring/commit/c6c605715f7115af16525b2cf410e94612f2dd9e))
+* update dependencies ([3e9ce7e](https://github.com/dgreif/ring/commit/3e9ce7e37ec1b40b556e56dca5445d2e3d984903))
+
 ### [5.13.1](https://github.com/dgreif/ring/compare/v5.13.0...v5.13.1) (2020-01-15)
 
 

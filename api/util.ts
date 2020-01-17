@@ -89,3 +89,10 @@ export function stringify(data: any) {
 
   return JSON.stringify(data) + ''
 }
+
+export function mapAsync<T, U>(
+  records: T[],
+  asyncMapper: (record: T) => Promise<U>
+): Promise<U[]> {
+  return Promise.all(records.map(record => asyncMapper(record)))
+}

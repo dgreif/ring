@@ -4,7 +4,8 @@
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/api/index.js",
   "bin": {
-    "ring-auth-cli": "ring-auth-cli.js"
+    "ring-auth-cli": "ring-auth-cli.js",
+    "ring-device-data-cli": "ring-device-data-cli.js"
   },
   "scripts": {
     "test": "eslint **/*.ts",
@@ -15,7 +16,8 @@
     "record-example": "npm run build && node ./lib/examples/record-example.js",
     "stream-example": "npm run build && node ./lib/examples/stream-example.js",
     "browser-example": "npm run build && node ./lib/examples/browser-example.js",
-    "cli": "npm run build && ./ring-auth-cli.js",
+    "auth-cli": "npm run build && ./ring-auth-cli.js",
+    "device-data-cli": "npm run build && ./ring-device-data-cli.js",
     "test-homebridge": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge",
     "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",

@@ -1,15 +1,13 @@
 /* eslint-disable no-console */
+import 'dotenv/config'
 import { RingRestClient } from './rest-client'
 import { requestInput } from './util'
 import { AuthTokenResponse } from './ring-types'
 
 export async function acquireRefreshToken() {
-  console.log(
-    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
-  )
-
-  const email = await requestInput('Email: '),
-    password = await requestInput('Password: '),
+  const { env } = process,
+    email = env.RING_EMAIL || (await requestInput('Email: ')),
+    password = env.RING_PASS || (await requestInput('Password: ')),
     restClient = new RingRestClient({ email, password }),
     getAuthWith2fa = async (): Promise<any> => {
       const code = await requestInput('2fa Code: ')
@@ -32,10 +30,20 @@ export async function acquireRefreshToken() {
       process.exit(1)
     })
 
+  return auth.refresh_token
+}
+
+export async function logRefreshToken() {
+  console.log(
+    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
+  )
+
+  const refreshToken = await acquireRefreshToken()
+
   console.log(
     '\nSuccessfully logged in to Ring. Please remove your email/password from your config and add the following instead:\n'
   )
-  console.log(`"refreshToken": "${auth.refresh_token}"`)
+  console.log(`"refreshToken": "${refreshToken}"`)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

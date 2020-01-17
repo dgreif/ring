@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('./lib/api/refresh-token').acquireRefreshToken()
+require('./lib/api/refresh-token').logRefreshToken()

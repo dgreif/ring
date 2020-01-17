@@ -7,6 +7,7 @@ mkdir -p release-homebridge/lib
 cp -R lib/* release-homebridge/lib
 rm -rf release-homebridge/lib/examples
 cp ring-auth-cli.js release-homebridge
+cp ring-device-data-cli.js release-homebridge
 cp package.json release-homebridge
 cp package-lock.json release-homebridge
 cp LICENSE release-homebridge

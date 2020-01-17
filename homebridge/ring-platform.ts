@@ -24,7 +24,6 @@ import { Switch } from './switch'
 import { Camera } from './camera'
 import { PanicButtons } from './panic-buttons'
 import { RingAuth } from '../api/rest-client'
-import { platformName, pluginName } from './plugin-info'
 import { useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
@@ -36,6 +35,8 @@ const debug = __filename.includes('release-homebridge'),
     RingDeviceType.Keypad
   ]
 
+export const platformName = 'Ring'
+export const pluginName = 'homebridge-ring'
 process.env.RING_DEBUG = debug ? 'true' : ''
 
 function getAccessoryClass(

@@ -275,7 +275,9 @@ export class RingRestClient {
           return this.request(options)
         }
         logError(
-          `http request failed.  ${url} returned unknown errors: (${errors}).`
+          `http request failed.  ${url} returned unknown errors: (${JSON.stringify(
+            errors
+          )}).`
         )
       }
 

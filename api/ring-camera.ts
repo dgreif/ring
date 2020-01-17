@@ -2,9 +2,11 @@ import {
   ActiveDing,
   batteryCameraKinds,
   CameraData,
+  CameraEventOptions,
+  CameraEventResponse,
   CameraHealth,
   DoorbellType,
-  HistoricalDingGlobal,
+  HistoryOptions,
   RingCameraModel,
   SnapshotTimestamp
 } from './ring-types'
@@ -42,6 +44,27 @@ function getBatteryLevel(data: CameraData) {
   }
 
   return batteryLevel
+}
+
+export function getSearchQueryString(
+  options: CameraEventOptions | (HistoryOptions & { accountId: string })
+) {
+  const queryString = Object.entries(options)
+    .map(([key, value]) => {
+      if (value === undefined) {
+        return ''
+      }
+
+      if (key === 'olderThanId') {
+        key = 'pagination_key'
+      }
+
+      return `${key}=${value}`
+    })
+    .filter(x => x)
+    .join('&')
+
+  return queryString.length ? `?${queryString}` : ''
 }
 
 export class RingCamera {
@@ -278,14 +301,17 @@ export class RingCamera {
     }, 65 * 1000) // dings last ~1 minute
   }
 
-  getHistory(limit = 10, favoritesOnly = false) {
-    const favoritesParam = favoritesOnly ? '&favorites=1' : ''
-    return this.restClient.request<HistoricalDingGlobal[]>({
-      url: this.doorbotUrl(`history?limit=${limit}${favoritesParam}`)
+  getEvents(options: CameraEventOptions) {
+    return this.restClient.request<CameraEventResponse>({
+      url: clientApi(
+        `locations/${this.data.location_id}/devices/${
+          this.id
+        }/events${getSearchQueryString(options)}`
+      )
     })
   }
 
-  async getRecording(dingIdStr: string, transcoded = false) {
+  async getRecordingUrl(dingIdStr: string, { transcoded = false } = {}) {
     const path = transcoded ? 'recording' : 'share/play',
       response = await this.restClient.request<{ url: string }>({
         url: clientApi(`dings/${dingIdStr}/${path}?disable_redirect=true`)

@@ -393,9 +393,10 @@ export type DingKind =
   | 'alarm' // Linked Event - Alarm
   | 'on_demand_link' // Linked Event - Motion
 
-export interface LocationEvent {
+export interface CameraEvent {
   created_at: string
   cv_properties: {
+    detection_type: null | any
     person_detected: null | any
     stream_broken: null | any
   }
@@ -406,35 +407,37 @@ export interface LocationEvent {
   kind: DingKind
   recorded: false
   recording_status: 'ready' | 'audio_ready'
-  state: 'timed_out' | 'completed' // answered
+  state: 'timed_out' | 'completed'
 }
-
-export interface HistoricalDingByDoorbotId {
-  id: number
-  created_at: string
-  answered: boolean
-  events: any[]
-  kind: DingKind
-  favorite: boolean
-  snapshot_url: string
-  recording: {
-    status: 'ready' | 'audio_ready' | null
-  }
-  duration: number
-  cv_properties: {
-    person_detected: null
-    stream_broken: null
-  }
-}
-
-export interface HistoricalDingGlobal extends HistoricalDingByDoorbotId {
-  doorbot: {
-    id: number
-    description: string
-  }
-}
-
 // timed_out + ding === Missed Ring
+// completed === Answered
+
+export interface CameraEventResponse {
+  events: CameraEvent[]
+  meta: { pagination_key: string }
+}
+
+export interface CameraEventOptions {
+  limit?: number
+  kind?: DingKind
+  state?: 'missed' | 'accepted' | 'person_detected'
+  favorites?: boolean
+  olderThanId?: string // alias for pagination_key
+  pagination_key?: string
+}
+
+export interface HistoryOptions {
+  limit?: number
+  offset?: number
+  category?: 'alarm' | 'beams'
+  maxLevel?: number
+}
+
+export interface RingDeviceHistoryEvent {
+  msg: 'DataUpdate'
+  datatype: MessageDataType
+  body: any // Skipping for now
+}
 
 export interface ActiveDing {
   id: number

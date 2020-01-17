@@ -5,7 +5,6 @@ import {
   BaseStation,
   BeamBridge,
   CameraData,
-  HistoricalDingGlobal,
   UserLocation
 } from './ring-types'
 import { RingCamera } from './ring-camera'
@@ -241,12 +240,5 @@ export class RingApi {
       (cameras, location) => [...cameras, ...location.cameras],
       [] as RingCamera[]
     )
-  }
-
-  getHistory(limit = 10, favoritesOnly = false) {
-    const favoritesParam = favoritesOnly ? '&favorites=1' : ''
-    return this.restClient.request<HistoricalDingGlobal[]>({
-      url: clientApi(`doorbots/history?limit=${limit}${favoritesParam}`)
-    })
   }
 }

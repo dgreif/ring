@@ -11,6 +11,7 @@
     "lint": "eslint **/*.ts --fix",
     "build": "rm -rf lib && tsc --declaration",
     "example": "npm run build && node ./lib/examples/example.js",
+    "api-example": "npm run build && node ./lib/examples/api-example.js",
     "record-example": "npm run build && node ./lib/examples/record-example.js",
     "stream-example": "npm run build && node ./lib/examples/stream-example.js",
     "browser-example": "npm run build && node ./lib/examples/browser-example.js",

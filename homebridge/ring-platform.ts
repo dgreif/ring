@@ -173,7 +173,7 @@ export class RingPlatform {
         }
 
         this.log.info(
-          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.locationDetails.name}" - locationId: ${location.locationId}`
+          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`
         )
         hapDevices.forEach(({ device, isCamera, id, name, AccessoryClass }) => {
           const uuid = hap.UUIDGen.generate(debugPrefix + id),

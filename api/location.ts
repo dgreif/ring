@@ -17,17 +17,20 @@ import {
   AlarmMode,
   AssetSession,
   DispatchSignalType,
-  LocationEvent,
   MessageDataType,
   MessageType,
   RingDeviceData,
   RingDeviceType,
   SocketIoMessage,
   TicketAsset,
-  UserLocation
+  UserLocation,
+  CameraEventResponse,
+  CameraEventOptions,
+  HistoryOptions,
+  RingDeviceHistoryEvent
 } from './ring-types'
 import { appApi, clientApi, RingRestClient } from './rest-client'
-import { RingCamera } from './ring-camera'
+import { getSearchQueryString, RingCamera } from './ring-camera'
 import { RingDevice } from './ring-device'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
@@ -101,16 +104,12 @@ export class Location {
   receivedAssetDeviceLists: string[] = []
   offlineAssets: string[] = []
 
-  public readonly locationId: string
-
   constructor(
     public readonly locationDetails: UserLocation,
     public readonly cameras: RingCamera[],
     public readonly hasHubs: boolean,
     private restClient: RingRestClient
   ) {
-    this.locationId = locationDetails.location_id
-
     // start listening for devices immediately
     this.onDevices.subscribe()
 
@@ -143,6 +142,18 @@ export class Location {
     })
   }
 
+  get id() {
+    return this.locationId
+  }
+
+  get locationId() {
+    return this.locationDetails.location_id
+  }
+
+  get name() {
+    return this.locationDetails.name
+  }
+
   async createConnection(): Promise<SocketIOClient.Socket> {
     logInfo('Creating location socket.io connection')
     const { assets, ticket, host } = await this.restClient.request<{
@@ -150,14 +161,14 @@ export class Location {
       host: string
       ticket: string
     }>({
-      url: appApi('clap/tickets?locationID=' + this.locationId)
+      url: appApi('clap/tickets?locationID=' + this.id)
     })
     this.assets = assets
     this.receivedAssetDeviceLists.length = 0
     this.offlineAssets.length = 0
 
     if (!assets.length) {
-      const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${this.locationDetails.name} - ${this.locationId}`
+      const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${this.name} - ${this.id}`
       logError(errorMessage)
       throw new Error(errorMessage)
     }
@@ -211,9 +222,7 @@ export class Location {
   getConnection() {
     if (!this.hasHubs) {
       return Promise.reject(
-        new Error(
-          `Location ${this.locationDetails.name} does not have any hubs`
-        )
+        new Error(`Location ${this.name} does not have any hubs`)
       )
     }
 
@@ -277,7 +286,7 @@ export class Location {
   setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
     this.restClient.request<any>({
       method: 'POST',
-      url: `https://api.ring.com/groups/v1/locations/${this.locationId}/groups/${groupId}/devices`,
+      url: `https://api.ring.com/groups/v1/locations/${this.id}/groups/${groupId}/devices`,
       data: {
         lights_on: {
           duration_seconds: durationSeconds,
@@ -335,7 +344,7 @@ export class Location {
 
     if (!securityPanel) {
       throw new Error(
-        `Could not find a security panel for location ${this.locationDetails.name} - ${this.locationId}`
+        `Could not find a security panel for location ${this.name} - ${this.id}`
       )
     }
 
@@ -354,22 +363,30 @@ export class Location {
     return this.setAlarmMode('all', bypassSensorZids)
   }
 
-  getEvents(limit = 50, olderThanId?: number | string) {
-    const paginationKey = olderThanId ? `&pagination_key=${olderThanId}` : ''
+  getHistory(options: HistoryOptions = {}) {
+    options.maxLevel = options.maxLevel || 50
 
-    return this.restClient.request<{
-      events: LocationEvent[]
-      meta: { pagination_key: string }
-    }>({
+    return this.restClient.request<RingDeviceHistoryEvent[]>({
+      url: appApi(
+        `rs/history${getSearchQueryString({
+          accountId: this.id,
+          ...options
+        })}`
+      )
+    })
+  }
+
+  getCameraEvents(options: CameraEventOptions = {}) {
+    return this.restClient.request<CameraEventResponse>({
       url: clientApi(
-        `locations/${this.locationId}/events?limit=${limit}${paginationKey}`
+        `locations/${this.id}/events${getSearchQueryString(options)}`
       )
     })
   }
 
   getAccountMonitoringStatus() {
     return this.restClient.request<AccountMonitoringStatus>({
-      url: appApi('rs/monitoring/accounts/' + this.locationId)
+      url: appApi('rs/monitoring/accounts/' + this.id)
     })
   }
 
@@ -388,7 +405,7 @@ export class Location {
     return this.restClient.request<AccountMonitoringStatus>({
       method: 'POST',
       url: appApi(
-        `rs/monitoring/accounts/${this.locationId}/assets/${baseStationAsset.uuid}/userAlarm`
+        `rs/monitoring/accounts/${this.id}/assets/${baseStationAsset.uuid}/userAlarm`
       ),
       json: true,
       data: {

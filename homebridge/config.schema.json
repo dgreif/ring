@@ -2,6 +2,7 @@
   "pluginAlias": "Ring",
   "pluginType": "platform",
   "headerDisplay": "You must supply _either_ **Email & Password** _or_ **Refresh Token**.  Refresh Token is your only option if you have 2fa enabled, but also works without 2fa if you don't want your password in plain text.  See [the wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth) for details on generating a refresh token",
+  "accountLinkingHeader": "Please supply your Ring credentials.  These will be used to contact the Ring servers and generate a unique access token for your account.  Your email and password will be sent directly to Ring and will not be stored anywhere.",
   "schema": {
     "type": "object",
     "properties": {

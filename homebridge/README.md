@@ -21,6 +21,10 @@ Assuming a global installation of `homebridge`:
 
 Add the `Ring` platform in your homebridge `config.json` file.
 
+### Easiest Configuration
+
+For the best experience setting up this plugin, please use [homebridge-config-ui-x](https://www.npmjs.com/package/homebridge-config-ui-x).  It will walk you through linking your account without any cli tools or storing your email/password.
+
 ### Basic Configuration
 
 If you _do not have_ 2fa enabled, this is all that you need to get up and running.  It will enable all devices from Ring and no other configuration is required.  [See below](https://github.com/dgreif/ring/tree/master/homebridge#camera-setup) for instructions to add cameras to HomeKit.

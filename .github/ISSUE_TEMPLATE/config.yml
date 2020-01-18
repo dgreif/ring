@@ -1,0 +1,12 @@
+
+blank_issues_enabled: false
+contact_links:
+  - name: Live Stream Issues
+    url: https://github.com/dgreif/ring/issues/234
+    about: Please Post your live stream issues here.
+  - name: Homebridge Slack Channel for Ring
+    url: https://homebridgeteam.slack.com/archives/C5N7ZBP7W
+    about: Please ask and answer questions here.
+  - name: Ring - Pull Requests
+    url: https://github.com/dgreif/ring/pulls
+    about: Please report security vulnerabilities here.

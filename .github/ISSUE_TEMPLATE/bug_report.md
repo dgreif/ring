@@ -2,10 +2,13 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
-assignees: ''
+labels: 'bug'
+assignees: 'dgreif'
 
 ---
+**If this is a Live Stream bug**
+[Post Here](https://github.com/dgreif/ring/issues/234)
+
 
 **Describe the bug**
 A clear and concise description of what the bug is.

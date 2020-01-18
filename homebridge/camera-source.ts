@@ -129,6 +129,14 @@ export class CameraSource {
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )
+
+      if (!this.ringCamera.isOffline) {
+        this.logger.error(
+          this.ringCamera.name +
+            ' camera appears to be unable to upload snapshots.  This usually requires a physical restart of the camera.  Please turn off power to this camera by removing its battery or turning off the breaker for the circuit it is wired to.  Once power is cycled, snapshots should start working again.'
+        )
+      }
+
       this.logger.error(e)
       callback(e)
     }

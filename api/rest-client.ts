@@ -227,7 +227,8 @@ export class RingRestClient {
     json?: boolean
     responseType?: ResponseType
   }): Promise<T & ExtendedResponse> {
-    const { method, url, data, json, responseType } = options
+    const { method, url, data, json, responseType } = options,
+      hardwareId = await hardwareIdPromise
 
     try {
       await this.sessionPromise
@@ -237,7 +238,7 @@ export class RingRestClient {
             ? 'application/json'
             : 'application/x-www-form-urlencoded',
           authorization: `Bearer ${authTokenResponse.access_token}`,
-          hardware_id: await hardwareIdPromise
+          hardware_id: hardwareId
         }
 
       return await requestWithRetry<T>({
@@ -275,7 +276,7 @@ export class RingRestClient {
           return this.request(options)
         }
         logError(
-          `http request failed.  ${url} returned unknown errors: (${JSON.stringify(
+          `http request failed.  ${url} returned unknown errors: (${stringify(
             errors
           )}).`
         )
@@ -283,7 +284,7 @@ export class RingRestClient {
 
       if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {
         logError('404 from endpoint ' + url)
-        if (response.data === '') {
+        if (response.data?.error?.includes(hardwareId)) {
           logError(
             'Session hardware_id not found.  Creating a new session and trying again.'
           )
@@ -294,7 +295,11 @@ export class RingRestClient {
         throw new Error('Not found with response: ' + stringify(response.data))
       }
 
-      logError(`Request to ${url} failed`)
+      logError(
+        `Request to ${url} failed with status ${
+          response.status
+        }. Response body: ${stringify(response.data)}`
+      )
 
       throw e
     }

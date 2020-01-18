@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.0.3](https://github.com/dgreif/ring/compare/v6.0.2...v6.0.3) (2020-01-18)
+
+
+### Bug Fixes
+
+* better logging for common errors ([74b94dc](https://github.com/dgreif/ring/commit/74b94dc928150155e06a1ea02d44706e19c9a8b7))
+
 ### [6.0.2](https://github.com/dgreif/ring/compare/v6.0.1...v6.0.2) (2020-01-17)
 
 ### [6.0.1](https://github.com/dgreif/ring/compare/v6.0.0...v6.0.1) (2020-01-17)

@@ -1,7 +1,11 @@
 # ring-client-api
+[![npm](https://img.shields.io/npm/v/homebridge-ring?style=for-the-badge)](https://www.npmjs.com/package/homebridge-ring)
+[![npm](https://img.shields.io/npm/dt/homebridge-ring?style=for-the-badge)](https://www.npmjs.com/package/homebridge-ring)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI?style=for-the-badge)](https://github.com/dgreif/ring/actions)
+[![GitHub issues](https://img.shields.io/github/issues/dgreif/ring?style=for-the-badge)](https://github.com/dgreif/ring/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/dgreif/ring?style=for-the-badge)](https://github.com/dgreif/ring/pulls)
 
-[![Actions Status](https://github.com/dgreif/ring/workflows/Node%20CI/badge.svg)](https://github.com/dgreif/ring/actions)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg?style=for-the-badge)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
 
 This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
 [Ring Cameras](https://shop.ring.com/pages/security-cameras),

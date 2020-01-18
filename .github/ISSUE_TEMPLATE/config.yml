@@ -1,0 +1,9 @@
+
+blank_issues_enabled: false
+contact_links:
+  - name: Homebridge Slack Channel for Ring
+    url: https://homebridgeteam.slack.com/archives/C5N7ZBP7W
+    about: For general questions and discussion about homebridge-ring
+  - name: Homebridge Reddit
+    url: https://www.reddit.com/r/homebridge/
+    about: The fastest way to get help and advice from the homebridge community

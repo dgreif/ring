@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://github.com/dgreif/ring/compare/v6.0.3...v6.1.0) (2020-01-21)
+
+
+### Features
+
+* handle cameras with two battery slots ([0f6b0c5](https://github.com/dgreif/ring/commit/0f6b0c5f5af5757c593ab14a5b5afc058dd5cd9f))
+
 ### [6.0.3](https://github.com/dgreif/ring/compare/v6.0.2...v6.0.3) (2020-01-18)
 
 

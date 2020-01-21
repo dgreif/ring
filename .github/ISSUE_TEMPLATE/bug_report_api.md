@@ -5,7 +5,8 @@ labels: 'bug'
 ---
 
 <!--
-Please search for open and closed GitHub issues that match your situation before opening a new bug report.
+Please DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
+Before opening an issue, search for open and closed GitHub issues that match your situation.
 
 If this is a Live Stream issue please go back and use the Live Streaming issue template.
 -->

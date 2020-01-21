@@ -4,7 +4,8 @@ about: Report an issue with live streaming
 ---
 
 <!--
-Please search for open and closed GitHub issues that match your situation before opening a new bug report.
+Please DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
+Before opening an issue, search for open and closed GitHub issues that match your situation.
 
 PLEASE THOROUGHLY READ https://github.com/dgreif/ring/wiki/Camera-Troubleshooting#live-stream-troubleshooting BEFORE OPENING AN ISSUE
 
@@ -24,6 +25,7 @@ PLEASE THOROUGHLY READ https://github.com/dgreif/ring/wiki/Camera-Troubleshootin
 
 ### Environment
 <!-- ✍️edit: -->
+ - Ring Camera: [e.g. Stickup Cam Battery]
  - OS: [e.g. Raspbian]
  - Node.js: [e.g. 12.14.1] <!-- run `node -v` to get current version -->
  - NPM: [e.g 6.13.4] <!-- run `npm -v` to get current version -->

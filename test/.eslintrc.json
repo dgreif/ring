@@ -1,14 +1,11 @@
 {
   "plugins": [
-    "mocha"
+    "jest"
   ],
   "extends": [
-    "plugin:mocha/recommended"
+    "plugin:jest/recommended"
   ],
   "env": {
-    "mocha": true
-  },
-  "rules": {
-    "mocha/no-mocha-arrows": 0
+    "jest": true
   }
 }

@@ -24,7 +24,7 @@ import {
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
-import { delay, logError, logInfo } from './util'
+import { delay, logError, logInfo, sum } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 
@@ -33,17 +33,36 @@ const snapshotRefreshDelay = 500,
   maxSnapshotRefreshAttempts =
     (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
 
-function getBatteryLevel(data: CameraData) {
+function parseBatteryLife(batteryLife: string | number | null | undefined) {
+  if (batteryLife === null || batteryLife === undefined) {
+    return null
+  }
+
   const batteryLevel =
-    typeof data.battery_life === 'number'
-      ? data.battery_life
-      : Number.parseFloat(data.battery_life)
+    typeof batteryLife === 'number'
+      ? batteryLife
+      : Number.parseFloat(batteryLife)
 
   if (isNaN(batteryLevel)) {
     return null
   }
 
   return batteryLevel
+}
+
+export function getBatteryLevel(
+  data: Pick<CameraData, 'battery_life' | 'battery_life_2'>
+) {
+  const levels = [
+    parseBatteryLife(data.battery_life),
+    parseBatteryLife(data.battery_life_2)
+  ].filter((level): level is number => level !== null)
+
+  if (!levels.length) {
+    return null
+  }
+
+  return sum(levels) / levels.length
 }
 
 export function getSearchQueryString(

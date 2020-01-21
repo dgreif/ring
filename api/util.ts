@@ -104,3 +104,7 @@ export function mapAsync<T, U>(
 ): Promise<U[]> {
   return Promise.all(records.map(record => asyncMapper(record)))
 }
+
+export function sum(numbers: number[]) {
+  return numbers.reduce((total, num) => total + num, 0)
+}

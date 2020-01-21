@@ -288,7 +288,10 @@ export interface CameraData {
   time_zone: string
   subscribed: boolean
   subscribed_motions: boolean
-  battery_life: number | string // 4003 or 100 or "100" or "71"
+  battery_life: number | string | null // 4003 or 100 or "100" or "71"
+  battery_life_2?: number | string | null
+  battery_voltage?: number
+  battery_voltage_2?: number
   external_connection: boolean
   firmware_version: Firmware
   kind: RingCameraKind

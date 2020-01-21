@@ -1,0 +1,14 @@
+{
+  "plugins": [
+    "mocha"
+  ],
+  "extends": [
+    "plugin:mocha/recommended"
+  ],
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "mocha/no-mocha-arrows": 0
+  }
+}

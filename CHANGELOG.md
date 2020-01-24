@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.1](https://github.com/dgreif/ring/compare/v6.1.0...v6.1.1) (2020-01-24)
+
+
+### Bug Fixes
+
+* use lower of dual battery values instead of average ([3109ff2](https://github.com/dgreif/ring/commit/3109ff268a95f3672fde22b3fe0bab7bcad2e11b)), closes [#206](https://github.com/dgreif/ring/issues/206)
+
 ## [6.1.0](https://github.com/dgreif/ring/compare/v6.0.3...v6.1.0) (2020-01-21)
 
 

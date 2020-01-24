@@ -25,7 +25,10 @@ describe('Ring Camera', () => {
     it('should handle dual batteries', () => {
       expect(
         getBatteryLevel({ battery_life: '92', battery_life_2: 84 })
-      ).toEqual((84 + 92) / 2)
+      ).toEqual(84)
+      expect(
+        getBatteryLevel({ battery_life: '92', battery_life_2: 100 })
+      ).toEqual(92)
     })
   })
 })

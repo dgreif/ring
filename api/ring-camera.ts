@@ -24,7 +24,7 @@ import {
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
-import { delay, logError, logInfo, sum } from './util'
+import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 
@@ -62,7 +62,7 @@ export function getBatteryLevel(
     return null
   }
 
-  return sum(levels) / levels.length
+  return Math.min(...levels)
 }
 
 export function getSearchQueryString(

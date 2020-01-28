@@ -153,8 +153,11 @@ export class RingRestClient {
             ? 'refresh token is'
             : 'email and password are',
         errorMessage =
-          `Failed to fetch oauth token from Ring. Verify that your ${authTypeMessage} correct. ` +
-          responseError
+          'Failed to fetch oauth token from Ring. ' +
+          (responseData.err_msg === 'too many requests from dependency service'
+            ? 'You have requested too many 2fa codes.  Ring limits 2fa to 10 codes within 10 minutes.  Please try again in 10 minutes.'
+            : `Verify that your ${authTypeMessage} correct.`) +
+          ` (error: ${responseError})`
       logError(requestError.response || requestError)
       logError(errorMessage)
       throw new Error(errorMessage)

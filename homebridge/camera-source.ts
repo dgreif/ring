@@ -185,13 +185,15 @@ export class CameraSource {
             .then(supported => {
               if (!supported) {
                 this.logger.error(
-                  'Streaming video only - found ffmpeg, but libfdk_aac is not installed.'
+                  'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
                 )
               }
               return supported
             })
             .catch(() => {
-              this.logger.error('Streaming video only - ffmpeg was not found')
+              this.logger.error(
+                'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
+              )
               return false
             })
         ]),

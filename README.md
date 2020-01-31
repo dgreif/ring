@@ -1,11 +1,8 @@
 # ring-client-api
 
-[![npm](https://img.shields.io/npm/v/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
-[![npm](https://img.shields.io/npm/dt/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
+[![npm](https://img.shields.io/npm/v/ring-client-api.svg)](https://www.npmjs.com/package/ring-client-api)
+[![npm](https://img.shields.io/npm/dt/ring-client-api.svg)](https://www.npmjs.com/package/ring-client-api)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)
-[![GitHub issues](https://img.shields.io/github/issues/dgreif/ring.svg)](https://github.com/dgreif/ring/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/dgreif/ring.svg)](https://github.com/dgreif/ring/pulls)
-
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
 
 This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),

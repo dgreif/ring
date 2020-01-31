@@ -1,6 +1,8 @@
 # homebridge-ring
 
-[![Actions Status](https://github.com/dgreif/ring/workflows/Node%20CI/badge.svg)](https://github.com/dgreif/ring/actions)
+[![npm](https://img.shields.io/npm/v/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
+[![npm](https://img.shields.io/npm/dt/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
 
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for

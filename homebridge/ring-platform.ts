@@ -40,12 +40,17 @@ export const pluginName = 'homebridge-ring'
 process.env.RING_DEBUG = debug ? 'true' : ''
 
 function getAccessoryClass(
-  device: RingDevice | RingCamera
+  device: RingDevice
 ): (new (...args: any[]) => BaseAccessory<RingDevice>) | null {
   const { deviceType } = device
 
+  if (device.data.status === 'disabled') {
+    return null
+  }
+
   switch (deviceType) {
     case RingDeviceType.ContactSensor:
+    case RingDeviceType.RetrofitZone:
       return ContactSensor
     case RingDeviceType.MotionSensor:
       return MotionSensor
@@ -159,7 +164,10 @@ export class RingPlatform {
               isCamera,
               id: device.id.toString() + cameraIdDifferentiator,
               name: device.name,
-              AccessoryClass: isCamera ? Camera : getAccessoryClass(device)
+              AccessoryClass:
+                device instanceof RingCamera
+                  ? Camera
+                  : getAccessoryClass(device)
             }
           })
 

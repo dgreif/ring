@@ -22,7 +22,9 @@ export enum RingDeviceType {
   BeamsMotionSensor = 'motion-sensor.beams',
   BeamsSwitch = 'switch.multilevel.beams',
   BeamsLightGroupSwitch = 'group.light-group.beams',
-  BeamsTransformerSwitch = 'switch.transformer.beams'
+  BeamsTransformerSwitch = 'switch.transformer.beams',
+  RetrofitBridge = 'bridge.flatline',
+  RetrofitZone = 'sensor.zone'
 }
 
 export enum RingDeviceCategory {
@@ -190,6 +192,7 @@ export interface RingDeviceData {
   freeze?: { faulted?: boolean }
   motionStatus?: 'clear' | 'faulted'
   groupId?: string
+  tags: ('hidden' | 'sleepy' | 'ota-lock' | 'scanned' | 'kitted' | string)[]
 
   // switch
   on?: boolean
@@ -200,6 +203,11 @@ export interface RingDeviceData {
     sat?: number // 0 - 1
   }
   ct?: number // 0 - 1
+  // Retrofit sensor.zone
+  status?: 'enabled' | 'disabled'
+  parentZid?: string
+  rootDevice?: string
+  relToParentZid?: string // '1' - '8'
 }
 
 export const deviceTypesWithVolume = [

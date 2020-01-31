@@ -8,6 +8,7 @@ export enum RingDeviceType {
   MotionSensor = 'sensor.motion',
   FloodFreezeSensor = 'sensor.flood-freeze',
   FreezeSensor = 'sensor.freeze',
+  TemperatureSensor = 'sensor.temperature',
   RangeExtender = 'range-extender.zwave',
   ZigbeeAdapter = 'adapter.zigbee',
   AccessCodeVault = 'access-code.vault',
@@ -208,6 +209,10 @@ export interface RingDeviceData {
   parentZid?: string
   rootDevice?: string
   relToParentZid?: string // '1' - '8'
+  //sensor.temperature
+  celsius?: number // no F provided, just celsius
+  faultHigh?: number
+  faultLow?: number
 }
 
 export const deviceTypesWithVolume = [

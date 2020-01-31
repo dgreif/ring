@@ -1,10 +1,10 @@
 import {
   RingApi,
   RingCamera,
+  RingCameraKind,
   RingDevice,
-  RingDeviceType,
   RingDeviceCategory,
-  RingCameraKind
+  RingDeviceType
 } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
@@ -28,6 +28,7 @@ import { useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
+import { TemperatureSensor } from './temperature-sensor'
 
 const debug = __filename.includes('release-homebridge'),
   unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
@@ -84,6 +85,8 @@ function getAccessoryClass(
       return MultiLevelSwitch
     case RingDeviceType.Switch:
       return Switch
+    case RingDeviceType.TemperatureSensor:
+      return TemperatureSensor
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

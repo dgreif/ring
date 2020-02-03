@@ -60,7 +60,15 @@ export function generateUuid(seed?: string) {
 }
 
 export async function getHardwareId() {
-  const id = await machineId()
+  const id = await Promise.race([machineId(), delay(5000).then(() => '')])
+
+  if (!id) {
+    logError(
+      'Request for machine id timed out.  Falling back to random session id'
+    )
+    return generateRandomUuid()
+  }
+
   return generateUuid(id)
 }
 
@@ -88,4 +96,11 @@ export function stringify(data: any) {
   }
 
   return JSON.stringify(data) + ''
+}
+
+export function mapAsync<T, U>(
+  records: T[],
+  asyncMapper: (record: T) => Promise<U>
+): Promise<U[]> {
+  return Promise.all(records.map(record => asyncMapper(record)))
 }

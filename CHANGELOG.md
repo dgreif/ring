@@ -2,6 +2,80 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.1](https://github.com/dgreif/ring/compare/v6.1.0...v6.1.1) (2020-01-24)
+
+
+### Bug Fixes
+
+* use lower of dual battery values instead of average ([3109ff2](https://github.com/dgreif/ring/commit/3109ff268a95f3672fde22b3fe0bab7bcad2e11b)), closes [#206](https://github.com/dgreif/ring/issues/206)
+
+## [6.1.0](https://github.com/dgreif/ring/compare/v6.0.3...v6.1.0) (2020-01-21)
+
+
+### Features
+
+* handle cameras with two battery slots ([0f6b0c5](https://github.com/dgreif/ring/commit/0f6b0c5f5af5757c593ab14a5b5afc058dd5cd9f))
+
+### [6.0.3](https://github.com/dgreif/ring/compare/v6.0.2...v6.0.3) (2020-01-18)
+
+
+### Bug Fixes
+
+* better logging for common errors ([74b94dc](https://github.com/dgreif/ring/commit/74b94dc928150155e06a1ea02d44706e19c9a8b7))
+
+### [6.0.2](https://github.com/dgreif/ring/compare/v6.0.1...v6.0.2) (2020-01-17)
+
+### [6.0.1](https://github.com/dgreif/ring/compare/v6.0.0...v6.0.1) (2020-01-17)
+
+
+### Bug Fixes
+
+* remove `dotenv/config` from cli tools ([c3f169e](https://github.com/dgreif/ring/commit/c3f169e750805e44ba3350f72fe2f8e5338814bc))
+
+## [6.0.0](https://github.com/dgreif/ring/compare/v5.13.1...v6.0.0) (2020-01-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** Conversion step to change from `homebridge-ring-alarm` to `homebridge-ring` has been removed.  If you are updating from v2, please first upgrade to version `5.13.1` before upgrading to version 6+
+* **api:** api.getHistory has been removed in favor of location.getCameraEvents
+* **api:** location.getEvents has been replaced with location.getCameraEvents
+* **api:** camera.getHistory has been replaced with camera.getEvents
+* **api:** camera.getRecording has been renamed to camera.getRecordingUrl and takes a second optional param `{ transcoded: true }` instead of `true`.  This allows for additional options if we decide to add any down the road
+* Node.js 10+ now required
+
+### Features
+
+* `ring-device-data-cli` for discovering new device types and data structures ([de3c23a](https://github.com/dgreif/ring/commit/de3c23a4769403f40cf8f491ff9278d37be4236d))
+* **api:** updated history/event methods for locations and cameras ([e415605](https://github.com/dgreif/ring/commit/e415605d8f4e96386d416efa783f541ab524a3e7))
+
+
+* **homebridge:** remove v3 conversion step to update homebridge plugin name ([c6c6057](https://github.com/dgreif/ring/commit/c6c605715f7115af16525b2cf410e94612f2dd9e))
+* update dependencies ([3e9ce7e](https://github.com/dgreif/ring/commit/3e9ce7e37ec1b40b556e56dca5445d2e3d984903))
+
+### [5.13.1](https://github.com/dgreif/ring/compare/v5.13.0...v5.13.1) (2020-01-15)
+
+
+### Bug Fixes
+
+* handle delayed and expired dings when starting live video ([b6c4460](https://github.com/dgreif/ring/commit/b6c4460468ac5aa8e5085b51020d288058923e5d)), closes [#211](https://github.com/dgreif/ring/issues/211) [#157](https://github.com/dgreif/ring/issues/157) [#106](https://github.com/dgreif/ring/issues/106)
+* handle live stream for battery cameras ([8c74a23](https://github.com/dgreif/ring/commit/8c74a2343aa1aeb0954c36f37f0318ea08aff634))
+
+## [5.13.0](https://github.com/dgreif/ring/compare/v5.13.0-alpha.0...v5.13.0) (2020-01-11)
+
+
+### Bug Fixes
+
+* automatically subscribe cameras to motion and dings ([7bf4260](https://github.com/dgreif/ring/commit/7bf4260a7056a8eea87becd92d156fff914c45e5)), closes [#210](https://github.com/dgreif/ring/issues/210)
+* get or create active ding via new live_view endpoint ([4fb837e](https://github.com/dgreif/ring/commit/4fb837e1647c9bbc629cdf236680376d6451e546))
+
+## [5.13.0-alpha.0](https://github.com/dgreif/ring/compare/v5.12.1...v5.13.0-alpha.0) (2020-01-05)
+
+
+### Features
+
+* configurable external port range ([a5255f8](https://github.com/dgreif/ring/commit/a5255f89b36a5b15b24164270058e3d9f2e43073))
+
 ### [5.12.1](https://github.com/dgreif/ring/compare/v5.12.0...v5.12.1) (2020-01-02)
 
 

@@ -1,15 +1,17 @@
 # ring-client-api
- 
-[![Actions Status](https://github.com/dgreif/ring/workflows/Node%20CI/badge.svg)](https://github.com/dgreif/ring/actions)
+
+[![npm](https://img.shields.io/npm/v/ring-client-api.svg)](https://www.npmjs.com/package/ring-client-api)
+[![npm](https://img.shields.io/npm/dt/ring-client-api.svg)](https://www.npmjs.com/package/ring-client-api)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
- 
+
 This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/pages/doorbell-cameras),
 [Ring Cameras](https://shop.ring.com/pages/security-cameras),
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
 Built to support the [homebridge-ring Plugin](./homebridge)
- 
+
 ## Installation
 
 `npm i ring-client-api`
@@ -23,7 +25,7 @@ const ringApi = new RingApi({
   // without 2fa
   email: 'some.one@website.com',
   password: 'abc123!#',
-  
+
   // with 2fa or if you dont want to store your email/password in your config
   refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth',
 
@@ -42,7 +44,7 @@ Option | Default | Explanation
 --- | --- | ---
 `refreshToken` | `undefined` | An alternate authentication method for accounts with 2fa enabled, or if you don't want to store your email/password in a config file.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth).
 `cameraStatusPollingSeconds` | `undefined` (No Polling) | How frequently to poll for updates to your cameras (in seconds).  Information like light/siren status do not update in real time and need to be requested periodically.
-`cameraDingsPollingSeconds` | `undefined` (No Polling) | How frequently to poll for new events from your cameras (in seconds).  These include motion and doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.  
+`cameraDingsPollingSeconds` | `undefined` (No Polling) | How frequently to poll for new events from your cameras (in seconds).  These include motion and doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.
 `locationIds` | All Locations | Allows you to limit the results to a specific set of locations. This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations. This will also limit the results for `ringApi.getCameras()` to the configured locations. If this option is not included, all locations will be returned.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
 
@@ -58,7 +60,8 @@ location.getAlarmMode() // returns Promise<'all' | 'some' | 'none'>
 location.soundSiren()
 location.silenceSiren()
 location.cameras // array of cameras at this location
-const rooms = await location.getRoomList() // array of rooms { id: number, name: string }
+location.getHistory() // historical events from alarm/lights
+location.getCameraEvents() // ding events from all cameras in the location
 ```
 
 `locations` is an array of your Ring locations. Each location can be armed or disarmed,
@@ -95,9 +98,10 @@ camera.setSiren(true) // turn siren on/off
 camera.getHealth() // fetch health info like wifi status
 camera.startVideoOnDemand() // ask the camera to start a new video stream
 camera.createSipSession() // creates a new SipSession which allows you to control RTP flow
-camera.getHistory(50) // fetch ding history (like motion and doorbell presses)
-camera.getRecording()
-camera.getSnapshot() // returns a Promise<Buffer> of the latest snapshot from the camera 
+camera.getEvents() // fetch ding events for the camera (like motion and doorbell presses)
+camera.getRecordingUrl(dingIdStr, { transcoded: true }) // fetch the url for a recording
+camera.getSnapshot() // returns a Promise<Buffer> of the latest snapshot from the camera
+
 ```
 
 Camera also includes the following observables:
@@ -114,10 +118,6 @@ Some other useful propeties
 * `isDoorbot`: is this camera a doorbell
 
 See the `examples` directory for additional code examples.
-
-## Upgrading from v3 to v4
-
-See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4
 
 ## homebridge-ring
 

@@ -31,7 +31,7 @@ export class PanicButtons extends BaseAccessory<RingDevice> {
     super()
 
     const { Characteristic, Service } = hap,
-      locationName = device.location.locationDetails.name
+      locationName = device.location.name
 
     this.registerCharacteristic(
       Characteristic.On,
@@ -75,7 +75,7 @@ export class PanicButtons extends BaseAccessory<RingDevice> {
     this.registerCharacteristic(
       Characteristic.Model,
       Service.AccessoryInformation,
-      () => 'Panic Buttons for ' + this.device.location.locationDetails.name
+      () => 'Panic Buttons for ' + this.device.location.name
     )
     this.registerCharacteristic(
       Characteristic.SerialNumber,

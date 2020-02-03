@@ -5,19 +5,23 @@ import {
   BaseStation,
   BeamBridge,
   CameraData,
-  HistoricalDingGlobal,
   UserLocation
 } from './ring-types'
 import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
+import { setPreferredExternalPorts } from './rtp-utils'
 
 export interface RingApiOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
   debug?: boolean
+  externalPorts?: {
+    start: number
+    end: number
+  }
 }
 
 export class RingApi {
@@ -29,6 +33,39 @@ export class RingApi {
   constructor(public readonly options: RingApiOptions & RingAuth) {
     if (options.debug) {
       enableDebug()
+    }
+
+    const { externalPorts } = options
+
+    if (typeof externalPorts === 'object') {
+      const { start, end } = externalPorts,
+        portConfigIssues: string[] = []
+
+      if (!start || !end) {
+        portConfigIssues.push('start and end must both be defined')
+      }
+
+      if (start >= end) {
+        portConfigIssues.push('start must be larger than end')
+      }
+
+      if (start < 1024) {
+        portConfigIssues.push(
+          'start must be larger than 1024, preferably larger than 10000 to avoid conflicts'
+        )
+      }
+
+      if (end > 65535) {
+        portConfigIssues.push('end must be smaller than 65536')
+      }
+
+      if (portConfigIssues.length) {
+        throw new Error(
+          'Invalid externalPorts config: ' + portConfigIssues.join('; ')
+        )
+      }
+
+      setPreferredExternalPorts(start, end)
     }
   }
 
@@ -203,12 +240,5 @@ export class RingApi {
       (cameras, location) => [...cameras, ...location.cameras],
       [] as RingCamera[]
     )
-  }
-
-  getHistory(limit = 10, favoritesOnly = false) {
-    const favoritesParam = favoritesOnly ? '&favorites=1' : ''
-    return this.restClient.request<HistoricalDingGlobal[]>({
-      url: clientApi(`doorbots/history?limit=${limit}${favoritesParam}`)
-    })
   }
 }

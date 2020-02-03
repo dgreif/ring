@@ -1,6 +1,8 @@
 # homebridge-ring
 
-[![Actions Status](https://github.com/dgreif/ring/workflows/Node%20CI/badge.svg)](https://github.com/dgreif/ring/actions)
+[![npm](https://img.shields.io/npm/v/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
+[![npm](https://img.shields.io/npm/dt/homebridge-ring.svg)](https://www.npmjs.com/package/homebridge-ring)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
 
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for
@@ -20,6 +22,10 @@ Assuming a global installation of `homebridge`:
 ## Homebridge Configuration
 
 Add the `Ring` platform in your homebridge `config.json` file.
+
+### Easiest Configuration
+
+For the best experience setting up this plugin, please use [homebridge-config-ui-x](https://www.npmjs.com/package/homebridge-config-ui-x).  It will walk you through linking your account without any cli tools or storing your email/password.
 
 ### Basic Configuration
 
@@ -243,7 +249,3 @@ People Arrive | Turn on "Arrived Home"
 People Leave | Turn on "Left Home"
 "Arrived Home" turns on | Set Ring Alarm mode to Off
 "Left Home" turns on | Set Ring Alarm mode to Away
-
-## Upgrading from v3 to v4
-
-See https://github.com/dgreif/ring/wiki/Upgrading-from-v3-to-v4

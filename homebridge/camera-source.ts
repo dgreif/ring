@@ -129,6 +129,14 @@ export class CameraSource {
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )
+
+      if (!this.ringCamera.isOffline) {
+        this.logger.error(
+          this.ringCamera.name +
+            ' camera appears to be unable to upload snapshots.  This usually requires a physical restart of the camera.  Please turn off power to this camera by removing its battery or turning off the breaker for the circuit it is wired to.  Once power is cycled, snapshots should start working again.'
+        )
+      }
+
       this.logger.error(e)
       callback(e)
     }
@@ -177,13 +185,15 @@ export class CameraSource {
             .then(supported => {
               if (!supported) {
                 this.logger.error(
-                  'Streaming video only - found ffmpeg, but libfdk_aac is not installed.'
+                  'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
                 )
               }
               return supported
             })
             .catch(() => {
-              this.logger.error('Streaming video only - ffmpeg was not found')
+              this.logger.error(
+                'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
+              )
               return false
             })
         ]),

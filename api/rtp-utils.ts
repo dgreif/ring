@@ -1,18 +1,37 @@
 import { createSocket, Socket } from 'dgram'
 import { AddressInfo } from 'net'
 import { v4 as fetchPublicIp } from 'public-ip'
-import { RtpOptions, SipSession } from './sip-session'
+import { SipSession } from './sip-session'
 import { ReplaySubject } from 'rxjs'
 import { filter, map, take } from 'rxjs/operators'
 import { randomBytes } from 'crypto'
 import getPort from 'get-port'
 import execa from 'execa'
+import { logError } from './util'
 const stun = require('stun'),
   portControl = require('nat-puncher')
+
+let preferredExternalPorts: number[] | undefined
+
+export function setPreferredExternalPorts(start: number, end: number) {
+  const count = end - start + 1
+
+  preferredExternalPorts = Array.from(new Array(count)).map((_, i) => i + start)
+}
 
 export interface SrtpOptions {
   srtpKey: Buffer
   srtpSalt: Buffer
+}
+
+export interface RtpStreamOptions extends Partial<SrtpOptions> {
+  port: number
+}
+
+export interface RtpOptions {
+  address: string
+  audio: RtpStreamOptions
+  video: RtpStreamOptions
 }
 
 export async function getPublicIpViaStun() {
@@ -29,13 +48,44 @@ export function getPublicIp() {
 }
 
 let reservedPorts: number[] = []
-export async function reservePorts(count = 1): Promise<number[]> {
-  const port = await getPort(),
-    ports = [port]
+export function releasePorts(ports: number[]) {
+  reservedPorts = reservedPorts.filter(p => !ports.includes(p))
+}
+
+// Need to reserve ports in sequence because ffmpeg uses the next port up by default.  If it's taken, ffmpeg will error
+// These "buffer" ports are internal only, so they don't need to stay within "preferred external ports"
+export async function reservePorts({
+  count = 1,
+  forExternalUse = false,
+  attemptedPorts = []
+}: {
+  count?: number
+  forExternalUse?: boolean
+  attemptedPorts?: number[]
+} = {}): Promise<number[]> {
+  const availablePorts =
+      forExternalUse && preferredExternalPorts
+        ? preferredExternalPorts.filter(p => !reservedPorts.includes(p))
+        : undefined,
+    port = await getPort({ port: availablePorts }),
+    ports = [port],
+    tryAgain = () => {
+      return reservePorts({
+        count,
+        forExternalUse,
+        attemptedPorts: attemptedPorts.concat(ports)
+      })
+    }
 
   if (reservedPorts.includes(port)) {
     // this avoids race conditions where we can reserve the same port twice
-    return reservePorts(count)
+    return tryAgain()
+  }
+
+  if (availablePorts && !availablePorts.includes(port)) {
+    logError(
+      'Preferred external ports depleted!  Falling back to random external port.  Consider expanding the range specified in your externalPorts config'
+    )
   }
 
   for (let i = 1; i < count; i++) {
@@ -44,22 +94,18 @@ export async function reservePorts(count = 1): Promise<number[]> {
 
     if (openPort !== targetConsecutivePort) {
       // can't reserve next port, bail and get another set
-      return reservePorts(count)
+      return tryAgain()
     }
 
     ports.push(openPort)
   }
 
   if (ports.some(p => reservedPorts.includes(p))) {
-    return reservePorts(count)
+    return tryAgain()
   }
 
   reservedPorts.push(...ports)
   return ports
-}
-
-export function releasePort(port: number) {
-  reservedPorts = reservedPorts.filter(p => p !== port)
 }
 
 function isRtpMessage(message: Buffer) {
@@ -90,10 +136,17 @@ export function getSrtpValue({ srtpKey, srtpSalt }: Partial<SrtpOptions>) {
   return Buffer.concat([srtpKey, srtpSalt]).toString('base64')
 }
 
-export function bindToRandomPort(socket: Socket) {
-  return new Promise<number>(resolve => {
+export async function bindToPort(
+  socket: Socket,
+  { forExternalUse = false } = {}
+) {
+  const [desiredPort] = await reservePorts({ forExternalUse })
+
+  return new Promise<number>((resolve, reject) => {
+    socket.on('error', reject)
+
     // 0 means select a random open port
-    socket.bind(0, () => {
+    socket.bind(desiredPort, () => {
       const { port } = socket.address() as AddressInfo
       resolve(port)
     })
@@ -149,7 +202,8 @@ export async function bindProxyPorts(
     }
   })
 
-  const localPort = await bindToRandomPort(socket)
+  const localPort = await bindToPort(socket)
+  sipSession.reservedPorts.push(localPort)
 
   sipSession.onCallEnded.subscribe(() => {
     socket.close()

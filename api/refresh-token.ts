@@ -4,10 +4,6 @@ import { requestInput } from './util'
 import { AuthTokenResponse } from './ring-types'
 
 export async function acquireRefreshToken() {
-  console.log(
-    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
-  )
-
   const email = await requestInput('Email: '),
     password = await requestInput('Password: '),
     restClient = new RingRestClient({ email, password }),
@@ -32,10 +28,20 @@ export async function acquireRefreshToken() {
       process.exit(1)
     })
 
+  return auth.refresh_token
+}
+
+export async function logRefreshToken() {
+  console.log(
+    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
+  )
+
+  const refreshToken = await acquireRefreshToken()
+
   console.log(
     '\nSuccessfully logged in to Ring. Please remove your email/password from your config and add the following instead:\n'
   )
-  console.log(`"refreshToken": "${auth.refresh_token}"`)
+  console.log(`"refreshToken": "${refreshToken}"`)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

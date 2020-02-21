@@ -19,7 +19,7 @@ export async function acquireRefreshToken() {
     auth: AuthTokenResponse = await restClient.getCurrentAuth().catch(e => {
       if (restClient.using2fa) {
         console.log(
-          'Ring 2fa is enabled.  Please enter code from text message.'
+          'Ring 2fa or verification code is enabled.  Please enter code from the text/email.'
         )
         return getAuthWith2fa()
       }
@@ -39,7 +39,7 @@ export async function logRefreshToken() {
   const refreshToken = await acquireRefreshToken()
 
   console.log(
-    '\nSuccessfully logged in to Ring. Please remove your email/password from your config and add the following instead:\n'
+    '\nSuccessfully logged in to Ring. Please add the following to your config:\n'
   )
   console.log(`"refreshToken": "${refreshToken}"`)
 }

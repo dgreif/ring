@@ -29,30 +29,14 @@ For the best experience setting up this plugin, please use [homebridge-config-ui
 
 ### Basic Configuration
 
-If you _do not have_ 2fa enabled, this is all that you need to get up and running.  It will enable all devices from Ring and no other configuration is required.  [See below](https://github.com/dgreif/ring/tree/master/homebridge#camera-setup) for instructions to add cameras to HomeKit.
+First, generate a `refreshToken` using the instructions in the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
 
  ```json
 {
   "platforms": [
     {
       "platform": "Ring",
-      "email": "some.one@website.com",
-      "password": "abc123!#"
-    }
-  ]
-}
-```
-
-### Alternate Basic Config (2fa)
-
-If you _have_ 2fa enable, you _must_ use a `refreshToken` instead of email/password.  It also works without 2fa if you simply don't want your email/password in your homebridge `config.json`.  See the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth) for details on generating a `refreshToken`.
-
- ```json
-{
-  "platforms": [
-    {
-      "platform": "Ring",
-      "refreshToken": "token generated with ring-auth-cli"
+      "refreshToken": "token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth"
     }
   ]
 }
@@ -63,9 +47,6 @@ Only include an optional parameter if you actually need it.  Default behavior wi
 
  ```json
 {
-  "email": "some.one@website.com",
-  "password": "abc123!#",
-
   "alarmOnEntryDelay": true,
   "beamDurationSeconds": 60,
   "hideLightGroups": true,

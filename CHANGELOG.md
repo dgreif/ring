@@ -11,11 +11,15 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
+* **homebridge:** retrofit alarm zones as contact sensors ([a32b6e6](https://github.com/dgreif/ring/commit/a32b6e61bb634fdcccf17ced930b2b074a04668b)), closes [#192](https://github.com/dgreif/ring/issues/192) [#248](https://github.com/dgreif/ring/issues/248)
+* **homebridge:** temperature sensors ([96502cc](https://github.com/dgreif/ring/commit/96502cc6bf2d24691cf1610f8f4f23653add26bd)), closes [#227](https://github.com/dgreif/ring/issues/227)
 * custom device name for Control Center in Ring app ([46ea3cf](https://github.com/dgreif/ring/commit/46ea3cf1f8820995db80628e9a64c318dd33eaf7)), closes [#257](https://github.com/dgreif/ring/issues/257)
 
 
 ### Bug Fixes
 
+* log 2fa code rate limiting ([64a5b70](https://github.com/dgreif/ring/commit/64a5b70120c895c59a8db6934009d987d8bb61d6))
+* log wiki link for ffmpeg errors ([c453462](https://github.com/dgreif/ring/commit/c453462bc618c27635b5b1a2bebc4e03a27d09ea))
 * remove email/password auth from api and homebridge config options ([2957416](https://github.com/dgreif/ring/commit/295741634b0a9ebe1ecabb788c3a7ba8d14bb6df))
 
 ## [6.2.0-alpha.0](https://github.com/dgreif/ring/compare/v6.1.1...v6.2.0-alpha.0) (2020-02-04)

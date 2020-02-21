@@ -141,7 +141,10 @@ export class RingPlatform {
   }
 
   async connectToApi() {
-    const ringApi = new RingApi(this.config),
+    const ringApi = new RingApi({
+        controlCenterDisplayName: 'homebridge-ring',
+        ...this.config
+      }),
       locations = await ringApi.getLocations(),
       { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),

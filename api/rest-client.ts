@@ -61,6 +61,10 @@ export interface RefreshTokenAuth {
   refreshToken: string
 }
 
+export interface SessionOptions {
+  controlCenterDisplayName?: string
+}
+
 export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
@@ -72,7 +76,9 @@ export class RingRestClient {
     newRefreshToken: string
   }>(1)
 
-  constructor(private authOptions: EmailAuth | RefreshTokenAuth) {}
+  constructor(
+    private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions
+  ) {}
 
   private getGrantData(twoFactorAuthCode?: string) {
     if (this.refreshToken && !twoFactorAuthCode) {
@@ -169,9 +175,11 @@ export class RingRestClient {
         device: {
           hardware_id: await hardwareIdPromise,
           metadata: {
-            api_version: apiVersion
+            api_version: apiVersion,
+            device_model:
+              this.authOptions.controlCenterDisplayName ?? 'ring-client-api'
           },
-          os: 'android'
+          os: 'android' // can use android, ios, ring-site, windows for sure
         }
       },
       method: 'POST',

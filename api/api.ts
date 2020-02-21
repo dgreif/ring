@@ -1,4 +1,9 @@
-import { clientApi, RefreshTokenAuth, RingRestClient } from './rest-client'
+import {
+  clientApi,
+  RefreshTokenAuth,
+  RingRestClient,
+  SessionOptions
+} from './rest-client'
 import { Location } from './location'
 import {
   ActiveDing,
@@ -13,7 +18,7 @@ import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
 import { setPreferredExternalPorts } from './rtp-utils'
 
-export interface RingApiOptions {
+export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number

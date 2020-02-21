@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/dgreif/ring/compare/v6.2.0-alpha.0...v7.0.0) (2020-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* email/password auth via the api is no longer supported.  Ring now requires 2fa or verification codes for all account logins, so `refreshToken`s are now the only way for the api to authenticate
+
+### Features
+
+* custom device name for Control Center in Ring app ([46ea3cf](https://github.com/dgreif/ring/commit/46ea3cf1f8820995db80628e9a64c318dd33eaf7)), closes [#257](https://github.com/dgreif/ring/issues/257)
+
+
+### Bug Fixes
+
+* remove email/password auth from api and homebridge config options ([2957416](https://github.com/dgreif/ring/commit/295741634b0a9ebe1ecabb788c3a7ba8d14bb6df))
+
 ## [6.2.0-alpha.0](https://github.com/dgreif/ring/compare/v6.1.1...v6.2.0-alpha.0) (2020-02-04)
 
 

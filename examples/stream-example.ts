@@ -10,10 +10,7 @@ import { cleanOutputDirectory, outputDirectory } from './util'
 
 async function example() {
   const ringApi = new RingApi({
-      // Replace with your ring email/password
-      email: process.env.RING_EMAIL!,
-      password: process.env.RING_PASS!,
-      // Refresh token is used when 2fa is on
+      // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
       debug: true
     }),

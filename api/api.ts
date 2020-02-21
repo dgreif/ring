@@ -1,4 +1,4 @@
-import { clientApi, RingAuth, RingRestClient } from './rest-client'
+import { clientApi, RefreshTokenAuth, RingRestClient } from './rest-client'
 import { Location } from './location'
 import {
   ActiveDing,
@@ -30,7 +30,7 @@ export class RingApi {
 
   private locations = this.fetchAndBuildLocations()
 
-  constructor(public readonly options: RingApiOptions & RingAuth) {
+  constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
     if (options.debug) {
       enableDebug()
     }

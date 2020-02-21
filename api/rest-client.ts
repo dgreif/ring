@@ -61,8 +61,6 @@ export interface RefreshTokenAuth {
   refreshToken: string
 }
 
-export type RingAuth = EmailAuth | RefreshTokenAuth
-
 export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
@@ -74,7 +72,7 @@ export class RingRestClient {
     newRefreshToken: string
   }>(1)
 
-  constructor(private authOptions: RingAuth) {}
+  constructor(private authOptions: EmailAuth | RefreshTokenAuth) {}
 
   private getGrantData(twoFactorAuthCode?: string) {
     if (this.refreshToken && !twoFactorAuthCode) {

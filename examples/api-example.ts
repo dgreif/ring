@@ -4,10 +4,7 @@ import { RingApi } from '../api'
 async function example() {
   const { env } = process,
     ringApi = new RingApi({
-      // Replace with your ring email/password
-      email: env.RING_EMAIL!,
-      password: env.RING_PASS!,
-      // Refresh token is used when 2fa is on
+      // Replace with your refresh token
       refreshToken: env.RING_REFRESH_TOKEN!
     }),
     locations = await ringApi.getLocations(),

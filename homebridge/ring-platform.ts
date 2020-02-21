@@ -23,7 +23,7 @@ import { Fan } from './fan'
 import { Switch } from './switch'
 import { Camera } from './camera'
 import { PanicButtons } from './panic-buttons'
-import { RingAuth } from '../api/rest-client'
+import { RefreshTokenAuth } from '../api/rest-client'
 import { useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
@@ -101,7 +101,7 @@ export class RingPlatform {
 
   constructor(
     public log: HAP.Log,
-    public config: RingPlatformConfig & RingAuth,
+    public config: RingPlatformConfig & RefreshTokenAuth,
     public api: HAP.Platform
   ) {
     useLogger({

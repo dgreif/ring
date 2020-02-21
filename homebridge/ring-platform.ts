@@ -29,6 +29,7 @@ import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
 import { TemperatureSensor } from './temperature-sensor'
+import { LocationModeSwitch } from './location-mode-switch'
 
 const debug = __filename.includes('release-homebridge'),
   unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
@@ -120,6 +121,7 @@ export class RingPlatform {
 
     config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds || 20
     config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 2
+    config.locationModePollingSeconds = config.locationModePollingSeconds || 20
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
@@ -166,19 +168,22 @@ export class RingPlatform {
               cameraIdDifferentiator = isCamera ? 'camera' : '' // this forces bridged cameras from old version of the plugin to be seen as "stale"
 
             return {
-              device,
+              deviceType: device.deviceType as string,
+              device: device as any,
               isCamera,
               id: device.id.toString() + cameraIdDifferentiator,
               name: device.name,
-              AccessoryClass:
-                device instanceof RingCamera
-                  ? Camera
-                  : getAccessoryClass(device)
+              AccessoryClass: (device instanceof RingCamera
+                ? Camera
+                : getAccessoryClass(device)) as
+                | (new (...args: any[]) => BaseAccessory<any>)
+                | null
             }
           })
 
         if (this.config.showPanicButtons && securityPanel) {
           hapDevices.push({
+            deviceType: securityPanel.deviceType,
             device: securityPanel,
             isCamera: false,
             id: securityPanel.id.toString() + 'panic',
@@ -187,60 +192,74 @@ export class RingPlatform {
           })
         }
 
+        if (
+          !location.hasAlarmBaseStation &&
+          (await location.getLocationMode()).mode !== 'disabled'
+        ) {
+          hapDevices.push({
+            deviceType: 'location.mode',
+            device: location,
+            isCamera: false,
+            id: location.id + 'mode',
+            name: location.name + ' Mode',
+            AccessoryClass: LocationModeSwitch
+          })
+        }
+
         this.log.info(
           `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`
         )
-        hapDevices.forEach(({ device, isCamera, id, name, AccessoryClass }) => {
-          const uuid = hap.UUIDGen.generate(debugPrefix + id),
-            displayName = debugPrefix + name
+        hapDevices.forEach(
+          ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
+            const uuid = hap.UUIDGen.generate(debugPrefix + id),
+              displayName = debugPrefix + name
 
-          if (
-            !AccessoryClass ||
-            (this.config.hideLightGroups &&
-              device.deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
-            (this.config.hideUnsupportedServices &&
-              unsupportedDeviceTypes.includes(device.deviceType))
-          ) {
-            this.log.info(
-              `Hidden accessory ${device.deviceType} ${displayName}`
-            )
-            return
+            if (
+              !AccessoryClass ||
+              (this.config.hideLightGroups &&
+                deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
+              (this.config.hideUnsupportedServices &&
+                unsupportedDeviceTypes.includes(deviceType as any))
+            ) {
+              this.log.info(`Hidden accessory ${deviceType} ${displayName}`)
+              return
+            }
+
+            const createHomebridgeAccessory = () => {
+                const accessory = new hap.PlatformAccessory(
+                  displayName,
+                  uuid,
+                  isCamera
+                    ? hap.AccessoryCategories.CAMERA
+                    : hap.AccessoryCategories.SECURITY_SYSTEM
+                )
+
+                this.log.info(
+                  `Adding new accessory ${deviceType} ${displayName}`
+                )
+
+                if (isCamera) {
+                  cameraAccessories.push(accessory)
+                } else {
+                  platformAccessories.push(accessory)
+                }
+
+                return accessory
+              },
+              homebridgeAccessory =
+                this.homebridgeAccessories[uuid] || createHomebridgeAccessory(),
+              accessory = new AccessoryClass(
+                device as any,
+                homebridgeAccessory,
+                this.log,
+                this.config
+              )
+            accessory.initBase()
+
+            this.homebridgeAccessories[uuid] = homebridgeAccessory
+            activeAccessoryIds.push(uuid)
           }
-
-          const createHomebridgeAccessory = () => {
-              const accessory = new hap.PlatformAccessory(
-                displayName,
-                uuid,
-                isCamera
-                  ? hap.AccessoryCategories.CAMERA
-                  : hap.AccessoryCategories.SECURITY_SYSTEM
-              )
-
-              this.log.info(
-                `Adding new accessory ${device.deviceType} ${displayName}`
-              )
-
-              if (isCamera) {
-                cameraAccessories.push(accessory)
-              } else {
-                platformAccessories.push(accessory)
-              }
-
-              return accessory
-            },
-            homebridgeAccessory =
-              this.homebridgeAccessories[uuid] || createHomebridgeAccessory(),
-            accessory = new AccessoryClass(
-              device as any,
-              homebridgeAccessory,
-              this.log,
-              this.config
-            )
-          accessory.initBase()
-
-          this.homebridgeAccessories[uuid] = homebridgeAccessory
-          activeAccessoryIds.push(uuid)
-        })
+        )
       })
     )
 

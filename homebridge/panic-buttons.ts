@@ -1,7 +1,7 @@
 import { RingDevice, RingDeviceData, AlarmState } from '../api'
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { BaseAccessory } from './base-accessory'
+import { BaseDataAccessory } from './base-data-accessory'
 
 const burglarStates: AlarmState[] = [
     'burglar-alarm',
@@ -21,7 +21,7 @@ function matchesAnyAlarmState(
   return Boolean(alarmInfo && targetStates.includes(alarmInfo.state))
 }
 
-export class PanicButtons extends BaseAccessory<RingDevice> {
+export class PanicButtons extends BaseDataAccessory<RingDevice> {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: HAP.Accessory,

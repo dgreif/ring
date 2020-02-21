@@ -58,6 +58,7 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideUnsupportedServices": true,
   "cameraStatusPollingSeconds": 20,
   "cameraDingsPollingSeconds": 2,
+  "locationModePollingSeconds": 20,
   "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
 }
 ```
@@ -76,6 +77,7 @@ Option | Default | Explanation
 `showPanicButtons` | `false` | Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
+`locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
 
@@ -171,8 +173,11 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Creates `Burglar Alarm` and `Fire Alarm` switches in a new `Panic Buttons` device in HomeKit
     * Use these at your own risk.  **I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**
     * If either switch is turned on, you will receive a call from Ring monitoring to verify the emergency, and then authorities will be dispatched
+  * Location Modes
+    * For homes not equipped with a Ring Alarm, Locations Modes can be used as an alternative way to change settings for Ring cameras.
+    * Shows as a security system in HomeKit, just like the Ring Alarm.
 
-### Alarm Modes
+### Alarm/Location Modes
 
 Ring Mode | HomeKit Mode
 --- | ---
@@ -187,7 +192,7 @@ These settings will automatically be used by HomeKit.
 **Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
 HomeKit should immediately switch to `Home` to match.
 
-### Siri Commands for Alarm
+### Siri Commands for Alarm/Location Modes
 
 Siri Command | Outcome
 --- | ---

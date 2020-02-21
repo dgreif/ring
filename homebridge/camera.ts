@@ -1,11 +1,11 @@
 import { HAP, hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { RingCamera } from '../api'
-import { BaseAccessory } from './base-accessory'
+import { BaseDataAccessory } from './base-data-accessory'
 import { filter, map, mapTo } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 
-export class Camera extends BaseAccessory<RingCamera> {
+export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
 
   constructor(

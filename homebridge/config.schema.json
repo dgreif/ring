@@ -94,6 +94,13 @@
         "placeholder": "Get camera events every __ seconds",
         "description": "Camera motion and ding events does not update live and must be fetched periodically.  By default this is done every 2 seconds"
       },
+      "locationModePollingSeconds": {
+        "title": "Location Mode Polling",
+        "type": "integer",
+        "minimum": 1,
+        "placeholder": "Get current Location Mode every __ seconds",
+        "description": "Location Modes do not update live and must be fetched periodically.  By default this is done every 20 seconds for locations that have Location Modes enabled, and that do not have a Ring Alarm"
+      },
       "locationIds": {
         "title": "Location ID",
         "type": "array",
@@ -149,6 +156,7 @@
         "debug",
         "cameraStatusPollingSeconds",
         "cameraDingsPollingSeconds",
+        "locationModePollingSeconds",
         {
           "key": "locationIds",
           "add": "Add Another Location ID",

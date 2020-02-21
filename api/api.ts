@@ -22,6 +22,7 @@ export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
   cameraDingsPollingSeconds?: number
+  locationModePollingSeconds?: number
   debug?: boolean
   externalPorts?: {
     start: number
@@ -225,7 +226,14 @@ export class RingApi {
             new Location(
               location,
               cameras.filter(x => x.data.location_id === location.location_id),
-              locationIdsWithHubs.includes(location.location_id),
+              {
+                hasHubs: locationIdsWithHubs.includes(location.location_id),
+                hasAlarmBaseStation: baseStations.some(
+                  station => station.location_id === location.location_id
+                ),
+                locationModePollingSeconds: this.options
+                  .locationModePollingSeconds
+              },
               this.restClient
             )
         )

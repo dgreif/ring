@@ -1,7 +1,8 @@
 import { connect as connectSocketIo } from 'socket.io-client'
-import { BehaviorSubject, Subject } from 'rxjs'
+import { BehaviorSubject, merge, ReplaySubject, Subject } from 'rxjs'
 import {
   concatMap,
+  debounceTime,
   distinctUntilChanged,
   filter,
   map,
@@ -27,7 +28,13 @@ import {
   CameraEventResponse,
   CameraEventOptions,
   HistoryOptions,
-  RingDeviceHistoryEvent
+  RingDeviceHistoryEvent,
+  LocationModeResponse,
+  LocationModeSettings,
+  LocationMode,
+  LocationModeSharing,
+  LocationModeSettingsResponse,
+  LocationModeInput
 } from './ring-types'
 import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
@@ -97,17 +104,25 @@ export class Location {
     map(m => m.body as AssetSession[])
   )
   onConnected = new BehaviorSubject(false)
+  onLocationMode = new ReplaySubject<LocationMode>(1)
+  private onLocationModeRequested = new Subject()
   reconnecting = false
   connectionPromise?: Promise<SocketIOClient.Socket>
   securityPanel?: RingDevice
   assets?: TicketAsset[]
   receivedAssetDeviceLists: string[] = []
   offlineAssets: string[] = []
+  hasHubs = this.options.hasHubs
+  hasAlarmBaseStation = this.options.hasAlarmBaseStation
 
   constructor(
     public readonly locationDetails: UserLocation,
     public readonly cameras: RingCamera[],
-    public readonly hasHubs: boolean,
+    public readonly options: {
+      hasHubs: boolean
+      hasAlarmBaseStation: boolean
+      locationModePollingSeconds?: number
+    },
     private restClient: RingRestClient
   ) {
     // start listening for devices immediately
@@ -140,6 +155,14 @@ export class Location {
         }
       })
     })
+
+    if (!options.hasAlarmBaseStation && options.locationModePollingSeconds) {
+      merge(this.onLocationModeRequested, this.onLocationMode)
+        .pipe(debounceTime(options.locationModePollingSeconds * 1000))
+        .subscribe(() => this.getLocationMode())
+
+      void this.getLocationMode()
+    }
   }
 
   get id() {
@@ -423,5 +446,70 @@ export class Location {
 
   triggerFireAlarm() {
     return this.triggerAlarm(DispatchSignalType.Fire)
+  }
+
+  async getLocationMode() {
+    this.onLocationModeRequested.next()
+
+    const response = await this.restClient.request<LocationModeResponse>({
+      method: 'GET',
+      url: appApi(`mode/location/${this.id}`)
+    })
+
+    this.onLocationMode.next(response.mode)
+
+    return response
+  }
+
+  async setLocationMode(mode: LocationModeInput) {
+    const response = await this.restClient.request<LocationModeResponse>({
+      method: 'POST',
+      url: appApi(`mode/location/${this.id}`),
+      json: true,
+      data: { mode }
+    })
+
+    this.onLocationMode.next(response.mode)
+
+    return response
+  }
+
+  async disableLocationModes() {
+    await this.restClient.request<void>({
+      method: 'DELETE',
+      url: appApi(`mode/location/${this.id}/settings`)
+    })
+    this.onLocationMode.next('disabled')
+  }
+
+  getLocationModeSettings() {
+    return this.restClient.request<LocationModeSettingsResponse>({
+      method: 'GET',
+      url: appApi(`mode/location/${this.id}/settings`)
+    })
+  }
+
+  setLocationModeSettings(settings: LocationModeSettings) {
+    return this.restClient.request<LocationModeSettingsResponse>({
+      method: 'POST',
+      url: appApi(`mode/location/${this.id}/settings`),
+      data: settings
+    })
+  }
+
+  getLocationModeSharing() {
+    return this.restClient.request<LocationModeSharing>({
+      method: 'GET',
+      url: appApi(`mode/location/${this.id}/sharing`)
+    })
+  }
+
+  setLocationModeSharing(sharedUsersEnabled: boolean) {
+    return this.restClient.request<LocationModeSharing>({
+      method: 'POST',
+      url: appApi(`mode/location/${this.id}/sharing`),
+      json: true,
+      data: { sharedUsersEnabled }
+    })
   }
 }

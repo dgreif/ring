@@ -71,6 +71,7 @@ export enum RingCameraKind {
   floodlight_v1 = 'floodlight_v1',
   floodlight_v2 = 'floodlight_v2'
 }
+
 export const batteryCameraKinds: RingCameraKind[] = [
   RingCameraKind.doorbot,
   RingCameraKind.doorbell,
@@ -425,6 +426,7 @@ export interface CameraEvent {
   recording_status: 'ready' | 'audio_ready'
   state: 'timed_out' | 'completed'
 }
+
 // timed_out + ding === Missed Ring
 // completed === Answered
 
@@ -538,4 +540,46 @@ export interface AccountMonitoringStatus {
 export enum DispatchSignalType {
   Burglar = 'user-verified-burglar-xa',
   Fire = 'user-verified-fire-xa'
+}
+
+export type LocationModeInput = 'home' | 'away' | 'disarmed'
+export type LocationMode = LocationModeInput | 'disabled'
+
+export interface LocationModeResponse {
+  mode: LocationMode
+  lastUpdateTimeMS: number
+  securityStatus: {
+    lu?: number
+    md: 'none' | string
+    returnTopic: string
+  }
+  readOnly: boolean
+  notYetParticipatingInMode: []
+}
+
+export type LocationModeAction =
+  | 'disableMotionDetection'
+  | 'enableMotionDetection'
+  | 'blockLiveViewLocally'
+  | 'allowLiveViewLocally'
+
+export interface LocationModeSetting {
+  deviceId: string
+  deviceIdType: 'doorbot' | string
+  actions: LocationModeAction[]
+}
+
+export interface LocationModeSettings {
+  disarmed: LocationModeSetting[]
+  home: LocationModeSetting[]
+  away: LocationModeSetting[]
+}
+
+export interface LocationModeSettingsResponse extends LocationModeSettings {
+  lastUpdateTimeMS: number
+}
+
+export interface LocationModeSharing {
+  sharedUsersEnabled: boolean
+  lastUpdateTimeMS: number
 }

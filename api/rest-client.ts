@@ -230,7 +230,7 @@ export class RingRestClient {
   }
 
   async request<T = void>(options: {
-    method?: 'GET' | 'POST' | 'PUT'
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
     url: string
     data?: any
     json?: boolean

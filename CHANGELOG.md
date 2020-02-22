@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/dgreif/ring/compare/v7.0.0...v7.1.0) (2020-02-22)
+
+
+### Features
+
+* **homebridge:** location mode switch ([defe995](https://github.com/dgreif/ring/commit/defe995a3912d06a4a208ad3e2e8374a90e0d6fb)), closes [#200](https://github.com/dgreif/ring/issues/200)
+
 ## [7.0.0](https://github.com/dgreif/ring/compare/v6.2.0-alpha.0...v7.0.0) (2020-02-21)
 
 

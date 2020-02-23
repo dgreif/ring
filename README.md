@@ -42,6 +42,7 @@ Option | Default | Explanation
 `locationModePollingSeconds` | `undefined` (No Polling) | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.
 `locationIds` | All Locations | Allows you to limit the results to a specific set of locations. This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations. This will also limit the results for `ringApi.getCameras()` to the configured locations. If this option is not included, all locations will be returned.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
+`ffmpegPath` | undefined | A custom path to the `ffmpeg` executable.  By default, `ffmpeg` will be found using the `PATH` environment variable.
 `controlCenterDisplayName` | 'ring-client-api' | This allows you to change the displayed name for the Authorized Device within Control Center in the Ring app
 
 ## Locations

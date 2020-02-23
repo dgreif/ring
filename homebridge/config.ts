@@ -12,6 +12,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   hideAlarmSirenSwitch?: boolean
   hideUnsupportedServices?: boolean
   showPanicButtons?: boolean
+  ffmpegPath?: string
 }
 
 export function updateHomebridgeConfig(

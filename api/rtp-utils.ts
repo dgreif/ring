@@ -11,12 +11,20 @@ import { logError } from './util'
 const stun = require('stun'),
   portControl = require('nat-puncher')
 
-let preferredExternalPorts: number[] | undefined
+let preferredExternalPorts: number[] | undefined, ffmpegPath: string | undefined
 
 export function setPreferredExternalPorts(start: number, end: number) {
   const count = end - start + 1
 
   preferredExternalPorts = Array.from(new Array(count)).map((_, i) => i + start)
+}
+
+export function setFfmpegPath(path: string) {
+  ffmpegPath = path
+}
+
+export function getFfmpegPath() {
+  return ffmpegPath || 'ffmpeg'
 }
 
 export interface SrtpOptions {
@@ -217,6 +225,6 @@ export async function bindProxyPorts(
 }
 
 export async function doesFfmpegSupportCodec(codec: string) {
-  const output = await execa('ffmpeg', ['-codecs'])
+  const output = await execa(getFfmpegPath(), ['-codecs'])
   return output.stdout.includes(codec)
 }

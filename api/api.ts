@@ -16,7 +16,7 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
-import { setPreferredExternalPorts } from './rtp-utils'
+import { setFfmpegPath, setPreferredExternalPorts } from './rtp-utils'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -24,6 +24,7 @@ export interface RingApiOptions extends SessionOptions {
   cameraDingsPollingSeconds?: number
   locationModePollingSeconds?: number
   debug?: boolean
+  ffmpegPath?: string
   externalPorts?: {
     start: number
     end: number
@@ -41,7 +42,7 @@ export class RingApi {
       enableDebug()
     }
 
-    const { externalPorts } = options
+    const { externalPorts, ffmpegPath } = options
 
     if (typeof externalPorts === 'object') {
       const { start, end } = externalPorts,
@@ -72,6 +73,10 @@ export class RingApi {
       }
 
       setPreferredExternalPorts(start, end)
+    }
+
+    if (ffmpegPath) {
+      setFfmpegPath(ffmpegPath)
     }
   }
 

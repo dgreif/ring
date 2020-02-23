@@ -9,6 +9,7 @@ import {
 } from 'rxjs'
 import {
   bindProxyPorts,
+  getFfmpegPath,
   getSrtpValue,
   releasePorts,
   reservePorts,
@@ -202,7 +203,7 @@ export class SipSession {
         ...(ffmpegOptions.output || [])
       ],
       ff = spawn(
-        'ffmpeg',
+        getFfmpegPath(),
         ffOptions.map(x => x.toString())
       )
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0-alpha.0](https://github.com/dgreif/ring/compare/v7.1.0...v7.2.0-alpha.0) (2020-02-23)
+
+
+### Features
+
+* **homebridge:** use pre-built ffmpeg binary ([3911d52](https://github.com/dgreif/ring/commit/3911d528ec1379d4415134e7b450ef843cbde77d)), closes [#259](https://github.com/dgreif/ring/issues/259)
+
 ## [7.1.0](https://github.com/dgreif/ring/compare/v7.0.0...v7.1.0) (2020-02-22)
 
 

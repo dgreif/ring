@@ -543,7 +543,8 @@ export enum DispatchSignalType {
 }
 
 export type LocationModeInput = 'home' | 'away' | 'disarmed'
-export type LocationMode = LocationModeInput | 'disabled'
+export type LocationMode = LocationModeInput | 'disabled' | 'unset'
+export const disabledLocationModes: LocationMode[] = ['disabled', 'unset']
 
 export interface LocationModeResponse {
   mode: LocationMode
@@ -554,7 +555,7 @@ export interface LocationModeResponse {
     returnTopic: string
   }
   readOnly: boolean
-  notYetParticipatingInMode: []
+  notYetParticipatingInMode?: []
 }
 
 export type LocationModeAction =

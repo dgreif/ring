@@ -193,10 +193,7 @@ export class RingPlatform {
           })
         }
 
-        if (
-          !location.hasAlarmBaseStation &&
-          (await location.getLocationMode()).mode !== 'disabled'
-        ) {
+        if (await location.supportsLocationModeSwitching()) {
           hapDevices.push({
             deviceType: 'location.mode',
             device: location,

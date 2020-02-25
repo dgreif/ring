@@ -12,7 +12,7 @@ import {
   skip,
   take
 } from 'rxjs/operators'
-import { delay, generateUuid, logError, logInfo } from './util'
+import { delay, generateUuid, logDebug, logError, logInfo } from './util'
 import {
   AccountMonitoringStatus,
   AlarmMode,
@@ -511,5 +511,18 @@ export class Location {
       json: true,
       data: { sharedUsersEnabled }
     })
+  }
+
+  async supportsLocationModeSwitching() {
+    if (this.hasAlarmBaseStation || !this.cameras.length) {
+      return false
+    }
+
+    const modeResponse = await this.getLocationMode(),
+      { mode, readOnly, notYetParticipatingInMode } = modeResponse
+
+    logDebug('Location Mode: ' + JSON.stringify(modeResponse))
+
+    return !readOnly && !notYetParticipatingInMode.length && mode !== 'disabled'
   }
 }

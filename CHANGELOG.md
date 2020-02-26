@@ -4,17 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [7.2.0](https://github.com/dgreif/ring/compare/v7.2.0-alpha.0...v7.2.0) (2020-02-26)
 
+### Features
+
+* **homebridge:** use pre-built ffmpeg binary ([3911d52](https://github.com/dgreif/ring/commit/3911d528ec1379d4415134e7b450ef843cbde77d)), closes [#259](https://github.com/dgreif/ring/issues/259)
 
 ### Bug Fixes
 
 * **homebridge:** hide location modes in more scenarios ([72d8db4](https://github.com/dgreif/ring/commit/72d8db4df1d10814cea7aad01a4678c627dcdff5)), closes [#260](https://github.com/dgreif/ring/issues/260)
-
-## [7.2.0-alpha.0](https://github.com/dgreif/ring/compare/v7.1.0...v7.2.0-alpha.0) (2020-02-23)
-
-
-### Features
-
-* **homebridge:** use pre-built ffmpeg binary ([3911d52](https://github.com/dgreif/ring/commit/3911d528ec1379d4415134e7b450ef843cbde77d)), closes [#259](https://github.com/dgreif/ring/issues/259)
 
 ## [7.1.0](https://github.com/dgreif/ring/compare/v7.0.0...v7.1.0) (2020-02-22)
 

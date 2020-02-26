@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/dgreif/ring/compare/v7.2.0-alpha.0...v7.2.0) (2020-02-26)
+
+
+### Bug Fixes
+
+* **homebridge:** hide location modes in more scenarios ([72d8db4](https://github.com/dgreif/ring/commit/72d8db4df1d10814cea7aad01a4678c627dcdff5)), closes [#260](https://github.com/dgreif/ring/issues/260)
+
 ## [7.2.0-alpha.0](https://github.com/dgreif/ring/compare/v7.1.0...v7.2.0-alpha.0) (2020-02-23)
 
 

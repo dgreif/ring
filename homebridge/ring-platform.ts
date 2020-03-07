@@ -119,9 +119,9 @@ export class RingPlatform {
       return
     }
 
-    config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds || 20
-    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds || 2
-    config.locationModePollingSeconds = config.locationModePollingSeconds || 20
+    config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds ?? 20
+    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds ?? 2
+    config.locationModePollingSeconds = config.locationModePollingSeconds ?? 20
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
@@ -193,7 +193,10 @@ export class RingPlatform {
           })
         }
 
-        if (await location.supportsLocationModeSwitching()) {
+        if (
+          this.config.locationModePollingSeconds &&
+          (await location.supportsLocationModeSwitching())
+        ) {
           hapDevices.push({
             deviceType: 'location.mode',
             device: location,

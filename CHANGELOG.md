@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.2.1](https://github.com/dgreif/ring/compare/v7.2.0...v7.2.1) (2020-03-07)
+
+
+### Bug Fixes
+
+* **homebridge:** allow `0` for polling options to disable polling ([c89c977](https://github.com/dgreif/ring/commit/c89c977b89e0b8ead39bf0010879473d8b166ab0)), closes [#260](https://github.com/dgreif/ring/issues/260) [#266](https://github.com/dgreif/ring/issues/266)
+
 ## [7.2.0](https://github.com/dgreif/ring/compare/v7.2.0-alpha.0...v7.2.0) (2020-02-26)
 
 ### Features

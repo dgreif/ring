@@ -1,4 +1,6 @@
-![homebridge verified](https://raw.githubusercontent.com/dgreif/ring/master/branding/Homebridge_x_Ring.svg)
+<p align="center">
+  <a href="https://github.com/homebridge/verified/blob/master/verified-plugins.json"><img alt="Homebridge Verified" src="https://raw.githubusercontent.com/dgreif/ring/master/branding/Homebridge_x_Ring.svg?sanitize=true" width="500px"></a>
+</p>
 
 # homebridge-ring
 
@@ -13,7 +15,6 @@ This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platf
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
-
 
 ## Installation
 

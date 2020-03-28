@@ -1,7 +1,8 @@
-![homebridge verified](https://raw.githubusercontent.com/dgreif/ring/master/branding/Homebridge_x_Ring.svg)
+![homebridge verified](https://raw.githubusercontent.com/dgreif/ring/master/branding/Homebridge_x_Ring.svg?sanitize=true)
 
 # homebridge-ring
 
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![npm](https://badgen.net/npm/v/homebridge-ring)](https://www.npmjs.com/package/homebridge-ring)
 [![npm](https://badgen.net/npm/dt/homebridge-ring)](https://www.npmjs.com/package/homebridge-ring)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)

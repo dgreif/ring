@@ -7,6 +7,7 @@
 [![npm](https://badgen.net/npm/v/homebridge-ring)](https://www.npmjs.com/package/homebridge-ring)
 [![npm](https://badgen.net/npm/dt/homebridge-ring)](https://www.npmjs.com/package/homebridge-ring)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dgreif/ring/Node-CI.svg)](https://github.com/dgreif/ring/actions)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)
 
 This [Homebridge](https://github.com/nfarina/homebridge) plugin provides a platform for

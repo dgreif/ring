@@ -16,8 +16,8 @@ export class RingDevice {
     public assetId: string
   ) {
     location.onDeviceDataUpdate
-      .pipe(filter(update => update.zid === this.zid))
-      .subscribe(update => this.updateData(update))
+      .pipe(filter((update) => update.zid === this.zid))
+      .subscribe((update) => this.updateData(update))
   }
 
   updateData(update: Partial<RingDeviceData>) {
@@ -61,9 +61,9 @@ export class RingDevice {
       body: [
         {
           zid: this.zid,
-          ...body
-        }
-      ]
+          ...body,
+        },
+      ],
     })
   }
 
@@ -73,10 +73,10 @@ export class RingDevice {
         v1: [
           {
             commandType,
-            data
-          }
-        ]
-      }
+            data,
+          },
+        ],
+      },
     })
   }
 
@@ -87,7 +87,7 @@ export class RingDevice {
   toJSON() {
     return JSON.stringify(
       {
-        data: this.data
+        data: this.data,
       },
       null,
       2

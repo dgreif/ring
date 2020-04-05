@@ -14,10 +14,10 @@ export class SmokeCoListener extends BaseDeviceAccessory {
 
     const {
       Characteristic: { SmokeDetected, CarbonMonoxideDetected },
-      Service: { SmokeSensor, CarbonMonoxideSensor }
+      Service: { SmokeSensor, CarbonMonoxideSensor },
     } = hap
 
-    this.registerCharacteristic(SmokeDetected, SmokeSensor, data => {
+    this.registerCharacteristic(SmokeDetected, SmokeSensor, (data) => {
       return data.smoke && data.smoke.alarmStatus === 'active'
         ? SmokeDetected.SMOKE_DETECTED
         : SmokeDetected.SMOKE_NOT_DETECTED
@@ -25,7 +25,7 @@ export class SmokeCoListener extends BaseDeviceAccessory {
     this.registerCharacteristic(
       CarbonMonoxideDetected,
       CarbonMonoxideSensor,
-      data => {
+      (data) => {
         return data.co && data.co.alarmStatus === 'active'
           ? CarbonMonoxideDetected.CO_LEVELS_ABNORMAL
           : CarbonMonoxideDetected.CO_LEVELS_NORMAL

@@ -4,7 +4,7 @@ import {
   RingCameraKind,
   RingDevice,
   RingDeviceCategory,
-  RingDeviceType
+  RingDeviceType,
 } from '../api'
 import { HAP, hap } from './hap'
 import { SecurityPanel } from './security-panel'
@@ -34,7 +34,7 @@ import { LocationModeSwitch } from './location-mode-switch'
 const debug = __filename.includes('release-homebridge'),
   unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
     RingDeviceType.BaseStation,
-    RingDeviceType.Keypad
+    RingDeviceType.Keypad,
   ]
 
 export const platformName = 'Ring'
@@ -111,7 +111,7 @@ export class RingPlatform {
       },
       logError(message) {
         log.error(message)
-      }
+      },
     })
 
     if (!config) {
@@ -125,7 +125,7 @@ export class RingPlatform {
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
-      this.connectToApi().catch(e => {
+      this.connectToApi().catch((e) => {
         this.log.error('Error connecting to API')
         this.log.error(e)
       })
@@ -146,7 +146,7 @@ export class RingPlatform {
     const ringApi = new RingApi({
         controlCenterDisplayName: 'homebridge-ring',
         ffmpegPath: require('ffmpeg-for-homebridge'),
-        ...this.config
+        ...this.config,
       }),
       locations = await ringApi.getLocations(),
       { api } = this,
@@ -156,15 +156,15 @@ export class RingPlatform {
       activeAccessoryIds: string[] = []
 
     await Promise.all(
-      locations.map(async location => {
+      locations.map(async (location) => {
         const devices = await location.getDevices(),
           cameras = location.cameras,
           allDevices = [...devices, ...cameras],
           securityPanel = devices.find(
-            x => x.deviceType === RingDeviceType.SecurityPanel
+            (x) => x.deviceType === RingDeviceType.SecurityPanel
           ),
           debugPrefix = debug ? 'TEST ' : '',
-          hapDevices = allDevices.map(device => {
+          hapDevices = allDevices.map((device) => {
             const isCamera = device instanceof RingCamera,
               cameraIdDifferentiator = isCamera ? 'camera' : '' // this forces bridged cameras from old version of the plugin to be seen as "stale"
 
@@ -178,7 +178,7 @@ export class RingPlatform {
                 ? Camera
                 : getAccessoryClass(device)) as
                 | (new (...args: any[]) => BaseAccessory<any>)
-                | null
+                | null,
             }
           })
 
@@ -189,7 +189,7 @@ export class RingPlatform {
             isCamera: false,
             id: securityPanel.id.toString() + 'panic',
             name: 'Panic Buttons',
-            AccessoryClass: PanicButtons
+            AccessoryClass: PanicButtons,
           })
         }
 
@@ -203,7 +203,7 @@ export class RingPlatform {
             isCamera: false,
             id: location.id + 'mode',
             name: location.name + ' Mode',
-            AccessoryClass: LocationModeSwitch
+            AccessoryClass: LocationModeSwitch,
           })
         }
 
@@ -276,10 +276,10 @@ export class RingPlatform {
     }
 
     const staleAccessories = cachedAccessoryIds
-      .filter(cachedId => !activeAccessoryIds.includes(cachedId))
-      .map(id => this.homebridgeAccessories[id])
+      .filter((cachedId) => !activeAccessoryIds.includes(cachedId))
+      .map((id) => this.homebridgeAccessories[id])
 
-    staleAccessories.forEach(staleAccessory => {
+    staleAccessories.forEach((staleAccessory) => {
       this.log.info(
         `Removing stale cached accessory ${staleAccessory.UUID} ${staleAccessory.displayName}`
       )
@@ -299,7 +299,7 @@ export class RingPlatform {
           return
         }
 
-        updateHomebridgeConfig(this.api, config => {
+        updateHomebridgeConfig(this.api, (config) => {
           return config.replace(oldRefreshToken, newRefreshToken)
         })
       }

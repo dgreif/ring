@@ -2,7 +2,7 @@ import {
   clientApi,
   RefreshTokenAuth,
   RingRestClient,
-  SessionOptions
+  SessionOptions,
 } from './rest-client'
 import { Location } from './location'
 import {
@@ -10,7 +10,7 @@ import {
   BaseStation,
   BeamBridge,
   CameraData,
-  UserLocation
+  UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
@@ -86,7 +86,7 @@ export class RingApi {
       authorized_doorbots: authorizedDoorbots,
       stickup_cams: stickupCams,
       base_stations: baseStations,
-      beams_bridges: beamBridges
+      beams_bridges: beamBridges,
     } = await this.restClient.request<{
       doorbots: CameraData[]
       authorized_doorbots: CameraData[]
@@ -101,26 +101,26 @@ export class RingApi {
       stickupCams,
       allCameras: doorbots.concat(stickupCams, authorizedDoorbots),
       baseStations,
-      beamBridges
+      beamBridges,
     }
   }
 
   fetchActiveDings() {
     return this.restClient.request<ActiveDing[]>({
-      url: clientApi('dings/active')
+      url: clientApi('dings/active'),
     })
   }
 
   private listenForCameraUpdates(cameras: RingCamera[]) {
     const {
         cameraStatusPollingSeconds,
-        cameraDingsPollingSeconds
+        cameraDingsPollingSeconds,
       } = this.options,
       onCamerasRequestUpdate = merge(
-        ...cameras.map(camera => camera.onRequestUpdate)
+        ...cameras.map((camera) => camera.onRequestUpdate)
       ),
       onCamerasRequestActiveDings = merge(
-        ...cameras.map(camera => camera.onRequestActiveDings)
+        ...cameras.map((camera) => camera.onRequestActiveDings)
       ),
       onUpdateReceived = new Subject(),
       onActiveDingsReceived = new Subject(),
@@ -149,14 +149,14 @@ export class RingApi {
           return response && response.allCameras
         })
       )
-      .subscribe(cameraData => {
+      .subscribe((cameraData) => {
         onUpdateReceived.next()
 
         if (!cameraData) {
           return
         }
 
-        cameraData.forEach(data => {
+        cameraData.forEach((data) => {
           const camera = camerasById[data.id]
           if (camera) {
             camera.updateData(data)
@@ -177,7 +177,7 @@ export class RingApi {
           return
         }
 
-        activeDings.forEach(activeDing => {
+        activeDings.forEach((activeDing) => {
           const camera = camerasById[activeDing.doorbot_id]
           if (camera) {
             camera.processActiveDing(activeDing)
@@ -206,13 +206,13 @@ export class RingApi {
         doorbots,
         allCameras,
         baseStations,
-        beamBridges
+        beamBridges,
       } = await this.fetchRingDevices(),
       locationIdsWithHubs = [...baseStations, ...beamBridges].map(
-        x => x.location_id
+        (x) => x.location_id
       ),
       cameras = allCameras.map(
-        data =>
+        (data) =>
           new RingCamera(
             data,
             doorbots.includes(data) || authorizedDoorbots.includes(data),
@@ -220,24 +220,26 @@ export class RingApi {
           )
       ),
       locations = rawLocations
-        .filter(location => {
+        .filter((location) => {
           return (
             !Array.isArray(this.options.locationIds) ||
             this.options.locationIds.includes(location.location_id)
           )
         })
         .map(
-          location =>
+          (location) =>
             new Location(
               location,
-              cameras.filter(x => x.data.location_id === location.location_id),
+              cameras.filter(
+                (x) => x.data.location_id === location.location_id
+              ),
               {
                 hasHubs: locationIdsWithHubs.includes(location.location_id),
                 hasAlarmBaseStation: baseStations.some(
-                  station => station.location_id === location.location_id
+                  (station) => station.location_id === location.location_id
                 ),
                 locationModePollingSeconds: this.options
-                  .locationModePollingSeconds
+                  .locationModePollingSeconds,
               },
               this.restClient
             )

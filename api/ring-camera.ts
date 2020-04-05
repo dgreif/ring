@@ -8,7 +8,7 @@ import {
   DoorbellType,
   HistoryOptions,
   RingCameraModel,
-  SnapshotTimestamp
+  SnapshotTimestamp,
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, interval, Subject } from 'rxjs'
@@ -20,7 +20,7 @@ import {
   refCount,
   share,
   take,
-  takeUntil
+  takeUntil,
 } from 'rxjs/operators'
 import { createSocket } from 'dgram'
 import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
@@ -55,7 +55,7 @@ export function getBatteryLevel(
 ) {
   const levels = [
     parseBatteryLife(data.battery_life),
-    parseBatteryLife(data.battery_life_2)
+    parseBatteryLife(data.battery_life_2),
   ].filter((level): level is number => level !== null)
 
   if (!levels.length) {
@@ -80,7 +80,7 @@ export function getSearchQueryString(
 
       return `${key}=${value}`
     })
-    .filter(x => x)
+    .filter((x) => x)
     .join('&')
 
   return queryString.length ? `?${queryString}` : ''
@@ -106,11 +106,11 @@ export class RingCamera {
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
   onDoorbellPressed = this.onNewDing.pipe(
-    filter(ding => ding.kind === 'ding'),
+    filter((ding) => ding.kind === 'ding'),
     share()
   )
   onMotionDetected = this.onActiveDings.pipe(
-    map(dings => dings.some(ding => ding.motion || ding.kind === 'motion')),
+    map((dings) => dings.some((ding) => ding.motion || ding.kind === 'motion')),
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
@@ -132,7 +132,7 @@ export class RingCamera {
     private restClient: RingRestClient
   ) {
     if (!initialData.subscribed) {
-      this.subscribeToDingEvents().catch(e => {
+      this.subscribeToDingEvents().catch((e) => {
         logError(
           'Failed to subscribe ' + initialData.description + ' to ding events'
         )
@@ -141,7 +141,7 @@ export class RingCamera {
     }
 
     if (!initialData.subscribed_motions) {
-      this.subscribeToMotionEvents().catch(e => {
+      this.subscribeToMotionEvents().catch((e) => {
         logError(
           'Failed to subscribe ' + initialData.description + ' to motion events'
         )
@@ -209,7 +209,7 @@ export class RingCamera {
 
     await this.restClient.request({
       method: 'PUT',
-      url: this.doorbotUrl('floodlight_light_' + state)
+      url: this.doorbotUrl('floodlight_light_' + state),
     })
 
     this.updateData({ ...this.data, led_status: state })
@@ -226,7 +226,7 @@ export class RingCamera {
 
     await this.restClient.request({
       method: 'PUT',
-      url: this.doorbotUrl('siren_' + state)
+      url: this.doorbotUrl('siren_' + state),
     })
 
     this.updateData({ ...this.data, siren_status: { seconds_remaining: 1 } })
@@ -244,8 +244,8 @@ export class RingCamera {
       method: 'PUT',
       url: this.doorbotUrl(),
       data: {
-        'doorbot[settings][chime_settings][enable]': on
-      }
+        'doorbot[settings][chime_settings][enable]': on,
+      },
     })
 
     this.requestUpdate()
@@ -257,7 +257,7 @@ export class RingCamera {
     const response = await this.restClient.request<{
       device_health: CameraHealth
     }>({
-      url: this.doorbotUrl('health')
+      url: this.doorbotUrl('health'),
     })
 
     return response.device_health
@@ -266,7 +266,7 @@ export class RingCamera {
   startVideoOnDemand() {
     return this.restClient.request<ActiveDing | ''>({
       method: 'POST',
-      url: this.doorbotUrl('live_view') // Ring app uses vod for battery cams, but doesn't appear to be necessary
+      url: this.doorbotUrl('live_view'), // Ring app uses vod for battery cams, but doesn't appear to be necessary
     })
   }
 
@@ -300,7 +300,7 @@ export class RingCamera {
 
   private removeDingById(idToRemove: string) {
     const allActiveDings = this.activeDings,
-      otherDings = allActiveDings.filter(ding => ding.id_str !== idToRemove)
+      otherDings = allActiveDings.filter((ding) => ding.id_str !== idToRemove)
 
     this.onActiveDings.next(otherDings)
   }
@@ -311,12 +311,12 @@ export class RingCamera {
 
     this.onNewDing.next(ding)
     this.onActiveDings.next(
-      activeDings.filter(d => d.id_str !== dingId).concat([ding])
+      activeDings.filter((d) => d.id_str !== dingId).concat([ding])
     )
 
     setTimeout(() => {
       this.removeDingById(ding.id_str)
-      this.expiredDingIds = this.expiredDingIds.filter(id => id !== dingId)
+      this.expiredDingIds = this.expiredDingIds.filter((id) => id !== dingId)
     }, 65 * 1000) // dings last ~1 minute
   }
 
@@ -326,14 +326,14 @@ export class RingCamera {
         `locations/${this.data.location_id}/devices/${
           this.id
         }/events${getSearchQueryString(options)}`
-      )
+      ),
     })
   }
 
   async getRecordingUrl(dingIdStr: string, { transcoded = false } = {}) {
     const path = transcoded ? 'recording' : 'share/play',
       response = await this.restClient.request<{ url: string }>({
-        url: clientApi(`dings/${dingIdStr}/${path}?disable_redirect=true`)
+        url: clientApi(`dings/${dingIdStr}/${path}?disable_redirect=true`),
       })
     return response.url
   }
@@ -349,9 +349,9 @@ export class RingCamera {
         url: clientApi('snapshots/timestamps'),
         method: 'POST',
         data: {
-          doorbot_ids: [this.id]
+          doorbot_ids: [this.id],
         },
-        json: true
+        json: true,
       }),
       deviceTimestamp = timestamps[0],
       timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0,
@@ -361,7 +361,7 @@ export class RingCamera {
 
     return {
       timestamp,
-      inLifeTime: this.isTimestampInLifeTime(timestampAge)
+      inLifeTime: this.isTimestampInLifeTime(timestampAge),
     }
   }
 
@@ -374,9 +374,9 @@ export class RingCamera {
     const currentTimestampAge = Date.now() - this.lastSnapshotTimestampLocal
     if (this.isTimestampInLifeTime(currentTimestampAge)) {
       logInfo(
-        `Snapshot for ${
-          this.name
-        } is still within its life time (${currentTimestampAge / 1000}s old)`
+        `Snapshot for ${this.name} is still within its life time (${
+          currentTimestampAge / 1000
+        }s old)`
       )
       return true
     }
@@ -424,7 +424,7 @@ export class RingCamera {
 
     this.lastSnapshotPromise = this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
     })
 
     this.lastSnapshotPromise.catch(() => {
@@ -438,7 +438,7 @@ export class RingCamera {
   async getSipOptions(): Promise<SipOptions> {
     const activeDings = this.onActiveDings.getValue(),
       existingDing = activeDings
-        .filter(ding => !this.expiredDingIds.includes(ding.id_str))
+        .filter((ding) => !this.expiredDingIds.includes(ding.id_str))
         .slice()
         .reverse()[0],
       ding = existingDing || (await this.getSipConnectionDetails())
@@ -452,7 +452,7 @@ export class RingCamera {
     return {
       to: ding.sip_to,
       from: ding.sip_from,
-      dingId: ding.id_str
+      dingId: ding.id_str,
     }
   }
 
@@ -472,24 +472,24 @@ export class RingCamera {
         publicIpPromise,
         videoPort,
         audioPort,
-        [tlsPort]
+        [tlsPort],
       ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
         bindToPort(videoSocket, { forExternalUse: true }),
         bindToPort(audioSocket, { forExternalUse: true }),
-        reservePorts()
+        reservePorts(),
       ]),
       rtpOptions = {
         address: await publicIpPromise,
         audio: {
           port: audioPort,
-          ...srtpOption.audio
+          ...srtpOption.audio,
         },
         video: {
           port: videoPort,
-          ...srtpOption.video
-        }
+          ...srtpOption.video,
+        },
       }
 
     return new SipSession(
@@ -504,7 +504,7 @@ export class RingCamera {
 
   async recordToFile(outputPath: string, duration = 30) {
     const sipSession = await this.streamVideo({
-      output: ['-t', duration.toString(), outputPath]
+      output: ['-t', duration.toString(), outputPath],
     })
 
     await sipSession.onCallEnded.pipe(take(1)).toPromise()
@@ -520,28 +520,28 @@ export class RingCamera {
   subscribeToDingEvents() {
     return this.restClient.request({
       method: 'POST',
-      url: this.doorbotUrl('subscribe')
+      url: this.doorbotUrl('subscribe'),
     })
   }
 
   unsubscribeFromDingEvents() {
     return this.restClient.request({
       method: 'POST',
-      url: this.doorbotUrl('unsubscribe')
+      url: this.doorbotUrl('unsubscribe'),
     })
   }
 
   subscribeToMotionEvents() {
     return this.restClient.request({
       method: 'POST',
-      url: this.doorbotUrl('motions_subscribe')
+      url: this.doorbotUrl('motions_subscribe'),
     })
   }
 
   unsubscribeFromMotionEvents() {
     return this.restClient.request({
       method: 'POST',
-      url: this.doorbotUrl('motions_unsubscribe')
+      url: this.doorbotUrl('motions_unsubscribe'),
     })
   }
 }

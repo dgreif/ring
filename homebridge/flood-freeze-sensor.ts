@@ -15,7 +15,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
 
     const {
         Characteristic: { LeakDetected, OccupancyDetected },
-        Service: { LeakSensor, OccupancySensor }
+        Service: { LeakSensor, OccupancySensor },
       } = hap,
       leakService = this.getService(LeakSensor, `${device.name} Flood Sensor`),
       freezeService = this.getService(
@@ -23,7 +23,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
         `${device.name} Freeze Sensor`
       ),
       onFloodDetected = device.onData.pipe(
-        map(data => {
+        map((data) => {
           return data.flood && data.flood.faulted
             ? LeakDetected.LEAK_DETECTED
             : LeakDetected.LEAK_NOT_DETECTED
@@ -31,7 +31,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
         distinctUntilChanged()
       ),
       onFreezeDetected = device.onData.pipe(
-        map(data => {
+        map((data) => {
           return data.freeze && data.freeze.faulted
             ? OccupancyDetected.OCCUPANCY_DETECTED
             : OccupancyDetected.OCCUPANCY_NOT_DETECTED
@@ -43,9 +43,9 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
     this.registerObservableCharacteristic({
       characteristicType: LeakDetected,
       serviceType: leakService,
-      onValue: onFloodDetected
+      onValue: onFloodDetected,
     })
-    onFloodDetected.pipe(filter(faulted => faulted)).subscribe(() => {
+    onFloodDetected.pipe(filter((faulted) => faulted)).subscribe(() => {
       this.logger.info(device.name + ' Detected Flooding')
     })
 
@@ -53,9 +53,9 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
     this.registerObservableCharacteristic({
       characteristicType: OccupancyDetected,
       serviceType: freezeService,
-      onValue: onFreezeDetected
+      onValue: onFreezeDetected,
     })
-    onFreezeDetected.pipe(filter(faulted => faulted)).subscribe(() => {
+    onFreezeDetected.pipe(filter((faulted) => faulted)).subscribe(() => {
       this.logger.info(device.name + ' Detected Freezing')
     })
   }

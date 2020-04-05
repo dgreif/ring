@@ -14,7 +14,7 @@
     "es6": true
   },
   "rules": {
-    "comma-dangle": [2,"never"],
+    "comma-dangle": [2,"only-multiline"],
     "no-cond-assign": [2,"except-parens"],
     "no-console": 2,
     "no-constant-condition": 2,

@@ -17,8 +17,8 @@ export class Switch extends BaseDeviceAccessory {
     this.registerCharacteristic(
       Characteristic.On,
       Service.Switch,
-      data => Boolean(data.on),
-      value => this.setOnState(value)
+      (data) => Boolean(data.on),
+      (value) => this.setOnState(value)
     )
   }
 

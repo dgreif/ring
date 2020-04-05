@@ -19,14 +19,14 @@ export class Beam extends BaseDeviceAccessory {
     const { Characteristic, Service } = hap,
       { MotionSensor } = Service,
       {
-        data: { deviceType }
+        data: { deviceType },
       } = this.device
 
     if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
       this.registerCharacteristic(
         hap.Characteristic.MotionDetected,
         MotionSensor,
-        data => data.motionStatus === 'faulted'
+        (data) => data.motionStatus === 'faulted'
       )
       this.initSensorService(MotionSensor)
     }
@@ -35,8 +35,8 @@ export class Beam extends BaseDeviceAccessory {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Lightbulb,
-        data => Boolean(data.on),
-        value => this.setOnState(value)
+        (data) => Boolean(data.on),
+        (value) => this.setOnState(value)
       )
     }
 
@@ -44,8 +44,8 @@ export class Beam extends BaseDeviceAccessory {
       this.registerLevelCharacteristic(
         Characteristic.Brightness,
         Service.Lightbulb,
-        data => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
-        value => this.setLevelState(value)
+        (data) => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
+        (value) => this.setLevelState(value)
       )
     }
   }
@@ -71,7 +71,7 @@ export class Beam extends BaseDeviceAccessory {
     this.logger.info(`Setting brightness of ${this.device.name} to ${level}%`)
 
     return this.device.setInfo({
-      device: { v1: { level: level / 100 } }
+      device: { v1: { level: level / 100 } },
     })
   }
 }

@@ -61,7 +61,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
     onValue,
     setValue,
     name,
-    requestUpdate
+    requestUpdate,
   }: {
     characteristicType: HAP.Characteristic
     serviceType: Service
@@ -74,7 +74,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
     const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType)
 
-    characteristic.on('get', async callback => {
+    characteristic.on('get', async (callback) => {
       try {
         const value = await onValue.pipe(take(1)).toPromise()
         callback(null, value)
@@ -87,13 +87,13 @@ export abstract class BaseAccessory<T extends { name: string }> {
       }
     })
 
-    onValue.subscribe(value => {
+    onValue.subscribe((value) => {
       characteristic.updateValue(value)
     })
 
     if (setValue) {
       characteristic.on('set', (newValue, callback) => {
-        Promise.resolve(setValue(newValue)).catch(e => {
+        Promise.resolve(setValue(newValue)).catch((e) => {
           this.logger.error(e)
         })
         callback()
@@ -104,10 +104,10 @@ export abstract class BaseAccessory<T extends { name: string }> {
   pruneUnusedServices() {
     const safeServiceUUIDs = [
       hap.Service.CameraRTPStreamManagement.UUID,
-      hap.Service.CameraControl.UUID
+      hap.Service.CameraControl.UUID,
     ]
 
-    this.accessory.services.forEach(service => {
+    this.accessory.services.forEach((service) => {
       if (
         !this.servicesInUse.includes(service) &&
         !safeServiceUUIDs.includes(service.UUID)

@@ -15,10 +15,10 @@ export class FreezeSensor extends BaseDeviceAccessory {
 
     const {
         Characteristic: { OccupancyDetected },
-        Service: { OccupancySensor }
+        Service: { OccupancySensor },
       } = hap,
       onFreezeDetected = device.onData.pipe(
-        map(data => {
+        map((data) => {
           return data.faulted
             ? OccupancyDetected.OCCUPANCY_DETECTED
             : OccupancyDetected.OCCUPANCY_NOT_DETECTED
@@ -30,9 +30,9 @@ export class FreezeSensor extends BaseDeviceAccessory {
     this.registerObservableCharacteristic({
       characteristicType: OccupancyDetected,
       serviceType: OccupancySensor,
-      onValue: onFreezeDetected
+      onValue: onFreezeDetected,
     })
-    onFreezeDetected.pipe(filter(faulted => faulted)).subscribe(() => {
+    onFreezeDetected.pipe(filter((faulted) => faulted)).subscribe(() => {
       this.logger.info(device.name + ' Detected Freezing')
     })
   }

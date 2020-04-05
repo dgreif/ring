@@ -14,7 +14,7 @@ async function example() {
   const ringApi = new RingApi({
       // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
-      debug: true
+      debug: true,
     }),
     [camera] = await ringApi.getCameras()
 
@@ -53,8 +53,8 @@ async function example() {
       '6',
       '-hls_flags',
       'delete_segments',
-      path.join(publicOutputDirectory, 'stream.m3u8')
-    ]
+      path.join(publicOutputDirectory, 'stream.m3u8'),
+    ],
   })
 
   sipSession.onCallEnded.subscribe(() => {
@@ -62,7 +62,7 @@ async function example() {
     process.exit()
   })
 
-  setTimeout(function() {
+  setTimeout(function () {
     console.log('Stopping call...')
     sipSession.stop()
   }, 5 * 60 * 1000) // Stop after 5 minutes.

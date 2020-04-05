@@ -1,8 +1,7 @@
 import debug = require('debug')
 import { red } from 'colors'
 import { createInterface } from 'readline'
-import generateRandomUuid from 'uuid/v4'
-import generateUuidFromNamespace from 'uuid/v5'
+import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
 import { machineId } from 'node-machine-id'
 
 const debugLogger = debug('ring'),
@@ -19,12 +18,12 @@ let logger: Logger = {
     },
     logError(message) {
       debugLogger(red(message))
-    }
+    },
   },
   debugEnabled = false
 
 export function delay(milliseconds: number) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, milliseconds)
   })
 }
@@ -75,9 +74,9 @@ export async function getHardwareId() {
 export async function requestInput(question: string) {
   const lineReader = createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     }),
-    answer = await new Promise<string>(resolve => {
+    answer = await new Promise<string>((resolve) => {
       lineReader.question(question, resolve)
     })
 
@@ -102,5 +101,5 @@ export function mapAsync<T, U>(
   records: T[],
   asyncMapper: (record: T) => Promise<U>
 ): Promise<U[]> {
-  return Promise.all(records.map(record => asyncMapper(record)))
+  return Promise.all(records.map((record) => asyncMapper(record)))
 }

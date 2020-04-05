@@ -10,7 +10,7 @@ import {
   refCount,
   scan,
   skip,
-  take
+  take,
 } from 'rxjs/operators'
 import { delay, generateUuid, logDebug, logError, logInfo } from './util'
 import {
@@ -35,7 +35,7 @@ import {
   LocationModeSharing,
   LocationModeSettingsResponse,
   LocationModeInput,
-  disabledLocationModes
+  disabledLocationModes,
 } from './ring-types'
 import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
@@ -57,14 +57,14 @@ export class Location {
   onMessage = new Subject<SocketIoMessage>()
   onDataUpdate = new Subject<SocketIoMessage>()
   onDeviceDataUpdate = this.onDataUpdate.pipe(
-    filter(message => {
+    filter((message) => {
       return message.datatype === 'DeviceInfoDocType' && Boolean(message.body)
     }),
-    concatMap(message => message.body),
+    concatMap((message) => message.body),
     map(flattenDeviceData)
   )
   onDeviceList = this.onMessage.pipe(
-    filter(m => m.msg === deviceListMessageType)
+    filter((m) => m.msg === deviceListMessageType)
   )
   onDevices = this.onDeviceList.pipe(
     scan((devices, { body: deviceList, src }) => {
@@ -78,7 +78,7 @@ export class Location {
 
       return deviceList.reduce((updatedDevices: RingDevice[], data) => {
         const flatData = flattenDeviceData(data),
-          existingDevice = updatedDevices.find(x => x.zid === flatData.zid)
+          existingDevice = updatedDevices.find((x) => x.zid === flatData.zid)
 
         if (existingDevice) {
           existingDevice.updateData(flatData)
@@ -92,7 +92,7 @@ export class Location {
     filter(() => {
       return Boolean(
         this.assets &&
-          this.assets.every(asset =>
+          this.assets.every((asset) =>
             this.receivedAssetDeviceLists.includes(asset.uuid)
           )
       )
@@ -101,8 +101,8 @@ export class Location {
     refCount()
   )
   onSessionInfo = this.onDataUpdate.pipe(
-    filter(m => m.msg === 'SessionInfo'),
-    map(m => m.body as AssetSession[])
+    filter((m) => m.msg === 'SessionInfo'),
+    map((m) => m.body as AssetSession[])
   )
   onConnected = new BehaviorSubject(false)
   onLocationMode = new ReplaySubject<LocationMode>(1)
@@ -130,10 +130,10 @@ export class Location {
     this.onDevices.subscribe()
 
     // watch for sessions to come online
-    this.onSessionInfo.subscribe(sessions => {
+    this.onSessionInfo.subscribe((sessions) => {
       sessions.forEach(({ connectionStatus, assetUuid }) => {
         const assetWasOffline = this.offlineAssets.includes(assetUuid),
-          asset = this.assets && this.assets.find(x => x.uuid === assetUuid)
+          asset = this.assets && this.assets.find((x) => x.uuid === assetUuid)
 
         if (!asset) {
           // we don't know about this asset, so don't worry about it
@@ -144,7 +144,7 @@ export class Location {
           if (assetWasOffline) {
             this.requestList(deviceListMessageType, assetUuid)
             this.offlineAssets = this.offlineAssets.filter(
-              id => id !== assetUuid
+              (id) => id !== assetUuid
             )
             logInfo(`Ring ${asset.kind} ${assetUuid} has come back online`)
           }
@@ -185,7 +185,7 @@ export class Location {
       host: string
       ticket: string
     }>({
-      url: appApi('clap/tickets?locationID=' + this.id)
+      url: appApi('clap/tickets?locationID=' + this.id),
     })
     this.assets = assets
     this.receivedAssetDeviceLists.length = 0
@@ -235,7 +235,7 @@ export class Location {
         resolve(connection)
         this.onConnected.next(true)
         logInfo('Ring connected to socket.io server')
-        assets.forEach(asset =>
+        assets.forEach((asset) =>
           this.requestList(deviceListMessageType, asset.uuid)
         )
       })
@@ -282,7 +282,7 @@ export class Location {
 
     await this.sendCommandToSecurityPanel('security-panel.switch-mode', {
       mode: alarmMode,
-      bypass: bypassSensorZids
+      bypass: bypassSensorZids,
     })
 
     const updatedData = await updatedDataPromise
@@ -314,18 +314,18 @@ export class Location {
       data: {
         lights_on: {
           duration_seconds: durationSeconds,
-          enabled: on
-        }
+          enabled: on,
+        },
       },
-      json: true
+      json: true,
     })
   }
 
   getNextMessageOfType(type: MessageType, src: string) {
     return this.onMessage
       .pipe(
-        filter(m => m.msg === type && m.src === src),
-        map(m => m.body),
+        filter((m) => m.msg === type && m.src === src),
+        map((m) => m.body),
         take(1)
       )
       .toPromise()
@@ -362,7 +362,7 @@ export class Location {
     }
 
     const devices = await this.getDevices(),
-      securityPanel = devices.find(device => {
+      securityPanel = devices.find((device) => {
         return device.data.deviceType === RingDeviceType.SecurityPanel
       })
 
@@ -394,9 +394,9 @@ export class Location {
       url: appApi(
         `rs/history${getSearchQueryString({
           accountId: this.id,
-          ...options
+          ...options,
         })}`
-      )
+      ),
     })
   }
 
@@ -404,13 +404,13 @@ export class Location {
     return this.restClient.request<CameraEventResponse>({
       url: clientApi(
         `locations/${this.id}/events${getSearchQueryString(options)}`
-      )
+      ),
     })
   }
 
   getAccountMonitoringStatus() {
     return this.restClient.request<AccountMonitoringStatus>({
-      url: appApi('rs/monitoring/accounts/' + this.id)
+      url: appApi('rs/monitoring/accounts/' + this.id),
     })
   }
 
@@ -418,7 +418,7 @@ export class Location {
     const now = Date.now(),
       alarmSessionUuid = generateUuid(),
       baseStationAsset =
-        this.assets && this.assets.find(x => x.kind === 'base_station_v1')
+        this.assets && this.assets.find((x) => x.kind === 'base_station_v1')
 
     if (!baseStationAsset) {
       throw new Error(
@@ -436,8 +436,8 @@ export class Location {
         alarmSessionUuid,
         currentTsMs: now,
         eventOccurredTime: now,
-        signalType
-      }
+        signalType,
+      },
     })
   }
 
@@ -454,7 +454,7 @@ export class Location {
 
     const response = await this.restClient.request<LocationModeResponse>({
       method: 'GET',
-      url: appApi(`mode/location/${this.id}`)
+      url: appApi(`mode/location/${this.id}`),
     })
 
     this.onLocationMode.next(response.mode)
@@ -467,7 +467,7 @@ export class Location {
       method: 'POST',
       url: appApi(`mode/location/${this.id}`),
       json: true,
-      data: { mode }
+      data: { mode },
     })
 
     this.onLocationMode.next(response.mode)
@@ -478,7 +478,7 @@ export class Location {
   async disableLocationModes() {
     await this.restClient.request<void>({
       method: 'DELETE',
-      url: appApi(`mode/location/${this.id}/settings`)
+      url: appApi(`mode/location/${this.id}/settings`),
     })
     this.onLocationMode.next('disabled')
   }
@@ -486,7 +486,7 @@ export class Location {
   getLocationModeSettings() {
     return this.restClient.request<LocationModeSettingsResponse>({
       method: 'GET',
-      url: appApi(`mode/location/${this.id}/settings`)
+      url: appApi(`mode/location/${this.id}/settings`),
     })
   }
 
@@ -494,14 +494,14 @@ export class Location {
     return this.restClient.request<LocationModeSettingsResponse>({
       method: 'POST',
       url: appApi(`mode/location/${this.id}/settings`),
-      data: settings
+      data: settings,
     })
   }
 
   getLocationModeSharing() {
     return this.restClient.request<LocationModeSharing>({
       method: 'GET',
-      url: appApi(`mode/location/${this.id}/sharing`)
+      url: appApi(`mode/location/${this.id}/sharing`),
     })
   }
 
@@ -510,7 +510,7 @@ export class Location {
       method: 'POST',
       url: appApi(`mode/location/${this.id}/sharing`),
       json: true,
-      data: { sharedUsersEnabled }
+      data: { sharedUsersEnabled },
     })
   }
 

@@ -26,7 +26,7 @@ function getStatusLowBattery(data: RingDeviceData) {
 function getBatteryChargingState({
   batteryStatus,
   batteryBackup,
-  acStatus
+  acStatus,
 }: RingDeviceData) {
   const { ChargingState } = hap.Characteristic
 
@@ -62,24 +62,24 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
   initBase() {
     const {
         device: { data: initialData },
-        device
+        device,
       } = this,
       { Characteristic, Service } = hap
 
     this.registerCharacteristic(
       Characteristic.Manufacturer,
       Service.AccessoryInformation,
-      data => data.manufacturerName || 'Ring'
+      (data) => data.manufacturerName || 'Ring'
     )
     this.registerCharacteristic(
       Characteristic.Model,
       Service.AccessoryInformation,
-      data => data.deviceType
+      (data) => data.deviceType
     )
     this.registerCharacteristic(
       Characteristic.SerialNumber,
       Service.AccessoryInformation,
-      data => data.serialNumber || 'Unknown'
+      (data) => data.serialNumber || 'Unknown'
     )
 
     if ('volume' in initialData && 'setVolume' in device) {
@@ -91,7 +91,7 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
       this.registerLevelCharacteristic(
         Characteristic.Volume,
         Service.Speaker,
-        data => {
+        (data) => {
           return data.volume ? data.volume * 100 : 0
         },
         (volume: number) => {
@@ -127,7 +127,7 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
     this.registerCharacteristic(
       Characteristic.StatusTampered,
       SensorService,
-      data => {
+      (data) => {
         return data.tamperStatus === 'ok'
           ? Characteristic.StatusTampered.NOT_TAMPERED
           : Characteristic.StatusTampered.TAMPERED
@@ -138,7 +138,7 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
       this.registerCharacteristic(
         Characteristic.StatusLowBattery,
         SensorService,
-        data => getStatusLowBattery(data)
+        (data) => getStatusLowBattery(data)
       )
     }
   }

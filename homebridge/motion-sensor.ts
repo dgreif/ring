@@ -17,7 +17,7 @@ export class MotionSensor extends BaseDeviceAccessory {
     this.registerCharacteristic(
       hap.Characteristic.MotionDetected,
       Service.MotionSensor,
-      data => data.faulted
+      (data) => data.faulted
     )
 
     this.initSensorService(Service.MotionSensor)

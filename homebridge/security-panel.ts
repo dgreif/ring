@@ -8,7 +8,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
   private targetState: any
   private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
     ? allAlarmStates
-    : allAlarmStates.filter(x => x !== 'entry-delay')
+    : allAlarmStates.filter((x) => x !== 'entry-delay')
 
   constructor(
     public readonly device: RingDevice,
@@ -22,14 +22,14 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
     this.device.onData
       .pipe(distinctUntilChanged((a, b) => a.mode === b.mode))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.targetState = this.getTargetState(data)
       })
 
     this.registerCharacteristic(
       Characteristic.SecuritySystemCurrentState,
       Service.SecuritySystem,
-      data => {
+      (data) => {
         const state = this.getCurrentState(data)
 
         if (state === this.targetState) {
@@ -43,16 +43,16 @@ export class SecurityPanel extends BaseDeviceAccessory {
     this.registerCharacteristic(
       Characteristic.SecuritySystemTargetState,
       Service.SecuritySystem,
-      data => this.getTargetState(data),
-      value => this.setTargetState(value)
+      (data) => this.getTargetState(data),
+      (value) => this.setTargetState(value)
     )
 
     if (!config.hideAlarmSirenSwitch) {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Switch,
-        data => data.siren && data.siren.state === 'on',
-        value => {
+        (data) => data.siren && data.siren.state === 'on',
+        (value) => {
           if (value) {
             return this.device.location.soundSiren()
           }
@@ -66,7 +66,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
   getCurrentState({ mode, alarmInfo }: RingDeviceData) {
     const {
-      Characteristic: { SecuritySystemCurrentState: State }
+      Characteristic: { SecuritySystemCurrentState: State },
     } = hap
 
     if (alarmInfo && this.alarmStates.includes(alarmInfo.state)) {
@@ -87,7 +87,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
   setTargetState(state: any) {
     const {
-        Characteristic: { SecuritySystemTargetState: State }
+        Characteristic: { SecuritySystemTargetState: State },
       } = hap,
       { location, data } = this.device
 

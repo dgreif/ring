@@ -9,7 +9,7 @@ const ringErrorCodes: { [code: number]: string } = {
     7019: 'ASSET_OFFLINE',
     7061: 'ASSET_CELL_BACKUP',
     7062: 'UPDATING',
-    7063: 'MAINTENANCE'
+    7063: 'MAINTENANCE',
   },
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
   appApiBaseUrl = 'https://app.ring.com/api/v1/',
@@ -84,7 +84,7 @@ export class RingRestClient {
     if (this.refreshToken && !twoFactorAuthCode) {
       return {
         grant_type: 'refresh_token',
-        refresh_token: this.refreshToken
+        refresh_token: this.refreshToken,
       }
     }
 
@@ -93,7 +93,7 @@ export class RingRestClient {
       return {
         grant_type: 'password',
         password: authOptions.password,
-        username: authOptions.email
+        username: authOptions.email,
       }
     }
 
@@ -111,20 +111,20 @@ export class RingRestClient {
         data: {
           client_id: 'ring_official_android',
           scope: 'client',
-          ...grantData
+          ...grantData,
         },
         method: 'POST',
         headers: {
           'content-type': 'application/json',
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
-          hardware_id: await hardwareIdPromise
-        }
+          hardware_id: await hardwareIdPromise,
+        },
       })
 
       this.onRefreshTokenUpdated.next({
         oldRefreshToken: this.refreshToken,
-        newRefreshToken: response.refresh_token
+        newRefreshToken: response.refresh_token,
       })
       this.refreshToken = response.refresh_token
 
@@ -177,21 +177,21 @@ export class RingRestClient {
           metadata: {
             api_version: apiVersion,
             device_model:
-              this.authOptions.controlCenterDisplayName ?? 'ring-client-api'
+              this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
           },
-          os: 'android' // can use android, ios, ring-site, windows for sure
-        }
+          os: 'android', // can use android, ios, ring-site, windows for sure
+        },
       },
       method: 'POST',
       headers: {
         authorization: `Bearer ${authToken.access_token}`,
-        'content-type': 'application/json'
-      }
+        'content-type': 'application/json',
+      },
     })
   }
 
   getSession(): Promise<SessionResponse> {
-    return this.authPromise.then(async authToken => {
+    return this.authPromise.then(async (authToken) => {
       try {
         return await this.fetchNewSession(authToken)
       } catch (e) {
@@ -247,7 +247,7 @@ export class RingRestClient {
             ? 'application/json'
             : 'application/x-www-form-urlencoded',
           authorization: `Bearer ${authTokenResponse.access_token}`,
-          hardware_id: hardwareId
+          hardware_id: hardwareId,
         }
 
       return await requestWithRetry<T>({
@@ -255,7 +255,7 @@ export class RingRestClient {
         url,
         data: json ? data : querystring.stringify(data),
         headers,
-        responseType
+        responseType,
       })
     } catch (e) {
       const response = e.response || {}

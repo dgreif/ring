@@ -25,10 +25,10 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.MotionDetected,
         serviceType: Service.MotionSensor,
-        onValue: device.onMotionDetected
+        onValue: device.onMotionDetected,
       })
 
-      device.onMotionDetected.pipe(filter(motion => motion)).subscribe(() => {
+      device.onMotionDetected.pipe(filter((motion) => motion)).subscribe(() => {
         this.logger.info(device.name + ' Detected Motion')
       })
     }
@@ -45,14 +45,14 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
-        onValue: onPressed
+        onValue: onPressed,
       })
 
       if (!config.hideDoorbellSwitch) {
         this.registerObservableCharacteristic({
           characteristicType: Characteristic.ProgrammableSwitchEvent,
           serviceType: Service.StatelessProgrammableSwitch,
-          onValue: onPressed
+          onValue: onPressed,
         })
       }
     }
@@ -61,10 +61,10 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Lightbulb,
-        data => {
+        (data) => {
           return data.led_status === 'on'
         },
-        value => device.setLight(value),
+        (value) => device.setLight(value),
         0,
         undefined,
         () => device.requestUpdate()
@@ -75,12 +75,12 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerCharacteristic(
         Characteristic.On,
         Service.Switch,
-        data => {
+        (data) => {
           return Boolean(
             data.siren_status && data.siren_status.seconds_remaining
           )
         },
-        value => device.setSiren(value),
+        (value) => device.setSiren(value),
         0,
         device.name + ' Siren',
         () => device.requestUpdate(),
@@ -99,9 +99,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         serviceType: Service.Switch,
         serviceSubType: 'In-Home Doorbell',
         onValue: device.onInHomeDoorbellStatus,
-        setValue: value => device.setInHomeDoorbell(value),
+        setValue: (value) => device.setInHomeDoorbell(value),
         name: device.name + ' In-Home Doorbell',
-        requestUpdate: () => device.requestUpdate()
+        requestUpdate: () => device.requestUpdate(),
       })
     }
 
@@ -113,12 +113,12 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     this.registerCharacteristic(
       Characteristic.Model,
       Service.AccessoryInformation,
-      data => `${device.model} (${data.kind})`
+      (data) => `${device.model} (${data.kind})`
     )
     this.registerCharacteristic(
       Characteristic.SerialNumber,
       Service.AccessoryInformation,
-      data => data.device_id
+      (data) => data.device_id
     )
 
     if (
@@ -140,10 +140,10 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         characteristicType: Characteristic.BatteryLevel,
         serviceType: Service.BatteryService,
         onValue: device.onBatteryLevel.pipe(
-          map(batteryLevel => {
+          map((batteryLevel) => {
             return batteryLevel === null ? 100 : batteryLevel
           })
-        )
+        ),
       })
     }
   }

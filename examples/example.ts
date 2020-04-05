@@ -8,7 +8,7 @@ async function example() {
       // Replace with your refresh token
       refreshToken: env.RING_REFRESH_TOKEN!,
       // Listen for dings and motion events
-      cameraDingsPollingSeconds: 2
+      cameraDingsPollingSeconds: 2,
     }),
     locations = await ringApi.getLocations(),
     allCameras = await ringApi.getCameras()
@@ -18,7 +18,7 @@ async function example() {
   )
 
   for (const location of locations) {
-    location.onConnected.pipe(skip(1)).subscribe(connected => {
+    location.onConnected.pipe(skip(1)).subscribe((connected) => {
       const status = connected ? 'Connected to' : 'Disconnected from'
       console.log(`**** ${status} location ${location.name} - ${location.id}`)
     })
@@ -46,8 +46,8 @@ async function example() {
   }
 
   if (allCameras.length) {
-    allCameras.forEach(camera => {
-      camera.onNewDing.subscribe(ding => {
+    allCameras.forEach((camera) => {
+      camera.onNewDing.subscribe((ding) => {
         const event =
           ding.kind === 'motion'
             ? 'Motion detected'

@@ -14,10 +14,10 @@ export class SmokeAlarm extends BaseDeviceAccessory {
 
     const {
       Characteristic: { SmokeDetected },
-      Service: { SmokeSensor }
+      Service: { SmokeSensor },
     } = hap
 
-    this.registerCharacteristic(SmokeDetected, SmokeSensor, data => {
+    this.registerCharacteristic(SmokeDetected, SmokeSensor, (data) => {
       return data.alarmStatus === 'active'
         ? SmokeDetected.SMOKE_DETECTED
         : SmokeDetected.SMOKE_NOT_DETECTED

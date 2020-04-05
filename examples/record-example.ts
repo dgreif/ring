@@ -11,7 +11,7 @@ async function example() {
   const ringApi = new RingApi({
       // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
-      debug: true
+      debug: true,
     }),
     [camera] = await ringApi.getCameras()
 

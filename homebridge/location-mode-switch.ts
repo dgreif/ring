@@ -8,7 +8,7 @@ import { of } from 'rxjs'
 
 function getStateFromMode(mode: LocationMode) {
   const {
-    Characteristic: { SecuritySystemCurrentState: State }
+    Characteristic: { SecuritySystemCurrentState: State },
   } = hap
 
   switch (mode) {
@@ -37,7 +37,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
     super()
     const {
         Characteristic,
-        Service: { SecuritySystem, AccessoryInformation }
+        Service: { SecuritySystem, AccessoryInformation },
       } = hap,
       location = device,
       accessoryName = location.name + ' Mode',
@@ -53,7 +53,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
 
     this.securitySystemService = service
 
-    location.onLocationMode.pipe(distinctUntilChanged()).subscribe(mode => {
+    location.onLocationMode.pipe(distinctUntilChanged()).subscribe((mode) => {
       const state = getStateFromMode(mode)
 
       if (state === this.targetState) {
@@ -67,8 +67,8 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       currentState.updateValue(state)
     })
 
-    currentState.on('get', async callback => {
-      location.getLocationMode().catch(e => {
+    currentState.on('get', async (callback) => {
+      location.getLocationMode().catch((e) => {
         logError('Failed to retrieve location mode for ' + location.name)
         logError(e)
       })
@@ -81,7 +81,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       callback(null, state)
     })
 
-    targetState.on('get', async callback => {
+    targetState.on('get', async (callback) => {
       callback(
         null,
         this.targetState !== undefined
@@ -92,7 +92,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
 
     targetState.on('set', async (state, callback) => {
       const {
-        Characteristic: { SecuritySystemTargetState: State }
+        Characteristic: { SecuritySystemTargetState: State },
       } = hap
 
       callback()
@@ -124,18 +124,18 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.Manufacturer,
       serviceType: AccessoryInformation,
-      onValue: of('Ring')
+      onValue: of('Ring'),
     })
 
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.Model,
       serviceType: AccessoryInformation,
-      onValue: of('Location Mode')
+      onValue: of('Location Mode'),
     })
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.SerialNumber,
       serviceType: AccessoryInformation,
-      onValue: of('N/A')
+      onValue: of('N/A'),
     })
   }
 }

@@ -5,7 +5,7 @@ import {
   generateSsrc,
   bindProxyPorts,
   doesFfmpegSupportCodec,
-  getSrtpValue
+  getSrtpValue,
 } from '../api/rtp-utils'
 const ip = require('ip')
 
@@ -75,21 +75,21 @@ export class CameraSource {
           [480, 270, 30],
           [320, 240, 30],
           [320, 240, 15], // Apple Watch requires this configuration
-          [320, 180, 30]
+          [320, 180, 30],
         ],
         codec: {
           profiles: [0],
-          levels: [0]
-        }
+          levels: [0],
+        },
       },
       audio: {
         codecs: [
           {
             type: 'AAC-eld',
-            samplerate: 16
-          }
-        ]
-      }
+            samplerate: 16,
+          },
+        ],
+      },
     }
 
     this.services.push(new hap.Service.CameraControl())
@@ -143,7 +143,7 @@ export class CameraSource {
   }
 
   handleCloseConnection(connectionID: any) {
-    this.streamControllers.forEach(controller => {
+    this.streamControllers.forEach((controller) => {
       controller.handleCloseConnection(connectionID)
     })
   }
@@ -162,27 +162,27 @@ export class CameraSource {
           audio: {
             port: audioPort,
             srtp_key: audioSrtpKey,
-            srtp_salt: audioSrtpSalt
+            srtp_salt: audioSrtpSalt,
           },
           video: {
             port: videoPort,
             srtp_key: videoSrtpKey,
-            srtp_salt: videoSrtpSalt
-          }
+            srtp_salt: videoSrtpSalt,
+          },
         } = request,
         [sipSession, libfdkAacInstalled] = await Promise.all([
           this.ringCamera.createSipSession({
             audio: {
               srtpKey: audioSrtpKey,
-              srtpSalt: audioSrtpSalt
+              srtpSalt: audioSrtpSalt,
             },
             video: {
               srtpKey: videoSrtpKey,
-              srtpSalt: videoSrtpSalt
-            }
+              srtpSalt: videoSrtpSalt,
+            },
           }),
           doesFfmpegSupportCodec('libfdk_aac')
-            .then(supported => {
+            .then((supported) => {
               if (!supported) {
                 this.logger.error(
                   'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
@@ -195,7 +195,7 @@ export class CameraSource {
                 'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
               )
               return false
-            })
+            }),
         ]),
         audioSsrc = generateSsrc(),
         proxyAudioPort = await sipSession.reservePort(),
@@ -245,16 +245,16 @@ export class CameraSource {
                     '-srtp_out_params',
                     getSrtpValue({
                       srtpKey: audioSrtpKey,
-                      srtpSalt: audioSrtpSalt
+                      srtpSalt: audioSrtpSalt,
                     }),
-                    `srtp://${targetAddress}:${audioPort}?localrtcpport=${proxyAudioPort}&pkt_size=188`
+                    `srtp://${targetAddress}:${audioPort}?localrtcpport=${proxyAudioPort}&pkt_size=188`,
                   ],
                   video: false,
-                  output: []
+                  output: [],
                 }
               : undefined
           ),
-          bindProxyPorts(videoPort, targetAddress, 'video', sipSession)
+          bindProxyPorts(videoPort, targetAddress, 'video', sipSession),
         ])
 
       this.sessions[hap.UUIDGen.unparse(sessionID)] = sipSession
@@ -276,20 +276,20 @@ export class CameraSource {
       callback({
         address: {
           address: currentAddress,
-          type: ip.isV4Format(currentAddress) ? 'v4' : 'v6'
+          type: ip.isV4Format(currentAddress) ? 'v4' : 'v6',
         },
         audio: {
           port: proxyAudioPort,
           ssrc: audioSsrc,
           srtp_key: audioSrtpKey,
-          srtp_salt: audioSrtpSalt
+          srtp_salt: audioSrtpSalt,
         },
         video: {
           port: videoProxy.localPort,
           ssrc: videoSsrc,
           srtp_key: rtpOptions.video.srtpKey,
-          srtp_salt: rtpOptions.video.srtpSalt
-        }
+          srtp_salt: rtpOptions.video.srtpSalt,
+        },
       })
     } catch (e) {
       this.logger.error(

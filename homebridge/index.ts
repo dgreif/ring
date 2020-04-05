@@ -1,7 +1,7 @@
 import { platformName, pluginName, RingPlatform } from './ring-platform'
 import { hap } from './hap'
 
-export default function(homebridge: any) {
+export default function (homebridge: any) {
   hap.PlatformAccessory = homebridge.platformAccessory
   hap.Service = homebridge.hap.Service
   hap.Characteristic = homebridge.hap.Characteristic

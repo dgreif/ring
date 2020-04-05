@@ -28,7 +28,7 @@ export abstract class BaseDataAccessory<
       characteristic = service.getCharacteristic(characteristicType),
       { device } = this
 
-    characteristic.on('get', callback => {
+    characteristic.on('get', (callback) => {
       try {
         const value = getValue(device.data)
         callback(null, value)
@@ -64,7 +64,7 @@ export abstract class BaseDataAccessory<
 
     ;(this.device.onData as Observable<T['data']>)
       .pipe(map(getValue), distinctUntilChanged())
-      .subscribe(value => characteristic.updateValue(value))
+      .subscribe((value) => characteristic.updateValue(value))
   }
 
   registerLevelCharacteristic(
@@ -78,7 +78,7 @@ export abstract class BaseDataAccessory<
     this.registerCharacteristic(
       characteristicType,
       serviceType,
-      data => {
+      (data) => {
         const newLevel = getValue(data)
 
         if (newLevel === targetLevel) {

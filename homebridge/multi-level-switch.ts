@@ -18,16 +18,16 @@ export class MultiLevelSwitch extends BaseDeviceAccessory {
     this.registerCharacteristic(
       Characteristic.On,
       Service.Lightbulb,
-      data => Boolean(data.on),
-      value => this.setOnState(value)
+      (data) => Boolean(data.on),
+      (value) => this.setOnState(value)
     )
 
     if (initialData.level !== undefined) {
       this.registerLevelCharacteristic(
         Characteristic.Brightness,
         Service.Lightbulb,
-        data => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
-        value => this.setLevelState(value)
+        (data) => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
+        (value) => this.setLevelState(value)
       )
     }
 
@@ -44,7 +44,7 @@ export class MultiLevelSwitch extends BaseDeviceAccessory {
     this.logger.info(`Setting brightness of ${this.device.name} to ${level}%`)
 
     return this.device.setInfo({
-      device: { v1: { level: level / 100 } }
+      device: { v1: { level: level / 100 } },
     })
   }
 }

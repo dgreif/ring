@@ -74,7 +74,7 @@ function getRtpDescription(
   sections: string[],
   mediaType: 'audio' | 'video'
 ): RtpStreamOptions {
-  const section = sections.find(s => s.startsWith('m=' + mediaType)),
+  const section = sections.find((s) => s.startsWith('m=' + mediaType)),
     { port } = sdp.parseMLine(section),
     lines = sdp.splitLines(section),
     cryptoLine = lines.find((l: string) => l.startsWith('a=crypto'))
@@ -88,7 +88,7 @@ function getRtpDescription(
   return {
     port,
     srtpKey: crypto.slice(0, 16),
-    srtpSalt: crypto.slice(16, 30)
+    srtpSalt: crypto.slice(16, 30),
   }
 }
 
@@ -98,7 +98,7 @@ function parseRtpOptions(inviteResponse: { content: string }): RtpOptions {
     rtpOptions = {
       address: oLine.address,
       audio: getRtpDescription(sections, 'audio'),
-      video: getRtpDescription(sections, 'video')
+      video: getRtpDescription(sections, 'video'),
     }
   return rtpOptions
 }
@@ -130,10 +130,10 @@ export class SipCall {
         hostname: host,
         tls_port: tlsPort,
         tls: {
-          rejectUnauthorized: false
+          rejectUnauthorized: false,
         },
         tcp: false,
-        udp: false
+        udp: false,
       },
       (request: SipRequest) => {
         if (request.method === 'BYE') {
@@ -162,9 +162,9 @@ export class SipCall {
       `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
       'a=rtpmap:99 H264/90000',
       createCryptoLine(video),
-      'a=rtcp-mux'
+      'a=rtcp-mux',
     ]
-      .filter(l => l)
+      .filter((l) => l)
       .join('\r\n')
   }
 
@@ -172,7 +172,7 @@ export class SipCall {
     method,
     headers,
     content,
-    seq
+    seq,
   }: {
     method: string
     headers?: Partial<SipHeaders>
@@ -195,19 +195,19 @@ export class SipCall {
             to: {
               name: '"FS Doorbot"',
               uri: this.sipOptions.to,
-              params: this.toParams
+              params: this.toParams,
             },
             from: {
               uri: this.sipOptions.from,
-              params: this.fromParams
+              params: this.fromParams,
             },
             'max-forwards': 70,
             'call-id': this.callId,
             'User-Agent': 'Android/3.15.3 (belle-sip/1.4.2)',
             cseq: { seq, method },
-            ...headers
+            ...headers,
           },
-          content: content || ''
+          content: content || '',
         },
         (response: SipResponse) => {
           if (response.headers.to.params && response.headers.to.params.tag) {
@@ -240,7 +240,7 @@ export class SipCall {
           } else {
             if (method === 'INVITE') {
               // The ACK must be sent with every OK to keep the connection alive.
-              this.ackWithInfo(seq!).catch(e => {
+              this.ackWithInfo(seq!).catch((e) => {
                 logError('Failed to send SDP ACK and INFO')
                 logError(e)
               })
@@ -256,25 +256,25 @@ export class SipCall {
     // Don't wait for ack, it won't ever come back.
     this.request({
       method: 'ACK',
-      seq // The ACK must have the original sequence number.
+      seq, // The ACK must have the original sequence number.
     })
 
     // SIP session will be terminated after 30 seconds if INFO isn't sent.
     await this.request({
       method: 'INFO',
       headers: {
-        'Content-Type': 'application/dtmf-relay'
+        'Content-Type': 'application/dtmf-relay',
       },
-      content: 'Signal=2\r\nDuration=250'
+      content: 'Signal=2\r\nDuration=250',
     })
 
     await this.request({
       method: 'INFO',
       headers: {
-        'Content-Type': 'application/media_control+xml'
+        'Content-Type': 'application/media_control+xml',
       },
       content:
-        '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>'
+        '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>',
     })
   }
 
@@ -287,9 +287,9 @@ export class SipCall {
           allow:
             'INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, NOTIFY, MESSAGE, SUBSCRIBE, INFO, UPDATE',
           'content-type': 'application/sdp',
-          contact: [{ uri: from }]
+          contact: [{ uri: from }],
         },
-        content: this.sdp
+        content: this.sdp,
       }),
       remoteRtpOptions = parseRtpOptions(inviteResponse)
 

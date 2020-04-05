@@ -6,7 +6,7 @@ import { RingPlatformConfig } from './config'
 
 function getCurrentState({ locked }: RingDeviceData) {
   const {
-    Characteristic: { LockCurrentState: State }
+    Characteristic: { LockCurrentState: State },
   } = hap
 
   switch (locked) {
@@ -36,14 +36,14 @@ export class Lock extends BaseDeviceAccessory {
 
     this.device.onData
       .pipe(distinctUntilChanged((a, b) => a.locked === b.locked))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.targetState = this.getTargetState(data)
       })
 
     this.registerCharacteristic(
       Characteristic.LockCurrentState,
       Service.LockMechanism,
-      data => {
+      (data) => {
         const state = getCurrentState(data)
 
         if (state === this.targetState) {
@@ -57,14 +57,14 @@ export class Lock extends BaseDeviceAccessory {
     this.registerCharacteristic(
       Characteristic.LockTargetState,
       Service.LockMechanism,
-      data => this.getTargetState(data),
-      value => this.setTargetState(value)
+      (data) => this.getTargetState(data),
+      (value) => this.setTargetState(value)
     )
   }
 
   setTargetState(state: any) {
     const {
-        Characteristic: { LockTargetState: State }
+        Characteristic: { LockTargetState: State },
       } = hap,
       command = state === State.SECURED ? 'lock' : 'unlock'
 

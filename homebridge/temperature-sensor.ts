@@ -15,18 +15,18 @@ export class TemperatureSensor extends BaseDeviceAccessory {
 
     const {
       Characteristic: { CurrentTemperature },
-      Service: { TemperatureSensor: TempSensorService }
+      Service: { TemperatureSensor: TempSensorService },
     } = hap
 
     this.registerObservableCharacteristic({
       characteristicType: CurrentTemperature,
       serviceType: TempSensorService,
       onValue: device.onData.pipe(
-        map(data => {
+        map((data) => {
           return data.celsius!
         }),
         distinctUntilChanged()
-      )
+      ),
     })
 
     this.initSensorService(TempSensorService)

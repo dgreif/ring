@@ -22,13 +22,13 @@ const sensitiveFields = [
   'codes',
   'groupId',
   'group',
-  'groupMembers'
+  'groupMembers',
 ]
 
 function stripSensitiveFields(input: any) {
   if (typeof input === 'object') {
     if (Array.isArray(input)) {
-      input.forEach(value => stripSensitiveFields(value))
+      input.forEach((value) => stripSensitiveFields(value))
       return
     }
 
@@ -66,12 +66,12 @@ export async function logDeviceData() {
 
   console.log('Successfully logged in.  Fetching devices...')
   const locations = await ringApi.getLocations(),
-    locationsWithDevices = await mapAsync(locations, async location => {
+    locationsWithDevices = await mapAsync(locations, async (location) => {
       const devices = await location.getDevices()
       return {
         name: location.name,
-        cameras: location.cameras.map(camera => camera.data),
-        devices: devices.map(device => device.data)
+        cameras: location.cameras.map((camera) => camera.data),
+        devices: devices.map((device) => device.data),
       }
     })
 

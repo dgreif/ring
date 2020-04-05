@@ -14,13 +14,13 @@ export class CoAlarm extends BaseDeviceAccessory {
 
     const {
       Characteristic: { CarbonMonoxideDetected },
-      Service: { CarbonMonoxideSensor }
+      Service: { CarbonMonoxideSensor },
     } = hap
 
     this.registerCharacteristic(
       CarbonMonoxideDetected,
       CarbonMonoxideSensor,
-      data => {
+      (data) => {
         return data.alarmStatus === 'active'
           ? CarbonMonoxideDetected.CO_LEVELS_ABNORMAL
           : CarbonMonoxideDetected.CO_LEVELS_NORMAL

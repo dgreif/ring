@@ -18,13 +18,13 @@ Built to support the [homebridge-ring Plugin](./homebridge)
 
 ## Setup and Config
 
-First, generate a `refreshToken` using the instructions in the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
+First, generate a `refreshToken` using the instructions in the [Refresh Tokens Wiki](https://github.com/dgreif/ring/wiki/Refresh-Tokens)
 
 ```js
 import { RingApi } from 'ring-client-api'
 
 const ringApi = new RingApi({
-  refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth',
+  refreshToken: 'token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens',
 
   // The following are all optional. See below for details
   cameraStatusPollingSeconds: 20,
@@ -115,6 +115,10 @@ Some other useful propeties
 * `isDoorbot`: is this camera a doorbell
 
 See the `examples` directory for additional code examples.
+
+## Refresh Token
+
+Ring has restricted refresh tokens so that they expire shortly after use.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens#refresh-token-expiration for details on how to properly handle refresh tokens in your library.
 
 ## homebridge-ring
 

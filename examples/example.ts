@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
 import { skip } from 'rxjs/operators'
+import { readFile, writeFile } from 'fs'
+import { promisify } from 'util'
 
 async function example() {
   const { env } = process,
@@ -15,6 +17,25 @@ async function example() {
 
   console.log(
     `Found ${locations.length} location(s) with ${allCameras.length} camera(s).`
+  )
+
+  ringApi.onRefreshTokenUpdated.subscribe(
+    async ({ newRefreshToken, oldRefreshToken }) => {
+      console.log('Refresh Token Updated: ', newRefreshToken)
+
+      // If you are implementing a project that use `ring-client-api`, you should subscribe to onRefreshTokenUpdated and update your config each time it fires an event
+      // Here is an example using a .env file for configuration
+      if (!oldRefreshToken) {
+        return
+      }
+
+      const currentConfig = await promisify(readFile)('.env'),
+        updatedConfig = currentConfig
+          .toString()
+          .replace(oldRefreshToken, newRefreshToken)
+
+      await promisify(writeFile)('.env', updatedConfig)
+    }
   )
 
   for (const location of locations) {

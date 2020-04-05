@@ -98,7 +98,7 @@ export class RingRestClient {
     }
 
     throw new Error(
-      'Refresh token is not valid.  Unable to authenticate with Ring servers.'
+      'Refresh token is not valid.  Unable to authenticate with Ring servers.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens'
     )
   }
 
@@ -148,7 +148,7 @@ export class RingRestClient {
       ) {
         this.using2fa = true
         throw new Error(
-          'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth for details.'
+          'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.'
         )
       }
 

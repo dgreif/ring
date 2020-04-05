@@ -33,14 +33,14 @@ For the best experience setting up this plugin, please use [homebridge-config-ui
 
 ### Basic Configuration
 
-First, generate a `refreshToken` using the instructions in the [Two Factor Auth Wiki](https://github.com/dgreif/ring/wiki/Two-Factor-Auth)
+First, generate a `refreshToken` using the instructions in the [Refresh Tokens Wiki](https://github.com/dgreif/ring/wiki/Refresh-Tokens)
 
  ```json
 {
   "platforms": [
     {
       "platform": "Ring",
-      "refreshToken": "token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Two-Factor-Auth"
+      "refreshToken": "token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens"
     }
   ]
 }

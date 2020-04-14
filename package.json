@@ -55,7 +55,7 @@
     "colors": "^1.4.0",
     "debug": "^4.1.1",
     "execa": "^4.0.0",
-    "ffmpeg-for-homebridge": "0.0.3",
+    "ffmpeg-for-homebridge": "0.0.4",
     "get-port": "^5.1.1",
     "nat-puncher": "^0.1.8",
     "node-machine-id": "^1.1.12",

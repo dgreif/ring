@@ -1,7 +1,8 @@
 import { RingDevice, RingDeviceData, AlarmState } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDataAccessory } from './base-data-accessory'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 const burglarStates: AlarmState[] = [
     'burglar-alarm',
@@ -24,8 +25,8 @@ function matchesAnyAlarmState(
 export class PanicButtons extends BaseDataAccessory<RingDevice> {
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -33,11 +34,13 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
     const { Characteristic, Service } = hap,
       locationName = device.location.name
 
-    this.registerCharacteristic(
-      Characteristic.On,
-      this.getService(Service.Switch, 'Burglar Alarm', 'Burglar'),
-      (data) => matchesAnyAlarmState(data, burglarStates),
-      (on) => {
+    this.registerCharacteristic({
+      characteristicType: Characteristic.On,
+      serviceType: Service.Switch,
+      serviceSubType: 'Burglar',
+      name: 'Burglar Alarm',
+      getValue: (data) => matchesAnyAlarmState(data, burglarStates),
+      setValue: (on) => {
         if (on) {
           this.logger.info(`Burglar Alarm activated for ${locationName}`)
           return this.device.location.triggerBurglarAlarm()
@@ -45,14 +48,16 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
 
         this.logger.info(`Burglar Alarm turned off for ${locationName}`)
         return this.device.location.setAlarmMode('none')
-      }
-    )
+      },
+    })
 
-    this.registerCharacteristic(
-      Characteristic.On,
-      this.getService(Service.Switch, 'Fire Alarm', 'Fire'),
-      (data) => matchesAnyAlarmState(data, fireStates),
-      (on) => {
+    this.registerCharacteristic({
+      characteristicType: Characteristic.On,
+      serviceType: Service.Switch,
+      serviceSubType: 'Fire',
+      name: 'Fire Alarm',
+      getValue: (data) => matchesAnyAlarmState(data, fireStates),
+      setValue: (on) => {
         if (on) {
           this.logger.info(`Fire Alarm activated for ${locationName}`)
           return this.device.location.triggerFireAlarm()
@@ -60,28 +65,28 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
 
         this.logger.info(`Fire Alarm turned off for ${locationName}`)
         return this.device.location.setAlarmMode('none')
-      }
-    )
+      },
+    })
   }
 
   initBase() {
     const { Characteristic, Service } = hap
 
-    this.registerCharacteristic(
-      Characteristic.Manufacturer,
-      Service.AccessoryInformation,
-      (data) => data.manufacturerName || 'Ring'
-    )
-    this.registerCharacteristic(
-      Characteristic.Model,
-      Service.AccessoryInformation,
-      () => 'Panic Buttons for ' + this.device.location.name
-    )
-    this.registerCharacteristic(
-      Characteristic.SerialNumber,
-      Service.AccessoryInformation,
-      () => 'None'
-    )
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Manufacturer,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.manufacturerName || 'Ring',
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Model,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => 'Panic Buttons for ' + this.device.location.name,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.SerialNumber,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => 'None',
+    })
 
     super.initBase()
   }

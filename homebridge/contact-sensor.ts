@@ -1,13 +1,14 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 export class ContactSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -17,15 +18,15 @@ export class ContactSensor extends BaseDeviceAccessory {
       Service,
     } = hap
 
-    this.registerCharacteristic(
-      ContactSensorState,
-      Service.ContactSensor,
-      (data) => {
+    this.registerCharacteristic({
+      characteristicType: ContactSensorState,
+      serviceType: Service.ContactSensor,
+      getValue: (data) => {
         return data.faulted
           ? ContactSensorState.CONTACT_NOT_DETECTED
           : ContactSensorState.CONTACT_DETECTED
-      }
-    )
+      },
+    })
 
     this.initSensorService(Service.ContactSensor)
   }

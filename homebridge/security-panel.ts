@@ -1,8 +1,9 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice, RingDeviceData, AlarmState, allAlarmStates } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 export class SecurityPanel extends BaseDeviceAccessory {
   private targetState: any
@@ -12,8 +13,8 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -26,10 +27,10 @@ export class SecurityPanel extends BaseDeviceAccessory {
         this.targetState = this.getTargetState(data)
       })
 
-    this.registerCharacteristic(
-      Characteristic.SecuritySystemCurrentState,
-      Service.SecuritySystem,
-      (data) => {
+    this.registerCharacteristic({
+      characteristicType: Characteristic.SecuritySystemCurrentState,
+      serviceType: Service.SecuritySystem,
+      getValue: (data) => {
         const state = this.getCurrentState(data)
 
         if (state === this.targetState) {
@@ -37,30 +38,29 @@ export class SecurityPanel extends BaseDeviceAccessory {
         }
 
         return state
-      }
-    )
+      },
+    })
 
-    this.registerCharacteristic(
-      Characteristic.SecuritySystemTargetState,
-      Service.SecuritySystem,
-      (data) => this.getTargetState(data),
-      (value) => this.setTargetState(value)
-    )
+    this.registerCharacteristic({
+      characteristicType: Characteristic.SecuritySystemTargetState,
+      serviceType: Service.SecuritySystem,
+      getValue: (data) => this.getTargetState(data),
+      setValue: (value) => this.setTargetState(value),
+    })
 
     if (!config.hideAlarmSirenSwitch) {
-      this.registerCharacteristic(
-        Characteristic.On,
-        Service.Switch,
-        (data) => data.siren && data.siren.state === 'on',
-        (value) => {
+      this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: Service.Switch,
+        name: this.device.name + ' Siren',
+        getValue: (data) => data.siren && data.siren.state === 'on',
+        setValue: (value) => {
           if (value) {
             return this.device.location.soundSiren()
           }
           return this.device.location.silenceSiren()
         },
-        0,
-        this.device.name + ' Siren'
-      )
+      })
     }
   }
 

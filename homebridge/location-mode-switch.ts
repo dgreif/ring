@@ -1,10 +1,18 @@
 import { Location, LocationMode } from '../api'
 import { distinctUntilChanged, take } from 'rxjs/operators'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { logError } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { of } from 'rxjs'
+import {
+  Logging,
+  PlatformAccessory,
+  CharacteristicEventTypes,
+  CharacteristicGetCallback,
+  CharacteristicSetCallback,
+  CharacteristicValue,
+} from 'homebridge'
 
 function getStateFromMode(mode: LocationMode) {
   const {
@@ -25,13 +33,12 @@ function getStateFromMode(mode: LocationMode) {
 
 export class LocationModeSwitch extends BaseAccessory<Location> {
   private targetState: any
-  private securitySystemService: HAP.Service
-  private location = this.device
+  public device = this.location // for use in BaseAccessory
 
   constructor(
-    public readonly device: Location,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    private readonly location: Location,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -39,7 +46,6 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         Characteristic,
         Service: { SecuritySystem, AccessoryInformation },
       } = hap,
-      location = device,
       accessoryName = location.name + ' Mode',
       service = this.getService(SecuritySystem, accessoryName),
       currentState = service.getCharacteristic(
@@ -50,8 +56,6 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       ),
       getCurrentMode = () => location.onLocationMode.pipe(take(1)).toPromise(),
       getCurrentState = async () => getStateFromMode(await getCurrentMode())
-
-    this.securitySystemService = service
 
     location.onLocationMode.pipe(distinctUntilChanged()).subscribe((mode) => {
       const state = getStateFromMode(mode)
@@ -67,59 +71,71 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       currentState.updateValue(state)
     })
 
-    currentState.on('get', async (callback) => {
-      location.getLocationMode().catch((e) => {
-        logError('Failed to retrieve location mode for ' + location.name)
-        logError(e)
-      })
-      const state = await getCurrentState()
+    currentState.on(
+      CharacteristicEventTypes.GET,
+      async (callback: CharacteristicGetCallback) => {
+        location.getLocationMode().catch((e) => {
+          logError('Failed to retrieve location mode for ' + location.name)
+          logError(e)
+        })
+        const state = await getCurrentState()
 
-      if (state === this.targetState) {
-        this.targetState = undefined
+        if (state === this.targetState) {
+          this.targetState = undefined
+        }
+
+        callback(null, state)
       }
+    )
 
-      callback(null, state)
-    })
-
-    targetState.on('get', async (callback) => {
-      callback(
-        null,
-        this.targetState !== undefined
-          ? this.targetState
-          : await getCurrentState()
-      )
-    })
-
-    targetState.on('set', async (state, callback) => {
-      const {
-        Characteristic: { SecuritySystemTargetState: State },
-      } = hap
-
-      callback()
-
-      if (state === State.NIGHT_ARM) {
-        state = State.STAY_ARM
-        // Ring doesn't have night mode, so switch over to stay mode
-        setTimeout(() => targetState.updateValue(state), 100)
+    targetState.on(
+      CharacteristicEventTypes.GET,
+      async (callback: CharacteristicGetCallback) => {
+        callback(
+          null,
+          this.targetState !== undefined
+            ? this.targetState
+            : await getCurrentState()
+        )
       }
+    )
 
-      if (state === (await getCurrentState())) {
-        this.targetState = undefined
-        return
+    targetState.on(
+      CharacteristicEventTypes.SET,
+      async (
+        state: CharacteristicValue,
+        callback: CharacteristicSetCallback
+      ) => {
+        const {
+          Characteristic: { SecuritySystemTargetState: State },
+        } = hap
+
+        callback()
+
+        if (state === State.NIGHT_ARM) {
+          state = State.STAY_ARM
+          // Ring doesn't have night mode, so switch over to stay mode
+          setTimeout(() => targetState.updateValue(state), 100)
+        }
+
+        if (state === (await getCurrentState())) {
+          this.targetState = undefined
+          return
+        }
+
+        this.targetState = state
+
+        if (state === State.AWAY_ARM) {
+          this.logger.info(`Setting ${this.location.name} Mode to away`)
+          return this.location.setLocationMode('away')
+        } else if (state === State.DISARM) {
+          this.logger.info(`Setting ${this.location.name} Mode to disarmed`)
+          return this.location.setLocationMode('disarmed')
+        }
+        this.logger.info(`Setting ${this.location.name} Mode to home`)
+        return this.location.setLocationMode('home')
       }
-
-      this.targetState = state
-
-      if (state === State.AWAY_ARM) {
-        this.logger.info(`Setting ${this.location.name} Mode to away`)
-        return this.location.setLocationMode('away')
-      } else if (state === State.DISARM) {
-        this.logger.info(`Setting ${this.location.name} Mode to disarmed`)
-        return this.location.setLocationMode('disarmed')
-      }
-      this.logger.info(`Setting ${this.location.name} Mode to home`)
-      return this.location.setLocationMode('home')
-    })
+    )
 
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.Manufacturer,

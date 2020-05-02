@@ -1,70 +1,37 @@
 import { RingCamera, SipSession } from '../api'
-import { hap, HAP } from './hap'
-import Service = HAP.Service
+import { hap } from './hap'
 import {
-  generateSsrc,
   bindProxyPorts,
   doesFfmpegSupportCodec,
   getSrtpValue,
 } from '../api/rtp-utils'
+import {
+  Logging,
+  CameraStreamingDelegate,
+  SnapshotRequest,
+  SnapshotRequestCallback,
+  PrepareStreamRequest,
+  PrepareStreamCallback,
+  StreamingRequest,
+  StreamRequestCallback,
+  AudioStreamingCodecType,
+  SRTPCryptoSuites,
+  AudioStreamingSamplerate,
+  H264Profile,
+  H264Level,
+} from 'homebridge'
 const ip = require('ip')
-
-interface HapRtpConfig {
-  port: number
-  proxy_rtp: number
-  proxy_rtcp: number
-  srtp_key: Buffer
-  srtp_salt: Buffer
-}
-
-interface PrepareStreamRequest {
-  sessionID: Buffer
-  targetAddress: string
-  video: HapRtpConfig
-  audio: HapRtpConfig
-}
-
-interface HandleStreamRequest {
-  sessionID: Buffer
-  type: 'start' | 'stop' | 'reconfigure'
-  video: {
-    profile: number
-    level: number
-    width: number
-    height: number
-    fps: number
-    ssrc: number
-    pt: number
-    max_bit_rate: number
-    rtcp_interval: number
-    mtu: number
-  }
-  audio: {
-    codec: 'AAC-eld' | string
-    channel: number
-    bit_rate: number
-    sample_rate: number
-    packet_time: number
-    pt: number
-    ssrc: number
-    max_bit_rate: number
-    rtcp_interval: number
-    comfort_pt: number
-  }
-}
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000
 }
 
-export class CameraSource {
-  services: Service[] = []
-  streamControllers: any[] = []
-  sessions: { [sessionKey: string]: SipSession } = {}
-
-  constructor(private ringCamera: RingCamera, private logger: HAP.Log) {
-    const options = {
-      srtp: true,
+export class CameraSource implements CameraStreamingDelegate {
+  public controller = new hap.CameraController({
+    cameraStreamCount: 2,
+    delegate: this,
+    streamingOptions: {
+      supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
       video: {
         resolutions: [
           [1280, 720, 30],
@@ -78,33 +45,27 @@ export class CameraSource {
           [320, 180, 30],
         ],
         codec: {
-          profiles: [0],
-          levels: [0],
+          profiles: [H264Profile.BASELINE],
+          levels: [H264Level.LEVEL3_1],
         },
       },
       audio: {
         codecs: [
           {
-            type: 'AAC-eld',
-            samplerate: 16,
+            type: AudioStreamingCodecType.AAC_ELD,
+            samplerate: AudioStreamingSamplerate.KHZ_16,
           },
         ],
       },
-    }
+    },
+  })
+  sessions: { [sessionKey: string]: SipSession } = {}
 
-    this.services.push(new hap.Service.CameraControl())
-
-    for (let i = 0; i < 2; i++) {
-      const streamController = new hap.StreamController(i, options, this)
-
-      this.services.push(streamController.service)
-      this.streamControllers.push(streamController)
-    }
-  }
+  constructor(private ringCamera: RingCamera, private logger: Logging) {}
 
   async handleSnapshotRequest(
-    request: { width: number; height: number },
-    callback: (err?: Error, snapshot?: Buffer) => void
+    request: SnapshotRequest,
+    callback: SnapshotRequestCallback
   ) {
     const start = Date.now()
     try {
@@ -142,15 +103,9 @@ export class CameraSource {
     }
   }
 
-  handleCloseConnection(connectionID: any) {
-    this.streamControllers.forEach((controller) => {
-      controller.handleCloseConnection(connectionID)
-    })
-  }
-
   async prepareStream(
     request: PrepareStreamRequest,
-    callback: (response: any) => void
+    callback: PrepareStreamCallback
   ) {
     const start = Date.now()
     this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
@@ -197,7 +152,7 @@ export class CameraSource {
               return false
             }),
         ]),
-        audioSsrc = generateSsrc(),
+        audioSsrc = hap.CameraController.generateSynchronisationSource(),
         proxyAudioPort = await sipSession.reservePort(),
         [rtpOptions, videoProxy] = await Promise.all([
           sipSession.start(
@@ -257,7 +212,7 @@ export class CameraSource {
           bindProxyPorts(videoPort, targetAddress, 'video', sipSession),
         ])
 
-      this.sessions[hap.UUIDGen.unparse(sessionID)] = sipSession
+      this.sessions[hap.uuid.unparse(sessionID)] = sipSession
 
       this.logger.info(
         `Waiting for stream data from ${
@@ -273,7 +228,7 @@ export class CameraSource {
       )
 
       const currentAddress = ip.address()
-      callback({
+      callback(undefined, {
         address: {
           address: currentAddress,
           type: ip.isV4Format(currentAddress) ? 'v4' : 'v6',
@@ -301,13 +256,17 @@ export class CameraSource {
     }
   }
 
-  handleStreamRequest(request: HandleStreamRequest) {
+  handleStreamRequest(
+    request: StreamingRequest,
+    callback: StreamRequestCallback
+  ) {
     const sessionID = request.sessionID,
-      sessionKey = hap.UUIDGen.unparse(sessionID),
+      sessionKey = hap.uuid.unparse(sessionID),
       session = this.sessions[sessionKey],
       requestType = request.type
 
     if (!session) {
+      callback(new Error('Cannot find session for stream ' + sessionID))
       return
     }
 
@@ -319,5 +278,7 @@ export class CameraSource {
       session.stop()
       delete this.sessions[sessionKey]
     }
+
+    callback()
   }
 }

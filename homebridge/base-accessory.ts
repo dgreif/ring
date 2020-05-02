@@ -1,13 +1,32 @@
-import { HAP, hap } from './hap'
-import Service = HAP.Service
+import { hap } from './hap'
 import { take } from 'rxjs/operators'
 import { Observable } from 'rxjs'
 import { RingPlatformConfig } from './config'
+import {
+  Characteristic,
+  Logging,
+  PlatformAccessory,
+  Service,
+  CharacteristicEventTypes,
+  CharacteristicGetCallback,
+  CharacteristicValue,
+  CharacteristicSetCallback,
+  WithUUID,
+} from 'homebridge'
+
+function isServiceInstance(
+  serviceType: WithUUID<typeof Service> | Service
+): serviceType is Service {
+  return typeof (serviceType as any) === 'object'
+}
+
+export type CharacteristicType = WithUUID<{ new (): Characteristic }>
+export type ServiceType = WithUUID<typeof Service> | Service
 
 export abstract class BaseAccessory<T extends { name: string }> {
   abstract readonly device: T
-  abstract readonly accessory: HAP.Accessory
-  abstract readonly logger: HAP.Log
+  abstract readonly accessory: PlatformAccessory
+  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
   private servicesInUse: Service[] = []
 
@@ -16,11 +35,11 @@ export abstract class BaseAccessory<T extends { name: string }> {
   }
 
   getService(
-    serviceType: HAP.Service,
+    serviceType: ServiceType,
     name = this.device.name,
     subType?: string
   ) {
-    if (typeof (serviceType as any) === 'object') {
+    if (isServiceInstance(serviceType)) {
       return serviceType
     }
 
@@ -31,7 +50,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
     }
 
     const existingService = subType
-        ? this.accessory.getServiceByUUIDAndSubType(serviceType, subType)
+        ? this.accessory.getServiceById(serviceType, subType)
         : this.accessory.getService(serviceType),
       service =
         existingService || this.accessory.addService(serviceType, name, subType)
@@ -54,7 +73,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
     return service
   }
 
-  registerObservableCharacteristic<T extends string | number | boolean>({
+  registerObservableCharacteristic<T extends CharacteristicValue>({
     characteristicType,
     serviceType,
     serviceSubType,
@@ -63,8 +82,8 @@ export abstract class BaseAccessory<T extends { name: string }> {
     name,
     requestUpdate,
   }: {
-    characteristicType: HAP.Characteristic
-    serviceType: Service
+    characteristicType: CharacteristicType
+    serviceType: ServiceType
     serviceSubType?: string
     onValue: Observable<T>
     setValue?: (value: T) => any
@@ -74,30 +93,39 @@ export abstract class BaseAccessory<T extends { name: string }> {
     const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType)
 
-    characteristic.on('get', async (callback) => {
-      try {
-        const value = await onValue.pipe(take(1)).toPromise()
-        callback(null, value)
+    characteristic.on(
+      CharacteristicEventTypes.GET,
+      async (callback: CharacteristicGetCallback) => {
+        try {
+          const value = await onValue.pipe(take(1)).toPromise()
+          callback(null, value)
 
-        if (requestUpdate) {
-          requestUpdate()
+          if (requestUpdate) {
+            requestUpdate()
+          }
+        } catch (e) {
+          callback(e)
         }
-      } catch (e) {
-        callback(e)
       }
-    })
+    )
 
     onValue.subscribe((value) => {
       characteristic.updateValue(value)
     })
 
     if (setValue) {
-      characteristic.on('set', (newValue, callback) => {
-        Promise.resolve(setValue(newValue)).catch((e) => {
-          this.logger.error(e)
-        })
-        callback()
-      })
+      characteristic.on(
+        CharacteristicEventTypes.SET,
+        (
+          newValue: CharacteristicValue,
+          callback: CharacteristicSetCallback
+        ) => {
+          Promise.resolve(setValue(newValue as T)).catch((e) => {
+            this.logger.error(e)
+          })
+          callback()
+        }
+      )
     }
   }
 

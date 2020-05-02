@@ -1,13 +1,14 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 export class Fan extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -15,20 +16,22 @@ export class Fan extends BaseDeviceAccessory {
     const { Characteristic, Service } = hap,
       { data: initialData } = this.device
 
-    this.registerCharacteristic(
-      Characteristic.On,
-      Service.Fan,
-      (data) => Boolean(data.on),
-      (value) => this.setOnState(value)
-    )
+    this.registerCharacteristic({
+      characteristicType: Characteristic.On,
+      serviceType: Service.Fan,
+      getValue: (data) => Boolean(data.on),
+      setValue: (value) => this.setOnState(value),
+    })
 
     if (initialData.level !== undefined) {
-      this.registerLevelCharacteristic(
-        Characteristic.RotationSpeed,
-        Service.Fan,
-        (data) => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
-        (value) => this.setLevelState(value)
-      )
+      this.registerLevelCharacteristic({
+        characteristicType: Characteristic.RotationSpeed,
+        serviceType: Service.Fan,
+        getValue: (data) => {
+          return data.level && !isNaN(data.level) ? 100 * data.level : 0
+        },
+        setValue: (value) => this.setLevelState(value),
+      })
     }
   }
 

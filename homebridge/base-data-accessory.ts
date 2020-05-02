@@ -1,65 +1,99 @@
-import { BaseAccessory } from './base-accessory'
+import {
+  BaseAccessory,
+  CharacteristicType,
+  ServiceType,
+} from './base-accessory'
 import { Observable, Subject } from 'rxjs'
 import { RingCamera, RingDevice } from '../api'
-import { HAP } from './hap'
 import { RingPlatformConfig } from './config'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
-import Service = HAP.Service
+import {
+  Logging,
+  PlatformAccessory,
+  CharacteristicValue,
+  CharacteristicSetCallback,
+  CharacteristicGetCallback,
+  CharacteristicEventTypes,
+} from 'homebridge'
 
 export abstract class BaseDataAccessory<
   T extends RingDevice | RingCamera
 > extends BaseAccessory<T> {
   abstract readonly device: T
-  abstract readonly accessory: HAP.Accessory
-  abstract readonly logger: HAP.Log
+  abstract readonly accessory: PlatformAccessory
+  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
 
-  registerCharacteristic(
-    characteristicType: HAP.Characteristic,
-    serviceType: Service,
-    getValue: (data: T['data']) => any,
-    setValue?: (data: any) => any,
+  registerCharacteristic({
+    characteristicType,
+    serviceType,
+    getValue,
+    setValue,
     setValueDebounceTime = 0,
-    name?: string,
-    requestUpdate?: () => any,
+    name,
+    requestUpdate,
+    serviceSubType,
+  }: {
+    characteristicType: CharacteristicType
+    serviceType: ServiceType
     serviceSubType?: string
-  ) {
+    name?: string
+    getValue: (data: T['data']) => any
+    setValue?: (data: any) => any
+    setValueDebounceTime?: number
+    requestUpdate?: () => any
+  }) {
     const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType),
       { device } = this
 
-    characteristic.on('get', (callback) => {
-      try {
-        const value = getValue(device.data)
-        callback(null, value)
+    characteristic.on(
+      CharacteristicEventTypes.GET,
+      (callback: CharacteristicGetCallback) => {
+        try {
+          const value = getValue(device.data)
+          callback(null, value)
 
-        if (requestUpdate) {
-          requestUpdate()
+          if (requestUpdate) {
+            requestUpdate()
+          }
+        } catch (e) {
+          callback(e)
         }
-      } catch (e) {
-        callback(e)
       }
-    })
+    )
 
     if (setValue && setValueDebounceTime) {
       const onValueToSet = new Subject<any>()
 
-      characteristic.on('set', (newValue, callback) => {
-        onValueToSet.next(newValue)
-        callback()
-      })
+      characteristic.on(
+        CharacteristicEventTypes.SET,
+        (
+          newValue: CharacteristicValue,
+          callback: CharacteristicSetCallback
+        ) => {
+          onValueToSet.next(newValue)
+          callback()
+        }
+      )
 
       onValueToSet.pipe(debounceTime(setValueDebounceTime)).subscribe(setValue)
     } else if (setValue) {
-      characteristic.on('set', async (newValue, callback) => {
-        try {
-          await Promise.resolve(setValue(newValue))
-          callback()
-        } catch (e) {
-          this.logger.error(e)
-          callback(e)
+      characteristic.on(
+        CharacteristicEventTypes.SET,
+        async (
+          newValue: CharacteristicValue,
+          callback: CharacteristicSetCallback
+        ) => {
+          try {
+            await Promise.resolve(setValue(newValue))
+            callback()
+          } catch (e) {
+            this.logger.error(e)
+            callback(e)
+          }
         }
-      })
+      )
     }
 
     ;(this.device.onData as Observable<T['data']>)
@@ -67,18 +101,23 @@ export abstract class BaseDataAccessory<
       .subscribe((value) => characteristic.updateValue(value))
   }
 
-  registerLevelCharacteristic(
-    characteristicType: HAP.Characteristic,
-    serviceType: Service,
-    getValue: (data: T['data']) => number,
+  registerLevelCharacteristic({
+    characteristicType,
+    serviceType,
+    getValue,
+    setValue,
+  }: {
+    characteristicType: CharacteristicType
+    serviceType: ServiceType
+    getValue: (data: T['data']) => number
     setValue: (data: any) => any
-  ) {
+  }) {
     let targetLevel: number | undefined
 
-    this.registerCharacteristic(
+    this.registerCharacteristic({
       characteristicType,
       serviceType,
-      (data) => {
+      getValue: (data) => {
         const newLevel = getValue(data)
 
         if (newLevel === targetLevel) {
@@ -87,11 +126,11 @@ export abstract class BaseDataAccessory<
 
         return targetLevel === undefined ? newLevel : targetLevel
       },
-      (volume: number) => {
+      setValue: (volume: number) => {
         targetLevel = volume
         setValue(volume)
       },
-      500
-    )
+      setValueDebounceTime: 500,
+    })
   }
 }

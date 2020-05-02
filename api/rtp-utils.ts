@@ -4,7 +4,6 @@ import { v4 as fetchPublicIp } from 'public-ip'
 import { SipSession } from './sip-session'
 import { ReplaySubject } from 'rxjs'
 import { filter, map, take } from 'rxjs/operators'
-import { randomBytes } from 'crypto'
 import getPort from 'get-port'
 import execa from 'execa'
 import { logError } from './util'
@@ -128,12 +127,6 @@ export function getSsrc(message: Buffer) {
   } catch (_) {
     return null
   }
-}
-
-export function generateSsrc() {
-  const ssrcSource = randomBytes(4)
-  ssrcSource[0] = 0
-  return ssrcSource.readInt32BE(0)
 }
 
 export function getSrtpValue({ srtpKey, srtpSalt }: Partial<SrtpOptions>) {

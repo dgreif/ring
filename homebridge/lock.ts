@@ -1,8 +1,9 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice, RingDeviceData } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 function getCurrentState({ locked }: RingDeviceData) {
   const {
@@ -26,8 +27,8 @@ export class Lock extends BaseDeviceAccessory {
 
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -40,10 +41,10 @@ export class Lock extends BaseDeviceAccessory {
         this.targetState = this.getTargetState(data)
       })
 
-    this.registerCharacteristic(
-      Characteristic.LockCurrentState,
-      Service.LockMechanism,
-      (data) => {
+    this.registerCharacteristic({
+      characteristicType: Characteristic.LockCurrentState,
+      serviceType: Service.LockMechanism,
+      getValue: (data) => {
         const state = getCurrentState(data)
 
         if (state === this.targetState) {
@@ -51,15 +52,15 @@ export class Lock extends BaseDeviceAccessory {
         }
 
         return state
-      }
-    )
+      },
+    })
 
-    this.registerCharacteristic(
-      Characteristic.LockTargetState,
-      Service.LockMechanism,
-      (data) => this.getTargetState(data),
-      (value) => this.setTargetState(value)
-    )
+    this.registerCharacteristic({
+      characteristicType: Characteristic.LockTargetState,
+      serviceType: Service.LockMechanism,
+      getValue: (data) => this.getTargetState(data),
+      setValue: (value) => this.setTargetState(value),
+    })
   }
 
   setTargetState(state: any) {

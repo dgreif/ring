@@ -6,7 +6,14 @@ import {
   RingDeviceCategory,
   RingDeviceType,
 } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
+import {
+  API,
+  DynamicPlatformPlugin,
+  Logging,
+  PlatformAccessory,
+  PlatformConfig,
+} from 'homebridge'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
 import { Keypad } from './keypad'
@@ -97,13 +104,15 @@ function getAccessoryClass(
   return null
 }
 
-export class RingPlatform {
-  private readonly homebridgeAccessories: { [uuid: string]: HAP.Accessory } = {}
+export class RingPlatform implements DynamicPlatformPlugin {
+  private readonly homebridgeAccessories: {
+    [uuid: string]: PlatformAccessory
+  } = {}
 
   constructor(
-    public log: HAP.Log,
-    public config: RingPlatformConfig & RefreshTokenAuth,
-    public api: HAP.Platform
+    public log: Logging,
+    public config: PlatformConfig & RingPlatformConfig & RefreshTokenAuth,
+    public api: API
   ) {
     useLogger({
       logInfo(message) {
@@ -134,7 +143,7 @@ export class RingPlatform {
     this.homebridgeAccessories = {}
   }
 
-  configureAccessory(accessory: HAP.Accessory) {
+  configureAccessory(accessory: PlatformAccessory) {
     this.log.info(
       `Configuring cached accessory ${accessory.UUID} ${accessory.displayName}`
     )
@@ -151,8 +160,7 @@ export class RingPlatform {
       locations = await ringApi.getLocations(),
       { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
-      platformAccessories: HAP.Accessory[] = [],
-      cameraAccessories: HAP.Accessory[] = [],
+      platformAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
 
     await Promise.all(
@@ -212,7 +220,7 @@ export class RingPlatform {
         )
         hapDevices.forEach(
           ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
-            const uuid = hap.UUIDGen.generate(debugPrefix + id),
+            const uuid = hap.uuid.generate(debugPrefix + id),
               displayName = debugPrefix + name
 
             if (
@@ -227,23 +235,18 @@ export class RingPlatform {
             }
 
             const createHomebridgeAccessory = () => {
-                const accessory = new hap.PlatformAccessory(
+                const accessory = new api.platformAccessory(
                   displayName,
                   uuid,
                   isCamera
-                    ? hap.AccessoryCategories.CAMERA
-                    : hap.AccessoryCategories.SECURITY_SYSTEM
+                    ? hap.Categories.CAMERA
+                    : hap.Categories.SECURITY_SYSTEM
                 )
 
                 this.log.info(
                   `Adding new accessory ${deviceType} ${displayName}`
                 )
-
-                if (isCamera) {
-                  cameraAccessories.push(accessory)
-                } else {
-                  platformAccessories.push(accessory)
-                }
+                platformAccessories.push(accessory)
 
                 return accessory
               },
@@ -270,9 +273,6 @@ export class RingPlatform {
         platformName,
         platformAccessories
       )
-    }
-    if (cameraAccessories.length) {
-      api.publishCameraAccessories(pluginName, cameraAccessories)
     }
 
     const staleAccessories = cachedAccessoryIds

@@ -1,7 +1,9 @@
 import { RingDevice, RingDeviceData } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDataAccessory } from './base-data-accessory'
+import { Logging, PlatformAccessory } from 'homebridge'
+import { ServiceType } from './base-accessory'
 
 function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
   if (batteryLevel !== undefined) {
@@ -55,8 +57,8 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
   RingDevice
 > {
   abstract readonly device: RingDevice
-  abstract readonly accessory: HAP.Accessory
-  abstract readonly logger: HAP.Log
+  abstract readonly accessory: PlatformAccessory
+  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
 
   initBase() {
@@ -66,80 +68,80 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<
       } = this,
       { Characteristic, Service } = hap
 
-    this.registerCharacteristic(
-      Characteristic.Manufacturer,
-      Service.AccessoryInformation,
-      (data) => data.manufacturerName || 'Ring'
-    )
-    this.registerCharacteristic(
-      Characteristic.Model,
-      Service.AccessoryInformation,
-      (data) => data.deviceType
-    )
-    this.registerCharacteristic(
-      Characteristic.SerialNumber,
-      Service.AccessoryInformation,
-      (data) => data.serialNumber || 'Unknown'
-    )
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Manufacturer,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.manufacturerName || 'Ring',
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Model,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.deviceType,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.SerialNumber,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.serialNumber || 'Unknown',
+    })
 
     if ('volume' in initialData && 'setVolume' in device) {
-      this.registerCharacteristic(
-        Characteristic.Mute,
-        Service.Speaker,
-        () => false
-      )
-      this.registerLevelCharacteristic(
-        Characteristic.Volume,
-        Service.Speaker,
-        (data) => {
+      this.registerCharacteristic({
+        characteristicType: Characteristic.Mute,
+        serviceType: Service.Speaker,
+        getValue: () => false,
+      })
+      this.registerLevelCharacteristic({
+        characteristicType: Characteristic.Volume,
+        serviceType: Service.Speaker,
+        getValue: (data) => {
           return data.volume ? data.volume * 100 : 0
         },
-        (volume: number) => {
+        setValue: (volume: number) => {
           device.setVolume(volume / 100)
-        }
-      )
+        },
+      })
     }
 
     if (hasBatteryStatus(initialData)) {
-      this.registerCharacteristic(
-        Characteristic.BatteryLevel,
-        Service.BatteryService,
-        getBatteryLevel
-      )
-      this.registerCharacteristic(
-        Characteristic.StatusLowBattery,
-        Service.BatteryService,
-        getStatusLowBattery
-      )
-      this.registerCharacteristic(
-        Characteristic.ChargingState,
-        Service.BatteryService,
-        getBatteryChargingState
-      )
+      this.registerCharacteristic({
+        characteristicType: Characteristic.BatteryLevel,
+        serviceType: Service.BatteryService,
+        getValue: getBatteryLevel,
+      })
+      this.registerCharacteristic({
+        characteristicType: Characteristic.StatusLowBattery,
+        serviceType: Service.BatteryService,
+        getValue: getStatusLowBattery,
+      })
+      this.registerCharacteristic({
+        characteristicType: Characteristic.ChargingState,
+        serviceType: Service.BatteryService,
+        getValue: getBatteryChargingState,
+      })
     }
 
     super.initBase()
   }
 
-  initSensorService(SensorService: HAP.Service) {
+  initSensorService(serviceType: ServiceType) {
     const { Characteristic } = hap
 
-    this.registerCharacteristic(
-      Characteristic.StatusTampered,
-      SensorService,
-      (data) => {
+    this.registerCharacteristic({
+      characteristicType: Characteristic.StatusTampered,
+      serviceType,
+      getValue: (data) => {
         return data.tamperStatus === 'ok'
           ? Characteristic.StatusTampered.NOT_TAMPERED
           : Characteristic.StatusTampered.TAMPERED
-      }
-    )
+      },
+    })
 
     if (hasBatteryStatus(this.device.data)) {
-      this.registerCharacteristic(
-        Characteristic.StatusLowBattery,
-        SensorService,
-        (data) => getStatusLowBattery(data)
-      )
+      this.registerCharacteristic({
+        characteristicType: Characteristic.StatusLowBattery,
+        serviceType,
+        getValue: (data) => getStatusLowBattery(data),
+      })
     }
   }
 }

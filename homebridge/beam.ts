@@ -1,7 +1,8 @@
 import { RingDevice, RingDeviceType } from '../api'
-import { HAP, hap } from './hap'
+import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDeviceAccessory } from './base-device-accessory'
+import { Logging, PlatformAccessory } from 'homebridge'
 
 export class Beam extends BaseDeviceAccessory {
   isLightGroup =
@@ -10,8 +11,8 @@ export class Beam extends BaseDeviceAccessory {
 
   constructor(
     public readonly device: RingDevice,
-    public readonly accessory: HAP.Accessory,
-    public readonly logger: HAP.Log,
+    public readonly accessory: PlatformAccessory,
+    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -23,30 +24,32 @@ export class Beam extends BaseDeviceAccessory {
       } = this.device
 
     if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
-      this.registerCharacteristic(
-        hap.Characteristic.MotionDetected,
-        MotionSensor,
-        (data) => data.motionStatus === 'faulted'
-      )
+      this.registerCharacteristic({
+        characteristicType: hap.Characteristic.MotionDetected,
+        serviceType: MotionSensor,
+        getValue: (data) => data.motionStatus === 'faulted',
+      })
       this.initSensorService(MotionSensor)
     }
 
     if (deviceType !== RingDeviceType.BeamsMotionSensor) {
-      this.registerCharacteristic(
-        Characteristic.On,
-        Service.Lightbulb,
-        (data) => Boolean(data.on),
-        (value) => this.setOnState(value)
-      )
+      this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: Service.Lightbulb,
+        getValue: (data) => Boolean(data.on),
+        setValue: (value) => this.setOnState(value),
+      })
     }
 
     if (deviceType === RingDeviceType.BeamsSwitch) {
-      this.registerLevelCharacteristic(
-        Characteristic.Brightness,
-        Service.Lightbulb,
-        (data) => (data.level && !isNaN(data.level) ? 100 * data.level : 0),
-        (value) => this.setLevelState(value)
-      )
+      this.registerLevelCharacteristic({
+        characteristicType: Characteristic.Brightness,
+        serviceType: Service.Lightbulb,
+        getValue: (data) => {
+          return data.level && !isNaN(data.level) ? 100 * data.level : 0
+        },
+        setValue: (value) => this.setLevelState(value),
+      })
     }
   }
 

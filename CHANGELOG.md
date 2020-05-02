@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.0.0-alpha.0](https://github.com/dgreif/ring/compare/v7.2.2...v8.0.0-alpha.0) (2020-05-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** homebridge >=1.0.0 is now required
+* **homebridge:** Cameras are now bridged instead of being created as external accessories in homebridge.  Once you update, you will see two copies of each of your cameras.  You will need to manually remove the old cameras from HomeKit by going into the cameras settings and choosing "Remove Camera from Home".  The new bridged cameras will not have this option, and will instead have a "Bridge" button.  You will also need to copy over any automations that you had tied to your cameras, such as motion detection, button presses, and lighting/siren activations.  Please note, this change should significantly reduce complexity while setting up homebridge-ring cameras, but will _not_ change live streaming in any way.  If you had issues with live streams before, you will continue to have issues with live streams after this update.
+
+### Features
+
+* **homebridge:** bridged cameras and homebridge 1+ ([01ac0ec](https://github.com/dgreif/ring/commit/01ac0ec4d787ef70311e58d43aca0cb84f0fe134))
+
 ### [7.2.2](https://github.com/dgreif/ring/compare/v7.2.1...v7.2.2) (2020-04-05)
 
 ### [7.2.1](https://github.com/dgreif/ring/compare/v7.2.0...v7.2.1) (2020-03-07)

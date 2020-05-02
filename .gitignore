@@ -7,3 +7,4 @@ node_modules
 release-*
 json-data
 yarn.lock
+.homebridge

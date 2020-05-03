@@ -58,6 +58,13 @@ export class Camera extends BaseDataAccessory<RingCamera> {
           serviceType: Service.StatelessProgrammableSwitch,
           onValue: onPressed,
         })
+
+        // Hide long and double press events by setting max value
+        this.getService(Service.StatelessProgrammableSwitch)
+          .getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+          .setProps({
+            maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+          })
       }
     }
 

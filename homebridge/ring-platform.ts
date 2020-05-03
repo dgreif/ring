@@ -37,6 +37,7 @@ import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
 import { TemperatureSensor } from './temperature-sensor'
 import { LocationModeSwitch } from './location-mode-switch'
+import { generateMacAddress } from './util'
 
 const debug = __filename.includes('release-homebridge'),
   unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
@@ -247,6 +248,13 @@ export class RingPlatform implements DynamicPlatformPlugin {
                   `Adding new accessory ${deviceType} ${displayName}`
                 )
                 platformAccessories.push(accessory)
+
+                if (isCamera) {
+                  // This is a one-time cleanup that will remove persist files for old external accessories from before camera bridging in version 8
+                  hap.Accessory.cleanupAccessoryData(
+                    generateMacAddress(accessory.UUID)
+                  )
+                }
 
                 return accessory
               },

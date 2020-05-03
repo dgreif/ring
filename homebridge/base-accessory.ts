@@ -143,7 +143,9 @@ export abstract class BaseAccessory<T extends { name: string }> {
         this.logger.info(
           'Pruning unused service',
           service.UUID,
-          service.displayName
+          service.displayName || service.name,
+          'from',
+          this.device.name
         )
 
         this.accessory.removeService(service)

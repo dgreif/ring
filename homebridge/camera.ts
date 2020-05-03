@@ -22,6 +22,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
     accessory.configureController(cameraSource.controller)
 
+    // access the microphone service so that it does not get pruned
+    this.getService(Service.Microphone)
+
     if (!config.hideCameraMotionSensor) {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.MotionDetected,

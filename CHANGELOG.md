@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.0.0](https://github.com/dgreif/ring/compare/v8.0.0-alpha.0...v8.0.0) (2020-05-03)
+
+
+### Features
+
+* **homebridge:** clean up persist files from old external cameras ([054691c](https://github.com/dgreif/ring/commit/054691c676539725d0e19d1bafa25d13e3fdf293))
+* **homebridge:** explicit error if using cameras without homebridge 1+ ([21702da](https://github.com/dgreif/ring/commit/21702daa2a34e6381648927d615030861fa387de))
+
+
+### Bug Fixes
+
+* **homebridge:** hide double and long press for doorbell programmable switch ([e8be8fb](https://github.com/dgreif/ring/commit/e8be8fb33c4413bb38d66948558e45d20ad09f46)), closes [#288](https://github.com/dgreif/ring/issues/288)
+
 ## [8.0.0-alpha.0](https://github.com/dgreif/ring/compare/v7.2.2...v8.0.0-alpha.0) (2020-05-02)
 
 

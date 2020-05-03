@@ -16,6 +16,14 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     public readonly config: RingPlatformConfig
   ) {
     super()
+
+    if (!hap.CameraController) {
+      const error =
+        'HAP CameraController not found.  Please make sure you are on homebridge version 1.0.0 or newer'
+      logger.error(error)
+      throw new Error(error)
+    }
+
     const { Characteristic, Service } = hap,
       { StatusLowBattery } = Characteristic,
       cameraSource = new CameraSource(device, logger)

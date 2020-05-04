@@ -259,6 +259,81 @@ export interface BeamBridge {
   updated_at: string
 }
 
+export interface Chime {
+  id: number
+  description: string
+  device_id: string
+  time_zone: string
+  firmware_version: Firmware
+  kind: string
+  latitude: number
+  longitude: number
+  address: string
+  settings: {
+    volume: number
+    ding_audio_user_id: string
+    ding_audio_id: string
+    motion_audio_user_id: string
+    motion_audio_id: string
+  }
+  features: {
+    ringtones_enabled: boolean
+  }
+  owned: boolean
+  alerts: {
+    connection: string
+    rssi: string
+  }
+  do_not_disturb: {
+    seconds_left: number
+  }
+  stolen: boolean
+  location_id: string
+  ring_id: null
+  owner: {
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+  }
+}
+
+export type ChimeSoundKind = 'motion' | 'ding'
+
+export interface ChimeOptions {
+  chime: {
+    description?: string
+    latitude?: number
+    longitude?: number
+    address?: string
+    settings?: {
+      volume?: number
+      ding_audio_user_id?: string
+      ding_audio_id?: string
+      motion_audio_user_id?: string
+      motion_audio_id?: string
+    }
+  }
+}
+
+export interface RingtoneOptions {
+  default_ding_user_id: string
+  default_ding_id: string
+  default_motion_user_id: string
+  default_motion_id: string
+  audios: [
+    {
+      user_id: string
+      id: string
+      description: string
+      kind: string
+      url: string
+      checksum: string
+      available: string
+    }
+  ]
+}
+
 export interface LocationAddress {
   address1: string
   address2: string

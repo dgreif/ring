@@ -39,6 +39,7 @@ import {
 } from './ring-types'
 import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
+import { RingChime } from './ring-chime'
 import { RingDevice } from './ring-device'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
@@ -119,6 +120,7 @@ export class Location {
   constructor(
     public readonly locationDetails: UserLocation,
     public readonly cameras: RingCamera[],
+    public readonly chimes: RingChime[],
     public readonly options: {
       hasHubs: boolean
       hasAlarmBaseStation: boolean

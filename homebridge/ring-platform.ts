@@ -249,7 +249,10 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 )
                 platformAccessories.push(accessory)
 
-                if (isCamera) {
+                if (
+                  isCamera &&
+                  typeof hap.Accessory.cleanupAccessoryData === 'function'
+                ) {
                   // This is a one-time cleanup that will remove persist files for old external accessories from before camera bridging in version 8
                   hap.Accessory.cleanupAccessoryData(
                     generateMacAddress(accessory.UUID)

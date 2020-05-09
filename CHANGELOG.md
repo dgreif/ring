@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [8.0.1](https://github.com/dgreif/ring/compare/v8.0.0...v8.0.1) (2020-05-09)
+
+
+### Bug Fixes
+
+* skip external camera cleanup if `cleanupAccessoryData` is not available ([e80f832](https://github.com/dgreif/ring/commit/e80f8323d4457d05b084fbed65118783dd8e44da)), closes [#315](https://github.com/dgreif/ring/issues/315)
+
 ## [8.0.0](https://github.com/dgreif/ring/compare/v8.0.0-alpha.0...v8.0.0) (2020-05-03)
 
 

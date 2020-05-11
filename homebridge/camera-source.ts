@@ -6,20 +6,22 @@ import {
   getSrtpValue,
 } from '../api/rtp-utils'
 import {
-  Logging,
+  AudioStreamingCodecType,
+  AudioStreamingSamplerate,
   CameraStreamingDelegate,
+  H264Level,
+  H264Profile,
+  Logging,
+  PrepareStreamCallback,
+  PrepareStreamRequest,
   SnapshotRequest,
   SnapshotRequestCallback,
-  PrepareStreamRequest,
-  PrepareStreamCallback,
+  SRTPCryptoSuites,
   StreamingRequest,
   StreamRequestCallback,
-  AudioStreamingCodecType,
-  SRTPCryptoSuites,
-  AudioStreamingSamplerate,
-  H264Profile,
-  H264Level,
 } from 'homebridge'
+import { logDebug } from '../api/util'
+
 const ip = require('ip')
 
 function getDurationSeconds(start: number) {
@@ -61,32 +63,31 @@ export class CameraSource implements CameraStreamingDelegate {
   })
   sessions: { [sessionKey: string]: SipSession } = {}
 
-  constructor(private ringCamera: RingCamera, private logger: Logging) {}
+  constructor(private ringCamera: RingCamera, private logger: Logging) {
+    void this.loadSnapshot()
+  }
 
-  async handleSnapshotRequest(
-    request: SnapshotRequest,
-    callback: SnapshotRequestCallback
-  ) {
+  private lastSnapshot?: Buffer
+
+  async loadSnapshot() {
     const start = Date.now()
-    try {
-      this.logger.info(`Snapshot for ${this.ringCamera.name} Requested`)
+    logDebug(`Loading new snapshot into cache for ${this.ringCamera.name}`)
 
-      const snapshot = await this.ringCamera.getSnapshot(true)
-      this.logger.info(
-        `Snapshot for ${this.ringCamera.name} Received (${getDurationSeconds(
+    try {
+      this.lastSnapshot = await this.ringCamera.getSnapshot(true)
+
+      logDebug(
+        `Snapshot cached for ${this.ringCamera.name} (${getDurationSeconds(
           start
         )}s)`
       )
-      // Not currently resizing the image.
-      // HomeKit does a good job of resizing and doesn't seem to care if it's not right
-      callback(undefined, snapshot)
     } catch (e) {
       this.logger.error(
-        `Failed to retrieve snapshot for ${
+        `Failed to cache snapshot for ${
           this.ringCamera.name
         } (${getDurationSeconds(
           start
-        )}s).  The camera currently reports that is it ${
+        )}s), The camera currently reports that is it ${
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )
@@ -94,13 +95,26 @@ export class CameraSource implements CameraStreamingDelegate {
       if (!this.ringCamera.isOffline) {
         this.logger.error(
           this.ringCamera.name +
-            ' camera appears to be unable to upload snapshots.  This usually requires a physical restart of the camera.  Please turn off power to this camera by removing its battery or turning off the breaker for the circuit it is wired to.  Once power is cycled, snapshots should start working again.'
+            ' camera appears to be unable to upload snapshots.  This can happen when your Ring Modes settings prevent motion detection or live view, which also prevents snapshots.  If Modes are not blocking snapshots, this can also happen if the camera has gotten into a bad state, which requires a physical restart of the camera.  If this happens, you will also not be able to retrieve snapshots via the Ring app for this camera.  In that case, please turn off power to this camera by removing its battery or turning off the breaker for the circuit it is wired to.  Once power is cycled, snapshots should start working again.'
         )
       }
-
-      this.logger.error(e)
-      callback(e)
     }
+  }
+
+  handleSnapshotRequest(
+    request: SnapshotRequest,
+    callback: SnapshotRequestCallback
+  ) {
+    logDebug(
+      `${
+        this.lastSnapshot ? 'Used cached snapshot' : 'No snapshot cached'
+      } for ${this.ringCamera.name}`
+    )
+
+    // Not currently resizing the image.
+    // HomeKit does a good job of resizing and doesn't seem to care if it's not right
+    callback(undefined, this.lastSnapshot)
+    void this.loadSnapshot()
   }
 
   async prepareStream(

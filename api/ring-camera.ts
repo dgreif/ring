@@ -29,7 +29,7 @@ import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 
 const snapshotRefreshDelay = 500,
-  maxSnapshotRefreshSeconds = 30,
+  maxSnapshotRefreshSeconds = 20,
   maxSnapshotRefreshAttempts =
     (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
 
@@ -382,6 +382,12 @@ export class RingCamera {
     }
 
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
+      if (this.data.settings.motion_detection_enabled === false) {
+        throw new Error(
+          `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
+        )
+      }
+
       const { timestamp, inLifeTime } = await this.getSnapshotTimestamp()
 
       if (!timestamp && this.isOffline) {

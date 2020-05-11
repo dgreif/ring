@@ -313,7 +313,7 @@ export interface CameraData {
   longitude: number
   address: string
   settings: {
-    enable_vod: boolean
+    enable_vod: boolean | 1
     motion_zones: {
       enable_audio: false
       active_motion_filter: number
@@ -346,6 +346,8 @@ export interface CameraData {
     floodlight_settings?: any
     light_schedule_settings?: any
     luma_light_threshold?: number
+    live_view_disabled?: boolean // set by modes
+    motion_detection_enabled?: boolean // set by modes or Record Motion toggle
   }
   features: {
     motions_enabled: boolean
@@ -367,6 +369,10 @@ export interface CameraData {
   stolen: boolean
   location_id: string
   ring_id: null
+  motion_detection_enabled?: boolean
+  camera_location_indoor?: boolean
+  facing_window?: boolean
+  enable_ir_led?: boolean
   owner: {
     id: number
     email: string

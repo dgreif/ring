@@ -81,17 +81,14 @@ export abstract class BaseDataAccessory<
     } else if (setValue) {
       characteristic.on(
         CharacteristicEventTypes.SET,
-        async (
+        (
           newValue: CharacteristicValue,
           callback: CharacteristicSetCallback
         ) => {
-          try {
-            await Promise.resolve(setValue(newValue))
-            callback()
-          } catch (e) {
+          Promise.resolve(setValue(newValue)).catch((e) => {
             this.logger.error(e)
-            callback(e)
-          }
+          })
+          callback()
         }
       )
     }

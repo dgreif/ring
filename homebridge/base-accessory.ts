@@ -1,5 +1,5 @@
 import { hap } from './hap'
-import { take } from 'rxjs/operators'
+import { publishReplay, refCount, take } from 'rxjs/operators'
 import { Observable } from 'rxjs'
 import { RingPlatformConfig } from './config'
 import {
@@ -91,26 +91,30 @@ export abstract class BaseAccessory<T extends { name: string }> {
     requestUpdate?: () => any
   }) {
     const service = this.getService(serviceType, name, serviceSubType),
-      characteristic = service.getCharacteristic(characteristicType)
+      characteristic = service.getCharacteristic(characteristicType),
+      onCachedValue = onValue.pipe(publishReplay(1), refCount())
 
-    characteristic.on(
-      CharacteristicEventTypes.GET,
-      async (callback: CharacteristicGetCallback) => {
-        try {
-          const value = await onValue.pipe(take(1)).toPromise()
-          callback(null, value)
-
-          if (requestUpdate) {
-            requestUpdate()
-          }
-        } catch (e) {
-          callback(e)
-        }
-      }
-    )
-
-    onValue.subscribe((value) => {
+    onCachedValue.subscribe((value) => {
       characteristic.updateValue(value)
+    })
+
+    onCachedValue.pipe(take(1)).subscribe(() => {
+      // allow GET once a value is cached
+      characteristic.on(
+        CharacteristicEventTypes.GET,
+        async (callback: CharacteristicGetCallback) => {
+          try {
+            const value = await onCachedValue.pipe(take(1)).toPromise()
+            callback(null, value)
+
+            if (requestUpdate) {
+              requestUpdate()
+            }
+          } catch (e) {
+            callback(e)
+          }
+        }
+      )
     })
 
     if (setValue) {

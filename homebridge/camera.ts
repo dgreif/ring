@@ -2,7 +2,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseDataAccessory } from './base-data-accessory'
-import { filter, map, mapTo } from 'rxjs/operators'
+import { map, mapTo, switchMap } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { Logging, PlatformAccessory } from 'homebridge'
 
@@ -37,34 +37,76 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.MotionDetected,
         serviceType: Service.MotionSensor,
-        onValue: device.onMotionDetected,
-      })
+        onValue: device.onMotionDetected.pipe(
+          switchMap(async (motion) => {
+            if (!motion) {
+              return false
+            }
 
-      device.onMotionDetected.pipe(filter((motion) => motion)).subscribe(() => {
-        this.logger.info(device.name + ' Detected Motion')
+            if (device.hasBattery) {
+              // battery cameras cannot fetch a new snapshot while recording is in progress
+              this.logger.info(device.name + ' Detected Motion')
+              return true
+            }
+
+            this.logger.info(
+              device.name +
+                ' Detected Motion. Loading snapshot before sending event to HomeKit'
+            )
+
+            try {
+              await cameraSource.loadSnapshot()
+            } catch (e) {
+              this.logger.info(
+                device.name +
+                  ' Failed to load snapshot.  Sending motion to HomeKit without new snapshot'
+              )
+            }
+
+            return true
+          })
+        ),
       })
     }
 
     if (device.isDoorbot) {
-      const onPressed = device.onDoorbellPressed.pipe(
-        mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
-      )
-
-      onPressed.subscribe(() => {
-        this.logger.info(device.name + ' Button Pressed')
-      })
-
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
-        onValue: onPressed,
+        onValue: device.onDoorbellPressed.pipe(
+          switchMap(async () => {
+            if (device.hasBattery) {
+              // battery cameras cannot fetch a new snapshot while recording is in progress
+              this.logger.info(device.name + ' Button Pressed')
+              return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+            }
+
+            this.logger.info(
+              device.name +
+                ' Button Pressed. Loading snapshot before sending event to HomeKit'
+            )
+
+            try {
+              await cameraSource.loadSnapshot()
+            } catch (e) {
+              this.logger.info(
+                device.name +
+                  ' Failed to load snapshot.  Sending motion to HomeKit without new snapshot'
+              )
+            }
+
+            return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+          })
+        ),
       })
 
       if (!config.hideDoorbellSwitch) {
         this.registerObservableCharacteristic({
           characteristicType: Characteristic.ProgrammableSwitchEvent,
           serviceType: Service.StatelessProgrammableSwitch,
-          onValue: onPressed,
+          onValue: device.onDoorbellPressed.pipe(
+            mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
+          ),
         })
 
         // Hide long and double press events by setting max value

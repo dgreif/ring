@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.1.0](https://github.com/dgreif/ring/compare/v8.0.1...v8.1.0) (2020-05-11)
+
+
+### Features
+
+* **homebridge:** water sensor accessory ([569fed7](https://github.com/dgreif/ring/commit/569fed76a2b5448a956e018eeec93658b600f34a)), closes [#316](https://github.com/dgreif/ring/issues/316)
+
+
+### Bug Fixes
+
+* **homebridge:** cache snapshots to avoid blocking homebridge accessories ([eb75a46](https://github.com/dgreif/ring/commit/eb75a469509a5209e767c00edb4ac601a59908e4)), closes [#311](https://github.com/dgreif/ring/issues/311) [#293](https://github.com/dgreif/ring/issues/293)
+
 ### [8.0.1](https://github.com/dgreif/ring/compare/v8.0.0...v8.0.1) (2020-05-09)
 
 

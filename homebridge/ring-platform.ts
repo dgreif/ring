@@ -36,6 +36,7 @@ import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
 import { TemperatureSensor } from './temperature-sensor'
+import { WaterSensor } from './water-sensor'
 import { LocationModeSwitch } from './location-mode-switch'
 import { generateMacAddress } from './util'
 
@@ -96,6 +97,8 @@ function getAccessoryClass(
       return Switch
     case RingDeviceType.TemperatureSensor:
       return TemperatureSensor
+    case RingDeviceType.WaterSensor:
+      return WaterSensor
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

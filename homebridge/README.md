@@ -152,8 +152,12 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Has not been confirmed to work yet.  Please open an issue on GitHub if you have a Freeze Sensor (not the flood/freeze sensor) and can test it out for me
     * Tamper status
     * Battery status
-  * Temperature Sensor (**untested**)
+  * Temperature Sensor
     * Temperature
+    * Battery status
+  * Water Sensor
+    * Detect water leak
+    * Tamper status
     * Battery status
   * Ring Smart Lights (Motion Detector, Flood/Path/Spot Lights, Transformer)
     * On/Off

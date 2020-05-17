@@ -1,6 +1,11 @@
 import { Subject } from 'rxjs'
 import { logError, logInfo } from './util'
-import { getSrtpValue, RtpOptions, RtpStreamOptions } from './rtp-utils'
+import {
+  createCryptoLine,
+  decodeCryptoKey,
+  RtpOptions,
+  RtpStreamOptions,
+} from './rtp-utils'
 
 const ip = require('ip'),
   sip = require('sip'),
@@ -60,16 +65,6 @@ function getRandomId() {
   return Math.floor(Math.random() * 1e6).toString()
 }
 
-function createCryptoLine(rtpStreamOptions: RtpStreamOptions) {
-  const srtpValue = getSrtpValue(rtpStreamOptions)
-
-  if (!srtpValue) {
-    return ''
-  }
-
-  return `a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:${srtpValue}`
-}
-
 function getRtpDescription(
   sections: string[],
   mediaType: 'audio' | 'video'
@@ -82,13 +77,11 @@ function getRtpDescription(
   if (!cryptoLine) {
     return { port }
   }
-  const encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1],
-    crypto = Buffer.from(encodedCrypto, 'base64')
+  const encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
 
   return {
     port,
-    srtpKey: crypto.slice(0, 16),
-    srtpSalt: crypto.slice(16, 30),
+    ...decodeCryptoKey(encodedCrypto),
   }
 }
 

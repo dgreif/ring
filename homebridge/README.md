@@ -97,8 +97,8 @@ the output when you start homebridge, or in your homebridge `config.json` file.
 Walk through the setup pages and when you are done, you should see several devices related to the camera:
 
   * Camera Feed
-    * Shows a snapshot from the camera while viewing the room in Home
-    * Shows a live feed from the camera if you click on it.  The feed supports video out of the box, and will supply audio as well if you have `ffmpeg` with `libfdk_aac` installed.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg#homebridge-audio-support) for details on audio support. Camera streams may not work on some networks with strict NAT settings.
+    * Shows a snapshot from the camera while viewing the room in Home.  There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details.
+    * Shows a live feed from the camera if you click on it.  The feed supports video out of the box, and will support 2-way audio as well if you have `ffmpeg` with `libfdk_aac` installed.  A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg#homebridge-audio-support) for details on audio support. Camera streams may not work on some networks with strict NAT settings.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
   * Light (if camera is equipped)
@@ -110,8 +110,6 @@ Walk through the setup pages and when you are done, you should see several devic
   * Programmable switch for doorbells (triggers `Single Press` actions)
     * Note: doorbell event notifications should be configured via settings on the camera feed
     * Can be hidden with `hideDoorbellSwitch`
-
-**Battery Camera Limitations** - There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details.
 
 If you turn on notifications for the motion sensors, or for any doorbell camera, you will get rich notifications from
 HomeKit with a snapshot from the camera

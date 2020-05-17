@@ -1,35 +1,16 @@
-import { logDebug } from './util'
-import { RemoteInfo, Socket } from 'dgram'
+import { interval, ReplaySubject, Subscription } from 'rxjs'
 import {
-  interval,
-  Observable,
-  ReplaySubject,
-  Subject,
-  Subscription,
-} from 'rxjs'
-import {
-  bindProxyPorts,
-  getFfmpegPath,
-  getSrtpValue,
+  createCryptoLine,
   releasePorts,
   reservePorts,
   RtpOptions,
+  RtpSplitter,
   sendUdpHolePunch,
 } from './rtp-utils'
-import { spawn } from 'child_process'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
-
-export interface RtpPacket {
-  message: Buffer
-  info: RemoteInfo
-}
-
-export interface RtpStream {
-  socket: Socket
-  port: number
-  onRtpPacket: Observable<RtpPacket>
-}
+import { FfmpegProcess } from './ffmpeg'
+import { takeUntil } from 'rxjs/operators'
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -42,38 +23,24 @@ export interface FfmpegOptions {
 export class SipSession {
   private hasStarted = false
   private hasCallEnded = false
-  private onAudioPacket = new Subject<RtpPacket>()
-  private onVideoPacket = new Subject<RtpPacket>()
   private onCallEndedSubject = new ReplaySubject(1)
   private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
   private subscriptions: Subscription[] = []
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
-  reservedPorts = [
+  public readonly reservedPorts = [
     this.tlsPort,
     this.rtpOptions.video.port,
     this.rtpOptions.audio.port,
   ]
   onCallEnded = this.onCallEndedSubject.asObservable()
-  onRemoteRtpOptions = this.onRemoteRtpOptionsSubject.asObservable()
-
-  audioStream: RtpStream = {
-    socket: this.audioSocket,
-    port: this.rtpOptions.audio.port,
-    onRtpPacket: this.onAudioPacket.asObservable(),
-  }
-  videoStream: RtpStream = {
-    socket: this.videoSocket,
-    port: this.rtpOptions.video.port,
-    onRtpPacket: this.onVideoPacket.asObservable(),
-  }
 
   constructor(
-    private sipOptions: SipOptions,
-    private rtpOptions: RtpOptions,
-    private videoSocket: Socket,
-    private audioSocket: Socket,
-    private tlsPort: number,
-    private camera: RingCamera
+    public readonly sipOptions: SipOptions,
+    public readonly rtpOptions: RtpOptions,
+    public readonly videoSplitter: RtpSplitter,
+    public readonly audioSplitter: RtpSplitter,
+    private readonly tlsPort: number,
+    public readonly camera: RingCamera
   ) {}
 
   createSipCall(sipOptions: SipOptions) {
@@ -112,15 +79,15 @@ export class SipSession {
         portMappingLifetime = keepAliveInterval + 5,
         holePunch = () => {
           sendUdpHolePunch(
-            this.audioSocket,
-            this.audioStream.port,
+            this.audioSplitter.socket,
+            this.rtpOptions.audio.port,
             remoteRtpOptions.audio.port,
             remoteAddress,
             portMappingLifetime
           )
           sendUdpHolePunch(
-            this.videoSocket,
-            this.videoStream.port,
+            this.videoSplitter.socket,
+            this.rtpOptions.video.port,
             remoteRtpOptions.video.port,
             remoteAddress,
             portMappingLifetime
@@ -130,13 +97,6 @@ export class SipSession {
       if (ffmpegOptions) {
         this.startTranscoder(ffmpegOptions, remoteRtpOptions)
       }
-
-      this.audioSocket.on('message', (message, info) => {
-        this.onAudioPacket.next({ message, info })
-      })
-      this.videoSocket.on('message', (message, info) => {
-        this.onVideoPacket.next({ message, info })
-      })
 
       // punch to begin with to make sure we get through NAT
       holePunch()
@@ -166,33 +126,13 @@ export class SipSession {
     remoteRtpOptions: RtpOptions
   ) {
     const transcodeVideoStream = ffmpegOptions.video !== false,
-      [audioPort, videoPort] = [
-        await this.reservePort(1),
-        await this.reservePort(1),
-      ],
-      input = this.sipCall.sdp
-        .replace(
-          getSrtpValue(this.rtpOptions.audio),
-          getSrtpValue(remoteRtpOptions.audio)
-        )
-        .replace(
-          getSrtpValue(this.rtpOptions.video),
-          getSrtpValue(remoteRtpOptions.video)
-        )
-        .replace(
-          'm=audio ' + this.audioStream.port.toString(),
-          'm=audio ' + audioPort.toString()
-        )
-        .replace(
-          'm=video ' + this.videoStream.port.toString(),
-          'm=video ' + videoPort.toString()
-        ),
       ffOptions = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
         '-f',
         'sdp',
+        '-re',
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',
@@ -202,45 +142,49 @@ export class SipSession {
           : []),
         ...(ffmpegOptions.output || []),
       ],
-      ff = spawn(
-        getFfmpegPath(),
-        ffOptions.map((x) => x.toString())
-      )
-
-    ff.stderr.on('data', (data: any) => {
-      logDebug(`ffmpeg stderr: ${data}`)
-    })
-
-    ff.on('close', (code) => {
-      this.callEnded(true)
-      logDebug(`ffmpeg exited with code ${code}`)
-    })
-
-    const exitHandler = () => {
-      ff.stderr.pause()
-      ff.stdout.pause()
-      ff.kill()
-
-      process.off('SIGINT', exitHandler)
-      process.off('exit', exitHandler)
-    }
-
-    process.on('SIGINT', exitHandler)
-    process.on('exit', exitHandler)
-    this.onCallEnded.subscribe(exitHandler)
-
-    ff.stdin.write(input)
-    ff.stdin.end()
-
-    const proxyPromises = [
-      bindProxyPorts(audioPort, '127.0.0.1', 'audio', this),
-    ]
+      ff = new FfmpegProcess(ffOptions, 'From Ring'),
+      audioPort = await this.reservePort(1),
+      inputSdpLines = [
+        'v=0',
+        'o=105202070 3747 461 IN IP4 127.0.0.1',
+        's=Talk',
+        'c=IN IP4 127.0.0.1',
+        'b=AS:380',
+        't=0 0',
+        'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
+        `m=audio ${audioPort} RTP/SAVP 0 101`,
+        'a=rtpmap:0 PCMU/8000',
+        createCryptoLine(remoteRtpOptions.audio),
+        'a=rtcp-mux',
+      ]
 
     if (transcodeVideoStream) {
-      proxyPromises.push(bindProxyPorts(videoPort, '127.0.0.1', 'video', this))
+      const videoPort = await this.reservePort(1)
+      inputSdpLines.push(
+        `m=video ${videoPort} RTP/SAVP 99`,
+        'a=rtpmap:99 H264/90000',
+        createCryptoLine(remoteRtpOptions.video),
+        'a=rtcp-mux'
+      )
+      this.videoSplitter.addMessageHandler(({ isRtpMessage }) => {
+        return {
+          port: isRtpMessage ? videoPort : videoPort + 1,
+        }
+      })
     }
 
-    return Promise.all(proxyPromises)
+    this.onCallEnded.pipe(takeUntil(ff.onClosed)).subscribe(() => ff.stop())
+    ff.onClosed
+      .pipe(takeUntil(this.onCallEnded))
+      .subscribe(() => this.callEnded(true))
+
+    ff.start(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
+
+    this.audioSplitter.addMessageHandler(({ isRtpMessage }) => {
+      return {
+        port: isRtpMessage ? audioPort : audioPort + 1,
+      }
+    })
   }
 
   async reservePort(bufferPorts = 0) {
@@ -262,8 +206,8 @@ export class SipSession {
     // clean up
     this.onCallEndedSubject.next()
     this.sipCall.destroy()
-    this.videoSocket.close()
-    this.audioSocket.close()
+    this.videoSplitter.close()
+    this.audioSplitter.close()
     this.subscriptions.forEach((subscription) => subscription.unsubscribe())
     releasePorts(this.reservedPorts)
   }

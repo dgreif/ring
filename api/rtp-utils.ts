@@ -1,29 +1,19 @@
-import { createSocket, Socket } from 'dgram'
+import { createSocket, RemoteInfo, Socket } from 'dgram'
 import { AddressInfo } from 'net'
 import { v4 as fetchPublicIp } from 'public-ip'
-import { SipSession } from './sip-session'
-import { ReplaySubject } from 'rxjs'
-import { filter, map, take } from 'rxjs/operators'
+import { fromEvent, merge, ReplaySubject } from 'rxjs'
+import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
-import execa from 'execa'
 import { logError } from './util'
 const stun = require('stun'),
   portControl = require('nat-puncher')
 
-let preferredExternalPorts: number[] | undefined, ffmpegPath: string | undefined
+let preferredExternalPorts: number[] | undefined
 
 export function setPreferredExternalPorts(start: number, end: number) {
   const count = end - start + 1
 
   preferredExternalPorts = Array.from(new Array(count)).map((_, i) => i + start)
-}
-
-export function setFfmpegPath(path: string) {
-  ffmpegPath = path
-}
-
-export function getFfmpegPath() {
-  return ffmpegPath || 'ffmpeg'
 }
 
 export interface SrtpOptions {
@@ -115,7 +105,7 @@ export async function reservePorts({
   return ports
 }
 
-function isRtpMessage(message: Buffer) {
+export function isRtpMessage(message: Buffer) {
   const payloadType = message.readUInt8(1) & 0x7f
   return payloadType > 90 || payloadType === 0
 }
@@ -165,59 +155,106 @@ export function sendUdpHolePunch(
   portControl.addMapping(localPort, localPort, lifetimeSeconds)
 }
 
-export async function bindProxyPorts(
-  remotePort: number,
-  remoteAddress: string,
-  type: 'audio' | 'video',
-  sipSession: SipSession
-) {
-  let ringRtpOptions: RtpOptions | undefined
+export interface SocketTarget {
+  port: number
+  address?: string
+}
 
-  const onSsrc = new ReplaySubject<number>(1),
-    socket = createSocket('udp4'),
-    rtpStream =
-      type === 'audio' ? sipSession.audioStream : sipSession.videoStream,
-    subscriptions = [
-      sipSession.onRemoteRtpOptions.subscribe((rtpOptions) => {
-        ringRtpOptions = rtpOptions
-      }),
-      rtpStream.onRtpPacket.subscribe(({ message }) => {
-        socket.send(message, remotePort, remoteAddress)
-      }),
-      rtpStream.onRtpPacket
-        .pipe(
-          map(({ message }) => getSsrc(message)),
-          filter((x) => x !== null),
-          take(1)
-        )
-        .subscribe((ssrc) => ssrc && onSsrc.next(ssrc)),
-    ]
+interface RtpMessageDescription {
+  isRtpMessage: boolean
+  info: RemoteInfo
+  message: Buffer
+}
+type RtpMessageHandler = (
+  description: RtpMessageDescription
+) => SocketTarget | null
 
-  socket.on('message', (message) => {
-    if (ringRtpOptions) {
-      rtpStream.socket.send(
-        message,
-        ringRtpOptions[type].port,
-        ringRtpOptions.address
-      )
+export class RtpSplitter {
+  public readonly socket = createSocket('udp4')
+  public readonly portPromise = bindToPort(this.socket, this.options)
+  private onClose = new ReplaySubject<any>()
+  public readonly onMessage = fromEvent<[Buffer, RemoteInfo]>(
+    this.socket,
+    'message'
+  ).pipe(
+    map(([message, info]) => ({
+      message,
+      info,
+      isRtpMessage: isRtpMessage(message),
+    })),
+    takeUntil(this.onClose),
+    share()
+  )
+
+  constructor(
+    public readonly options = { forExternalUse: false },
+    messageHandler?: RtpMessageHandler
+  ) {
+    if (messageHandler) {
+      this.addMessageHandler(messageHandler)
     }
-  })
 
-  const localPort = await bindToPort(socket)
-  sipSession.reservedPorts.push(localPort)
+    merge(fromEvent(this.socket, 'close'), fromEvent(this.socket, 'error'))
+      .pipe(takeUntil(this.onClose))
+      .subscribe(() => {
+        this.cleanUp()
+      })
+  }
 
-  sipSession.onCallEnded.subscribe(() => {
-    socket.close()
-    subscriptions.forEach((subscription) => subscription.unsubscribe())
-  })
+  addMessageHandler(handler: RtpMessageHandler) {
+    this.onMessage.subscribe((description) => {
+      const forwardingTarget = handler(description)
 
-  return {
-    ssrcPromise: onSsrc.pipe(take(1)).toPromise(),
-    localPort,
+      if (forwardingTarget) {
+        this.send(description.message, forwardingTarget)
+      }
+    })
+  }
+
+  async send(message: Buffer, sendTo: SocketTarget) {
+    await this.portPromise
+    this.socket.send(message, sendTo.port, sendTo.address || '127.0.0.1')
+  }
+
+  private cleanedUp = false
+  private cleanUp() {
+    this.closed = true
+
+    if (this.cleanedUp) {
+      return
+    }
+
+    this.cleanedUp = true
+    this.onClose.next()
+    this.portPromise.then((port) => releasePorts([port]))
+  }
+
+  private closed = false
+  close() {
+    if (this.closed) {
+      return
+    }
+
+    this.socket.close()
+    this.cleanUp()
   }
 }
 
-export async function doesFfmpegSupportCodec(codec: string) {
-  const output = await execa(getFfmpegPath(), ['-codecs'])
-  return output.stdout.includes(codec)
+export function createCryptoLine(rtpStreamOptions: Partial<SrtpOptions>) {
+  const srtpValue = getSrtpValue(rtpStreamOptions)
+
+  if (!srtpValue) {
+    return ''
+  }
+
+  return `a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:${srtpValue}`
+}
+
+export function decodeCryptoKey(encordedCrypto: string) {
+  const crypto = Buffer.from(encordedCrypto, 'base64')
+
+  return {
+    srtpKey: crypto.slice(0, 16),
+    srtpSalt: crypto.slice(16, 30),
+  }
 }

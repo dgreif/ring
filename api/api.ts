@@ -16,7 +16,8 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
-import { setFfmpegPath, setPreferredExternalPorts } from './rtp-utils'
+import { setPreferredExternalPorts } from './rtp-utils'
+import { setFfmpegPath } from './ffmpeg'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]

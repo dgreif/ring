@@ -22,8 +22,12 @@ import {
   take,
   takeUntil,
 } from 'rxjs/operators'
-import { createSocket } from 'dgram'
-import { bindToPort, getPublicIp, reservePorts, SrtpOptions } from './rtp-utils'
+import {
+  getPublicIp,
+  reservePorts,
+  RtpSplitter,
+  SrtpOptions,
+} from './rtp-utils'
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
@@ -471,8 +475,8 @@ export class RingCamera {
   async createSipSession(
     srtpOption: { audio?: SrtpOptions; video?: SrtpOptions } = {}
   ) {
-    const videoSocket = createSocket('udp4'),
-      audioSocket = createSocket('udp4'),
+    const videoSplitter = new RtpSplitter(),
+      audioSplitter = new RtpSplitter(),
       [
         sipOptions,
         publicIpPromise,
@@ -482,8 +486,8 @@ export class RingCamera {
       ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
-        bindToPort(videoSocket, { forExternalUse: true }),
-        bindToPort(audioSocket, { forExternalUse: true }),
+        videoSplitter.portPromise,
+        audioSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
@@ -501,8 +505,8 @@ export class RingCamera {
     return new SipSession(
       sipOptions,
       rtpOptions,
-      videoSocket,
-      audioSocket,
+      videoSplitter,
+      audioSplitter,
       tlsPort,
       this
     )

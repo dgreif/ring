@@ -15,6 +15,7 @@ async function example() {
       // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
       debug: true,
+      ffmpegPath: require('ffmpeg-for-homebridge'),
     }),
     [camera] = await ringApi.getCameras()
 

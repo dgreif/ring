@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.2.0](https://github.com/dgreif/ring/compare/v8.1.0...v8.2.0) (2020-05-17)
+
+
+### Features
+
+* **homebridge:** 2-way audio ([0bdb154](https://github.com/dgreif/ring/commit/0bdb15410b72deba3e89e562ce7164d839574adb)), closes [#237](https://github.com/dgreif/ring/issues/237)
+
 ## [8.1.0](https://github.com/dgreif/ring/compare/v8.0.1...v8.1.0) (2020-05-11)
 
 

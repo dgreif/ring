@@ -111,6 +111,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
+export type ThermostatMode = 'heat' | 'cool' | 'off'
 export type MessageType =
   | 'RoomGetList'
   | 'SessionInfo'
@@ -179,7 +180,7 @@ export interface RingDeviceData {
   locked?: 'jammed' | 'locked' | 'unlocked' | 'unknown'
   roomId?: number
   volume?: number
-  mode?: AlarmMode
+  mode?: AlarmMode | ThermostatMode
   transitionDelayEndTimestamp?: number | null
   alarmInfo?: {
     state: AlarmState

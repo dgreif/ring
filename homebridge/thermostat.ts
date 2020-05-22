@@ -17,7 +17,7 @@ export class ExampleThermostatAccessory extends BaseDeviceAccessory {
 
     const { Characteristic, Service } = hap
 
-    // Required
+    // Required Characteristics
 
     this.registerCharacteristic({
       characteristicType: Characteristic.CurrentHeatingCoolingState,
@@ -48,30 +48,64 @@ export class ExampleThermostatAccessory extends BaseDeviceAccessory {
         }
       },
       setValue: (mode: ThermostatMode) => {
-        this.setTargetHeatingCoolingState(mode)
+        this.logger.info(`Setting ${this.device.name} mode to ${mode}`)
+
+        return this.device.setInfo({ device: { v1: { mode } } })
       },
     })
 
     this.registerCharacteristic({
       characteristicType: Characteristic.CurrentTemperature,
       serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 0–100 celsius in 0.1 steps
-         */
+      getValue: ({ componentDevices }) => {
+        const temperatureSensorData =
+          componentDevices &&
+          componentDevices.find((data) =>
+            data.rel.endsWith('sensor.temperature')
+          )
+
+        if (
+          !temperatureSensorData ||
+          !('celsius' in temperatureSensorData) ||
+          !temperatureSensorData.celsius
+        ) {
+          this.logger.error(
+            `Did not find a component temperature sensor for thermostat ${this.device.name}. Without a component temperature sensor, the current temperature cannot be read.`
+          )
+          return
+        }
+
+        // Documentation: https://developers.homebridge.io/#/characteristic/CurrentTemperature
+        // 'Characteristic.CurrentTemperature' supports 0.1 increments
+        return Math.round(temperatureSensorData.celsius * 10) / 10
       },
     })
 
     this.registerCharacteristic({
       characteristicType: Characteristic.TargetTemperature,
       serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 10–38 celsius in 0.1 steps
-         */
+      getValue: ({ setPoint }) => {
+        return setPoint
       },
-      setValue: () => {
-        /* MUSTDO */
+      setValue: (setPoint: number) => {
+        this.logger.info(
+          `Setting ${this.device.name} target temperature to ${setPoint}`
+        )
+
+        // Documentation: https://developers.homebridge.io/#/characteristic/TargetTemperature
+        // 'Characteristic.TargetTemperature' has a valid range from 10 to 38 degrees celsius,
+        // but devices may support a different range. When limits differ, accept the more strict.
+        const setPointMin = Math.max(this.device.data.setPointMin || 10, 10),
+          setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
+
+        if (setPoint < setPointMin || setPoint > setPointMax) {
+          this.logger.error(
+            `Ignoring request to set ${this.device.name} target temperature to ${setPoint}. Target temperature must be between ${setPointMin} and ${setPointMax}.`
+          )
+          return
+        }
+
+        return this.device.setInfo({ device: { v1: { setPoint } } })
       },
     })
 
@@ -79,75 +113,14 @@ export class ExampleThermostatAccessory extends BaseDeviceAccessory {
       characteristicType: Characteristic.TemperatureDisplayUnits,
       serviceType: Service.Thermostat,
       getValue: () => {
-        /**
-         * returns:
-         * - 0 (Characteristic.TemperatureDisplayUnits.CELSIUS)
-         * - 1 (Characteristic.TemperatureDisplayUnits.FAHRENHEIT)
-         */
+        // Neither thermostats nor their component devices (e.g. temperature sensors)
+        // appear to include the unit preference. Hardcoding Fahrenheit as the default.
+        return Characteristic.TemperatureDisplayUnits.FAHRENHEIT
       },
       setValue: () => {
-        /* MUSTDO */
+        // noop
+        // Setting display unit is unsupported
       },
     })
-
-    // Optional
-
-    this.registerCharacteristic({
-      characteristicType: Characteristic.CurrentRelativeHumidity,
-      serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 0–100 celsius in 1 steps
-         */
-      },
-      setValue: () => {
-        /* MUSTDO */
-      },
-    })
-
-    this.registerCharacteristic({
-      characteristicType: Characteristic.TargetRelativeHumidity,
-      serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 0–100 celsius in 1 steps
-         */
-      },
-      setValue: () => {
-        /* MUSTDO */
-      },
-    })
-
-    this.registerCharacteristic({
-      characteristicType: Characteristic.CoolingThresholdTemperature,
-      serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 10–35 celsius in 0.1 steps
-         */
-      },
-      setValue: () => {
-        /* MUSTDO */
-      },
-    })
-
-    this.registerCharacteristic({
-      characteristicType: Characteristic.HeatingThresholdTemperature,
-      serviceType: Service.Thermostat,
-      getValue: () => {
-        /**
-         * returns: 0–25 celsius in 0.1 steps
-         */
-      },
-      setValue: () => {
-        /* MUSTDO */
-      },
-    })
-  }
-
-  setTargetHeatingCoolingState(mode: ThermostatMode) {
-    this.logger.info(`Setting ${this.device.name} mode to ${mode}`)
-
-    return this.device.setInfo({ device: { v1: { mode } } })
   }
 }

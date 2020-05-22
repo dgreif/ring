@@ -27,6 +27,7 @@ export enum RingDeviceType {
   BeamsTransformerSwitch = 'switch.transformer.beams',
   RetrofitBridge = 'bridge.flatline',
   RetrofitZone = 'sensor.zone',
+  Thermostat = 'temperature-control.thermostat',
 }
 
 export enum RingDeviceCategory {
@@ -216,6 +217,21 @@ export interface RingDeviceData {
   celsius?: number // no F provided, just celsius
   faultHigh?: number
   faultLow?: number
+  // temperature-control.thermostat
+  // Related: 'mode?: ThermostatMode' (above)
+  setPoint?: number
+  setPointMax?: number
+  setPointMin?: number
+  componentDevices?: (
+    | {
+        rel: string
+        zid: string
+      }
+    | ({
+        rel: string
+        zid: string
+      } & Omit<RingDeviceData, 'componentDevices'>)
+  )[]
 }
 
 export const deviceTypesWithVolume = [

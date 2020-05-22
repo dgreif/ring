@@ -6,7 +6,7 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingPlatformConfig } from './config'
 import { hap } from './hap'
 
-export class ExampleThermostatAccessory extends BaseDeviceAccessory {
+export class Thermostat extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,

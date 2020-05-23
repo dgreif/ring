@@ -112,7 +112,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
-export type ThermostatMode = 'heat' | 'cool' | 'off'
+export type ThermostatMode = 'heat' | 'cool' | 'off' | 'aux'
 export type MessageType =
   | 'RoomGetList'
   | 'SessionInfo'

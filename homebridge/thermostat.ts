@@ -49,9 +49,12 @@ export class Thermostat extends BaseDeviceAccessory {
           // and the thermostat is set to 'cool', so the thermostat is cooling
           return Characteristic.CurrentHeatingCoolingState.COOL
         }
-        if (currentTemperatureIsLowerThanTarget && mode === 'heat') {
+        if (
+          currentTemperatureIsLowerThanTarget &&
+          (mode === 'heat' || mode === 'aux')
+        ) {
           // The current temperature is lower than the target temperature,
-          // and the thermostat is set to 'heat', so the thermostat is heating
+          // and the thermostat is set to 'heat' or 'aux' (emergency heat), so the thermostat is heating
           return Characteristic.CurrentHeatingCoolingState.HEAT
         }
         // The current temperature is either higher or lower than the target temperature,
@@ -69,6 +72,7 @@ export class Thermostat extends BaseDeviceAccessory {
           case 'off':
             return Characteristic.TargetHeatingCoolingState.OFF
           case 'heat':
+          case 'aux':
             return Characteristic.TargetHeatingCoolingState.HEAT
           case 'cool':
             return Characteristic.TargetHeatingCoolingState.COOL

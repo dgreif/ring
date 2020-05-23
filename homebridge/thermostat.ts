@@ -34,14 +34,14 @@ export class Thermostat extends BaseDeviceAccessory {
         if (!temperature || !setPoint) {
           return
         }
+        // Checking with a threshold to avoid floating point weirdness
         const currentTemperatureEqualsTarget =
-            Math.abs(temperature - setPoint) < 0.01,
-          currentTemperatureIsHigherThanTarget = temperature - setPoint >= 0.01,
-          currentTemperatureIsLowerThanTarget = temperature - setPoint <= -0.01
+            Math.abs(temperature - setPoint) < 0.1,
+          currentTemperatureIsHigherThanTarget = temperature - setPoint >= 0.1,
+          currentTemperatureIsLowerThanTarget = temperature - setPoint <= -0.1
 
         if (currentTemperatureEqualsTarget) {
           // The target temperature has been reached, so the thermostat is neither heating nor cooling
-          // (checked with a threshold to avoid floating point weirdness)
           return Characteristic.CurrentHeatingCoolingState.OFF
         }
         if (currentTemperatureIsHigherThanTarget && mode === 'cool') {

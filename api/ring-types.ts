@@ -222,16 +222,10 @@ export interface RingDeviceData {
   setPoint?: number
   setPointMax?: number
   setPointMin?: number
-  componentDevices?: (
-    | {
-        rel: string
-        zid: string
-      }
-    | ({
-        rel: string
-        zid: string
-      } & Omit<RingDeviceData, 'componentDevices'>)
-  )[]
+  componentDevices?: {
+    rel: string
+    zid: string
+  }[]
 }
 
 export const deviceTypesWithVolume = [

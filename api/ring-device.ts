@@ -32,6 +32,11 @@ export class RingDevice {
     return this.data.name
   }
 
+  async getComponentDevices() {
+    const devices = await this.location.getDevices()
+    return devices.filter(({ data }) => data.parentZid === this.id)
+  }
+
   get supportsVolume() {
     return (
       deviceTypesWithVolume.includes(this.data.deviceType) &&

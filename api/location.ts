@@ -77,28 +77,8 @@ export class Location {
       }
 
       return deviceList.reduce((updatedDevices: RingDevice[], data) => {
-        const flatData = flattenDeviceData(data)
-
-        // Embed component device data in parent device data
-        // Used to read ambient temperature from the temperature sensor inside a thermostat
-        if (flatData.componentDevices) {
-          flatData.componentDevices = flatData.componentDevices.map(
-            ({ rel, zid }) => {
-              const componentDeviceData: RingDeviceData | undefined =
-                zid && deviceList.find((d) => flattenDeviceData(d).zid === zid)
-              return {
-                rel,
-                zid,
-                ...(componentDeviceData &&
-                  flattenDeviceData(componentDeviceData)),
-              }
-            }
-          )
-        }
-
-        const existingDevice = updatedDevices.find(
-          (x) => x.zid === flatData.zid
-        )
+        const flatData = flattenDeviceData(data),
+          existingDevice = updatedDevices.find((x) => x.zid === flatData.zid)
 
         if (existingDevice) {
           existingDevice.updateData(flatData)

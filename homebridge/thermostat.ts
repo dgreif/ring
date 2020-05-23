@@ -1,7 +1,7 @@
 import { Logging, PlatformAccessory } from 'homebridge'
 
 import { RingDevice } from '../api'
-import { RingDeviceData, ThermostatMode } from '../api/ring-types'
+import { ThermostatMode } from '../api/ring-types'
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingPlatformConfig } from './config'
 import { hap } from './hap'
@@ -22,15 +22,13 @@ export class Thermostat extends BaseDeviceAccessory {
     this.registerCharacteristic({
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: Service.Thermostat,
-      getValue: ({ setPoint, mode, componentDevices }) => {
+      getValue: async ({ setPoint, mode }) => {
         if (mode === 'off') {
           // The thermostat is set to 'off', so the thermostat is neither heating nor cooling
           return Characteristic.CurrentHeatingCoolingState.OFF
         }
 
-        const temperature = this.getTemperatureFromComponentDevices(
-          componentDevices
-        )
+        const temperature = await this.getTemperatureFromComponentDevices()
         if (!temperature || !setPoint) {
           return
         }
@@ -108,10 +106,8 @@ export class Thermostat extends BaseDeviceAccessory {
     this.registerCharacteristic({
       characteristicType: Characteristic.CurrentTemperature,
       serviceType: Service.Thermostat,
-      getValue: ({ componentDevices }) => {
-        const temperature = this.getTemperatureFromComponentDevices(
-          componentDevices
-        )
+      getValue: async () => {
+        const temperature = await this.getTemperatureFromComponentDevices()
         if (!temperature) {
           return
         }
@@ -164,23 +160,19 @@ export class Thermostat extends BaseDeviceAccessory {
     })
   }
 
-  getTemperatureFromComponentDevices(
-    componentDevices: RingDeviceData['componentDevices']
-  ): number | undefined {
-    const temperatureSensorData =
-      componentDevices &&
-      componentDevices.find((data) => data.rel.endsWith('sensor.temperature'))
+  async getTemperatureFromComponentDevices(): Promise<number | undefined> {
+    const componentDevices = await this.device.getComponentDevices(),
+      temperatureSensorDevice = componentDevices?.find(({ data }) =>
+        data.deviceType.endsWith('sensor.temperature')
+      ),
+      temperature = temperatureSensorDevice?.data?.celsius
 
-    if (
-      !temperatureSensorData ||
-      !('celsius' in temperatureSensorData) ||
-      !temperatureSensorData.celsius
-    ) {
+    if (!temperature) {
       this.logger.error(
         `Did not find a component temperature sensor for thermostat ${this.device.name}. Without a component temperature sensor, the current temperature cannot be read.`
       )
       return
     }
-    return temperatureSensorData.celsius
+    return temperature
   }
 }

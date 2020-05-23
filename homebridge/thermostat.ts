@@ -102,6 +102,17 @@ export class Thermostat extends BaseDeviceAccessory {
         return this.device.setInfo({ device: { v1: { mode } } })
       },
     })
+    // Only allow 'TargetHeatingCoolingState's which can be mapped to Ring modes
+    // Specifically, this omits .AUTO
+    this.getService(Service.Thermostat)
+      .getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      .setProps({
+        validValues: [
+          Characteristic.TargetHeatingCoolingState.OFF,
+          Characteristic.TargetHeatingCoolingState.HEAT,
+          Characteristic.TargetHeatingCoolingState.COOL,
+        ],
+      })
 
     this.registerCharacteristic({
       characteristicType: Characteristic.CurrentTemperature,

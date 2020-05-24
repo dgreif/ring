@@ -56,7 +56,7 @@ export class Thermostat extends BaseDeviceAccessory {
           return Characteristic.CurrentHeatingCoolingState.HEAT
         }
         // The current temperature is either higher or lower than the target temperature,
-        // but the current thermostat mode would only to increase the difference,
+        // but the current thermostat mode would only increase the difference,
         // so the thermostat is neither heating nor cooling
         return Characteristic.CurrentHeatingCoolingState.OFF
       },

@@ -1,12 +1,17 @@
 import { Logging, PlatformAccessory } from 'homebridge'
+import { Observable } from 'rxjs'
+import { distinctUntilChanged, map, reduce } from 'rxjs/operators'
 
 import { RingDevice } from '../api'
-import { ThermostatMode } from '../api/ring-types'
+import { RingDeviceType, ThermostatMode } from '../api/ring-types'
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingPlatformConfig } from './config'
 import { hap } from './hap'
 
 export class Thermostat extends BaseDeviceAccessory {
+  private temperatureSensor: Observable<RingDevice>
+  private temperature: Observable<number | undefined>
+
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
@@ -17,49 +22,72 @@ export class Thermostat extends BaseDeviceAccessory {
 
     const { Characteristic, Service } = hap
 
+    // Component Device (Temperature Sensor)
+
+    this.temperatureSensor = this.device.onComponentDevices.pipe(
+      reduce((acc, value) => {
+        const temperatureSensor = value.find(
+          ({ data }) => data.deviceType === RingDeviceType.TemperatureSensor
+        )
+        return acc || temperatureSensor
+      }, (undefined as unknown) as RingDevice),
+      distinctUntilChanged()
+    )
+    this.temperature = this.temperatureSensor.pipe(
+      map(({ data }) => data.celsius),
+      distinctUntilChanged()
+    )
+
     // Required Characteristics
 
-    this.registerCharacteristic({
+    this.registerObservableCharacteristic({
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: Service.Thermostat,
-      getValue: async ({ setPoint, mode }) => {
-        if (mode === 'off') {
-          // The thermostat is set to 'off', so the thermostat is neither heating nor cooling
-          return Characteristic.CurrentHeatingCoolingState.OFF
-        }
+      onValue: this.temperature.pipe(
+        map((temperature) => {
+          const { setPoint, mode } = this.device.data
 
-        const temperature = await this.getTemperatureFromComponentDevices()
-        if (!temperature || !setPoint) {
-          return
-        }
-        // Checking with a threshold to avoid floating point weirdness
-        const currentTemperatureEqualsTarget =
-            Math.abs(temperature - setPoint) < 0.1,
-          currentTemperatureIsHigherThanTarget = temperature - setPoint >= 0.1,
-          currentTemperatureIsLowerThanTarget = temperature - setPoint <= -0.1
+          if (mode === 'off') {
+            // The thermostat is set to 'off', so the thermostat is neither heating nor cooling
+            return Characteristic.CurrentHeatingCoolingState.OFF
+          }
 
-        if (currentTemperatureEqualsTarget) {
-          // The target temperature has been reached, so the thermostat is neither heating nor cooling
+          if (!temperature || !setPoint) {
+            this.logger.error(
+              `Could not determine 'CurrentHeatingCoolingState' for ${this.device.name} given temperature: ${temperature}, set point: ${setPoint} and mode: ${mode}. Reporting 'off' state as a fallback.`
+            )
+            return Characteristic.CurrentHeatingCoolingState.OFF
+          }
+          // Checking with a threshold to avoid floating point weirdness
+          const currentTemperatureEqualsTarget =
+              Math.abs(temperature - setPoint) < 0.1,
+            currentTemperatureIsHigherThanTarget =
+              temperature - setPoint >= 0.1,
+            currentTemperatureIsLowerThanTarget = temperature - setPoint <= -0.1
+
+          if (currentTemperatureEqualsTarget) {
+            // The target temperature has been reached, so the thermostat is neither heating nor cooling
+            return Characteristic.CurrentHeatingCoolingState.OFF
+          }
+          if (currentTemperatureIsHigherThanTarget && mode === 'cool') {
+            // The current temperature is higher than the target temperature,
+            // and the thermostat is set to 'cool', so the thermostat is cooling
+            return Characteristic.CurrentHeatingCoolingState.COOL
+          }
+          if (
+            currentTemperatureIsLowerThanTarget &&
+            (mode === 'heat' || mode === 'aux')
+          ) {
+            // The current temperature is lower than the target temperature,
+            // and the thermostat is set to 'heat' or 'aux' (emergency heat), so the thermostat is heating
+            return Characteristic.CurrentHeatingCoolingState.HEAT
+          }
+          // The current temperature is either higher or lower than the target temperature,
+          // but the current thermostat mode would only increase the difference,
+          // so the thermostat is neither heating nor cooling
           return Characteristic.CurrentHeatingCoolingState.OFF
-        }
-        if (currentTemperatureIsHigherThanTarget && mode === 'cool') {
-          // The current temperature is higher than the target temperature,
-          // and the thermostat is set to 'cool', so the thermostat is cooling
-          return Characteristic.CurrentHeatingCoolingState.COOL
-        }
-        if (
-          currentTemperatureIsLowerThanTarget &&
-          (mode === 'heat' || mode === 'aux')
-        ) {
-          // The current temperature is lower than the target temperature,
-          // and the thermostat is set to 'heat' or 'aux' (emergency heat), so the thermostat is heating
-          return Characteristic.CurrentHeatingCoolingState.HEAT
-        }
-        // The current temperature is either higher or lower than the target temperature,
-        // but the current thermostat mode would only increase the difference,
-        // so the thermostat is neither heating nor cooling
-        return Characteristic.CurrentHeatingCoolingState.OFF
-      },
+        })
+      ),
     })
 
     this.registerCharacteristic({
@@ -114,18 +142,22 @@ export class Thermostat extends BaseDeviceAccessory {
         ],
       })
 
-    this.registerCharacteristic({
+    this.registerObservableCharacteristic({
       characteristicType: Characteristic.CurrentTemperature,
       serviceType: Service.Thermostat,
-      getValue: async () => {
-        const temperature = await this.getTemperatureFromComponentDevices()
-        if (!temperature) {
-          return
-        }
-        // Documentation: https://developers.homebridge.io/#/characteristic/CurrentTemperature
-        // 'Characteristic.CurrentTemperature' supports 0.1 increments
-        return Number(Number(temperature).toFixed(1))
-      },
+      onValue: this.temperature.pipe(
+        map((temperature) => {
+          if (!temperature) {
+            this.logger.error(
+              `Could not determine 'CurrentTemperature' for ${this.device.name} given temperature: ${temperature}. Returning 22 degrees celsius as a fallback.`
+            )
+            return 22
+          }
+          // Documentation: https://developers.homebridge.io/#/characteristic/CurrentTemperature
+          // 'Characteristic.CurrentTemperature' supports 0.1 increments
+          return Number(Number(temperature).toFixed(1))
+        })
+      ),
     })
 
     this.registerCharacteristic({
@@ -161,7 +193,7 @@ export class Thermostat extends BaseDeviceAccessory {
       // but devices may support a different range. When limits differ, accept the more strict.
       const setPointMin = Math.max(this.device.data.setPointMin || 10, 10),
         setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
-      this.logger.info(
+      this.logger.debug(
         `Setting ${this.device.name} target temperature range to ${setPointMin}–${setPointMax}`
       )
       this.getService(Service.Thermostat)
@@ -193,21 +225,5 @@ export class Thermostat extends BaseDeviceAccessory {
       .setProps({
         validValues: [Characteristic.TemperatureDisplayUnits.FAHRENHEIT],
       })
-  }
-
-  async getTemperatureFromComponentDevices(): Promise<number | undefined> {
-    const componentDevices = await this.device.getComponentDevices(),
-      temperatureSensorDevice = componentDevices?.find(({ data }) =>
-        data.deviceType.endsWith('sensor.temperature')
-      ),
-      temperature = temperatureSensorDevice?.data?.celsius
-
-    if (!temperature) {
-      this.logger.error(
-        `Did not find a component temperature sensor for thermostat ${this.device.name}. Without a component temperature sensor, the current temperature cannot be read.`
-      )
-      return
-    }
-    return temperature
   }
 }

@@ -51,9 +51,8 @@ export class Thermostat extends BaseDeviceAccessory {
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: Service.Thermostat,
-      onValue: this.onTemperature.pipe(
-        map((temperature) => {
-          const { setPoint, mode } = this.device.data
+      onValue: combineLatest([this.onTemperature, this.device.onData]).pipe(
+        map(([temperature, { setPoint, mode }])) => {
 
           if (mode === 'off') {
             // The thermostat is set to 'off', so the thermostat is neither heating nor cooling

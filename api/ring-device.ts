@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs'
 import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
-import { filter, reduce } from 'rxjs/operators'
+import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
 
 export class RingDevice {
@@ -32,13 +32,10 @@ export class RingDevice {
     return this.data.name
   }
 
-  getComponentDevices(callback: (componentDevices: RingDevice[]) => void) {
-    return this.location.onDevices.subscribe((devices) => {
-      const componentDevices = devices.filter(
-        ({ data }) => data.parentZid === this.id
-      )
-      callback(componentDevices)
-    })
+  get onComponentDevices() {
+    return this.location.onDevices.pipe(
+      map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
+    )
   }
 
   get supportsVolume() {

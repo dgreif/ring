@@ -1,6 +1,6 @@
 import { Logging, PlatformAccessory } from 'homebridge'
 import { Observable } from 'rxjs'
-import { distinctUntilChanged, map, reduce } from 'rxjs/operators'
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 
 import { RingDevice } from '../api'
 import { RingDeviceType, ThermostatMode } from '../api/ring-types'
@@ -9,10 +9,7 @@ import { RingPlatformConfig } from './config'
 import { hap } from './hap'
 
 export class Thermostat extends BaseDeviceAccessory {
-  private temperatureSensor: RingDevice | undefined
-  private temperature: Observable<
-    number | undefined
-  > = new Observable(({ next }) => next(0))
+  private onTemperature: Observable<number | undefined>
 
   constructor(
     public readonly device: RingDevice,
@@ -26,32 +23,35 @@ export class Thermostat extends BaseDeviceAccessory {
 
     // Component Device (Temperature Sensor)
 
-    this.device.getComponentDevices((componentDevices) => {
-      this.temperatureSensor = componentDevices.find(
-        ({ data }) => data.deviceType === RingDeviceType.TemperatureSensor
-      )
-      if (this.temperatureSensor) {
-        this.logger.debug(
-          `Found component temperature sensor for ${this.device.name}`
+    this.onTemperature = this.device.onComponentDevices.pipe(
+      switchMap((devices) => {
+        const temperatureSensor = devices.find(
+          ({ deviceType }) => deviceType === RingDeviceType.TemperatureSensor
         )
-        this.temperature = this.temperatureSensor?.onData.pipe(
-          map(({ celsius }) => {
+        if (!temperatureSensor) {
+          return []
+        }
+        this.logger.debug(
+          `Discovered a component temperature sensor for ${this.device.name}`
+        )
+        return temperatureSensor.onData.pipe(
+          map(({ celsius: temperature }) => {
             this.logger.debug(
-              `${this.device.name}’s component temperature sensor reports ${celsius} degrees`
+              `Component temperature sensor for ${this.device.name} reported ${temperature} degrees`
             )
-            return celsius
+            return temperature
           }),
           distinctUntilChanged()
         )
-      }
-    })
+      })
+    )
 
     // Required Characteristics
 
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: Service.Thermostat,
-      onValue: this.temperature.pipe(
+      onValue: this.onTemperature.pipe(
         map((temperature) => {
           const { setPoint, mode } = this.device.data
 
@@ -153,7 +153,7 @@ export class Thermostat extends BaseDeviceAccessory {
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.CurrentTemperature,
       serviceType: Service.Thermostat,
-      onValue: this.temperature.pipe(
+      onValue: this.onTemperature.pipe(
         map((temperature) => {
           if (!temperature) {
             this.logger.error(

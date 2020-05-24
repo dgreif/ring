@@ -124,7 +124,7 @@ export class Thermostat extends BaseDeviceAccessory {
         }
         // Documentation: https://developers.homebridge.io/#/characteristic/CurrentTemperature
         // 'Characteristic.CurrentTemperature' supports 0.1 increments
-        return Number(Number(temperature).toFixed(1))
+        return Math.round(temperature * 10) / 10
       },
     })
 

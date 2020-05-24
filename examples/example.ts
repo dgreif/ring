@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
-import { RingDeviceType } from '../api/ring-types'
 import { skip } from 'rxjs/operators'
 import { readFile, writeFile } from 'fs'
 import { promisify } from 'util'
@@ -13,7 +12,12 @@ async function example() {
       // Listen for dings and motion events
       cameraDingsPollingSeconds: 2,
     }),
-    locations = await ringApi.getLocations()
+    locations = await ringApi.getLocations(),
+    allCameras = await ringApi.getCameras()
+
+  console.log(
+    `Found ${locations.length} location(s) with ${allCameras.length} camera(s).`
+  )
 
   ringApi.onRefreshTokenUpdated.subscribe(
     async ({ newRefreshToken, oldRefreshToken }) => {
@@ -42,16 +46,45 @@ async function example() {
   }
 
   for (const location of locations) {
-    const devices = await location.getDevices()
+    const cameras = location.cameras,
+      devices = await location.getDevices()
+
+    console.log(
+      `\nLocation ${location.name} has the following ${cameras.length} camera(s):`
+    )
+
+    for (const camera of cameras) {
+      console.log(`- ${camera.id}: ${camera.name} (${camera.deviceType})`)
+    }
 
     console.log(
       `\nLocation ${location.name} has the following ${devices.length} device(s):`
     )
 
-    const thermostats = devices.find(
-      ({ data }) => data.deviceType === RingDeviceType.Thermostat
-    )
-    console.log(JSON.stringify(thermostats))
+    for (const device of devices) {
+      console.log(`- ${device.zid}: ${device.name} (${device.deviceType})`)
+    }
+  }
+
+  if (allCameras.length) {
+    allCameras.forEach((camera) => {
+      camera.onNewDing.subscribe((ding) => {
+        const event =
+          ding.kind === 'motion'
+            ? 'Motion detected'
+            : ding.kind === 'ding'
+            ? 'Doorbell pressed'
+            : `Video started (${ding.kind})`
+
+        console.log(
+          `${event} on ${camera.name} camera. Ding id ${
+            ding.id_str
+          }.  Received at ${new Date()}`
+        )
+      })
+    })
+
+    console.log('Listening for motion and doorbell presses on your cameras.')
   }
 }
 

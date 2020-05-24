@@ -155,6 +155,23 @@ export class Thermostat extends BaseDeviceAccessory {
         return this.device.setInfo({ device: { v1: { setPoint } } })
       },
     })
+    if (this.device.data.setPointMin || this.device.data.setPointMax) {
+      // Documentation: https://developers.homebridge.io/#/characteristic/TargetTemperature
+      // 'Characteristic.TargetTemperature' has a valid range from 10 to 38 degrees celsius,
+      // but devices may support a different range. When limits differ, accept the more strict.
+      const setPointMin = Math.max(this.device.data.setPointMin || 10, 10),
+        setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
+      this.logger.info(
+        `Setting ${this.device.name} target temperature range to ${setPointMin}–${setPointMax}`
+      )
+      this.getService(Service.Thermostat)
+        .getCharacteristic(Characteristic.TargetTemperature)
+        .setProps({
+          minValue: setPointMin,
+          maxValue: setPointMax,
+          validValueRanges: [setPointMin, setPointMax],
+        })
+    }
 
     this.registerCharacteristic({
       characteristicType: Characteristic.TemperatureDisplayUnits,

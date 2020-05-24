@@ -32,15 +32,13 @@ export class RingDevice {
     return this.data.name
   }
 
-  get onComponentDevices() {
-    return this.location.onDevices.pipe(
-      reduce((acc, value) => {
-        const componentDevices = value.find(
-          (device) => device.data.parentZid === this.id
-        )
-        return acc.concat(componentDevices || [])
-      }, [] as RingDevice[])
-    )
+  getComponentDevices(callback: (componentDevices: RingDevice[]) => void) {
+    return this.location.onDevices.subscribe((devices) => {
+      const componentDevices = devices.filter(
+        ({ data }) => data.parentZid === this.id
+      )
+      callback(componentDevices)
+    })
   }
 
   get supportsVolume() {

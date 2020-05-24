@@ -9,8 +9,10 @@ import { RingPlatformConfig } from './config'
 import { hap } from './hap'
 
 export class Thermostat extends BaseDeviceAccessory {
-  private temperatureSensor: Observable<RingDevice>
-  private temperature: Observable<number | undefined>
+  private temperatureSensor: RingDevice | undefined
+  private temperature: Observable<
+    number | undefined
+  > = new Observable(({ next }) => next(0))
 
   constructor(
     public readonly device: RingDevice,
@@ -24,19 +26,25 @@ export class Thermostat extends BaseDeviceAccessory {
 
     // Component Device (Temperature Sensor)
 
-    this.temperatureSensor = this.device.onComponentDevices.pipe(
-      reduce((acc, value) => {
-        const temperatureSensor = value.find(
-          ({ data }) => data.deviceType === RingDeviceType.TemperatureSensor
+    this.device.getComponentDevices((componentDevices) => {
+      this.temperatureSensor = componentDevices.find(
+        ({ data }) => data.deviceType === RingDeviceType.TemperatureSensor
+      )
+      if (this.temperatureSensor) {
+        this.logger.debug(
+          `Found component temperature sensor for ${this.device.name}`
         )
-        return acc || temperatureSensor
-      }, (undefined as unknown) as RingDevice),
-      distinctUntilChanged()
-    )
-    this.temperature = this.temperatureSensor.pipe(
-      map(({ data }) => data.celsius),
-      distinctUntilChanged()
-    )
+        this.temperature = this.temperatureSensor?.onData.pipe(
+          map(({ celsius }) => {
+            this.logger.debug(
+              `${this.device.name}’s component temperature sensor reports ${celsius} degrees`
+            )
+            return celsius
+          }),
+          distinctUntilChanged()
+        )
+      }
+    })
 
     // Required Characteristics
 

@@ -9,6 +9,9 @@ export class RingDevice {
   id = this.zid
   deviceType = this.initialData.deviceType
   categoryId = this.initialData.categoryId
+  onComponentDevices = this.location.onDevices.pipe(
+    map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
+  )
 
   constructor(
     private initialData: RingDeviceData,
@@ -30,12 +33,6 @@ export class RingDevice {
 
   get name() {
     return this.data.name
-  }
-
-  get onComponentDevices() {
-    return this.location.onDevices.pipe(
-      map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
-    )
   }
 
   get supportsVolume() {

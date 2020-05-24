@@ -173,7 +173,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
     await Promise.all(
       locations.map(async (location) => {
         const devices = await location.getDevices(),
-          cameras = location.cameras,
+          cameras = [] as RingCamera[],
           allDevices = [...devices, ...cameras],
           securityPanel = devices.find(
             (x) => x.deviceType === RingDeviceType.SecurityPanel
@@ -223,64 +223,73 @@ export class RingPlatform implements DynamicPlatformPlugin {
         }
 
         this.log.info(
-          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`
+          `Configuring ${cameras.length} cameras and ${
+            hapDevices.filter(
+              ({ deviceType }) => deviceType === RingDeviceType.Thermostat
+            ).length
+          } devices for location "${location.name}" - locationId: ${
+            location.id
+          }`
         )
-        hapDevices.forEach(
-          ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
-            const uuid = hap.uuid.generate(debugPrefix + id),
-              displayName = debugPrefix + name
+        hapDevices
+          .filter(({ deviceType }) => deviceType === RingDeviceType.Thermostat)
+          .forEach(
+            ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
+              const uuid = hap.uuid.generate(debugPrefix + id),
+                displayName = debugPrefix + name
 
-            if (
-              !AccessoryClass ||
-              (this.config.hideLightGroups &&
-                deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
-              (this.config.hideUnsupportedServices &&
-                unsupportedDeviceTypes.includes(deviceType as any))
-            ) {
-              this.log.info(`Hidden accessory ${deviceType} ${displayName}`)
-              return
-            }
+              if (
+                !AccessoryClass ||
+                (this.config.hideLightGroups &&
+                  deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
+                (this.config.hideUnsupportedServices &&
+                  unsupportedDeviceTypes.includes(deviceType as any))
+              ) {
+                this.log.info(`Hidden accessory ${deviceType} ${displayName}`)
+                return
+              }
 
-            const createHomebridgeAccessory = () => {
-                const accessory = new api.platformAccessory(
-                  displayName,
-                  uuid,
-                  isCamera
-                    ? hap.Categories.CAMERA
-                    : hap.Categories.SECURITY_SYSTEM
-                )
-
-                this.log.info(
-                  `Adding new accessory ${deviceType} ${displayName}`
-                )
-                platformAccessories.push(accessory)
-
-                if (
-                  isCamera &&
-                  typeof hap.Accessory.cleanupAccessoryData === 'function'
-                ) {
-                  // This is a one-time cleanup that will remove persist files for old external accessories from before camera bridging in version 8
-                  hap.Accessory.cleanupAccessoryData(
-                    generateMacAddress(accessory.UUID)
+              const createHomebridgeAccessory = () => {
+                  const accessory = new api.platformAccessory(
+                    displayName,
+                    uuid,
+                    isCamera
+                      ? hap.Categories.CAMERA
+                      : hap.Categories.SECURITY_SYSTEM
                   )
-                }
 
-                return accessory
-              },
-              homebridgeAccessory =
-                this.homebridgeAccessories[uuid] || createHomebridgeAccessory(),
-              accessory = new AccessoryClass(
-                device as any,
-                homebridgeAccessory,
-                this.log,
-                this.config
-              )
-            accessory.initBase()
+                  this.log.info(
+                    `Adding new accessory ${deviceType} ${displayName}`
+                  )
+                  platformAccessories.push(accessory)
 
-            this.homebridgeAccessories[uuid] = homebridgeAccessory
-            activeAccessoryIds.push(uuid)
-          }
-        )
+                  if (
+                    isCamera &&
+                    typeof hap.Accessory.cleanupAccessoryData === 'function'
+                  ) {
+                    // This is a one-time cleanup that will remove persist files for old external accessories from before camera bridging in version 8
+                    hap.Accessory.cleanupAccessoryData(
+                      generateMacAddress(accessory.UUID)
+                    )
+                  }
+
+                  return accessory
+                },
+                homebridgeAccessory =
+                  this.homebridgeAccessories[uuid] ||
+                  createHomebridgeAccessory(),
+                accessory = new AccessoryClass(
+                  device as any,
+                  homebridgeAccessory,
+                  this.log,
+                  this.config
+                )
+              accessory.initBase()
+
+              this.homebridgeAccessories[uuid] = homebridgeAccessory
+              activeAccessoryIds.push(uuid)
+            }
+          )
       })
     )
 

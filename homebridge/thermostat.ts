@@ -169,6 +169,13 @@ export class Thermostat extends BaseDeviceAccessory {
         // Setting display unit is unsupported
       },
     })
+    // Setting 'TemperatureDisplayUnits' is unsupported by the Ring API.
+    // We’ve defaulted to Fahrenheit above, so only allowing .FAHRENHEIT.
+    this.getService(Service.Thermostat)
+      .getCharacteristic(Characteristic.TemperatureDisplayUnits)
+      .setProps({
+        validValues: [Characteristic.TemperatureDisplayUnits.FAHRENHEIT],
+      })
   }
 
   async getTemperatureFromComponentDevices(): Promise<number | undefined> {

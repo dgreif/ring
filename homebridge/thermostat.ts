@@ -1,5 +1,5 @@
 import { Logging, PlatformAccessory } from 'homebridge'
-import { Observable } from 'rxjs'
+import { Observable, combineLatest } from 'rxjs'
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 
 import { RingDevice } from '../api'
@@ -52,8 +52,7 @@ export class Thermostat extends BaseDeviceAccessory {
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: Service.Thermostat,
       onValue: combineLatest([this.onTemperature, this.device.onData]).pipe(
-        map(([temperature, { setPoint, mode }])) => {
-
+        map(([temperature, { setPoint, mode }]) => {
           if (mode === 'off') {
             // The thermostat is set to 'off', so the thermostat is neither heating nor cooling
             return Characteristic.CurrentHeatingCoolingState.OFF

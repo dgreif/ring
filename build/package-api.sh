@@ -14,3 +14,5 @@ cp package-lock.json release-api
 cp LICENSE release-api
 cp README.md release-api
 cp CHANGELOG.md release-api
+mkdir -p release-api/media
+cp -R media/* release-api/media

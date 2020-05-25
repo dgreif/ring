@@ -23,7 +23,7 @@ import {
   takeUntil,
 } from 'rxjs/operators'
 import {
-  getPublicIp,
+  decodeCryptoKey,
   reservePorts,
   RtpSplitter,
   SrtpOptions,
@@ -477,28 +477,24 @@ export class RingCamera {
   ) {
     const videoSplitter = new RtpSplitter(),
       audioSplitter = new RtpSplitter(),
-      [
-        sipOptions,
-        publicIpPromise,
-        videoPort,
-        audioPort,
-        [tlsPort],
-      ] = await Promise.all([
+      [sipOptions, videoPort, audioPort, [tlsPort]] = await Promise.all([
         this.getSipOptions(),
-        getPublicIp(),
         videoSplitter.portPromise,
         audioSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
-        address: await publicIpPromise,
         audio: {
           port: audioPort,
-          ...srtpOption.audio,
+          ...(srtpOption.audio ||
+            // SOMEDAY: random value
+            decodeCryptoKey('8rHc1Q2FWUKT3rX/L1GbDKZJ2CsVy9wlEbLygPiq')),
         },
         video: {
           port: videoPort,
-          ...srtpOption.video,
+          ...(srtpOption.video ||
+            // SOMEDAY: random value
+            decodeCryptoKey('IxOwCA1T1hMRG2xnjHEULwiSILbDHLyto5NFBX+d')),
         },
       }
 

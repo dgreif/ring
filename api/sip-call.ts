@@ -72,12 +72,8 @@ function getRtpDescription(
   const section = sections.find((s) => s.startsWith('m=' + mediaType)),
     { port } = sdp.parseMLine(section),
     lines = sdp.splitLines(section),
-    cryptoLine = lines.find((l: string) => l.startsWith('a=crypto'))
-
-  if (!cryptoLine) {
-    return { port }
-  }
-  const encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
+    cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
+    encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
 
   return {
     port,
@@ -105,15 +101,22 @@ export class SipCall {
   public readonly onEndedByRemote = new Subject()
   public readonly onRemoteRtpOptionsSubject = new Subject<RtpOptions>()
   private destroyed = false
+  public releaseAck?: () => any
+  private releaseAckPromise = new Promise((resolve) => {
+    this.releaseAck = resolve
+  })
 
   public readonly sdp: string
 
   constructor(
     private sipOptions: SipOptions,
-    rtpOptions: RtpOptions,
+    rtpOptions: {
+      audio: RtpStreamOptions
+      video: RtpStreamOptions
+    },
     tlsPort: number
   ) {
-    const { address, audio, video } = rtpOptions,
+    const { audio, video } = rtpOptions,
       { from } = this.sipOptions,
       host = ip.address()
 
@@ -141,9 +144,9 @@ export class SipCall {
 
     this.sdp = [
       'v=0',
-      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${address}`,
+      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${host}`,
       's=Talk',
-      `c=IN IP4 ${address}`,
+      `c=IN IP4 ${host}`,
       'b=AS:380',
       't=0 0',
       'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
@@ -246,6 +249,8 @@ export class SipCall {
   }
 
   private async ackWithInfo(seq: number) {
+    await this.releaseAckPromise
+
     // Don't wait for ack, it won't ever come back.
     this.request({
       method: 'ACK',

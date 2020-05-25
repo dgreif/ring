@@ -16,7 +16,6 @@ import { RingCamera } from './ring-camera'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
-import { setPreferredExternalPorts } from './rtp-utils'
 import { setFfmpegPath } from './ffmpeg'
 
 export interface RingApiOptions extends SessionOptions {
@@ -72,8 +71,6 @@ export class RingApi {
           'Invalid externalPorts config: ' + portConfigIssues.join('; ')
         )
       }
-
-      setPreferredExternalPorts(start, end)
     }
 
     if (ffmpegPath) {

@@ -4,24 +4,17 @@ import { v4 as fetchPublicIp } from 'public-ip'
 import { fromEvent, merge, ReplaySubject } from 'rxjs'
 import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
+import { randomBytes } from 'crypto'
 import { logError } from './util'
 const stun = require('stun'),
-  portControl = require('nat-puncher')
-
-let preferredExternalPorts: number[] | undefined
-
-export function setPreferredExternalPorts(start: number, end: number) {
-  const count = end - start + 1
-
-  preferredExternalPorts = Array.from(new Array(count)).map((_, i) => i + start)
-}
+  ip = require('ip')
 
 export interface SrtpOptions {
   srtpKey: Buffer
   srtpSalt: Buffer
 }
 
-export interface RtpStreamOptions extends Partial<SrtpOptions> {
+export interface RtpStreamOptions extends SrtpOptions {
   port: number
 }
 
@@ -40,7 +33,10 @@ export function getPublicIp() {
   return fetchPublicIp()
     .catch(() => getPublicIpViaStun())
     .catch(() => {
-      throw new Error('Failed to retrieve public ip address')
+      logError(
+        'Failed to retrieve public ip address.  Falling back to local ip and RTP latching'
+      )
+      return ip.address()
     })
 }
 
@@ -53,23 +49,16 @@ export function releasePorts(ports: number[]) {
 // These "buffer" ports are internal only, so they don't need to stay within "preferred external ports"
 export async function reservePorts({
   count = 1,
-  forExternalUse = false,
   attemptedPorts = [],
 }: {
   count?: number
-  forExternalUse?: boolean
   attemptedPorts?: number[]
 } = {}): Promise<number[]> {
-  const availablePorts =
-      forExternalUse && preferredExternalPorts
-        ? preferredExternalPorts.filter((p) => !reservedPorts.includes(p))
-        : undefined,
-    port = await getPort({ port: availablePorts }),
+  const port = await getPort(),
     ports = [port],
     tryAgain = () => {
       return reservePorts({
         count,
-        forExternalUse,
         attemptedPorts: attemptedPorts.concat(ports),
       })
     }
@@ -77,12 +66,6 @@ export async function reservePorts({
   if (reservedPorts.includes(port)) {
     // this avoids race conditions where we can reserve the same port twice
     return tryAgain()
-  }
-
-  if (availablePorts && !availablePorts.includes(port)) {
-    logError(
-      'Preferred external ports depleted!  Falling back to random external port.  Consider expanding the range specified in your externalPorts config'
-    )
   }
 
   for (let i = 1; i < count; i++) {
@@ -105,8 +88,12 @@ export async function reservePorts({
   return ports
 }
 
+export function getPayloadType(message: Buffer) {
+  return message.readUInt8(1) & 0x7f
+}
+
 export function isRtpMessage(message: Buffer) {
-  const payloadType = message.readUInt8(1) & 0x7f
+  const payloadType = getPayloadType(message)
   return payloadType > 90 || payloadType === 0
 }
 
@@ -119,19 +106,8 @@ export function getSsrc(message: Buffer) {
   }
 }
 
-export function getSrtpValue({ srtpKey, srtpSalt }: Partial<SrtpOptions>) {
-  if (!srtpKey || !srtpSalt) {
-    return ''
-  }
-
-  return Buffer.concat([srtpKey, srtpSalt]).toString('base64')
-}
-
-export async function bindToPort(
-  socket: Socket,
-  { forExternalUse = false } = {}
-) {
-  const [desiredPort] = await reservePorts({ forExternalUse })
+export async function bindToPort(socket: Socket) {
+  const [desiredPort] = await reservePorts()
 
   return new Promise<number>((resolve, reject) => {
     socket.on('error', reject)
@@ -148,11 +124,9 @@ export function sendUdpHolePunch(
   socket: Socket,
   localPort: number,
   remotePort: number,
-  remoteAddress: string,
-  lifetimeSeconds: number
+  remoteAddress: string
 ) {
   socket.send(Buffer.alloc(8), remotePort, remoteAddress)
-  portControl.addMapping(localPort, localPort, lifetimeSeconds)
 }
 
 export interface SocketTarget {
@@ -171,7 +145,7 @@ type RtpMessageHandler = (
 
 export class RtpSplitter {
   public readonly socket = createSocket('udp4')
-  public readonly portPromise = bindToPort(this.socket, this.options)
+  public readonly portPromise = bindToPort(this.socket)
   private onClose = new ReplaySubject<any>()
   public readonly onMessage = fromEvent<[Buffer, RemoteInfo]>(
     this.socket,
@@ -186,10 +160,7 @@ export class RtpSplitter {
     share()
   )
 
-  constructor(
-    public readonly options = { forExternalUse: false },
-    messageHandler?: RtpMessageHandler
-  ) {
+  constructor(messageHandler?: RtpMessageHandler) {
     if (messageHandler) {
       this.addMessageHandler(messageHandler)
     }
@@ -240,21 +211,28 @@ export class RtpSplitter {
   }
 }
 
-export function createCryptoLine(rtpStreamOptions: Partial<SrtpOptions>) {
-  const srtpValue = getSrtpValue(rtpStreamOptions)
+export function getSrtpValue({ srtpKey, srtpSalt }: SrtpOptions) {
+  return Buffer.concat([srtpKey, srtpSalt]).toString('base64')
+}
 
-  if (!srtpValue) {
-    return ''
-  }
+export function createCryptoLine(rtpStreamOptions: SrtpOptions) {
+  const srtpValue = getSrtpValue(rtpStreamOptions)
 
   return `a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:${srtpValue}`
 }
 
-export function decodeCryptoKey(encordedCrypto: string) {
+export function decodeCryptoValue(encordedCrypto: string): SrtpOptions {
   const crypto = Buffer.from(encordedCrypto, 'base64')
 
   return {
     srtpKey: crypto.slice(0, 16),
     srtpSalt: crypto.slice(16, 30),
+  }
+}
+
+export function generateSrtpOptions(): SrtpOptions {
+  return {
+    srtpKey: randomBytes(16),
+    srtpSalt: randomBytes(14),
   }
 }

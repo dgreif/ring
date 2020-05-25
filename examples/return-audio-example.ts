@@ -40,14 +40,11 @@ async function example() {
       port: ringRtpOptions.audio.port,
       address: ringRtpOptions.address,
     },
-    audioOutForwarder = new RtpSplitter(
-      { forExternalUse: false },
-      ({ message }) => {
-        // Forwarder is needed so that transcoded audio can be sent out through the same port as audio in
-        sipSession.audioSplitter.send(message, ringAudioLocation)
-        return null
-      }
-    ),
+    audioOutForwarder = new RtpSplitter(({ message }) => {
+      // Forwarder is needed so that transcoded audio can be sent out through the same port as audio in
+      sipSession.audioSplitter.send(message, ringAudioLocation)
+      return null
+    }),
     speakerFf = new FfmpegProcess(
       [
         '-hide_banner',

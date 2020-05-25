@@ -16,4 +16,6 @@ cp CHANGELOG.md release-homebridge
 cp homebridge/config.schema.json release-homebridge
 mkdir -p release-homebridge/branding
 cp -R branding/* release-homebridge/branding
+mkdir -p release-homebridge/media
+cp -R media/* release-homebridge/media
 node ./build/package-homebridge

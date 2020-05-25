@@ -72,12 +72,8 @@ function getRtpDescription(
   const section = sections.find((s) => s.startsWith('m=' + mediaType)),
     { port } = sdp.parseMLine(section),
     lines = sdp.splitLines(section),
-    cryptoLine = lines.find((l: string) => l.startsWith('a=crypto'))
-
-  if (!cryptoLine) {
-    return { port }
-  }
-  const encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
+    cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
+    encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
 
   return {
     port,
@@ -103,8 +99,11 @@ export class SipCall {
   private callId = getRandomId()
   private sipClient: SipClient
   public readonly onEndedByRemote = new Subject()
-  public readonly onRemoteRtpOptionsSubject = new Subject<RtpOptions>()
   private destroyed = false
+  private cameraConnected?: () => any
+  private cameraConnectedPromise = new Promise((resolve) => {
+    this.cameraConnected = resolve
+  })
 
   public readonly sdp: string
 
@@ -135,6 +134,11 @@ export class SipCall {
           if (this.destroyed) {
             this.onEndedByRemote.next()
           }
+        } else if (
+          request.method === 'MESSAGE' &&
+          request.content === 'event=camera_connected'
+        ) {
+          this.cameraConnected?.()
         }
       }
     )
@@ -283,11 +287,21 @@ export class SipCall {
           contact: [{ uri: from }],
         },
         content: this.sdp,
-      }),
-      remoteRtpOptions = parseRtpOptions(inviteResponse)
+      })
 
-    this.onRemoteRtpOptionsSubject.next(remoteRtpOptions)
-    return remoteRtpOptions
+    return parseRtpOptions(inviteResponse)
+  }
+
+  async requestKeyFrame() {
+    await this.cameraConnectedPromise
+    await this.request({
+      method: 'INFO',
+      headers: {
+        'Content-Type': 'application/media_control+xml',
+      },
+      content:
+        '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>',
+    })
   }
 
   sendBye() {

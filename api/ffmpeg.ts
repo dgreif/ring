@@ -18,6 +18,15 @@ export async function doesFfmpegSupportCodec(codec: string) {
   return output.stdout.includes(codec)
 }
 
+export async function isFfmpegInstalled() {
+  try {
+    await execa(getFfmpegPath(), ['-codecs'])
+    return true
+  } catch (_) {
+    return false
+  }
+}
+
 export class FfmpegProcess {
   private ff = spawn(
     getFfmpegPath(),

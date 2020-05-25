@@ -185,10 +185,10 @@ export class CameraSource implements CameraStreamingDelegate {
         ringRtpOptions = await sipSession.start(
           libfdkAacInstalled
             ? {
-                input: ['-re', '-vn'],
+                input: ['-vn'],
                 audio: [
                   '-map',
-                  '0:0',
+                  '0:a',
 
                   // OPUS specific - it works, but audio is very choppy
                   // '-acodec',
@@ -226,10 +226,7 @@ export class CameraSource implements CameraStreamingDelegate {
                   '-srtp_out_suite',
                   'AES_CM_128_HMAC_SHA1_80',
                   '-srtp_out_params',
-                  getSrtpValue({
-                    srtpKey: audioSrtpKey,
-                    srtpSalt: audioSrtpSalt,
-                  }),
+                  getSrtpValue(sipSession.rtpOptions.audio),
                   `srtp://${targetAddress}:${audioPort}?localrtcpport=${incomingAudioRtcpPort}&pkt_size=188`,
                 ],
                 video: false,
@@ -257,16 +254,13 @@ export class CameraSource implements CameraStreamingDelegate {
         returnAudioPort = await sipSession.reservePort(1)
 
         const returnAudioRtcpPort = returnAudioPort + 1,
-          returnAudioSplitter = new RtpSplitter(
-            { forExternalUse: true },
-            (description) => {
-              return {
-                port: description.isRtpMessage
-                  ? returnAudioPort
-                  : returnAudioRtcpPort,
-              }
+          returnAudioSplitter = new RtpSplitter((description) => {
+            return {
+              port: description.isRtpMessage
+                ? returnAudioPort
+                : returnAudioRtcpPort,
             }
-          ),
+          }),
           returnAudioTranscodedSplitter = new RtpSplitter(),
           ffReturnAudio = new FfmpegProcess(
             [
@@ -296,9 +290,7 @@ export class CameraSource implements CameraStreamingDelegate {
               'AES_CM_128_HMAC_SHA1_80',
               '-srtp_out_params',
               getSrtpValue(sipSession.rtpOptions.audio),
-              `srtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}?pkt_size=188&srtp_out_suite=AES_CM_128_HMAC_SHA1_80&srtp_out_params=${getSrtpValue(
-                ringRtpOptions.audio
-              )}`,
+              `srtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}?pkt_size=188`,
             ],
             'HomeKit Return Audio'
           ),
@@ -395,7 +387,8 @@ export class CameraSource implements CameraStreamingDelegate {
 
     if (requestType === 'start') {
       this.logger.info(`Streaming active for ${this.ringCamera.name}`)
-      // sip/rtp already started at this point
+      // sip/rtp already started at this point, but request a key frame so that HomeKit for sure has one
+      void session.requestKeyFrame()
     } else if (requestType === 'stop') {
       this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()

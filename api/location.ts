@@ -269,7 +269,10 @@ export class Location {
     connection.emit('message', message)
   }
 
-  async sendCommandToSecurityPanel(commandType: string, data?: {}) {
+  async sendCommandToSecurityPanel(
+    commandType: string,
+    data?: Record<string, unknown>
+  ) {
     const securityPanel = await this.getSecurityPanel()
     securityPanel.sendCommand(commandType, data)
   }

@@ -5,12 +5,12 @@ import {
   reservePorts,
   RtpOptions,
   RtpSplitter,
-  sendUdpHolePunch,
 } from './rtp-utils'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
 import { FfmpegProcess } from './ffmpeg'
-import { takeUntil } from 'rxjs/operators'
+import { mapTo, switchMap, take, takeUntil } from 'rxjs/operators'
+import { RtpLatchGenerator } from './rtp-latch-generator'
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -20,13 +20,19 @@ export interface FfmpegOptions {
   output: SpawnInput[]
 }
 
+const keepAliveInterval = 15,
+  keepAliveMessage = Buffer.alloc(8)
+
 export class SipSession {
   private hasStarted = false
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
-  private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
   private subscriptions: Subscription[] = []
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
+  private rtpLatchGenerator = new RtpLatchGenerator(
+    this.rtpOptions.audio,
+    this.rtpOptions.video
+  )
   public readonly reservedPorts = [
     this.tlsPort,
     this.rtpOptions.video.port,
@@ -55,8 +61,7 @@ export class SipSession {
     ))
 
     this.subscriptions.push(
-      call.onEndedByRemote.subscribe(() => this.callEnded(false)),
-      call.onRemoteRtpOptionsSubject.subscribe(this.onRemoteRtpOptionsSubject)
+      call.onEndedByRemote.subscribe(() => this.callEnded(false))
     )
 
     return this.sipCall
@@ -73,37 +78,69 @@ export class SipSession {
     }
 
     try {
-      const remoteRtpOptions = await this.sipCall.invite(),
-        { address: remoteAddress } = remoteRtpOptions,
-        keepAliveInterval = 15,
-        portMappingLifetime = keepAliveInterval + 5,
-        holePunch = () => {
-          sendUdpHolePunch(
-            this.audioSplitter.socket,
-            this.rtpOptions.audio.port,
-            remoteRtpOptions.audio.port,
-            remoteAddress,
-            portMappingLifetime
-          )
-          sendUdpHolePunch(
-            this.videoSplitter.socket,
-            this.rtpOptions.video.port,
-            remoteRtpOptions.video.port,
-            remoteAddress,
-            portMappingLifetime
-          )
+      const audioPort = await this.reservePort(1),
+        videoPort = await this.reservePort(1),
+        remoteRtpOptions = await this.sipCall.invite(),
+        { address } = remoteRtpOptions,
+        remoteAudioLocation = {
+          port: remoteRtpOptions.audio.port,
+          address,
+        },
+        remoteVideoLocation = {
+          port: remoteRtpOptions.video.port,
+          address,
+        },
+        sendKeepAlive = () => {
+          this.audioSplitter.send(keepAliveMessage, remoteAudioLocation)
+          this.videoSplitter.send(keepAliveMessage, remoteVideoLocation)
         }
 
       if (ffmpegOptions) {
-        this.startTranscoder(ffmpegOptions, remoteRtpOptions)
+        this.startTranscoder(
+          ffmpegOptions,
+          remoteRtpOptions,
+          audioPort,
+          videoPort
+        )
       }
 
       // punch to begin with to make sure we get through NAT
-      holePunch()
+      sendKeepAlive()
 
-      // hole punch every 15 seconds to keep stream alive and port open
       this.subscriptions.push(
-        interval(keepAliveInterval * 1000).subscribe(holePunch)
+        // hole punch every 15 seconds to keep stream alive and port open
+        interval(keepAliveInterval * 1000).subscribe(sendKeepAlive),
+
+        // Send a valid RTP packet to audio/video ports repeatedly until data is received.
+        // This is how Ring gets through NATs.  See https://tools.ietf.org/html/rfc7362 for details
+        this.rtpLatchGenerator.onAudioLatchPacket
+          .pipe(
+            switchMap(() => {
+              return interval(50)
+            }),
+            takeUntil(this.audioSplitter.onMessage)
+          )
+          .subscribe(() => {
+            // Ring doesn't seem to care if the audio latch it SRTP.
+            // Send empty RTP to avoid sound being played out of the camera briefly
+            this.audioSplitter.send(
+              Buffer.from('800002e5b4f01b93c6039c68', 'hex'),
+              remoteAudioLocation
+            )
+          }),
+        this.rtpLatchGenerator.onVideoLatchPacket
+          .pipe(
+            switchMap((videoLatchPacket) => {
+              return interval(50).pipe(mapTo(videoLatchPacket))
+            }),
+            takeUntil(this.videoSplitter.onMessage)
+          )
+          .subscribe((videoLatchPacket) => {
+            this.videoSplitter.send(videoLatchPacket, remoteVideoLocation)
+          }),
+        this.videoSplitter.onMessage.pipe(take(1)).subscribe(() => {
+          this.sipCall.requestKeyFrame()
+        })
       )
       return remoteRtpOptions
     } catch (e) {
@@ -121,9 +158,11 @@ export class SipSession {
     }
   }
 
-  private async startTranscoder(
+  private startTranscoder(
     ffmpegOptions: FfmpegOptions,
-    remoteRtpOptions: RtpOptions
+    remoteRtpOptions: RtpOptions,
+    audioPort: number,
+    videoPort: number
   ) {
     const transcodeVideoStream = ffmpegOptions.video !== false,
       ffOptions = [
@@ -132,7 +171,6 @@ export class SipSession {
         'pipe,udp,rtp,file,crypto',
         '-f',
         'sdp',
-        '-re',
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',
@@ -143,7 +181,6 @@ export class SipSession {
         ...(ffmpegOptions.output || []),
       ],
       ff = new FfmpegProcess(ffOptions, 'From Ring'),
-      audioPort = await this.reservePort(1),
       inputSdpLines = [
         'v=0',
         'o=105202070 3747 461 IN IP4 127.0.0.1',
@@ -159,7 +196,6 @@ export class SipSession {
       ]
 
     if (transcodeVideoStream) {
-      const videoPort = await this.reservePort(1)
       inputSdpLines.push(
         `m=video ${videoPort} RTP/SAVP 99`,
         'a=rtpmap:99 H264/90000',
@@ -193,6 +229,10 @@ export class SipSession {
     return ports[0]
   }
 
+  requestKeyFrame() {
+    return this.sipCall.requestKeyFrame()
+  }
+
   private callEnded(sendBye: boolean) {
     if (this.hasCallEnded) {
       return
@@ -209,6 +249,7 @@ export class SipSession {
     this.videoSplitter.close()
     this.audioSplitter.close()
     this.subscriptions.forEach((subscription) => subscription.unsubscribe())
+    this.rtpLatchGenerator.stop()
     releasePorts(this.reservedPorts)
   }
 

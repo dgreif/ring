@@ -23,6 +23,7 @@ import {
   takeUntil,
 } from 'rxjs/operators'
 import {
+  generateSrtpOptions,
   getPublicIp,
   reservePorts,
   RtpSplitter,
@@ -31,6 +32,7 @@ import {
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
+import { isFfmpegInstalled } from './ffmpeg'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 20,
@@ -479,28 +481,36 @@ export class RingCamera {
       audioSplitter = new RtpSplitter(),
       [
         sipOptions,
-        publicIpPromise,
+        publicIp,
+        ffmpegIsInstalled,
         videoPort,
         audioPort,
         [tlsPort],
       ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
+        isFfmpegInstalled(),
         videoSplitter.portPromise,
         audioSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
-        address: await publicIpPromise,
+        address: publicIp,
         audio: {
           port: audioPort,
-          ...srtpOption.audio,
+          ...(srtpOption.audio || generateSrtpOptions()),
         },
         video: {
           port: videoPort,
-          ...srtpOption.video,
+          ...(srtpOption.video || generateSrtpOptions()),
         },
       }
+
+    if (!ffmpegIsInstalled) {
+      throw new Error(
+        'Ffmpeg is not installed.  See https://github.com/dgreif/ring/wiki/FFmpeg for directions.'
+      )
+    }
 
     return new SipSession(
       sipOptions,
@@ -521,7 +531,6 @@ export class RingCamera {
   }
 
   async streamVideo(ffmpegOptions: FfmpegOptions) {
-    // SOMEDAY: generate random SRTP key/salt
     const sipSession = await this.createSipSession()
     await sipSession.start(ffmpegOptions)
     return sipSession

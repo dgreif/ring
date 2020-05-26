@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.3.0-alpha.2](https://github.com/dgreif/ring/compare/v8.3.0-alpha.1...v8.3.0-alpha.2) (2020-05-26)
+
+
+### Bug Fixes
+
+* use relative path for latch.mp4 ([26b5931](https://github.com/dgreif/ring/commit/26b5931b9137c34221e48a857ef4d20ea9f0d8f3))
+
 ## [8.3.0-alpha.1](https://github.com/dgreif/ring/compare/v8.3.0-alpha.0...v8.3.0-alpha.1) (2020-05-26)
 
 

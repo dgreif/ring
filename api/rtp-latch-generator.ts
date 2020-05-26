@@ -51,7 +51,7 @@ export class RtpLatchGenerator {
           'pipe,udp,rtp,file,crypto',
           '-re',
           '-i',
-          path.join(path.resolve('media'), 'latch.mp4'),
+          path.resolve(__dirname, '../../media/latch.mp4'),
           '-map',
           '0:a',
           '-acodec',

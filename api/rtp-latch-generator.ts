@@ -5,7 +5,6 @@ import {
   SrtpOptions,
 } from './rtp-utils'
 import { FfmpegProcess } from './ffmpeg'
-import path from 'path'
 import { BehaviorSubject } from 'rxjs'
 import { filter } from 'rxjs/operators'
 
@@ -51,7 +50,7 @@ export class RtpLatchGenerator {
           'pipe,udp,rtp,file,crypto',
           '-re',
           '-i',
-          path.resolve(__dirname, '../../media/latch.mp4'),
+          require.resolve('../../media/latch.mp4'),
           '-map',
           '0:a',
           '-acodec',

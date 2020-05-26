@@ -57,6 +57,7 @@
     "execa": "^4.0.2",
     "ffmpeg-for-homebridge": "0.0.5",
     "get-port": "^5.1.1",
+    "ip": "1.1.5",
     "node-machine-id": "^1.1.12",
     "rxjs": "^6.5.5",
     "sdp": "^2.12.0",

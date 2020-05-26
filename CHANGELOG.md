@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.3.0-alpha.0](https://github.com/dgreif/ring/compare/v8.2.0...v8.3.0-alpha.0) (2020-05-26)
+
+
+### Features
+
+* rtp latching to avoid nat issue ([0db4349](https://github.com/dgreif/ring/commit/0db4349ee5c115303a61dcdd00a72b15cb99a45f))
+
 ## [8.2.0](https://github.com/dgreif/ring/compare/v8.1.0...v8.2.0) (2020-05-17)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.3.0-alpha.1](https://github.com/dgreif/ring/compare/v8.3.0-alpha.0...v8.3.0-alpha.1) (2020-05-26)
+
+
+### Bug Fixes
+
+* include `ip` as a dependency ([748e16a](https://github.com/dgreif/ring/commit/748e16a19d214dcf0db9851e7ff134e78e3b8f0e))
+
 ## [8.3.0-alpha.0](https://github.com/dgreif/ring/compare/v8.2.0...v8.3.0-alpha.0) (2020-05-26)
 
 

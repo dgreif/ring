@@ -23,7 +23,7 @@ import {
   takeUntil,
 } from 'rxjs/operators'
 import {
-  decodeCryptoKey,
+  generateSrtpOptions,
   reservePorts,
   RtpSplitter,
   SrtpOptions,
@@ -486,15 +486,11 @@ export class RingCamera {
       rtpOptions = {
         audio: {
           port: audioPort,
-          ...(srtpOption.audio ||
-            // SOMEDAY: random value
-            decodeCryptoKey('8rHc1Q2FWUKT3rX/L1GbDKZJ2CsVy9wlEbLygPiq')),
+          ...(srtpOption.audio || generateSrtpOptions()),
         },
         video: {
           port: videoPort,
-          ...(srtpOption.video ||
-            // SOMEDAY: random value
-            decodeCryptoKey('IxOwCA1T1hMRG2xnjHEULwiSILbDHLyto5NFBX+d')),
+          ...(srtpOption.video || generateSrtpOptions()),
         },
       }
 
@@ -517,7 +513,6 @@ export class RingCamera {
   }
 
   async streamVideo(ffmpegOptions: FfmpegOptions) {
-    // SOMEDAY: generate random SRTP key/salt
     const sipSession = await this.createSipSession()
     await sipSession.start(ffmpegOptions)
     return sipSession

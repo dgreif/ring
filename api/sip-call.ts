@@ -2,7 +2,7 @@ import { Subject } from 'rxjs'
 import { logError, logInfo } from './util'
 import {
   createCryptoLine,
-  decodeCryptoKey,
+  decodeCryptoValue,
   RtpOptions,
   RtpStreamOptions,
 } from './rtp-utils'
@@ -77,7 +77,7 @@ function getRtpDescription(
 
   return {
     port,
-    ...decodeCryptoKey(encodedCrypto),
+    ...decodeCryptoValue(encodedCrypto),
   }
 }
 

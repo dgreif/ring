@@ -3,6 +3,7 @@ import { AddressInfo } from 'net'
 import { fromEvent, merge, ReplaySubject } from 'rxjs'
 import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
+import { randomBytes } from 'crypto'
 
 export interface SrtpOptions {
   srtpKey: Buffer
@@ -83,10 +84,6 @@ export function getSsrc(message: Buffer) {
   } catch (_) {
     return null
   }
-}
-
-export function getSrtpValue({ srtpKey, srtpSalt }: SrtpOptions) {
-  return Buffer.concat([srtpKey, srtpSalt]).toString('base64')
 }
 
 export async function bindToPort(socket: Socket) {
@@ -194,17 +191,28 @@ export class RtpSplitter {
   }
 }
 
+export function getSrtpValue({ srtpKey, srtpSalt }: SrtpOptions) {
+  return Buffer.concat([srtpKey, srtpSalt]).toString('base64')
+}
+
 export function createCryptoLine(rtpStreamOptions: SrtpOptions) {
   const srtpValue = getSrtpValue(rtpStreamOptions)
 
   return `a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:${srtpValue}`
 }
 
-export function decodeCryptoKey(encordedCrypto: string) {
+export function decodeCryptoValue(encordedCrypto: string): SrtpOptions {
   const crypto = Buffer.from(encordedCrypto, 'base64')
 
   return {
     srtpKey: crypto.slice(0, 16),
     srtpSalt: crypto.slice(16, 30),
+  }
+}
+
+export function generateSrtpOptions(): SrtpOptions {
+  return {
+    srtpKey: randomBytes(16),
+    srtpSalt: randomBytes(14),
   }
 }

@@ -3,7 +3,7 @@ import { RingApi } from '../api'
 import { cleanOutputDirectory, outputDirectory } from './util'
 import * as path from 'path'
 import { FfmpegProcess } from '../api/ffmpeg'
-import { decodeCryptoKey, getSrtpValue, RtpSplitter } from '../api/rtp-utils'
+import { decodeCryptoValue, getSrtpValue, RtpSplitter } from '../api/rtp-utils'
 import { take } from 'rxjs/operators'
 
 /**
@@ -30,8 +30,8 @@ async function example() {
 
   const sipSession = await camera.createSipSession({
       // these should be random crypto keys
-      audio: decodeCryptoKey('8rHc1Q2FWUKT3rX/L1GbDKZJ2CsVy9wlEbLygPiq'),
-      video: decodeCryptoKey('IxOwCA1T1hMRG2xnjHEULwiSILbDHLyto5NFBX+d'),
+      audio: decodeCryptoValue('8rHc1Q2FWUKT3rX/L1GbDKZJ2CsVy9wlEbLygPiq'),
+      video: decodeCryptoValue('IxOwCA1T1hMRG2xnjHEULwiSILbDHLyto5NFBX+d'),
     }),
     ringRtpOptions = await sipSession.start({
       output: ['-t', 60, path.join(outputDirectory, 'example.mp4')],

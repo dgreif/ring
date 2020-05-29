@@ -32,6 +32,7 @@ import {
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
+import { isFfmpegInstalled } from './ffmpeg'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 20,
@@ -481,12 +482,14 @@ export class RingCamera {
       [
         sipOptions,
         publicIp,
+        ffmpegIsInstalled,
         videoPort,
         audioPort,
         [tlsPort],
       ] = await Promise.all([
         this.getSipOptions(),
         getPublicIp(),
+        isFfmpegInstalled(),
         videoSplitter.portPromise,
         audioSplitter.portPromise,
         reservePorts(),
@@ -502,6 +505,12 @@ export class RingCamera {
           ...(srtpOption.video || generateSrtpOptions()),
         },
       }
+
+    if (!ffmpegIsInstalled) {
+      throw new Error(
+        'Ffmpeg is not installed.  See https://github.com/dgreif/ring/wiki/FFmpeg for directions.'
+      )
+    }
 
     return new SipSession(
       sipOptions,

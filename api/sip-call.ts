@@ -99,7 +99,6 @@ export class SipCall {
   private callId = getRandomId()
   private sipClient: SipClient
   public readonly onEndedByRemote = new Subject()
-  public readonly onRemoteRtpOptionsSubject = new Subject<RtpOptions>()
   private destroyed = false
   public releaseAck?: () => any
   private releaseAckPromise = new Promise((resolve) => {
@@ -110,13 +109,10 @@ export class SipCall {
 
   constructor(
     private sipOptions: SipOptions,
-    rtpOptions: {
-      audio: RtpStreamOptions
-      video: RtpStreamOptions
-    },
+    rtpOptions: RtpOptions,
     tlsPort: number
   ) {
-    const { audio, video } = rtpOptions,
+    const { address, audio, video } = rtpOptions,
       { from } = this.sipOptions,
       host = ip.address()
 
@@ -144,9 +140,9 @@ export class SipCall {
 
     this.sdp = [
       'v=0',
-      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${host}`,
+      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${address}`,
       's=Talk',
-      `c=IN IP4 ${host}`,
+      `c=IN IP4 ${address}`,
       'b=AS:380',
       't=0 0',
       'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
@@ -288,11 +284,9 @@ export class SipCall {
           contact: [{ uri: from }],
         },
         content: this.sdp,
-      }),
-      remoteRtpOptions = parseRtpOptions(inviteResponse)
+      })
 
-    this.onRemoteRtpOptionsSubject.next(remoteRtpOptions)
-    return remoteRtpOptions
+    return parseRtpOptions(inviteResponse)
   }
 
   sendBye() {

@@ -24,6 +24,7 @@ import {
 } from 'rxjs/operators'
 import {
   generateSrtpOptions,
+  getPublicIp,
   reservePorts,
   RtpSplitter,
   SrtpOptions,
@@ -477,13 +478,21 @@ export class RingCamera {
   ) {
     const videoSplitter = new RtpSplitter(),
       audioSplitter = new RtpSplitter(),
-      [sipOptions, videoPort, audioPort, [tlsPort]] = await Promise.all([
+      [
+        sipOptions,
+        publicIp,
+        videoPort,
+        audioPort,
+        [tlsPort],
+      ] = await Promise.all([
         this.getSipOptions(),
+        getPublicIp(),
         videoSplitter.portPromise,
         audioSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
+        address: publicIp,
         audio: {
           port: audioPort,
           ...(srtpOption.audio || generateSrtpOptions()),

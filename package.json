@@ -59,10 +59,12 @@
     "get-port": "^5.1.1",
     "ip": "1.1.5",
     "node-machine-id": "^1.1.12",
+    "public-ip": "4.0.1",
     "rxjs": "^6.5.5",
     "sdp": "^2.12.0",
     "sip": "0.0.6",
     "socket.io": "^2.3.0",
+    "stun": "2.1.0",
     "uuid": "^8.1.0"
   },
   "devDependencies": {

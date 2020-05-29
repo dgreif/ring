@@ -5,7 +5,6 @@ import {
   reservePorts,
   RtpOptions,
   RtpSplitter,
-  RtpStreamOptions,
 } from './rtp-utils'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
@@ -28,7 +27,6 @@ export class SipSession {
   private hasStarted = false
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
-  private onRemoteRtpOptionsSubject = new ReplaySubject<RtpOptions>(1)
   private subscriptions: Subscription[] = []
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
   private rtpLatchGenerator = new RtpLatchGenerator(
@@ -44,10 +42,7 @@ export class SipSession {
 
   constructor(
     public readonly sipOptions: SipOptions,
-    public readonly rtpOptions: {
-      audio: RtpStreamOptions
-      video: RtpStreamOptions
-    },
+    public readonly rtpOptions: RtpOptions,
     public readonly videoSplitter: RtpSplitter,
     public readonly audioSplitter: RtpSplitter,
     private readonly tlsPort: number,
@@ -66,8 +61,7 @@ export class SipSession {
     ))
 
     this.subscriptions.push(
-      call.onEndedByRemote.subscribe(() => this.callEnded(false)),
-      call.onRemoteRtpOptionsSubject.subscribe(this.onRemoteRtpOptionsSubject)
+      call.onEndedByRemote.subscribe(() => this.callEnded(false))
     )
 
     return this.sipCall
@@ -127,6 +121,8 @@ export class SipSession {
             takeUntil(this.audioSplitter.onMessage)
           )
           .subscribe(() => {
+            // Ring doesn't seem to care if the audio latch it SRTP.
+            // Send empty RTP to avoid sound being played out of the camera briefly
             this.audioSplitter.send(
               Buffer.from('800002e5b4f01b93c6039c68', 'hex'),
               remoteAudioLocation

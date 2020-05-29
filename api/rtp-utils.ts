@@ -1,9 +1,13 @@
 import { createSocket, RemoteInfo, Socket } from 'dgram'
 import { AddressInfo } from 'net'
+import { v4 as fetchPublicIp } from 'public-ip'
 import { fromEvent, merge, ReplaySubject } from 'rxjs'
 import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
 import { randomBytes } from 'crypto'
+import { logError } from './util'
+const stun = require('stun'),
+  ip = require('ip')
 
 export interface SrtpOptions {
   srtpKey: Buffer
@@ -18,6 +22,22 @@ export interface RtpOptions {
   address: string
   audio: RtpStreamOptions
   video: RtpStreamOptions
+}
+
+export async function getPublicIpViaStun() {
+  const response = await stun.request('stun.l.google.com:19302')
+  return response.getXorAddress().address
+}
+
+export function getPublicIp() {
+  return fetchPublicIp()
+    .catch(() => getPublicIpViaStun())
+    .catch(() => {
+      logError(
+        'Failed to retrieve public ip address.  Falling back to local ip and RTP latching'
+      )
+      return ip.address()
+    })
 }
 
 let reservedPorts: number[] = []

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.3.0-alpha.3](https://github.com/dgreif/ring/compare/v8.3.0-alpha.2...v8.3.0-alpha.3) (2020-05-29)
+
+
+### Features
+
+* request key frame after live stream is established ([3fa63b6](https://github.com/dgreif/ring/commit/3fa63b6926db3bdbda2b246afe2afe7d3ecc444d))
+* use public ip in sdp in case nat is open ([751b542](https://github.com/dgreif/ring/commit/751b542299053fa3e9ef286a4dc464e6bca85d63))
+* use random srtp key/value for all live streams ([cb13458](https://github.com/dgreif/ring/commit/cb13458f8a09a789d63b011675d7a7a190c087ef))
+
+
+### Bug Fixes
+
+* detect missing ffmpeg before starting live stream ([a351436](https://github.com/dgreif/ring/commit/a351436d814335ebde31e46f058cf5ec5a63a5e3))
+* require to resolve path for latch.mp4 ([10cf16d](https://github.com/dgreif/ring/commit/10cf16d4fad8219c9828094dcaa13f5ee1d24dbb))
+
 ## [8.3.0-alpha.2](https://github.com/dgreif/ring/compare/v8.3.0-alpha.1...v8.3.0-alpha.2) (2020-05-26)
 
 

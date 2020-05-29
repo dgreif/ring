@@ -3,7 +3,7 @@ import { spawn } from 'child_process'
 import { logDebug } from './util'
 import { Subject } from 'rxjs'
 
-let ffmpegPath: string | undefined
+let ffmpegPath: string | undefined = require('ffmpeg-for-homebridge')
 
 export function setFfmpegPath(path: string) {
   ffmpegPath = path

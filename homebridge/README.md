@@ -83,22 +83,14 @@ Option | Default | Explanation
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
 `locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
-`ffmpegPath` | Uses ffmpeg-for-homebridge | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridg) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
+`ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridg) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
 
-### Camera Setup
-
-This plugin will connect all of your Ring cameras to homebridge, but they require a little extra work to get set up.
-Don't worry, it's really easy. Due to homebridge/HAP limitations, the cameras cannot be added through a bridge and must be added as individual devices.
-Configure the homebridge plugin like normal, then click on the "+" in the upper right in
-the Home app, then "Don't have a Code or Can't Scan?", then you should see the cameras listed as individual devices which
-which you can add.  The code that you need for each is the same code you used when setting up homebridge.  It should be in
-the output when you start homebridge, or in your homebridge `config.json` file.
-Walk through the setup pages and when you are done, you should see several devices related to the camera:
+### Cameras
 
   * Camera Feed
-    * Shows a snapshot from the camera while viewing the room in Home.  There are limitations with how frequently battery cameras can take snapshots.  See [the Battery Cam Snapshots Wiki](https://github.com/dgreif/ring/wiki/Battery-Cam-Snapshots) for details.
-    * Shows a live feed from the camera if you click on it.  The feed supports video out of the box, and will support 2-way audio as well if you have `ffmpeg` with `libfdk_aac` installed.  A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg#homebridge-audio-support) for details on audio support. Camera streams may not work on some networks with strict NAT settings.
+    * Shows a snapshot from the camera while viewing the room in Home.  There are limitations with how frequently battery cameras can take snapshots, and with the mechanism which Homebridge uses to request new snapshots.  See [the Snapshot Limitations Wiki](https://github.com/dgreif/ring/wiki/Snapshot-Limitations) for details.
+    * Shows a live feed from the camera if you click on it.  The feed supports video and 2-way audio, but requires that you have `ffmpeg` with `libfdk_aac` installed.  A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg) for details.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
   * Light (if camera is equipped)

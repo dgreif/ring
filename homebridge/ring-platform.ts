@@ -158,7 +158,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
   async connectToApi() {
     const ringApi = new RingApi({
         controlCenterDisplayName: 'homebridge-ring',
-        ffmpegPath: require('ffmpeg-for-homebridge'),
         ...this.config,
       }),
       locations = await ringApi.getLocations(),

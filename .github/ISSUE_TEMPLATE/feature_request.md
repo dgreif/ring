@@ -20,4 +20,4 @@ Before opening an issue, search for open and closed GitHub issues that match you
 <!-- ✍️--> Have you considered any alternative solutions or workarounds?
 
 ### Device data
-<!-- ✍️-->  If you are requesting a new device be added to homebridge-ring, please follow the instuctions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+<!-- ✍️-->  If you are requesting a new device be added to homebridge-ring, please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here

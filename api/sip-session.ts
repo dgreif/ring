@@ -9,7 +9,7 @@ import {
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
 import { FfmpegProcess } from './ffmpeg'
-import { mapTo, switchMap, takeUntil } from 'rxjs/operators'
+import { mapTo, switchMap, take, takeUntil } from 'rxjs/operators'
 import { RtpLatchGenerator } from './rtp-latch-generator'
 
 type SpawnInput = string | number
@@ -137,8 +137,10 @@ export class SipSession {
           )
           .subscribe((videoLatchPacket) => {
             this.videoSplitter.send(videoLatchPacket, remoteVideoLocation)
-            this.sipCall.releaseAck!()
-          })
+          }),
+        this.videoSplitter.onMessage.pipe(take(1)).subscribe(() => {
+          this.sipCall.requestKeyFrame()
+        })
       )
       return remoteRtpOptions
     } catch (e) {
@@ -225,6 +227,10 @@ export class SipSession {
     const ports = await reservePorts({ count: bufferPorts + 1 })
     this.reservedPorts.push(...ports)
     return ports[0]
+  }
+
+  requestKeyFrame() {
+    return this.sipCall.requestKeyFrame()
   }
 
   private callEnded(sendBye: boolean) {

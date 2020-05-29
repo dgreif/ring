@@ -100,9 +100,9 @@ export class SipCall {
   private sipClient: SipClient
   public readonly onEndedByRemote = new Subject()
   private destroyed = false
-  public releaseAck?: () => any
-  private releaseAckPromise = new Promise((resolve) => {
-    this.releaseAck = resolve
+  private cameraConnected?: () => any
+  private cameraConnectedPromise = new Promise((resolve) => {
+    this.cameraConnected = resolve
   })
 
   public readonly sdp: string
@@ -134,6 +134,11 @@ export class SipCall {
           if (this.destroyed) {
             this.onEndedByRemote.next()
           }
+        } else if (
+          request.method === 'MESSAGE' &&
+          request.content === 'event=camera_connected'
+        ) {
+          this.cameraConnected?.()
         }
       }
     )
@@ -245,8 +250,6 @@ export class SipCall {
   }
 
   private async ackWithInfo(seq: number) {
-    await this.releaseAckPromise
-
     // Don't wait for ack, it won't ever come back.
     this.request({
       method: 'ACK',
@@ -287,6 +290,18 @@ export class SipCall {
       })
 
     return parseRtpOptions(inviteResponse)
+  }
+
+  async requestKeyFrame() {
+    await this.cameraConnectedPromise
+    await this.request({
+      method: 'INFO',
+      headers: {
+        'Content-Type': 'application/media_control+xml',
+      },
+      content:
+        '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>',
+    })
   }
 
   sendBye() {

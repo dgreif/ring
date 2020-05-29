@@ -387,7 +387,8 @@ export class CameraSource implements CameraStreamingDelegate {
 
     if (requestType === 'start') {
       this.logger.info(`Streaming active for ${this.ringCamera.name}`)
-      // sip/rtp already started at this point
+      // sip/rtp already started at this point, but request a key frame so that HomeKit for sure has one
+      void session.requestKeyFrame()
     } else if (requestType === 'stop') {
       this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()

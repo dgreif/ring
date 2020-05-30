@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.0.0-beta.0](https://github.com/dgreif/ring/compare/v8.2.0...v9.0.0-beta.0) (2020-05-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* Night mode is no longer an option for Ring Alarm and Location Modes.  Any automations that made use of Night mode will need to use Home mode instead.
+* UPnP and NAT-PMP hole punching has been removed in favor of RTP latching.  This should lead to a successful live stream, regardless of network configuration, network settings, and NAT type
+* ffmpeg is now required for live streams.  See https://github.com/dgreif/ring/wiki/FFmpeg for details
+
+### Features
+
+* add support for z-wave thermostats via ring alarm ([#331](https://github.com/dgreif/ring/issues/331)) ([3daa1f1](https://github.com/dgreif/ring/commit/3daa1f1bf2222d8e4569c02ad2bae36922df08bc))
+* more reliable live streams regardless of nat type ([09a78c9](https://github.com/dgreif/ring/commit/09a78c97d51aa9a49361c5d72a4f818698b79f6f))
+* use random srtp key/value for all live streams ([082567a](https://github.com/dgreif/ring/commit/082567a1ab47c987b48b43b53832ac86033f76ac))
+
+
+### Bug Fixes
+
+* remove night mode from alarm and location modes ([63ff8a0](https://github.com/dgreif/ring/commit/63ff8a046e6d31af203bc9b11ecb15cb0b331870))
+
 ## [8.2.0](https://github.com/dgreif/ring/compare/v8.1.0...v8.2.0) (2020-05-17)
 
 

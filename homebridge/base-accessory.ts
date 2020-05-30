@@ -98,24 +98,24 @@ export abstract class BaseAccessory<T extends { name: string }> {
       characteristic.updateValue(value)
     })
 
-    onCachedValue.pipe(take(1)).subscribe(() => {
-      // allow GET once a value is cached
-      characteristic.on(
-        CharacteristicEventTypes.GET,
-        async (callback: CharacteristicGetCallback) => {
-          try {
-            const value = await onCachedValue.pipe(take(1)).toPromise()
-            callback(null, value)
-
-            if (requestUpdate) {
+    if (requestUpdate) {
+      // Only register for GET if an async request should be made to get an updated value
+      onCachedValue.pipe(take(1)).subscribe(() => {
+        // allow GET once a value is cached
+        characteristic.on(
+          CharacteristicEventTypes.GET,
+          async (callback: CharacteristicGetCallback) => {
+            try {
+              const value = await onCachedValue.pipe(take(1)).toPromise()
+              callback(null, value)
               requestUpdate()
+            } catch (e) {
+              callback(e)
             }
-          } catch (e) {
-            callback(e)
           }
-        }
-      )
-    })
+        )
+      })
+    }
 
     if (setValue) {
       characteristic.on(

@@ -47,21 +47,21 @@ export abstract class BaseDataAccessory<
       characteristic = service.getCharacteristic(characteristicType),
       { device } = this
 
-    characteristic.on(
-      CharacteristicEventTypes.GET,
-      (callback: CharacteristicGetCallback) => {
-        try {
-          const value = getValue(device.data)
-          callback(null, value)
-
-          if (requestUpdate) {
+    if (requestUpdate) {
+      // Only register for GET if an async request should be made to get an updated value
+      characteristic.on(
+        CharacteristicEventTypes.GET,
+        (callback: CharacteristicGetCallback) => {
+          try {
+            const value = getValue(device.data)
+            callback(null, value)
             requestUpdate()
+          } catch (e) {
+            callback(e)
           }
-        } catch (e) {
-          callback(e)
         }
-      }
-    )
+      )
+    }
 
     if (setValue && setValueDebounceTime) {
       const onValueToSet = new Subject<any>()

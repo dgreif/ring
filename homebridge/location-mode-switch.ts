@@ -137,6 +137,14 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       }
     )
 
+    targetState.setProps({
+      validValues: [
+        Characteristic.SecuritySystemTargetState.AWAY_ARM,
+        Characteristic.SecuritySystemTargetState.STAY_ARM,
+        Characteristic.SecuritySystemTargetState.DISARM,
+      ],
+    })
+
     this.registerObservableCharacteristic({
       characteristicType: Characteristic.Manufacturer,
       serviceType: AccessoryInformation,

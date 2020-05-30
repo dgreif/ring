@@ -48,6 +48,16 @@ export class SecurityPanel extends BaseDeviceAccessory {
       setValue: (value) => this.setTargetState(value),
     })
 
+    this.getService(Service.SecuritySystem)
+      .getCharacteristic(Characteristic.SecuritySystemTargetState)
+      .setProps({
+        validValues: [
+          Characteristic.SecuritySystemTargetState.AWAY_ARM,
+          Characteristic.SecuritySystemTargetState.STAY_ARM,
+          Characteristic.SecuritySystemTargetState.DISARM,
+        ],
+      })
+
     if (!config.hideAlarmSirenSwitch) {
       this.registerCharacteristic({
         characteristicType: Characteristic.On,

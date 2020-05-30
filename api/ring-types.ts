@@ -27,6 +27,7 @@ export enum RingDeviceType {
   BeamsTransformerSwitch = 'switch.transformer.beams',
   RetrofitBridge = 'bridge.flatline',
   RetrofitZone = 'sensor.zone',
+  Thermostat = 'temperature-control.thermostat',
 }
 
 export enum RingDeviceCategory {
@@ -111,6 +112,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
+export type ThermostatMode = 'heat' | 'cool' | 'off' | 'aux'
 export type MessageType =
   | 'RoomGetList'
   | 'SessionInfo'
@@ -179,7 +181,7 @@ export interface RingDeviceData {
   locked?: 'jammed' | 'locked' | 'unlocked' | 'unknown'
   roomId?: number
   volume?: number
-  mode?: AlarmMode
+  mode?: AlarmMode | ThermostatMode
   transitionDelayEndTimestamp?: number | null
   alarmInfo?: {
     state: AlarmState
@@ -215,6 +217,15 @@ export interface RingDeviceData {
   celsius?: number // no F provided, just celsius
   faultHigh?: number
   faultLow?: number
+  // temperature-control.thermostat
+  // Related: 'mode?: ThermostatMode' (above)
+  setPoint?: number
+  setPointMax?: number
+  setPointMin?: number
+  componentDevices?: {
+    rel: string
+    zid: string
+  }[]
 }
 
 export const deviceTypesWithVolume = [

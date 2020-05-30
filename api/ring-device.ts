@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs'
 import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
-import { filter } from 'rxjs/operators'
+import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
 
 export class RingDevice {
@@ -9,6 +9,9 @@ export class RingDevice {
   id = this.zid
   deviceType = this.initialData.deviceType
   categoryId = this.initialData.categoryId
+  onComponentDevices = this.location.onDevices.pipe(
+    map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
+  )
 
   constructor(
     private initialData: RingDeviceData,

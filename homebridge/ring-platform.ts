@@ -38,6 +38,7 @@ import { FreezeSensor } from './freeze-sensor'
 import { TemperatureSensor } from './temperature-sensor'
 import { WaterSensor } from './water-sensor'
 import { LocationModeSwitch } from './location-mode-switch'
+import { Thermostat } from './thermostat'
 import { generateMacAddress } from './util'
 
 const debug = __filename.includes('release-homebridge'),
@@ -99,6 +100,8 @@ function getAccessoryClass(
       return TemperatureSensor
     case RingDeviceType.WaterSensor:
       return WaterSensor
+    case RingDeviceType.Thermostat:
+      return Thermostat
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

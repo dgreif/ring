@@ -175,6 +175,10 @@ If you are having issues with your cameras in the Home app, please see the [Came
   * Location Modes
     * For homes not equipped with a Ring Alarm, Locations Modes can be used as an alternative way to change settings for Ring cameras.
     * Shows as a security system in HomeKit, just like the Ring Alarm.
+  * Thermostats
+    * Set Thermostat mode to heat/cool/off
+    * Set target temperature
+    * View current temperature and heating/cooling status
 
 ### Alarm/Location Modes
 

@@ -27,7 +27,7 @@ export class SipSession {
   private hasStarted = false
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
-  private subscriptions: Subscription[] = []
+  public readonly subscriptions: Subscription[] = []
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
   private rtpLatchGenerator = new RtpLatchGenerator(
     this.rtpOptions.audio,

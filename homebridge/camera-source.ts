@@ -23,7 +23,8 @@ import {
 } from 'homebridge'
 import { logDebug } from '../api/util'
 import { doesFfmpegSupportCodec, FfmpegProcess } from '../api/ffmpeg'
-import { filter, map, take } from 'rxjs/operators'
+import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
+import { merge, of, Subject } from 'rxjs'
 
 const ip = require('ip')
 
@@ -168,7 +169,21 @@ export class CameraSource implements CameraStreamingDelegate {
               )
               return false
             }),
-        ])
+        ]),
+        onReturnPacketReceived = new Subject()
+
+      sipSession.subscriptions.push(
+        merge(of(true).pipe(delay(15000)), onReturnPacketReceived)
+          .pipe(debounceTime(5000))
+          .subscribe(() => {
+            this.logger.info(
+              `Live stream for ${
+                this.ringCamera.name
+              } appears to be inactive. (${getDurationSeconds(start)}s)`
+            )
+            sipSession.stop()
+          })
+      )
 
       this.sessions[hap.uuid.unparse(sessionID)] = sipSession
 
@@ -237,6 +252,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
       sipSession.videoSplitter.addMessageHandler(({ info }) => {
         if (info.address === targetAddress) {
+          onReturnPacketReceived.next()
           return {
             port: ringRtpOptions.video.port,
             address: ringRtpOptions.address,
@@ -255,6 +271,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
         const returnAudioRtcpPort = returnAudioPort + 1,
           returnAudioSplitter = new RtpSplitter((description) => {
+            onReturnPacketReceived.next()
             return {
               port: description.isRtpMessage
                 ? returnAudioPort

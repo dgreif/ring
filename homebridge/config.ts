@@ -1,4 +1,4 @@
-import { RingApiOptions } from '../api'
+import { AlarmMode, RingApiOptions } from '../api'
 import { readFileSync, writeFileSync } from 'fs'
 
 export interface RingPlatformConfig extends RingApiOptions {
@@ -12,6 +12,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   hideAlarmSirenSwitch?: boolean
   hideUnsupportedServices?: boolean
   showPanicButtons?: boolean
+  nightModeBypassFor: AlarmMode
   ffmpegPath?: string
 }
 

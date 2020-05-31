@@ -54,6 +54,25 @@
         "type": "boolean",
         "description": "Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app."
       },
+      "nightModeBypassFor": {
+        "title": "Night Mode as Bypass For Mode",
+        "type": "string",
+        "description": "Allows you to use Night mode to \"Bypass and Arm\" a Ring Alarm.  If set and Night mode is activated from HomeKit, any open contact sensors will automatically be bypassed and the alarm will be set to the mode selected here.",
+        "oneOf": [
+          {
+            "title": "Home",
+            "enum": [
+              "some"
+            ]
+          },
+          {
+            "title": "Away",
+            "enum": [
+              "all"
+            ]
+          }
+        ]
+      },
       "beamDurationSeconds": {
         "title": "Ring Smart Lighting Timer",
         "type": "integer",
@@ -117,6 +136,7 @@
         "hideAlarmSirenSwitch",
         "hideUnsupportedServices",
         "showPanicButtons",
+        "nightModeBypassFor",
         "beamDurationSeconds",
         "debug",
         "cameraStatusPollingSeconds",

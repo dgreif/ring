@@ -1,12 +1,21 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice, RingDeviceData, AlarmState, allAlarmStates } from '../api'
-import { distinctUntilChanged } from 'rxjs/operators'
+import {
+  AlarmMode,
+  AlarmState,
+  allAlarmStates,
+  RingDevice,
+  RingDeviceData,
+  RingDeviceType,
+} from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { Logging, PlatformAccessory } from 'homebridge'
 
+function isValidNightModeBypass(mode?: AlarmMode) {
+  return mode && (mode === 'all' || mode === 'some')
+}
+
 export class SecurityPanel extends BaseDeviceAccessory {
-  private targetState: any
   private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
     ? allAlarmStates
     : allAlarmStates.filter((x) => x !== 'entry-delay')
@@ -19,44 +28,33 @@ export class SecurityPanel extends BaseDeviceAccessory {
   ) {
     super()
 
-    const { Characteristic, Service } = hap
+    const { Characteristic, Service } = hap,
+      validValues = [
+        Characteristic.SecuritySystemTargetState.AWAY_ARM,
+        Characteristic.SecuritySystemTargetState.STAY_ARM,
+        Characteristic.SecuritySystemTargetState.DISARM,
+      ]
 
-    this.device.onData
-      .pipe(distinctUntilChanged((a, b) => a.mode === b.mode))
-      .subscribe((data) => {
-        this.targetState = this.getTargetState(data)
-      })
+    if (isValidNightModeBypass(config.nightModeBypassFor)) {
+      validValues.push(Characteristic.SecuritySystemTargetState.NIGHT_ARM)
+    }
 
     this.registerCharacteristic({
       characteristicType: Characteristic.SecuritySystemCurrentState,
       serviceType: Service.SecuritySystem,
-      getValue: (data) => {
-        const state = this.getCurrentState(data)
-
-        if (state === this.targetState) {
-          this.targetState = undefined
-        }
-
-        return state
-      },
+      getValue: (data) => this.getCurrentState(data),
     })
 
     this.registerCharacteristic({
       characteristicType: Characteristic.SecuritySystemTargetState,
       serviceType: Service.SecuritySystem,
-      getValue: (data) => this.getTargetState(data),
+      getValue: (data) => this.getCurrentState(data),
       setValue: (value) => this.setTargetState(value),
     })
 
     this.getService(Service.SecuritySystem)
       .getCharacteristic(Characteristic.SecuritySystemTargetState)
-      .setProps({
-        validValues: [
-          Characteristic.SecuritySystemTargetState.AWAY_ARM,
-          Characteristic.SecuritySystemTargetState.STAY_ARM,
-          Characteristic.SecuritySystemTargetState.DISARM,
-        ],
-      })
+      .setProps({ validValues })
 
     if (!config.hideAlarmSirenSwitch) {
       this.registerCharacteristic({
@@ -95,41 +93,58 @@ export class SecurityPanel extends BaseDeviceAccessory {
     }
   }
 
-  setTargetState(state: any) {
+  async setTargetState(state: any) {
     const {
         Characteristic: { SecuritySystemTargetState: State },
       } = hap,
-      { location, data } = this.device
+      { location } = this.device,
+      { nightModeBypassFor } = this.config
+
+    let bypass = false
 
     if (state === State.NIGHT_ARM) {
-      state = State.STAY_ARM
-      // Ring doesn't have night mode, so switch over to stay mode
-      setTimeout(() => {
-        this.getService(hap.Service.SecuritySystem)
-          .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
-          .updateValue(state)
-      }, 100)
+      if (
+        nightModeBypassFor &&
+        (nightModeBypassFor === 'all' || nightModeBypassFor === 'some')
+      ) {
+        state = nightModeBypassFor === 'all' ? State.AWAY_ARM : State.STAY_ARM
+        bypass = true
+      } else {
+        // Switch to Home since we don't know which mode the user wanted
+        state = State.STAY_ARM
+      }
     }
 
-    if (state === this.getCurrentState(data)) {
-      this.targetState = undefined
-      return
+    const bypassContactSensors = bypass
+        ? (await location.getDevices()).filter((device) => {
+            return (
+              device.deviceType === RingDeviceType.ContactSensor &&
+              device.data.faulted
+            )
+          })
+        : [],
+      bypassSensorZids = bypassContactSensors.map((sensor) => sensor.id),
+      bypassSensorNames = bypassContactSensors.map((sensor) => sensor.name),
+      bypassLog = bypassSensorNames.length
+        ? ' - Bypassing Sensors: ' + bypassSensorNames.join(', ')
+        : ''
+
+    try {
+      if (state === State.AWAY_ARM) {
+        this.logger.info(`Arming (Away) ${this.device.name}${bypassLog}`)
+        await location.armAway(bypassSensorZids)
+      } else if (state === State.DISARM) {
+        this.logger.info(`Disarming ${this.device.name}`)
+        await location.disarm()
+      } else {
+        this.logger.info(`Arming (Home) ${this.device.name}${bypassLog}`)
+        await location.armHome(bypassSensorZids)
+      }
+    } catch (e) {
+      this.logger.error(e)
+      this.getService(hap.Service.SecuritySystem)
+        .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
+        .updateValue(this.getCurrentState(this.device.data))
     }
-
-    this.targetState = state
-
-    if (state === State.AWAY_ARM) {
-      this.logger.info(`Arming (Away) ${this.device.name}`)
-      return location.armAway()
-    } else if (state === State.DISARM) {
-      this.logger.info(`Disarming ${this.device.name}`)
-      return location.disarm()
-    }
-    this.logger.info(`Arming (Home) ${this.device.name}`)
-    return location.armHome()
-  }
-
-  getTargetState(data: RingDeviceData) {
-    return this.targetState || this.getCurrentState(data)
   }
 }

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.0.0-beta.1](https://github.com/dgreif/ring/compare/v9.0.0-beta.0...v9.0.0-beta.1) (2020-05-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** Night Mode can now be configured as a way to bypass contact sensors for either Home or Away mode.  Night Mode previously activated Home mode only.  By default, Night Mode will be hidden in HomeKit.
+
+### Features
+
+* **homebridge:** configure night mode to bypass contact sensors ([5d60820](https://github.com/dgreif/ring/commit/5d60820c91ae10e33bdd20bd0acfa869f1b22aab)), closes [#215](https://github.com/dgreif/ring/issues/215)
+
+
+### Bug Fixes
+
+* **homebridge:** detect and stop inactive live streams ([2b263de](https://github.com/dgreif/ring/commit/2b263deb27723d90de9efd924aa59a8bce5cec28))
+
 ## [9.0.0-beta.0](https://github.com/dgreif/ring/compare/v8.2.0...v9.0.0-beta.0) (2020-05-30)
 
 

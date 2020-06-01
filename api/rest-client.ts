@@ -1,8 +1,15 @@
-import axios, { AxiosRequestConfig, ResponseType } from 'axios'
+import https from 'https'
+import url from 'url'
+import dnscache from 'dnscache'
 import { delay, getHardwareId, logError, logInfo, stringify } from './util'
 import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
+
+const httpsAgent = new https.Agent({ keepAlive: true });
+https.globalAgent = httpsAgent;
+
+const dnsCacheLookup = dnscache({ enabled: true, ttl: 60 }).lookup;
 
 const ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
@@ -29,10 +36,80 @@ export interface ExtendedResponse {
 }
 
 async function requestWithRetry<T>(
-  options: AxiosRequestConfig
+  options: {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+    url: string
+    data?: any
+    headers?: any
+    responseType?: string
+  }
 ): Promise<T & ExtendedResponse> {
   try {
-    const { data, headers } = await axios(options)
+    const { data, headers } = await new Promise((resolve, reject) => {
+    	const parsed = url.parse(options.url);
+    	const _options = {
+    		hostname: parsed.hostname,
+    		port: parsed.port || 443,
+    		path: parsed.pathname,
+    		method: options.method,
+    		agent: httpsAgent,
+    		lookup: dnsCacheLookup,
+    		headers: options.headers || {}
+    	};
+    	let reqData = options.data || '';
+    	if (reqData) for (let header in _options.headers) {
+    		if (header.toString().toLowerCase() === 'content-type') {
+    			if (_options.headers[header]!.toString().toLowerCase().indexOf('json') !== -1) {
+    				reqData = JSON.stringify(reqData);
+    			}
+    			break;
+   			}
+	    }
+    	if (reqData.length) _options.headers['content-length'] = reqData.length;
+    	_options.headers['user-agent'] = 'Mozilla/5.0 (Linux) Ring';
+    	const request = https.request(_options, response => {
+    		let contentType = '';
+    		for (let header in response.headers) {
+    			if (header.toString().toLowerCase() === 'content-type') {
+    				contentType = response.headers[header]!.toString().toLowerCase();
+    				break;
+   				}
+	    	}
+	    	let resData : any;
+	    	if (options.responseType == 'arraybuffer') {
+		    	resData = [];
+	    		response.on('data', part => {
+	    			resData.push(part);
+	    		});
+	    		response.on('end', () => {
+	    			resData = Buffer.concat(resData);
+	    		});
+	    	} else {
+		    	response.setEncoding('utf8');
+	    		resData = '';
+	    		response.on('data', part => {
+	    			resData += part;
+	    		});
+	    		response.on('end', () => {
+	    			try {
+						if (contentType.indexOf('json') !== -1) {
+							resData = JSON.parse(resData);
+						} else if (contentType.indexOf('www-form-urlencoded') !== -1) {
+							resData = querystring.parse(resData);
+						}
+	    			} catch (e) {
+	    				reject(e);
+	    			}
+	    		});
+	    	}
+    		response.on('error', reject);
+    		response.on('end', () => {
+    			resolve({ data: resData, headers: response.headers });
+    		});
+    	});
+    	request.on('error', reject);
+    	request.end(reqData);
+    });
 
     if (typeof data === 'object' && headers.date) {
       data.responseTimestamp = new Date(headers.date).getTime()
@@ -234,7 +311,7 @@ export class RingRestClient {
     url: string
     data?: any
     json?: boolean
-    responseType?: ResponseType
+    responseType?: string
   }): Promise<T & ExtendedResponse> {
     const { method, url, data, json, responseType } = options,
       hardwareId = await hardwareIdPromise

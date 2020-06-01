@@ -53,10 +53,10 @@
   "dependencies": {
     "colors": "^1.4.0",
     "debug": "^4.1.1",
-    "dnscache": "^1.0.2",
     "execa": "^4.0.1",
     "ffmpeg-for-homebridge": "0.0.4",
     "get-port": "^5.1.1",
+    "got": "^11.2.0",
     "nat-puncher": "^0.1.8",
     "node-machine-id": "^1.1.12",
     "public-ip": "^4.0.1",
@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
+    "@types/got": "^9.6.11",
     "@types/jest": "^25.2.2",
     "@types/node": "^14.0.6",
     "@types/socket.io-client": "^1.4.33",

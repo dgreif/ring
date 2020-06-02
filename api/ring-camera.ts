@@ -212,7 +212,7 @@ export class RingCamera {
     const state = on ? 'on' : 'off'
 
     await this.restClient.request({
-      method: 'put',
+      method: 'PUT',
       url: this.doorbotUrl('floodlight_light_' + state),
     })
 
@@ -226,11 +226,9 @@ export class RingCamera {
       return false
     }
 
-    const state = on ? 'on' : 'off'
-
     await this.restClient.request({
-      method: 'put',
-      url: this.doorbotUrl('siren_' + state),
+      method: 'PUT',
+      url: this.doorbotUrl('siren_' + (on ? 'on' : 'off')),
     })
 
     this.updateData({ ...this.data, siren_status: { seconds_remaining: 1 } })
@@ -245,15 +243,15 @@ export class RingCamera {
     }
 
     await this.restClient.request({
-      method: 'put',
+      method: 'PUT',
       url: this.doorbotUrl(),
       form: {
         doorbot: {
-        	settings: {
-        		chime_settings: {
-        			enable: 'on',
-        		},
-        	},
+          settings: {
+            chime_settings: {
+              enable: on ? 'on' : 'off',
+            },
+          },
         },
       },
     })
@@ -275,7 +273,7 @@ export class RingCamera {
 
   startVideoOnDemand() {
     return this.restClient.request<ActiveDing | ''>({
-      method: 'post',
+      method: 'POST',
       url: this.doorbotUrl('live_view'), // Ring app uses vod for battery cams, but doesn't appear to be necessary
     })
   }
@@ -357,7 +355,7 @@ export class RingCamera {
         timestamps: SnapshotTimestamp[]
       }>({
         url: clientApi('snapshots/timestamps'),
-        method: 'post',
+        method: 'POST',
         json: {
           doorbot_ids: [this.id],
         },
@@ -534,28 +532,28 @@ export class RingCamera {
 
   subscribeToDingEvents() {
     return this.restClient.request({
-      method: 'post',
+      method: 'POST',
       url: this.doorbotUrl('subscribe'),
     })
   }
 
   unsubscribeFromDingEvents() {
     return this.restClient.request({
-      method: 'post',
+      method: 'POST',
       url: this.doorbotUrl('unsubscribe'),
     })
   }
 
   subscribeToMotionEvents() {
     return this.restClient.request({
-      method: 'post',
+      method: 'POST',
       url: this.doorbotUrl('motions_subscribe'),
     })
   }
 
   unsubscribeFromMotionEvents() {
     return this.restClient.request({
-      method: 'post',
+      method: 'POST',
       url: this.doorbotUrl('motions_unsubscribe'),
     })
   }

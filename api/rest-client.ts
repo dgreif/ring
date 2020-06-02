@@ -1,25 +1,23 @@
 import https from 'https'
-import got, { NormalizedOptions, Options, Headers } from 'got'
+import got, { Options, Headers } from 'got'
 import CacheableLookup from 'cacheable-lookup'
 import { delay, getHardwareId, logError, logInfo, stringify } from './util'
-import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
-const cacheableLookup = new CacheableLookup();
-const httpsAgent = new https.Agent({ keepAlive: true });
-https.globalAgent = httpsAgent;
+const cacheableLookup = new CacheableLookup(),
+  httpsAgent = new https.Agent({ keepAlive: true })
+https.globalAgent = httpsAgent
 
-const defaultOptions : Options = {
-  headers: { 'user-agent': 'Mozilla/5.0 (Linux) Ring' },
-  dnsCache: cacheableLookup,
-  agent: { https: httpsAgent },
-  http2: true,
-  responseType: 'json',
-  method: 'get',
-};
-
-const ringErrorCodes: { [code: number]: string } = {
+const defaultOptions: Options = {
+    headers: { 'user-agent': 'Mozilla/5.0 (Linux) Ring' },
+    dnsCache: cacheableLookup,
+    agent: { https: httpsAgent },
+    http2: true,
+    responseType: 'json',
+    method: 'GET',
+  },
+  ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
     7019: 'ASSET_OFFLINE',
     7061: 'ASSET_CELL_BACKUP',
@@ -47,11 +45,14 @@ async function requestWithRetry<T>(
   reqOptions: Options
 ): Promise<T & ExtendedResponse> {
   try {
-  	const options = { ...defaultOptions, ...reqOptions };
-    const { headers, body } = <{ headers: Headers, body: any }>await got(options);
-	const data = body as T & ExtendedResponse;
+    const options = { ...defaultOptions, ...reqOptions },
+      { headers, body } = (await got(options)) as {
+        headers: Headers
+        body: any
+      },
+      data = body as T & ExtendedResponse
     if (data !== null && typeof data === 'object' && headers.date) {
-      data.responseTimestamp = new Date(<string>headers.date).getTime()
+      data.responseTimestamp = new Date(headers.date as string).getTime()
     }
     return data
   } catch (e) {
@@ -127,11 +128,11 @@ export class RingRestClient {
           scope: 'client',
           ...grantData,
         },
-        method: 'post',
+        method: 'POST',
         headers: {
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
-          'hardware_id': await hardwareIdPromise,
+          hardware_id: await hardwareIdPromise,
         },
       })
 
@@ -171,7 +172,8 @@ export class RingRestClient {
             : 'email and password are',
         errorMessage =
           'Failed to fetch oauth token from Ring. ' +
-          (responseData.error_description === 'too many requests from dependency service'
+          (responseData.error_description ===
+          'too many requests from dependency service'
             ? 'You have requested too many 2fa codes.  Ring limits 2fa to 10 codes within 10 minutes.  Please try again in 10 minutes.'
             : `Verify that your ${authTypeMessage} correct.`) +
           ` (error: ${responseError})`
@@ -195,9 +197,9 @@ export class RingRestClient {
           os: 'android', // can use android, ios, ring-site, windows for sure
         },
       },
-      method: 'post',
+      method: 'POST',
       headers: {
-        authorization: `Bearer ${authToken.access_token}`
+        authorization: `Bearer ${authToken.access_token}`,
       },
     })
   }
@@ -242,20 +244,20 @@ export class RingRestClient {
   }
 
   async request<T = void>(options: Options): Promise<T & ExtendedResponse> {
-    const hardwareId = await hardwareIdPromise
-	const url = <string>options.url!;
-	
+    const hardwareId = await hardwareIdPromise,
+      url = options.url! as string
+
     try {
       await this.sessionPromise
-      const authTokenResponse = await this.authPromise;
+      const authTokenResponse = await this.authPromise
       options.headers = {
-      	...options.headers,
-      	...{
-          'authorization': `Bearer ${authTokenResponse.access_token}`,
-          'hardware_id': hardwareId,
-        }
-      };
-        
+        ...options.headers,
+        ...{
+          authorization: `Bearer ${authTokenResponse.access_token}`,
+          hardware_id: hardwareId,
+        },
+      }
+
       return await requestWithRetry<T>(options)
     } catch (e) {
       const response = e.response || {}
@@ -285,7 +287,9 @@ export class RingRestClient {
           return this.request(options)
         }
         logError(
-          `http request failed.  ${url} returned unknown errors: (${stringify(errors)}).`
+          `http request failed.  ${url} returned unknown errors: (${stringify(
+            errors
+          )}).`
         )
       }
 

@@ -309,7 +309,7 @@ export class Location {
 
   setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
     this.restClient.request<any>({
-      method: 'post',
+      method: 'POST',
       url: `https://api.ring.com/groups/v1/locations/${this.id}/groups/${groupId}/devices`,
       json: {
         lights_on: {
@@ -426,7 +426,7 @@ export class Location {
     }
 
     return this.restClient.request<AccountMonitoringStatus>({
-      method: 'post',
+      method: 'POST',
       url: appApi(
         `rs/monitoring/accounts/${this.id}/assets/${baseStationAsset.uuid}/userAlarm`
       ),
@@ -451,7 +451,7 @@ export class Location {
     this.onLocationModeRequested.next()
 
     const response = await this.restClient.request<LocationModeResponse>({
-      method: 'get',
+      method: 'GET',
       url: appApi(`mode/location/${this.id}`),
     })
 
@@ -462,7 +462,7 @@ export class Location {
 
   async setLocationMode(mode: LocationModeInput) {
     const response = await this.restClient.request<LocationModeResponse>({
-      method: 'post',
+      method: 'POST',
       url: appApi(`mode/location/${this.id}`),
       json: { mode },
     })
@@ -474,7 +474,7 @@ export class Location {
 
   async disableLocationModes() {
     await this.restClient.request<void>({
-      method: 'delete',
+      method: 'DELETE',
       url: appApi(`mode/location/${this.id}/settings`),
     })
     this.onLocationMode.next('disabled')
@@ -482,14 +482,14 @@ export class Location {
 
   getLocationModeSettings() {
     return this.restClient.request<LocationModeSettingsResponse>({
-      method: 'get',
+      method: 'GET',
       url: appApi(`mode/location/${this.id}/settings`),
     })
   }
 
   setLocationModeSettings(settings: LocationModeSettings) {
     return this.restClient.request<LocationModeSettingsResponse>({
-      method: 'post',
+      method: 'POST',
       url: appApi(`mode/location/${this.id}/settings`),
       json: settings,
     })
@@ -497,14 +497,14 @@ export class Location {
 
   getLocationModeSharing() {
     return this.restClient.request<LocationModeSharing>({
-      method: 'get',
+      method: 'GET',
       url: appApi(`mode/location/${this.id}/sharing`),
     })
   }
 
   setLocationModeSharing(sharedUsersEnabled: boolean) {
     return this.restClient.request<LocationModeSharing>({
-      method: 'post',
+      method: 'POST',
       url: appApi(`mode/location/${this.id}/sharing`),
       json: { sharedUsersEnabled },
     })

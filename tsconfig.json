@@ -13,6 +13,8 @@
     "strict": true
   },
   "exclude": [
-    "public"
+    "public",
+    "release-api",
+    "release-homebridge"
   ]
 }

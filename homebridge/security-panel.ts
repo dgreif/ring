@@ -70,6 +70,8 @@ export class SecurityPanel extends BaseDeviceAccessory {
         },
       })
     }
+
+    this.getService(Service.SecuritySystem).setPrimaryService(true)
   }
 
   getCurrentState({ mode, alarmInfo }: RingDeviceData) {

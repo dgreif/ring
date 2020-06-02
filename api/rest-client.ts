@@ -1,10 +1,18 @@
-import axios, { AxiosRequestConfig, ResponseType } from 'axios'
+import got, { Options as RequestOptions, Headers } from 'got'
+import CacheableLookup from 'cacheable-lookup'
+import HttpAgent, { HttpsAgent } from 'agentkeepalive'
 import { delay, getHardwareId, logError, logInfo, stringify } from './util'
-import * as querystring from 'querystring'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
-const ringErrorCodes: { [code: number]: string } = {
+const defaultRequestOptions: RequestOptions = {
+    dnsCache: new CacheableLookup(),
+    agent: { http: new HttpAgent(), https: new HttpsAgent() },
+    http2: true,
+    responseType: 'json',
+    method: 'GET',
+  },
+  ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
     7019: 'ASSET_OFFLINE',
     7061: 'ASSET_CELL_BACKUP',
@@ -29,25 +37,27 @@ export interface ExtendedResponse {
 }
 
 async function requestWithRetry<T>(
-  options: AxiosRequestConfig
+  requestOptions: RequestOptions
 ): Promise<T & ExtendedResponse> {
   try {
-    const { data, headers } = await axios(options)
-
-    if (typeof data === 'object' && headers.date) {
-      data.responseTimestamp = new Date(headers.date).getTime()
+    const options = { ...defaultRequestOptions, ...requestOptions },
+      { headers, body } = (await got(options)) as {
+        headers: Headers
+        body: any
+      },
+      data = body as T & ExtendedResponse
+    if (data !== null && typeof data === 'object' && headers.date) {
+      data.responseTimestamp = new Date(headers.date as string).getTime()
     }
-
-    return data as T & ExtendedResponse
+    return data
   } catch (e) {
     if (!e.response) {
       logError(
-        `Failed to reach Ring server at ${options.url}.  Trying again in 5 seconds...`
+        `Failed to reach Ring server at ${requestOptions.url}.  Trying again in 5 seconds...`
       )
       await delay(5000)
-      return requestWithRetry(options)
+      return requestWithRetry(requestOptions)
     }
-
     throw e
   }
 }
@@ -108,14 +118,13 @@ export class RingRestClient {
     try {
       const response = await requestWithRetry<AuthTokenResponse>({
         url: 'https://oauth.ring.com/oauth/token',
-        data: {
+        json: {
           client_id: 'ring_official_android',
           scope: 'client',
           ...grantData,
         },
         method: 'POST',
         headers: {
-          'content-type': 'application/json',
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
           hardware_id: await hardwareIdPromise,
@@ -137,13 +146,13 @@ export class RingRestClient {
       }
 
       const response = requestError.response || {},
-        responseData = response.data || {},
+        responseData = response.body || {},
         responseError =
           typeof responseData.error === 'string' ? responseData.error : ''
 
       if (
-        response.status === 412 || // need 2fa code
-        (response.status === 400 &&
+        response.statusCode === 412 || // need 2fa code
+        (response.statusCode === 400 &&
           responseError.startsWith('Verification Code')) // invalid 2fa code entered
       ) {
         this.using2fa = true
@@ -158,7 +167,8 @@ export class RingRestClient {
             : 'email and password are',
         errorMessage =
           'Failed to fetch oauth token from Ring. ' +
-          (responseData.err_msg === 'too many requests from dependency service'
+          (responseData.error_description ===
+          'too many requests from dependency service'
             ? 'You have requested too many 2fa codes.  Ring limits 2fa to 10 codes within 10 minutes.  Please try again in 10 minutes.'
             : `Verify that your ${authTypeMessage} correct.`) +
           ` (error: ${responseError})`
@@ -171,7 +181,7 @@ export class RingRestClient {
   private async fetchNewSession(authToken: AuthTokenResponse) {
     return requestWithRetry<SessionResponse>({
       url: clientApi('session'),
-      data: {
+      json: {
         device: {
           hardware_id: await hardwareIdPromise,
           metadata: {
@@ -185,7 +195,6 @@ export class RingRestClient {
       method: 'POST',
       headers: {
         authorization: `Bearer ${authToken.access_token}`,
-        'content-type': 'application/json',
       },
     })
   }
@@ -197,12 +206,12 @@ export class RingRestClient {
       } catch (e) {
         const response = e.response || {}
 
-        if (response.status === 401) {
+        if (response.statusCode === 401) {
           this.refreshAuth()
           return this.getSession()
         }
 
-        if (response.status === 429) {
+        if (response.statusCode === 429) {
           const retryAfter = e.response.headers['retry-after'],
             waitSeconds = isNaN(retryAfter)
               ? 200
@@ -229,48 +238,38 @@ export class RingRestClient {
     this.sessionPromise = this.getSession()
   }
 
-  async request<T = void>(options: {
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-    url: string
-    data?: any
-    json?: boolean
-    responseType?: ResponseType
-  }): Promise<T & ExtendedResponse> {
-    const { method, url, data, json, responseType } = options,
-      hardwareId = await hardwareIdPromise
+  async request<T = void>(
+    options: RequestOptions
+  ): Promise<T & ExtendedResponse> {
+    const hardwareId = await hardwareIdPromise,
+      url = options.url! as string
 
     try {
       await this.sessionPromise
-      const authTokenResponse = await this.authPromise,
-        headers: { [key: string]: string } = {
-          'content-type': json
-            ? 'application/json'
-            : 'application/x-www-form-urlencoded',
+      const authTokenResponse = await this.authPromise
+      options.headers = {
+        ...options.headers,
+        ...{
           authorization: `Bearer ${authTokenResponse.access_token}`,
           hardware_id: hardwareId,
-        }
+        },
+      }
 
-      return await requestWithRetry<T>({
-        method: method || 'GET',
-        url,
-        data: json ? data : querystring.stringify(data),
-        headers,
-        responseType,
-      })
+      return await requestWithRetry<T>(options)
     } catch (e) {
       const response = e.response || {}
 
-      if (response.status === 401) {
+      if (response.statusCode === 401) {
         this.refreshAuth()
         return this.request(options)
       }
 
       if (
-        response.status === 404 &&
-        response.data &&
-        Array.isArray(response.data.errors)
+        response.statusCode === 404 &&
+        response.body &&
+        Array.isArray(response.body.errors)
       ) {
-        const errors = response.data.errors,
+        const errors = response.body.errors,
           errorText = errors
             .map((code: number) => ringErrorCodes[code])
             .filter((x?: string) => x)
@@ -291,9 +290,9 @@ export class RingRestClient {
         )
       }
 
-      if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {
+      if (response.statusCode === 404 && url.startsWith(clientApiBaseUrl)) {
         logError('404 from endpoint ' + url)
-        if (response.data?.error?.includes(hardwareId)) {
+        if (response.body?.error?.includes(hardwareId)) {
           logError(
             'Session hardware_id not found.  Creating a new session and trying again.'
           )
@@ -301,13 +300,13 @@ export class RingRestClient {
           return this.request(options)
         }
 
-        throw new Error('Not found with response: ' + stringify(response.data))
+        throw new Error('Not found with response: ' + stringify(response.body))
       }
 
       logError(
         `Request to ${url} failed with status ${
-          response.status
-        }. Response body: ${stringify(response.data)}`
+          response.statusCode
+        }. Response body: ${stringify(response.body)}`
       )
 
       throw e

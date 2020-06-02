@@ -1,18 +1,14 @@
-import https from 'https'
 import got, { Options, Headers } from 'got'
 import CacheableLookup from 'cacheable-lookup'
+import HttpAgent, { HttpsAgent } from 'agentkeepalive'
 import { delay, getHardwareId, logError, logInfo, stringify } from './util'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
-const cacheableLookup = new CacheableLookup(),
-  httpsAgent = new https.Agent({ keepAlive: true })
-https.globalAgent = httpsAgent
-
 const defaultOptions: Options = {
-    headers: { 'user-agent': 'Mozilla/5.0 (Linux) Ring' },
-    dnsCache: cacheableLookup,
-    agent: { https: httpsAgent },
+    headers: { 'user-agent': 'Device' },
+    dnsCache: new CacheableLookup(),
+    agent: { http: new HttpAgent(), https: new HttpsAgent() },
     http2: true,
     responseType: 'json',
     method: 'GET',

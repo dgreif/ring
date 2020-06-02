@@ -51,6 +51,7 @@
   "author": "dgreif",
   "license": "MIT",
   "dependencies": {
+    "agentkeepalive": "^4.1.2",
     "colors": "^1.4.0",
     "debug": "^4.1.1",
     "execa": "^4.0.1",

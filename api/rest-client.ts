@@ -51,7 +51,7 @@ async function requestWithRetry<T>(
     const { headers, body } = <{ headers: Headers, body: any }>await got(options);
 	const data = body as T & ExtendedResponse;
     if (data !== null && typeof data === 'object' && headers.date) {
-      data!.responseTimestamp = new Date(<string>headers.date).getTime()
+      data.responseTimestamp = new Date(<string>headers.date).getTime()
     }
     return data
   } catch (e) {

@@ -23,15 +23,6 @@ export class Beam extends BaseDeviceAccessory {
         data: { deviceType },
       } = this.device
 
-    if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
-      this.registerCharacteristic({
-        characteristicType: hap.Characteristic.MotionDetected,
-        serviceType: MotionSensor,
-        getValue: (data) => data.motionStatus === 'faulted',
-      })
-      this.initSensorService(MotionSensor)
-    }
-
     if (deviceType !== RingDeviceType.BeamsMotionSensor) {
       this.registerCharacteristic({
         characteristicType: Characteristic.On,
@@ -39,6 +30,7 @@ export class Beam extends BaseDeviceAccessory {
         getValue: (data) => Boolean(data.on),
         setValue: (value) => this.setOnState(value),
       })
+      this.getService(Service.Lightbulb).setPrimaryService(true)
     }
 
     if (deviceType === RingDeviceType.BeamsSwitch) {
@@ -50,6 +42,15 @@ export class Beam extends BaseDeviceAccessory {
         },
         setValue: (value) => this.setLevelState(value),
       })
+    }
+
+    if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
+      this.registerCharacteristic({
+        characteristicType: hap.Characteristic.MotionDetected,
+        serviceType: MotionSensor,
+        getValue: (data) => data.motionStatus === 'faulted',
+      })
+      this.initSensorService(MotionSensor)
     }
   }
 

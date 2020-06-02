@@ -314,13 +314,12 @@ export class Location {
     this.restClient.request<any>({
       method: 'POST',
       url: `https://api.ring.com/groups/v1/locations/${this.id}/groups/${groupId}/devices`,
-      data: {
+      json: {
         lights_on: {
           duration_seconds: durationSeconds,
           enabled: on,
         },
       },
-      json: true,
     })
   }
 
@@ -434,8 +433,7 @@ export class Location {
       url: appApi(
         `rs/monitoring/accounts/${this.id}/assets/${baseStationAsset.uuid}/userAlarm`
       ),
-      json: true,
-      data: {
+      json: {
         alarmSessionUuid,
         currentTsMs: now,
         eventOccurredTime: now,
@@ -469,8 +467,7 @@ export class Location {
     const response = await this.restClient.request<LocationModeResponse>({
       method: 'POST',
       url: appApi(`mode/location/${this.id}`),
-      json: true,
-      data: { mode },
+      json: { mode },
     })
 
     this.onLocationMode.next(response.mode)
@@ -497,7 +494,7 @@ export class Location {
     return this.restClient.request<LocationModeSettingsResponse>({
       method: 'POST',
       url: appApi(`mode/location/${this.id}/settings`),
-      data: settings,
+      json: settings,
     })
   }
 
@@ -512,8 +509,7 @@ export class Location {
     return this.restClient.request<LocationModeSharing>({
       method: 'POST',
       url: appApi(`mode/location/${this.id}/sharing`),
-      json: true,
-      data: { sharedUsersEnabled },
+      json: { sharedUsersEnabled },
     })
   }
 

@@ -228,11 +228,9 @@ export class RingCamera {
       return false
     }
 
-    const state = on ? 'on' : 'off'
-
     await this.restClient.request({
       method: 'PUT',
-      url: this.doorbotUrl('siren_' + state),
+      url: this.doorbotUrl('siren_' + (on ? 'on' : 'off')),
     })
 
     this.updateData({ ...this.data, siren_status: { seconds_remaining: 1 } })
@@ -241,7 +239,7 @@ export class RingCamera {
   }
 
   // Enable or disable the in-home doorbell (if digital or mechanical)
-  async setInHomeDoorbell(on: boolean) {
+  async setInHomeDoorbell(enable: boolean) {
     if (!this.hasInHomeDoorbell) {
       return false
     }
@@ -249,8 +247,8 @@ export class RingCamera {
     await this.restClient.request({
       method: 'PUT',
       url: this.doorbotUrl(),
-      data: {
-        'doorbot[settings][chime_settings][enable]': on,
+      json: {
+        doorbot: { settings: { chime_settings: { enable } } },
       },
     })
 
@@ -354,10 +352,9 @@ export class RingCamera {
       }>({
         url: clientApi('snapshots/timestamps'),
         method: 'POST',
-        data: {
+        json: {
           doorbot_ids: [this.id],
         },
-        json: true,
       }),
       deviceTimestamp = timestamps[0],
       timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0,
@@ -436,7 +433,7 @@ export class RingCamera {
 
     this.lastSnapshotPromise = this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),
-      responseType: 'arraybuffer',
+      responseType: 'buffer',
     })
 
     this.lastSnapshotPromise.catch(() => {

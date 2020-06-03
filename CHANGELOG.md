@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.0.0-beta.2](https://github.com/dgreif/ring/compare/v9.0.0-beta.1...v9.0.0-beta.2) (2020-06-03)
+
+
+### Bug Fixes
+
+* **homebridge:** set light as primary service for beams ([3f6844e](https://github.com/dgreif/ring/commit/3f6844ea56c6040c7b1ad6a3369ea4e03533be76))
+* **homebridge:** set security system as primary service for alarm ([b3b8a30](https://github.com/dgreif/ring/commit/b3b8a30bd135548cce67114572e13db50990325d))
+
 ## [9.0.0-beta.1](https://github.com/dgreif/ring/compare/v9.0.0-beta.0...v9.0.0-beta.1) (2020-05-31)
 
 

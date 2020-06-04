@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.0.0](https://github.com/dgreif/ring/compare/v8.2.0...v9.0.0) (2020-06-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** Night Mode can now be configured as a way to bypass contact sensors for either Home or Away mode.  Night Mode previously activated Home mode only.  By default, Night Mode will be hidden in HomeKit.
+* Night mode is no longer an option for Ring Alarm and Location Modes.  Any automations that made use of Night mode will need to use Home mode instead.
+* UPnP and NAT-PMP hole punching has been removed in favor of RTP latching.  This should lead to a successful live stream, regardless of network configuration, network settings, and NAT type
+* ffmpeg is now required for live streams.  See https://github.com/dgreif/ring/wiki/FFmpeg for details
+
+### Features
+
+* **homebridge:** configure night mode to bypass contact sensors ([24183c4](https://github.com/dgreif/ring/commit/24183c4debc36eccf5994025d8974a012eb8ca98)), closes [#215](https://github.com/dgreif/ring/issues/215)
+* add support for z-wave thermostats via ring alarm ([#331](https://github.com/dgreif/ring/issues/331)) ([3daa1f1](https://github.com/dgreif/ring/commit/3daa1f1bf2222d8e4569c02ad2bae36922df08bc))
+* more reliable live streams regardless of nat type ([09a78c9](https://github.com/dgreif/ring/commit/09a78c97d51aa9a49361c5d72a4f818698b79f6f))
+* use random srtp key/value for all live streams ([082567a](https://github.com/dgreif/ring/commit/082567a1ab47c987b48b43b53832ac86033f76ac))
+
+
+### Bug Fixes
+
+* **homebridge:** detect and stop inactive live streams ([3a5a007](https://github.com/dgreif/ring/commit/3a5a007b4504105559b4232bce494cc90bb5dbbd))
+* **homebridge:** set light as primary service for beams ([b33233d](https://github.com/dgreif/ring/commit/b33233d460f7a1c421bb84b245924741065e0cc1))
+* **homebridge:** set security system as primary service for alarm ([a888bd1](https://github.com/dgreif/ring/commit/a888bd1c37bb596570a56b305f0f5747599cd75e))
+* remove night mode from alarm and location modes ([63ff8a0](https://github.com/dgreif/ring/commit/63ff8a046e6d31af203bc9b11ecb15cb0b331870))
+
 ## [8.2.0](https://github.com/dgreif/ring/compare/v8.1.0...v8.2.0) (2020-05-17)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.0.1](https://github.com/dgreif/ring/compare/v9.0.0...v9.0.1) (2020-06-05)
+
+
+### Bug Fixes
+
+* log error message when request fails without response ([d22de47](https://github.com/dgreif/ring/commit/d22de47b847d40e2d17ad29bb79b25c4ff996172))
+
 ## [9.0.0](https://github.com/dgreif/ring/compare/v8.2.0...v9.0.0) (2020-06-04)
 
 

@@ -53,7 +53,7 @@ async function requestWithRetry<T>(
   } catch (e) {
     if (!e.response) {
       logError(
-        `Failed to reach Ring server at ${requestOptions.url}.  Trying again in 5 seconds...`
+        `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
       await delay(5000)
       return requestWithRetry(requestOptions)

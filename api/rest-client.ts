@@ -1,7 +1,14 @@
 import got, { Options as RequestOptions, Headers } from 'got'
 import CacheableLookup from 'cacheable-lookup'
 import HttpAgent, { HttpsAgent } from 'agentkeepalive'
-import { delay, getHardwareId, logError, logInfo, stringify } from './util'
+import {
+  delay,
+  getHardwareId,
+  logDebug,
+  logError,
+  logInfo,
+  stringify,
+} from './util'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
@@ -55,6 +62,7 @@ async function requestWithRetry<T>(
       logError(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
+      logDebug(e)
       await delay(5000)
       return requestWithRetry(requestOptions)
     }

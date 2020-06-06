@@ -213,7 +213,9 @@ export class RingApi {
         (data) =>
           new RingCamera(
             data,
-            doorbots.includes(data) || authorizedDoorbots.includes(data),
+            doorbots.includes(data) ||
+              authorizedDoorbots.includes(data) ||
+              data.kind.startsWith('doorbell'),
             this.restClient
           )
       ),

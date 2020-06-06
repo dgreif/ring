@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.1.0](https://github.com/dgreif/ring/compare/v9.0.1...v9.1.0) (2020-06-06)
+
+
+### Features
+
+* add doorbell 3 ([6017a6c](https://github.com/dgreif/ring/commit/6017a6cdd65deeadb9e46833cd5e17c65dd74166)), closes [#346](https://github.com/dgreif/ring/issues/346)
+* **homebridge:** placeholder image if snapshots are unavailable ([425454d](https://github.com/dgreif/ring/commit/425454debcd13c25b83836dc39d22366fad0a3f1)), closes [#318](https://github.com/dgreif/ring/issues/318)
+
+
+### Bug Fixes
+
+* log full http error in debug mode ([f1a3884](https://github.com/dgreif/ring/commit/f1a388442189ad048addc4975b4148580e101ddc))
+
 ### [9.0.1](https://github.com/dgreif/ring/compare/v9.0.0...v9.0.1) (2020-06-05)
 
 

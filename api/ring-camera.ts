@@ -346,6 +346,10 @@ export class RingCamera {
     return timestampAge < this.snapshotLifeTime
   }
 
+  public get snapshotsAreBlocked() {
+    return this.data.settings.motion_detection_enabled === false
+  }
+
   private async getSnapshotTimestamp() {
     const { timestamps, responseTimestamp } = await this.restClient.request<{
         timestamps: SnapshotTimestamp[]
@@ -369,7 +373,7 @@ export class RingCamera {
   }
 
   private refreshSnapshotInProgress?: Promise<boolean>
-  private snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
+  public readonly snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
@@ -385,7 +389,7 @@ export class RingCamera {
     }
 
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      if (this.data.settings.motion_detection_enabled === false) {
+      if (this.snapshotsAreBlocked) {
         throw new Error(
           `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
         )

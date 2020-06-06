@@ -21,12 +21,18 @@ import {
   StreamingRequest,
   StreamRequestCallback,
 } from 'homebridge'
-import { logDebug } from '../api/util'
+import { logDebug, logError } from '../api/util'
 import { doesFfmpegSupportCodec, FfmpegProcess } from '../api/ffmpeg'
 import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
 import { merge, of, Subject } from 'rxjs'
+import { readFile } from 'fs'
+import { promisify } from 'util'
 
 const ip = require('ip')
+const readFileAsync = promisify(readFile),
+  cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
+  fetchingSnapshotsPath = require.resolve('../../media/fetching-snapshot.jpg'),
+  snapshotsBlockedPath = require.resolve('../../media/snapshots-blocked.jpg')
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000
@@ -65,20 +71,29 @@ export class CameraSource implements CameraStreamingDelegate {
       },
     },
   })
-  sessions: { [sessionKey: string]: SipSession } = {}
+  private sessions: { [sessionKey: string]: SipSession } = {}
+  private cachedSnapshot?: Buffer
 
-  constructor(private ringCamera: RingCamera, private logger: Logging) {
-    void this.loadSnapshot()
-  }
-
-  private lastSnapshot?: Buffer
+  constructor(private ringCamera: RingCamera, private logger: Logging) {}
 
   async loadSnapshot() {
     const start = Date.now()
     logDebug(`Loading new snapshot into cache for ${this.ringCamera.name}`)
 
     try {
-      this.lastSnapshot = await this.ringCamera.getSnapshot(true)
+      const previousSnapshot = this.cachedSnapshot,
+        newSnapshot = await this.ringCamera.getSnapshot(true)
+      this.cachedSnapshot = newSnapshot
+
+      if (previousSnapshot !== newSnapshot) {
+        // Only retain the snapshot while it is still within its lifetime
+        // After that, clear it out so a new one can be fetched and the "Fetching Snapshot" message can be displayed
+        setTimeout(() => {
+          if (this.cachedSnapshot === newSnapshot) {
+            this.cachedSnapshot = undefined
+          }
+        }, this.ringCamera.snapshotLifeTime)
+      }
 
       logDebug(
         `Snapshot cached for ${this.ringCamera.name} (${getDurationSeconds(
@@ -105,20 +120,44 @@ export class CameraSource implements CameraStreamingDelegate {
     }
   }
 
-  handleSnapshotRequest(
-    request: SnapshotRequest,
-    callback: SnapshotRequestCallback
-  ) {
+  private getCurrentSnapshot() {
+    if (this.ringCamera.isOffline) {
+      return readFileAsync(cameraOfflinePath)
+    }
+
+    if (this.ringCamera.snapshotsAreBlocked) {
+      return readFileAsync(snapshotsBlockedPath)
+    }
+
     logDebug(
       `${
-        this.lastSnapshot ? 'Used cached snapshot' : 'No snapshot cached'
+        this.cachedSnapshot ? 'Used cached snapshot' : 'No snapshot cached'
       } for ${this.ringCamera.name}`
     )
 
-    // Not currently resizing the image.
-    // HomeKit does a good job of resizing and doesn't seem to care if it's not right
-    callback(undefined, this.lastSnapshot)
+    if (this.cachedSnapshot) {
+      return this.cachedSnapshot
+    }
+
     void this.loadSnapshot()
+    return readFileAsync(fetchingSnapshotsPath)
+  }
+
+  async handleSnapshotRequest(
+    request: SnapshotRequest,
+    callback: SnapshotRequestCallback
+  ) {
+    try {
+      const snapshot = await this.getCurrentSnapshot()
+
+      // Not currently resizing the image.
+      // HomeKit does a good job of resizing and doesn't seem to care if it's not right
+      callback(undefined, snapshot)
+    } catch (e) {
+      logError(`Error fetching snapshot for ${this.ringCamera.name}`)
+      logError(e)
+      callback(e)
+    }
   }
 
   async prepareStream(
@@ -385,6 +424,7 @@ export class CameraSource implements CameraStreamingDelegate {
         } (${getDurationSeconds(start)}s)`
       )
       this.logger.error(e)
+      callback(e)
     }
   }
 

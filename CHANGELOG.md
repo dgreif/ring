@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.1.1](https://github.com/dgreif/ring/compare/v9.1.0...v9.1.1) (2020-06-07)
+
+
+### Bug Fixes
+
+* **homebridge:** cache snapshots for 2 minutes ([d671ea8](https://github.com/dgreif/ring/commit/d671ea881cd953bba5b6b819ce589f9b20ddb802)), closes [#350](https://github.com/dgreif/ring/issues/350)
+
 ## [9.1.0](https://github.com/dgreif/ring/compare/v9.0.1...v9.1.0) (2020-06-06)
 
 

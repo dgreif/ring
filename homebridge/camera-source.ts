@@ -86,13 +86,20 @@ export class CameraSource implements CameraStreamingDelegate {
       this.cachedSnapshot = newSnapshot
 
       if (previousSnapshot !== newSnapshot) {
+        // Keep the snapshots in cache longer than their lifetime
+        // This allows users on LTE with wired camera to get snapshots each 60 second pull instead of always seeing "fetching"
+        const clearCacheIn = Math.max(
+          this.ringCamera.currentTimestampExpiresIn,
+          2 * 60 * 1000
+        )
+
         // Only retain the snapshot while it is still within its lifetime
         // After that, clear it out so a new one can be fetched and the "Fetching Snapshot" message can be displayed
         setTimeout(() => {
           if (this.cachedSnapshot === newSnapshot) {
             this.cachedSnapshot = undefined
           }
-        }, this.ringCamera.snapshotLifeTime)
+        }, clearCacheIn)
       }
 
       logDebug(
@@ -135,11 +142,14 @@ export class CameraSource implements CameraStreamingDelegate {
       } for ${this.ringCamera.name}`
     )
 
+    if (!this.ringCamera.hasSnapshotWithinLifetime) {
+      void this.loadSnapshot()
+    }
+
     if (this.cachedSnapshot) {
       return this.cachedSnapshot
     }
 
-    void this.loadSnapshot()
     return readFileAsync(fetchingSnapshotsPath)
   }
 

@@ -377,12 +377,26 @@ export class RingCamera {
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
+  get currentTimestampAge() {
+    return Date.now() - this.lastSnapshotTimestampLocal
+  }
+
+  get currentTimestampExpiresIn() {
+    return Math.max(
+      this.lastSnapshotTimestampLocal - Date.now() + this.snapshotLifeTime,
+      0
+    )
+  }
+
+  get hasSnapshotWithinLifetime() {
+    return this.isTimestampInLifeTime(this.currentTimestampAge)
+  }
+
   private async refreshSnapshot() {
-    const currentTimestampAge = Date.now() - this.lastSnapshotTimestampLocal
-    if (this.isTimestampInLifeTime(currentTimestampAge)) {
+    if (this.hasSnapshotWithinLifetime) {
       logInfo(
         `Snapshot for ${this.name} is still within its life time (${
-          currentTimestampAge / 1000
+          this.currentTimestampAge / 1000
         }s old)`
       )
       return true

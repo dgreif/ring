@@ -30,7 +30,7 @@ Add the `Ring` platform in your homebridge `config.json` file.
 
 ### Easiest Configuration
 
-For the best experience setting up this plugin, please use [homebridge-config-ui-x](https://www.npmjs.com/package/homebridge-config-ui-x).  It will walk you through linking your account without any cli tools or storing your email/password.
+For the best experience setting up this plugin, please use [homebridge-config-ui-x](https://www.npmjs.com/package/homebridge-config-ui-x) or [HOOBS](https://hoobs.org/).  Both have a UI that will walk you through linking your account without any cli tools or storing your email/password.
 
 ### Basic Configuration
 

@@ -83,7 +83,7 @@ Option | Default | Explanation
 `nightModeBypassFor` | no Night Mode | Allows you to use Night mode to "Bypass and Arm" a Ring Alarm.  Can be set to `all` for Away or `some` for Home.  If set and Night mode is activated from HomeKit, any open contact sensors will automatically be bypassed.
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras.  Information like light/siren status do not update in real time and need to be requested periodically.
 `cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
-`locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.
+`locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.  Will hide Location Mode switch if set to `0`
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
 `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridg) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
@@ -177,6 +177,7 @@ If you are having issues with your cameras in the Home app, please see the [Came
   * Location Modes
     * For homes not equipped with a Ring Alarm, Locations Modes can be used as an alternative way to change settings for Ring cameras.
     * Shows as a security system in HomeKit, just like the Ring Alarm.
+    * Can be hidden with `"locationModePollingSeconds": 0`
   * Thermostats
     * Set Thermostat mode to heat/cool/off
     * Set target temperature

@@ -104,7 +104,7 @@
         "type": "integer",
         "minimum": 1,
         "placeholder": "Get current Location Mode every __ seconds",
-        "description": "Location Modes do not update live and must be fetched periodically.  By default this is done every 20 seconds for locations that have Location Modes enabled, and that do not have a Ring Alarm"
+        "description": "Location Modes do not update live and must be fetched periodically.  By default this is done every 20 seconds for locations that have Location Modes enabled, and that do not have a Ring Alarm.  The Location Mode switch can be hidden by setting this option to 0"
       },
       "locationIds": {
         "title": "Location ID",

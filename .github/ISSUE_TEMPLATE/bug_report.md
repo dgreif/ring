@@ -47,4 +47,5 @@ DO NOT INCLUDE YOUR REFRESH TOKEN OR EMAIL/PASSWORD (replace them with xxx)
  - Node.js: [e.g. 12.14.1] <!-- run `node -v` to get current version -->
  - NPM: [e.g 6.13.4] <!-- run `npm -v` to get current version -->
  - homebridge-ring: [e.g 6.0.3]
- - homebridge: [e.g. 0.4.50]
+ - homebridge: [e.g. 0.4.50 or N/A]
+ - hoobs: [e.g. 0.4.50 or N/A]

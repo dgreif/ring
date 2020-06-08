@@ -29,8 +29,9 @@ PLEASE THOROUGHLY READ https://github.com/dgreif/ring/wiki/Camera-Troubleshootin
  - OS: [e.g. Raspbian]
  - Node.js: [e.g. 12.14.1] <!-- run `node -v` to get current version -->
  - NPM: [e.g 6.13.4] <!-- run `npm -v` to get current version -->
- - homebridge-ring (if applicable): [e.g 6.0.3]
- - homebridge (if applicable): [e.g. 0.4.50]
+ - homebridge-ring (if applicable): [e.g 6.0.3 or N/A]
+ - homebridge (if applicable): [e.g. 0.4.50 or N/A]
+ - hoobs (if applicable): [e.g. 0.4.50 or N/A]
 
 ### Network Environment
 <!-- ✍️edit: --> Please provide a detailed description of your network setup, including all network hardware between your camera, the internet, your homebridge server, and your HomeKit home hub (Apple TV, HomePod, iPad).  Please include brand and model for each device that the network traffic passes through.

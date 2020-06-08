@@ -184,18 +184,15 @@ If you are having issues with your cameras in the Home app, please see the [Came
 
 ### Alarm/Location Modes
 
-Ring Mode | HomeKit Mode
+HomeKit Mode | Ring Mode
 --- | ---
-Disarmed | Off
+Off | Disarmed
 Home | Home
 Away | Away
-Home | Night
+Night | Hidden by default.  Configurable with  `nightModeBypassFor`
 
 Entry delays and bypassed sensors (ex. for Home mode) are all controlled in the Ring app.
 These settings will automatically be used by HomeKit.
-
-**Note**: Using `Night` mode in HomeKit will activate `Home` mode on the Ring alarm.
-HomeKit should immediately switch to `Home` to match.
 
 ### Siri Commands for Alarm/Location Modes
 

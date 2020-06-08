@@ -1,6 +1,5 @@
 # ring-client-api
 
-[![mit license](https://badgen.net/badge/license/MIT/red)](https://github.com/dgreif/ring/blob/master/LICENSE)
 [![npm](https://badgen.net/npm/v/ring-client-api)](https://www.npmjs.com/package/ring-client-api)
 [![npm](https://badgen.net/npm/dt/ring-client-api)](https://www.npmjs.com/package/ring-client-api)
 [![Donate](https://badgen.net/badge/Donate/PayPal/91BE09)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=HD9ZPB34FY428&currency_code=USD&source=url)

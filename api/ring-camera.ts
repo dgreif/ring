@@ -1,12 +1,12 @@
 import {
   ActiveDing,
-  batteryCameraKinds,
   CameraData,
   CameraEventOptions,
   CameraEventResponse,
   CameraHealth,
   DoorbellType,
   HistoryOptions,
+  isBatteryCameraKind,
   RingCameraModel,
   SnapshotTimestamp,
 } from './ring-types'
@@ -100,7 +100,7 @@ export class RingCamera {
   hasLight = this.initialData.led_status !== undefined
   hasSiren = this.initialData.siren_status !== undefined
   hasBattery =
-    batteryCameraKinds.includes(this.deviceType) ||
+    isBatteryCameraKind(this.deviceType) ||
     (typeof this.initialData.battery_life === 'string' &&
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&

@@ -76,20 +76,13 @@ export enum RingCameraKind {
   floodlight_v2 = 'floodlight_v2',
 }
 
-export const batteryCameraKinds: RingCameraKind[] = [
-  RingCameraKind.doorbot,
-  RingCameraKind.doorbell,
-  RingCameraKind.doorbell_v3,
-  RingCameraKind.doorbell_v4,
-  RingCameraKind.doorbell_v5,
-  RingCameraKind.doorbell_portal,
-  RingCameraKind.doorbell_scallop,
-  RingCameraKind.doorbell_scallop_lite,
-  RingCameraKind.stickup_cam,
-  RingCameraKind.stickup_cam_v3,
-  RingCameraKind.stickup_cam_v4,
-  RingCameraKind.stickup_cam_lunar,
-]
+// RegExp taken from ring.com app
+const isWiredCameraRegExp = new RegExp(
+  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight))/
+)
+export function isBatteryCameraKind(kind: RingCameraKind) {
+  return !kind.match(isWiredCameraRegExp)
+}
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   cocoa_camera: 'Stick Up Cam',

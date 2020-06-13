@@ -10,9 +10,11 @@ import {
   BaseStation,
   BeamBridge,
   CameraData,
+  ChimeData,
   UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
+import { RingChime } from './ring-chime'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug } from './util'
@@ -81,12 +83,14 @@ export class RingApi {
   async fetchRingDevices() {
     const {
       doorbots,
+      chimes,
       authorized_doorbots: authorizedDoorbots,
       stickup_cams: stickupCams,
       base_stations: baseStations,
       beams_bridges: beamBridges,
     } = await this.restClient.request<{
       doorbots: CameraData[]
+      chimes: ChimeData[]
       authorized_doorbots: CameraData[]
       stickup_cams: CameraData[]
       base_stations: BaseStation[]
@@ -95,6 +99,7 @@ export class RingApi {
 
     return {
       doorbots,
+      chimes,
       authorizedDoorbots,
       stickupCams,
       allCameras: doorbots.concat(stickupCams, authorizedDoorbots),
@@ -201,6 +206,7 @@ export class RingApi {
     const rawLocations = await this.fetchRawLocations(),
       {
         authorizedDoorbots,
+        chimes,
         doorbots,
         allCameras,
         baseStations,
@@ -219,6 +225,7 @@ export class RingApi {
             this.restClient
           )
       ),
+      ringChimes = chimes.map((data) => new RingChime(data, this.restClient)),
       locations = rawLocations
         .filter((location) => {
           return (
@@ -231,6 +238,9 @@ export class RingApi {
             new Location(
               location,
               cameras.filter(
+                (x) => x.data.location_id === location.location_id
+              ),
+              ringChimes.filter(
                 (x) => x.data.location_id === location.location_id
               ),
               {

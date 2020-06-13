@@ -461,6 +461,49 @@ export interface CameraEventOptions {
   pagination_key?: string
 }
 
+export interface VideoSearchResult {
+  ding_id: string
+  created_at: number
+  hq_url: null | string
+  lq_url: string
+  preroll_duration: null | unknown
+  thumbnail_url: string
+  untranscoded_url: string
+  kind: DingKind
+  state: 'timed_out' | 'completed'
+  had_subscription: boolean
+  favorite: boolean
+  duration: number
+  cv_properties: {
+    person_detected: null | unknown
+    stream_broken: null | unknown
+    detection_type: null | unknown
+  }
+}
+
+export interface VideoSearchResponse {
+  video_search: VideoSearchResult[]
+}
+
+export interface PeriodicalFootage {
+  start_ms: number
+  end_ms: number
+  playback_ms: number
+  kind: 'online_periodical' | 'offline_periodical'
+  url: string
+  deleted: boolean
+  snapshots: number[]
+}
+
+export interface PeriodicFootageResponse {
+  meta: {
+    pagination_key: number
+    butch_size: number
+  }
+  data: PeriodicalFootage[]
+  responseTimestamp: number
+}
+
 export interface HistoryOptions {
   limit?: number
   offset?: number

@@ -7,8 +7,10 @@ import {
   DoorbellType,
   HistoryOptions,
   isBatteryCameraKind,
+  PeriodicFootageResponse,
   RingCameraModel,
   SnapshotTimestamp,
+  VideoSearchResponse,
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, interval, Subject } from 'rxjs'
@@ -37,7 +39,8 @@ import { isFfmpegInstalled } from './ffmpeg'
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 20,
   maxSnapshotRefreshAttempts =
-    (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay
+    (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay,
+  fullDayMs = 24 * 60 * 60 * 1000
 
 function parseBatteryLife(batteryLife: string | number | null | undefined) {
   if (batteryLife === null || batteryLife === undefined) {
@@ -54,6 +57,14 @@ function parseBatteryLife(batteryLife: string | number | null | undefined) {
   }
 
   return batteryLevel
+}
+
+function getStartOfToday() {
+  return new Date(new Date().toLocaleDateString()).getTime()
+}
+
+function getEndOfToday() {
+  return getStartOfToday() + fullDayMs - 1
 }
 
 export function getBatteryLevel(
@@ -331,6 +342,31 @@ export class RingCamera {
           this.id
         }/events${getSearchQueryString(options)}`
       ),
+    })
+  }
+
+  videoSearch(
+    { dateFrom, dateTo, order = 'asc' } = {
+      dateFrom: getStartOfToday(),
+      dateTo: getEndOfToday(),
+    }
+  ) {
+    return this.restClient.request<VideoSearchResponse>({
+      url: clientApi(
+        `video_search/history?doorbot_id=${this.id}&date_from=${dateFrom}&date_to=${dateTo}&order=${order}&api_version=11&includes%5B%5D=pva`
+      ),
+    })
+  }
+
+  getPeriodicalFootage(
+    { startAtMs, endAtMs } = {
+      startAtMs: getStartOfToday(),
+      endAtMs: getEndOfToday(),
+    }
+  ) {
+    // These will be mp4 clips that are created using periodic snapshots
+    return this.restClient.request<PeriodicFootageResponse>({
+      url: `https://api.ring.com/recordings/public/footages/${this.id}?start_at_ms=${startAtMs}&end_at_ms=${endAtMs}&kinds=online_periodical&kinds=offline_periodical`,
     })
   }
 

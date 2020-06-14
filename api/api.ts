@@ -114,13 +114,16 @@ export class RingApi {
     })
   }
 
-  private listenForCameraUpdates(cameras: RingCamera[]) {
+  private listenForDeviceUpdates(cameras: RingCamera[], chimes: RingChime[]) {
     const {
         cameraStatusPollingSeconds,
         cameraDingsPollingSeconds,
       } = this.options,
       onCamerasRequestUpdate = merge(
         ...cameras.map((camera) => camera.onRequestUpdate)
+      ),
+      onChimesRequestUpdate = merge(
+        ...chimes.map((chime) => chime.onRequestUpdate)
       ),
       onCamerasRequestActiveDings = merge(
         ...cameras.map((camera) => camera.onRequestActiveDings)
@@ -138,31 +141,42 @@ export class RingApi {
       camerasById = cameras.reduce((byId, camera) => {
         byId[camera.id] = camera
         return byId
-      }, {} as { [id: number]: RingCamera })
+      }, {} as { [id: number]: RingCamera }),
+      chimesById = chimes.reduce((byId, chime) => {
+        byId[chime.id] = chime
+        return byId
+      }, {} as { [id: number]: RingChime })
 
-    if (!cameras.length) {
+    if (!cameras.length && !chimes.length) {
       return
     }
 
-    merge(onCamerasRequestUpdate, onPollForStatusUpdate)
+    merge(onCamerasRequestUpdate, onChimesRequestUpdate, onPollForStatusUpdate)
       .pipe(
         throttleTime(500),
         switchMap(async () => {
           const response = await this.fetchRingDevices().catch(() => null)
-          return response && response.allCameras
+          return response
         })
       )
-      .subscribe((cameraData) => {
+      .subscribe((response) => {
         onUpdateReceived.next()
 
-        if (!cameraData) {
+        if (!response) {
           return
         }
 
-        cameraData.forEach((data) => {
+        response.allCameras.forEach((data) => {
           const camera = camerasById[data.id]
           if (camera) {
             camera.updateData(data)
+          }
+        })
+
+        response.chimes.forEach((data) => {
+          const chime = chimesById[data.id]
+          if (chime) {
+            chime.updateData(data)
           }
         })
       })
@@ -189,7 +203,7 @@ export class RingApi {
       }
     )
 
-    if (cameraDingsPollingSeconds) {
+    if (cameras.length && cameraDingsPollingSeconds) {
       onActiveDingsReceived.next() // kick off polling
     }
   }
@@ -255,7 +269,7 @@ export class RingApi {
             )
         )
 
-    this.listenForCameraUpdates(cameras)
+    this.listenForDeviceUpdates(cameras, ringChimes)
 
     return locations
   }

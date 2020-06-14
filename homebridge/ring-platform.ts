@@ -2,6 +2,7 @@ import {
   RingApi,
   RingCamera,
   RingCameraKind,
+  RingChime,
   RingDevice,
   RingDeviceCategory,
   RingDeviceType,
@@ -16,6 +17,7 @@ import {
 } from 'homebridge'
 import { SecurityPanel } from './security-panel'
 import { BaseStation } from './base-station'
+import { Chime } from './chime'
 import { Keypad } from './keypad'
 import { ContactSensor } from './contact-sensor'
 import { MotionSensor } from './motion-sensor'
@@ -42,10 +44,11 @@ import { Thermostat } from './thermostat'
 import { generateMacAddress } from './util'
 
 const debug = __filename.includes('release-homebridge'),
-  unsupportedDeviceTypes: (RingDeviceType | RingCameraKind)[] = [
-    RingDeviceType.BaseStation,
-    RingDeviceType.Keypad,
-  ]
+  unsupportedDeviceTypes: (
+    | RingDeviceType
+    | RingCameraKind
+    | RingChime['deviceType']
+  )[] = [RingDeviceType.BaseStation, RingDeviceType.Keypad]
 
 export const platformName = 'Ring'
 export const pluginName = 'homebridge-ring'
@@ -173,14 +176,22 @@ export class RingPlatform implements DynamicPlatformPlugin {
       locations.map(async (location) => {
         const devices = await location.getDevices(),
           cameras = location.cameras,
-          allDevices = [...devices, ...cameras],
+          chimes = location.chimes,
+          allDevices = [...devices, ...cameras, ...chimes],
           securityPanel = devices.find(
             (x) => x.deviceType === RingDeviceType.SecurityPanel
           ),
           debugPrefix = debug ? 'TEST ' : '',
           hapDevices = allDevices.map((device) => {
             const isCamera = device instanceof RingCamera,
-              cameraIdDifferentiator = isCamera ? 'camera' : '' // this forces bridged cameras from old version of the plugin to be seen as "stale"
+              cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
+              AccessoryClass = (device instanceof RingCamera
+                ? Camera
+                : device instanceof RingChime
+                ? Chime
+                : getAccessoryClass(device)) as
+                | (new (...args: any[]) => BaseAccessory<any>)
+                | null
 
             return {
               deviceType: device.deviceType as string,
@@ -188,11 +199,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
               isCamera,
               id: device.id.toString() + cameraIdDifferentiator,
               name: device.name,
-              AccessoryClass: (device instanceof RingCamera
-                ? Camera
-                : getAccessoryClass(device)) as
-                | (new (...args: any[]) => BaseAccessory<any>)
-                | null,
+              AccessoryClass,
             }
           })
 

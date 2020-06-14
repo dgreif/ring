@@ -4,7 +4,7 @@ import {
   ServiceType,
 } from './base-accessory'
 import { Observable, Subject } from 'rxjs'
-import { RingCamera, RingDevice } from '../api'
+import { RingCamera, RingChime, RingDevice } from '../api'
 import { RingPlatformConfig } from './config'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import {
@@ -17,7 +17,7 @@ import {
 } from 'homebridge'
 
 export abstract class BaseDataAccessory<
-  T extends RingDevice | RingCamera
+  T extends RingDevice | RingCamera | RingChime
 > extends BaseAccessory<T> {
   abstract readonly device: T
   abstract readonly accessory: PlatformAccessory
@@ -103,11 +103,13 @@ export abstract class BaseDataAccessory<
     serviceType,
     getValue,
     setValue,
+    requestUpdate,
   }: {
     characteristicType: CharacteristicType
     serviceType: ServiceType
     getValue: (data: T['data']) => number
     setValue: (data: any) => any
+    requestUpdate?: () => any
   }) {
     let targetLevel: number | undefined
 
@@ -128,6 +130,7 @@ export abstract class BaseDataAccessory<
         setValue(volume)
       },
       setValueDebounceTime: 500,
+      requestUpdate,
     })
   }
 }

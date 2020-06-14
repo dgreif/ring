@@ -86,11 +86,11 @@
         "description": "Turns on additional logging.  In particular, ffmpeg logging."
       },
       "cameraStatusPollingSeconds": {
-        "title": "Camera Status Polling",
+        "title": "Camera/Chime Status Polling",
         "type": "integer",
         "minimum": 1,
         "placeholder": "Get camera status every __ seconds",
-        "description": "Camera status (such as light/siren state) does not update live and must be fetched periodically.  By default this is done every 20 seconds"
+        "description": "Camera/Chime status (such as light/siren/volume/snooze state) does not update live and must be fetched periodically.  By default this is done every 20 seconds"
       },
       "cameraDingsPollingSeconds": {
         "title": "Camera Event Polling",

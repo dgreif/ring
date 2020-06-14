@@ -276,7 +276,7 @@ export interface ChimeData {
   device_id: string
   time_zone: string
   firmware_version: Firmware
-  kind: string
+  kind: 'chime' | 'chime_pro'
   latitude: number
   longitude: number
   address: string
@@ -311,19 +311,17 @@ export interface ChimeData {
 
 export type ChimeSoundKind = 'motion' | 'ding'
 
-export interface ChimeOptions {
-  chime: {
-    description?: string
-    latitude?: number
-    longitude?: number
-    address?: string
-    settings?: {
-      volume?: number
-      ding_audio_user_id?: string
-      ding_audio_id?: string
-      motion_audio_user_id?: string
-      motion_audio_id?: string
-    }
+export interface ChimeUpdate {
+  description?: string
+  latitude?: number
+  longitude?: number
+  address?: string
+  settings?: {
+    volume?: number
+    ding_audio_user_id?: string
+    ding_audio_id?: string
+    motion_audio_user_id?: string
+    motion_audio_id?: string
   }
 }
 

@@ -1,22 +1,45 @@
 import {
   ChimeData,
-  ChimeOptions,
+  ChimeUpdate,
   ChimeSoundKind,
   RingtoneOptions,
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
-import { delay } from './util'
+import { BehaviorSubject, Subject } from 'rxjs'
+
+const settingsWhichRequireReboot = [
+  'ding_audio_id',
+  'ding_audio_user_id',
+  'motion_audio_id',
+  'motion_audio_user_id',
+]
 
 export class RingChime {
   id = this.initialData.id
+  deviceType = this.initialData.kind
+  model = this.deviceType === 'chime_pro' ? 'Chime Pro' : 'Chime'
+  onData = new BehaviorSubject<ChimeData>(this.initialData)
+  onRequestUpdate = new Subject()
 
   constructor(
     private initialData: ChimeData,
     private restClient: RingRestClient
   ) {}
 
+  updateData(update: ChimeData) {
+    this.onData.next(update)
+  }
+
+  requestUpdate() {
+    this.onRequestUpdate.next()
+  }
+
   get data() {
-    return this.initialData
+    return this.onData.getValue()
+  }
+
+  get name() {
+    return this.data.description
   }
 
   get description() {
@@ -61,43 +84,52 @@ export class RingChime {
     })
   }
 
-  snooze(time: number) {
-    return this.restClient.request({
+  async snooze(time: number) {
+    // time is in minutes, max 24 * 60 (1440)
+    await this.restClient.request({
       url: this.chimeUrl('do_not_disturb'),
       method: 'POST',
       json: { time },
     })
+
+    this.requestUpdate()
   }
 
-  clearSnooze() {
-    return this.restClient.request({
+  async clearSnooze() {
+    await this.restClient.request({
       url: this.chimeUrl('do_not_disturb'),
       method: 'POST',
     })
+
+    this.requestUpdate()
   }
 
-  async updateChime(data: ChimeOptions) {
+  async updateChime(update: ChimeUpdate) {
     await this.restClient.request({
       url: this.chimeUrl(),
       method: 'PUT',
-      json: data,
+      json: { chime: update },
     })
 
-    const {
-      ding_audio_user_id,
-      motion_audio_id,
-      ding_audio_id,
-      motion_audio_user_id,
-    } = data.chime?.settings || {}
+    this.requestUpdate()
 
-    if (
-      ding_audio_id ||
-      ding_audio_user_id ||
-      motion_audio_id ||
-      motion_audio_user_id
-    ) {
-      // allow chime to update and restart with new ringtone (will blink blue)
-      await delay(20000)
+    // inform caller if this change requires a reboot
+    return Object.keys(update.settings || {}).some((key) =>
+      settingsWhichRequireReboot.includes(key)
+    )
+  }
+
+  setVolume(volume: number) {
+    if (volume < 0 || volume > 11) {
+      throw new Error(
+        `Volume for ${this.name} must be between 0 and 11, got ${volume}`
+      )
     }
+
+    return this.updateChime({
+      settings: {
+        volume,
+      },
+    })
   }
 }

@@ -7,7 +7,7 @@ import { decodeCryptoValue, getSrtpValue, RtpSplitter } from '../api/rtp-utils'
 import { take } from 'rxjs/operators'
 
 /**
- * This example records a 10 second video clip to output/example.mp4
+ * This example takes an audio clip from output/example.mp4 and pipes it to a ring device
  **/
 
 async function example() {

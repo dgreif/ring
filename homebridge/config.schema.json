@@ -106,6 +106,13 @@
         "placeholder": "Get current Location Mode every __ seconds",
         "description": "Location Modes do not update live and must be fetched periodically.  By default this is done every 20 seconds for locations that have Location Modes enabled, and that do not have a Ring Alarm.  The Location Mode switch can be hidden by setting this option to 0"
       },
+      "hideDeviceIds": {
+        "title": "Hide Device ID",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "locationIds": {
         "title": "Location ID",
         "type": "array",
@@ -142,6 +149,28 @@
         "cameraStatusPollingSeconds",
         "cameraDingsPollingSeconds",
         "locationModePollingSeconds",
+        {
+          "key": "hideDeviceIds",
+          "add": "Add Another Device ID",
+          "type": "array",
+          "items": [
+            {
+              "type": "div",
+              "displayFlex": true,
+              "flex-direction": "row",
+              "items": [
+                {
+                  "key": "hideDeviceIds[]",
+                  "placeholder": "Device ID"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "help",
+          "helpvalue": "<p>If you would like to hide individual devices in HomeKit, enter the desired device IDs above.  The ID for each device is logged every time homebridge starts.</p>"
+        },
         {
           "key": "locationIds",
           "add": "Add Another Location ID",

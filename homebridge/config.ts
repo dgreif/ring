@@ -11,6 +11,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   hideInHomeDoorbellSwitch?: boolean
   hideAlarmSirenSwitch?: boolean
   hideUnsupportedServices?: boolean
+  hideDeviceIds?: string[]
   showPanicButtons?: boolean
   nightModeBypassFor: AlarmMode
   ffmpegPath?: string

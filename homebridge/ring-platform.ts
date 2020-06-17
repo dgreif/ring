@@ -201,7 +201,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
               name: device.name,
               AccessoryClass,
             }
-          })
+          }),
+          hideDeviceIds = this.config.hideDeviceIds || []
 
         if (this.config.showPanicButtons && securityPanel) {
           hapDevices.push({
@@ -241,9 +242,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
               (this.config.hideLightGroups &&
                 deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
               (this.config.hideUnsupportedServices &&
-                unsupportedDeviceTypes.includes(deviceType as any))
+                unsupportedDeviceTypes.includes(deviceType as any)) ||
+              hideDeviceIds.includes(uuid)
             ) {
-              this.log.info(`Hidden accessory ${deviceType} ${displayName}`)
+              this.log.info(
+                `Hidden accessory ${uuid} ${deviceType} ${displayName}`
+              )
               return
             }
 

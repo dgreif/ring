@@ -137,6 +137,7 @@ export class RingRestClient {
           '2fa-code': twoFactorAuthCode || '',
           hardware_id: await hardwareIdPromise,
         },
+        agent: {}, // no keepalive
       })
 
       this.onRefreshTokenUpdated.next({
@@ -204,6 +205,7 @@ export class RingRestClient {
       headers: {
         authorization: `Bearer ${authToken.access_token}`,
       },
+      agent: {}, // no keepalive
     })
   }
 

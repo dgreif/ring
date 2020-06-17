@@ -5,8 +5,6 @@ import { Logging, PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
 import { logInfo } from '../api/util'
 
-const minutesFor24Hours = 24 * 60
-
 export class Chime extends BaseDataAccessory<RingChime> {
   constructor(
     public readonly device: RingChime,

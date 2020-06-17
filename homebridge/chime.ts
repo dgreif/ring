@@ -17,7 +17,7 @@ export class Chime extends BaseDataAccessory<RingChime> {
     super()
     const { Characteristic, Service } = hap,
       snoozeService = this.getService(
-        Service.Switch,
+        Service.Lightbulb,
         device.name + ' Snooze',
         'snooze'
       ),
@@ -36,19 +36,31 @@ export class Chime extends BaseDataAccessory<RingChime> {
     this.registerCharacteristic({
       characteristicType: Characteristic.On,
       serviceType: snoozeService,
-      getValue: (data) => Boolean(data.do_not_disturb.seconds_left),
-      setValue: (snooze: boolean) => {
-        if (snooze) {
-          logInfo(device.name + ' snoozed for 24 hours')
-          return device.snooze(minutesFor24Hours)
+      getValue: () => false,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Brightness,
+      serviceType: snoozeService,
+      getValue: (data) =>
+        Number(Math.ceil(data.do_not_disturb.seconds_left / (60 * 60))),
+      setValue: (snoozeHours: number) => {
+        if (snoozeHours > 0) {
+          logInfo(`${device.name} snoozed for ${snoozeHours} hour${snoozeHours === 1 ? '' : 's'}`)
+          return device.snooze(60 * snoozeHours) // in minutes
         }
 
         logInfo(device.name + ' snooze cleared')
-
         return device.clearSnooze()
       },
       requestUpdate: () => device.requestUpdate(),
     })
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.Brightness)
+      .setProps({
+        minValue: 0,
+        maxValue: 24,
+      })
+
     snoozeService.setPrimaryService(true)
 
     // Speaker Service

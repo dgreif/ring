@@ -8,4 +8,5 @@ release-*
 json-data
 yarn.lock
 .homebridge
+.hoobs
 examples/test-example.ts

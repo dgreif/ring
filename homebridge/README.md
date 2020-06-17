@@ -54,6 +54,7 @@ Only include an optional parameter if you actually need it.  Default behavior wi
 {
   "alarmOnEntryDelay": true,
   "beamDurationSeconds": 60,
+  "hideDeviceIds": ["477e4800-fcde-4493-969b-d1a06f683102", "5aaed7a7-06df-4f18-b3af-291c89854d60"],
   "hideLightGroups": true,
   "hideDoorbellSwitch": true,
   "hideCameraMotionSensor": true,

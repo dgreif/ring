@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.3.1](https://github.com/dgreif/ring/compare/v9.3.0...v9.3.1) (2020-06-17)
+
+
+### Bug Fixes
+
+* remove keepalive for oauth requests ([e37b823](https://github.com/dgreif/ring/commit/e37b82332ddcd20099a58353c94312617814f9e5))
+
 ## [9.3.0](https://github.com/dgreif/ring/compare/v9.2.0...v9.3.0) (2020-06-17)
 
 

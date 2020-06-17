@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.3.0](https://github.com/dgreif/ring/compare/v9.2.0...v9.3.0) (2020-06-17)
+
+
+### Features
+
+* **homebridge:** allow devices to be hidden by id ([f28c0ca](https://github.com/dgreif/ring/commit/f28c0ca4ff70b2e628cc06ed337f9dc69563948a))
+
 ## [9.2.0](https://github.com/dgreif/ring/compare/v9.1.1...v9.2.0) (2020-06-17)
 
 

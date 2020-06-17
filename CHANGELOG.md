@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.3.2](https://github.com/dgreif/ring/compare/v9.3.1...v9.3.2) (2020-06-17)
+
+
+### Bug Fixes
+
+* remove dns caching for oauth requests ([3cd95e0](https://github.com/dgreif/ring/commit/3cd95e01d930bcac4346c7a5a3f9432160b8b316))
+
 ### [9.3.1](https://github.com/dgreif/ring/compare/v9.3.0...v9.3.1) (2020-06-17)
 
 

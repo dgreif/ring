@@ -37,7 +37,7 @@ import { SipOptions } from './sip-call'
 import { isFfmpegInstalled } from './ffmpeg'
 
 const snapshotRefreshDelay = 500,
-  maxSnapshotRefreshSeconds = 20,
+  maxSnapshotRefreshSeconds = 35, // needs to be 30+ because battery cam can't take snapshot while recording
   maxSnapshotRefreshAttempts =
     (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -418,6 +418,7 @@ export class RingCamera {
   }
 
   get currentTimestampExpiresIn() {
+    // Gets 0 if stale snapshot is used because snapshot timestamp refused to update (recording in progress on battery cam)
     return Math.max(
       this.lastSnapshotTimestampLocal - Date.now() + this.snapshotLifeTime,
       0

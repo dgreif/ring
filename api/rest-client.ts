@@ -13,11 +13,13 @@ import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
 const defaultRequestOptions: RequestOptions = {
-    dnsCache: new CacheableLookup(),
-    agent: { http: new HttpAgent(), https: new HttpsAgent() },
     http2: true,
     responseType: 'json',
     method: 'GET',
+  },
+  cacheKeepaliveRequestOptions = {
+    dnsCache: new CacheableLookup(),
+    agent: { http: new HttpAgent(), https: new HttpsAgent() },
   },
   ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
@@ -137,7 +139,6 @@ export class RingRestClient {
           '2fa-code': twoFactorAuthCode || '',
           hardware_id: await hardwareIdPromise,
         },
-        agent: {}, // no keepalive
       })
 
       this.onRefreshTokenUpdated.next({
@@ -205,7 +206,6 @@ export class RingRestClient {
       headers: {
         authorization: `Bearer ${authToken.access_token}`,
       },
-      agent: {}, // no keepalive
     })
   }
 
@@ -257,15 +257,16 @@ export class RingRestClient {
     try {
       await this.sessionPromise
       const authTokenResponse = await this.authPromise
-      options.headers = {
-        ...options.headers,
-        ...{
+
+      return await requestWithRetry<T>({
+        ...cacheKeepaliveRequestOptions,
+        ...options,
+        headers: {
+          ...options.headers,
           authorization: `Bearer ${authTokenResponse.access_token}`,
           hardware_id: hardwareId,
         },
-      }
-
-      return await requestWithRetry<T>(options)
+      })
     } catch (e) {
       const response = e.response || {}
 

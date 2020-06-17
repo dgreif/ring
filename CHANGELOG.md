@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.2.0](https://github.com/dgreif/ring/compare/v9.1.1...v9.2.0) (2020-06-17)
+
+
+### Features
+
+* **api:** ring chime support ([#309](https://github.com/dgreif/ring/issues/309)) ([8870d35](https://github.com/dgreif/ring/commit/8870d359b6b533a2407b9ab3170d0fdf5767d4c2))
+* **api:** video search and periodic footage ([f71584e](https://github.com/dgreif/ring/commit/f71584ee574ed953fad98c234c6ed7270c77e45f))
+* **homebridge:** chime with snooze, play sounds, and volume ([3581178](https://github.com/dgreif/ring/commit/3581178deb11df8791486f7f8705f0921f8d5624))
+
+
+### Bug Fixes
+
+* try for snapshots for 35 seconds ([a274d48](https://github.com/dgreif/ring/commit/a274d481c65564365efa0fadfa043ef4f1d0f9ae))
+* **homebridge:** center text for fetching snapshot placeholder ([28c2f33](https://github.com/dgreif/ring/commit/28c2f3304fe27baa0db9c51a2b4eb7140b9ef188))
+* improved detection of battery vs wired camera ([405423f](https://github.com/dgreif/ring/commit/405423fac53f1411a62ef95bf819080df7e34b5d))
+
 ### [9.1.1](https://github.com/dgreif/ring/compare/v9.1.0...v9.1.1) (2020-06-07)
 
 

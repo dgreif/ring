@@ -5,7 +5,13 @@ import { Logging, PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
 import { logInfo } from '../api/util'
 
-const minutesFor24Hours = 24 * 60
+const secondsFor24Hours = 60 * 60 * 24
+const elapsedTime = (elapsed: number) => {
+    const hours = Math.floor(elapsed / 3600),
+        minutes = Math.floor(elapsed / 60) % 60,
+        seconds = elapsed % 60
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${Math.round(seconds).toString().padStart(2, '0')}`
+}
 
 export class Chime extends BaseDataAccessory<RingChime> {
   constructor(
@@ -17,7 +23,7 @@ export class Chime extends BaseDataAccessory<RingChime> {
     super()
     const { Characteristic, Service } = hap,
       snoozeService = this.getService(
-        Service.Switch,
+        Service.Valve,
         device.name + ' Snooze',
         'snooze'
       ),
@@ -34,21 +40,66 @@ export class Chime extends BaseDataAccessory<RingChime> {
 
     // Snooze Switch
     this.registerCharacteristic({
-      characteristicType: Characteristic.On,
+      characteristicType: Characteristic.InUse,
+      serviceType: snoozeService,
+      getValue: (data) => Boolean(data.do_not_disturb.seconds_left),
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Active,
       serviceType: snoozeService,
       getValue: (data) => Boolean(data.do_not_disturb.seconds_left),
       setValue: (snooze: boolean) => {
         if (snooze) {
-          logInfo(device.name + ' snoozed for 24 hours')
-          return device.snooze(minutesFor24Hours)
+          logInfo(`${device.name} snoozed for ${elapsedTime(secondsFor24Hours)}`)
+          snoozeService.getCharacteristic(Characteristic.InUse).updateValue(1)
+          return device.snooze(Math.round(secondsFor24Hours / 60)) // in minutes
         }
 
         logInfo(device.name + ' snooze cleared')
+        snoozeService.getCharacteristic(Characteristic.InUse).updateValue(0)
+        return device.clearSnooze()
+      }
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ValveType,
+      serviceType: snoozeService,
+      getValue: () => 0,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.SetDuration,
+      serviceType: snoozeService,
+      getValue: (data) =>
+        Number(data.do_not_disturb.seconds_left),
+      setValue: (snoozeSec: number) => {
+        if (snoozeSec > 0) {
+          logInfo(`${device.name} snoozed for ${elapsedTime(snoozeSec)}`)
+          return device.snooze(Math.round(snoozeSec / 60)) // in minutes
+        }
 
+        logInfo(device.name + ' snooze cleared')
         return device.clearSnooze()
       },
       requestUpdate: () => device.requestUpdate(),
     })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.RemainingDuration,
+      serviceType: snoozeService,
+      getValue: (data) =>
+        Number(data.do_not_disturb.seconds_left),
+      requestUpdate: () => device.requestUpdate(),
+    })
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.SetDuration)
+      .setProps({
+        minValue: 0,
+        maxValue: secondsFor24Hours,
+      })
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.RemainingDuration)
+      .setProps({
+        minValue: 0,
+        maxValue: secondsFor24Hours,
+      })
     snoozeService.setPrimaryService(true)
 
     // Speaker Service

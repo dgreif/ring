@@ -335,7 +335,6 @@ export class CameraSource implements CameraStreamingDelegate {
               'pipe,udp,rtp,file,crypto',
               '-f',
               'sdp',
-              '-re',
               '-acodec',
               'libfdk_aac',
               '-i',

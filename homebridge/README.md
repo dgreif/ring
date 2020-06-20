@@ -22,7 +22,7 @@ and third party devices that connect to the Ring Alarm System.
 
 Assuming a global installation of `homebridge`:
 
-`npm i -g homebridge-ring`
+`npm i -g --unsafe-perm homebridge-ring`
 
 ## Homebridge Configuration
 

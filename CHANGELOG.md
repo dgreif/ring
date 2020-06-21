@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.3.3](https://github.com/dgreif/ring/compare/v9.3.2...v9.3.3) (2020-06-21)
+
+
+### Bug Fixes
+
+* add user agent to requests ([19ab0e6](https://github.com/dgreif/ring/commit/19ab0e6f8174d48a49ae5468b66918c7a1a138b8)), closes [#373](https://github.com/dgreif/ring/issues/373)
+* **homebridge:** remove -re flag for return audio ([db951a7](https://github.com/dgreif/ring/commit/db951a7cbf319b76ad8c8d626f5bb1a2e5f42a2c))
+
 ### [9.3.2](https://github.com/dgreif/ring/compare/v9.3.1...v9.3.2) (2020-06-17)
 
 

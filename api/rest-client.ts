@@ -265,6 +265,7 @@ export class RingRestClient {
           ...options.headers,
           authorization: `Bearer ${authTokenResponse.access_token}`,
           hardware_id: hardwareId,
+          'User-Agent': 'android:com.ringapp',
         },
       })
     } catch (e) {

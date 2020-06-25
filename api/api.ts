@@ -190,6 +190,12 @@ export class RingApi {
       user_locations: UserLocation[]
     }>({ url: 'https://app.ring.com/rhq/v1/devices/v1/locations' })
 
+    if (!rawLocations) {
+      throw new Error(
+        'The Ring account which you used to generate a refresh token does not have any associated locations.  Please use an account that has access to at least one location.'
+      )
+    }
+
     return rawLocations
   }
 

@@ -46,7 +46,6 @@ export function releasePorts(ports: number[]) {
 }
 
 // Need to reserve ports in sequence because ffmpeg uses the next port up by default.  If it's taken, ffmpeg will error
-// These "buffer" ports are internal only, so they don't need to stay within "preferred external ports"
 export async function reservePorts({
   count = 1,
   attemptedPorts = [],

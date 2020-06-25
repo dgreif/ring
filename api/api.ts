@@ -17,7 +17,7 @@ import { RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
-import { enableDebug } from './util'
+import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
 
 export interface RingApiOptions extends SessionOptions {
@@ -44,35 +44,12 @@ export class RingApi {
       enableDebug()
     }
 
-    const { externalPorts, ffmpegPath } = options
+    const { locationIds, ffmpegPath } = options
 
-    if (typeof externalPorts === 'object') {
-      const { start, end } = externalPorts,
-        portConfigIssues: string[] = []
-
-      if (!start || !end) {
-        portConfigIssues.push('start and end must both be defined')
-      }
-
-      if (start >= end) {
-        portConfigIssues.push('start must be larger than end')
-      }
-
-      if (start < 1024) {
-        portConfigIssues.push(
-          'start must be larger than 1024, preferably larger than 10000 to avoid conflicts'
-        )
-      }
-
-      if (end > 65535) {
-        portConfigIssues.push('end must be smaller than 65536')
-      }
-
-      if (portConfigIssues.length) {
-        throw new Error(
-          'Invalid externalPorts config: ' + portConfigIssues.join('; ')
-        )
-      }
+    if (locationIds && !locationIds.length) {
+      logError(
+        'Your Ring config has `"locationIds": []`, which means no locations will be used and no devices will be found.'
+      )
     }
 
     if (ffmpegPath) {

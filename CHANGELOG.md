@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.3.4](https://github.com/dgreif/ring/compare/v9.3.3...v9.3.4) (2020-06-28)
+
+
+### Bug Fixes
+
+* **homebridge:** remove 'fetching snapshot' placeholder image ([ff39dce](https://github.com/dgreif/ring/commit/ff39dceec1fe93a3c1806cb9dc91910d002c7b6b))
+* **homebridge:** split rtcp for incoming and return audio ([55fbaec](https://github.com/dgreif/ring/commit/55fbaecac34eeb5dd3a986a2a2ced5a279acfab5))
+* log an error if locationIds config is empty ([8dfc49a](https://github.com/dgreif/ring/commit/8dfc49a2905206052c5acec6ad8e7696c1c9ee35))
+* throw error if user has no locations ([c988a66](https://github.com/dgreif/ring/commit/c988a66c84708a226ec41002fdfc75090417f40f)), closes [#375](https://github.com/dgreif/ring/issues/375)
+
 ### [9.3.3](https://github.com/dgreif/ring/compare/v9.3.2...v9.3.3) (2020-06-21)
 
 

@@ -308,15 +308,19 @@ export class CameraSource implements CameraStreamingDelegate {
 
       let returnAudioPort = incomingAudioRtcpPort
       if (libfdkAacInstalled) {
-        returnAudioPort = await sipSession.reservePort(1)
-
-        const returnAudioRtcpPort = returnAudioPort + 1,
-          returnAudioSplitter = new RtpSplitter((description) => {
+        const returnAudioRtpPort = await sipSession.reservePort(1),
+          returnAudioRtcpPort = returnAudioRtpPort + 1,
+          returnAudioSplitter = new RtpSplitter(({ isRtpMessage, message }) => {
             onReturnPacketReceived.next()
+
+            if (!isRtpMessage && getSsrc(message) === audioSsrc) {
+              return {
+                port: incomingAudioRtcpPort,
+              }
+            }
+
             return {
-              port: description.isRtpMessage
-                ? returnAudioPort
-                : returnAudioRtcpPort,
+              port: isRtpMessage ? returnAudioRtpPort : returnAudioRtcpPort,
             }
           }),
           returnAudioTranscodedSplitter = new RtpSplitter(),
@@ -369,7 +373,7 @@ export class CameraSource implements CameraStreamingDelegate {
             `c=IN IP4 ${targetAddress}`,
             't=0 0',
             'a=tool:libavformat 58.38.100',
-            `m=audio ${returnAudioPort} RTP/AVP 110`,
+            `m=audio ${returnAudioRtpPort} RTP/AVP 110`,
             'b=AS:24',
             'a=rtpmap:110 MPEG4-GENERIC/16000/1',
             'a=fmtp:110 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=F8F0212C00BC00',
@@ -384,6 +388,8 @@ export class CameraSource implements CameraStreamingDelegate {
           returnAudioSplitter.close()
           returnAudioTranscodedSplitter.close()
         })
+
+        returnAudioPort = await returnAudioSplitter.portPromise
       }
 
       this.logger.info(

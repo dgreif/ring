@@ -31,7 +31,6 @@ import { promisify } from 'util'
 const ip = require('ip')
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
-  fetchingSnapshotsPath = require.resolve('../../media/fetching-snapshot.jpg'),
   snapshotsBlockedPath = require.resolve('../../media/snapshots-blocked.jpg')
 
 function getDurationSeconds(start: number) {
@@ -82,19 +81,19 @@ export class CameraSource implements CameraStreamingDelegate {
 
     try {
       const previousSnapshot = this.cachedSnapshot,
-        newSnapshot = await this.ringCamera.getSnapshot(true)
+        newSnapshot = await this.ringCamera.getSnapshot()
       this.cachedSnapshot = newSnapshot
 
       if (previousSnapshot !== newSnapshot) {
         // Keep the snapshots in cache longer than their lifetime
-        // This allows users on LTE with wired camera to get snapshots each 60 second pull instead of always seeing "fetching"
+        // This allows users on LTE with wired camera to get snapshots each 60 second pull even though the cached snapshot is out of date
         const clearCacheIn = Math.max(
           this.ringCamera.currentTimestampExpiresIn,
           2 * 60 * 1000
         )
 
         // Only retain the snapshot while it is still within its lifetime
-        // After that, clear it out so a new one can be fetched and the "Fetching Snapshot" message can be displayed
+        // After that, clear it out so a new one can be fetched
         setTimeout(() => {
           if (this.cachedSnapshot === newSnapshot) {
             this.cachedSnapshot = undefined
@@ -117,13 +116,6 @@ export class CameraSource implements CameraStreamingDelegate {
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )
-
-      if (!this.ringCamera.isOffline) {
-        this.logger.error(
-          this.ringCamera.name +
-            ' camera appears to be unable to upload snapshots.  This can happen when your Ring Modes settings prevent motion detection or live view, which also prevents snapshots.  If Modes are not blocking snapshots, this can also happen if the camera has gotten into a bad state, which requires a physical restart of the camera.  If this happens, you will also not be able to retrieve snapshots via the Ring app for this camera.  In that case, please turn off power to this camera by removing its battery or turning off the breaker for the circuit it is wired to.  Once power is cycled, snapshots should start working again.'
-        )
-      }
     }
   }
 
@@ -150,7 +142,7 @@ export class CameraSource implements CameraStreamingDelegate {
       return this.cachedSnapshot
     }
 
-    return readFileAsync(fetchingSnapshotsPath)
+    return undefined
   }
 
   async handleSnapshotRequest(

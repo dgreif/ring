@@ -472,19 +472,18 @@ export class RingCamera {
 
     try {
       const useLastSnapshot = await this.refreshSnapshotInProgress
+      this.refreshSnapshotInProgress = undefined
 
       if (useLastSnapshot && this.lastSnapshotPromise) {
-        this.refreshSnapshotInProgress = undefined
         return this.lastSnapshotPromise
       }
     } catch (e) {
+      this.refreshSnapshotInProgress = undefined
       logError(e.message)
       if (!allowStale) {
         throw e
       }
     }
-
-    this.refreshSnapshotInProgress = undefined
 
     this.lastSnapshotPromise = this.restClient.request<Buffer>({
       url: clientApi(`snapshots/image/${this.id}`),

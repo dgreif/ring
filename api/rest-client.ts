@@ -99,13 +99,14 @@ export interface RefreshTokenAuth {
 
 export interface SessionOptions {
   controlCenterDisplayName?: string
+  reuseSession?: SessionResponse
 }
 
 export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private authPromise = this.getAuth()
-  private sessionPromise = this.getSession()
+  private sessionPromise = (this.authOptions.reuseSession ? Promise.resolve(this.authOptions.reuseSession) : this.getSession())
   public using2fa = false
   public onRefreshTokenUpdated = new ReplaySubject<{
     oldRefreshToken?: string
@@ -343,5 +344,9 @@ export class RingRestClient {
 
   getCurrentAuth() {
     return this.authPromise
+  }
+
+  getCurrentSession() {
+    return this.sessionPromise
   }
 }

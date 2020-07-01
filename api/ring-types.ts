@@ -636,7 +636,7 @@ export interface SessionResponse {
     email: string
     first_name: string
     last_name: string
-    phone_number: string
+    phone_number?: string | null
     authentication_token: string
     features: { [name: string]: boolean | number | string | string[] }
     hardware_id: string
@@ -648,6 +648,7 @@ export interface SessionResponse {
     created_at: string
     tfa_enabled: boolean
     tfa_phone_number: null | string
+    [extra_meta:string] : any
   }
 }
 

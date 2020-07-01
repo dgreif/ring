@@ -11,14 +11,19 @@ import {
 } from './util'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
+import { parse as parseUrl } from 'url'
 
 const defaultRequestOptions: RequestOptions = {
     http2: true,
     responseType: 'json',
     method: 'GET',
   },
+  dnsCache = new CacheableLookup({
+    maxTtl: 60,
+    fallbackDuration: 0,
+  }),
   cacheKeepaliveRequestOptions = {
-    dnsCache: new CacheableLookup(),
+    dnsCache,
     agent: { http: new HttpAgent(), https: new HttpsAgent() },
   },
   ringErrorCodes: { [code: number]: string } = {
@@ -46,7 +51,7 @@ export interface ExtendedResponse {
 }
 
 async function requestWithRetry<T>(
-  requestOptions: RequestOptions
+  requestOptions: RequestOptions & { url: string }
 ): Promise<T & ExtendedResponse> {
   try {
     const options = { ...defaultRequestOptions, ...requestOptions },
@@ -65,6 +70,17 @@ async function requestWithRetry<T>(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
       logDebug(e)
+
+      if (e.code === 'ENOTFOUND') {
+        const url = parseUrl(requestOptions.url)
+        logDebug(
+          `DNS Cache for ${url.hostname}: ${JSON.stringify(
+            await dnsCache.query(url.hostname!)
+          )}`
+        )
+        dnsCache.clear(url.hostname!)
+      }
+
       await delay(5000)
       return requestWithRetry(requestOptions)
     }
@@ -249,7 +265,7 @@ export class RingRestClient {
   }
 
   async request<T = void>(
-    options: RequestOptions
+    options: RequestOptions & { url: string }
   ): Promise<T & ExtendedResponse> {
     const hardwareId = await hardwareIdPromise,
       url = options.url! as string

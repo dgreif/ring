@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.3.6](https://github.com/dgreif/ring/compare/v9.3.5...v9.3.6) (2020-07-01)
+
+
+### Bug Fixes
+
+* **homebridge:** clear dns cache after ENOTFOUND ([14edaa3](https://github.com/dgreif/ring/commit/14edaa30b47a029661c4bb40b0ca3b197f2b6206)), closes [#374](https://github.com/dgreif/ring/issues/374)
+
 ### [9.3.5](https://github.com/dgreif/ring/compare/v9.3.4...v9.3.5) (2020-06-29)
 
 

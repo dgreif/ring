@@ -11,6 +11,7 @@ import {
   BeamBridge,
   CameraData,
   ChimeData,
+  ProfileResponse,
   UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
@@ -267,5 +268,11 @@ export class RingApi {
       (cameras, location) => [...cameras, ...location.cameras],
       [] as RingCamera[]
     )
+  }
+
+  getProfile() {
+    return this.restClient.request<ProfileResponse>({
+      url: clientApi('profile'),
+    })
   }
 }

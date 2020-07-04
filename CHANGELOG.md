@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.4.0](https://github.com/dgreif/ring/compare/v9.3.6...v9.4.0) (2020-07-04)
+
+
+### Features
+
+* remove life time restrictions on snapshots ([0c7f226](https://github.com/dgreif/ring/commit/0c7f2263e3cdd6afe139082dd343c1cadd176524))
+* **api:** `api.getProfile` to fetch user profile ([6af8874](https://github.com/dgreif/ring/commit/6af88747c24234b20900f8c5c1c91eabe5cb5aaa)), closes [#389](https://github.com/dgreif/ring/issues/389)
+
+
+### Bug Fixes
+
+* prevent new session from being created on each restart ([8c21ca0](https://github.com/dgreif/ring/commit/8c21ca06d7868ea712ccf36487c2bdd404aac0b6)), closes [#389](https://github.com/dgreif/ring/issues/389)
+* **api:** prevent ding-loop when streaming from onNewDing ([#390](https://github.com/dgreif/ring/issues/390)) ([0980b33](https://github.com/dgreif/ring/commit/0980b33a5af1a6cc82a8503a14843bb53b9aac84))
+
 ### [9.3.6](https://github.com/dgreif/ring/compare/v9.3.5...v9.3.6) (2020-07-01)
 
 

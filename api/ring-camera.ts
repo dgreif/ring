@@ -324,10 +324,10 @@ export class RingCamera {
     const activeDings = this.activeDings,
       dingId = ding.id_str
 
-    this.onNewDing.next(ding)
     this.onActiveDings.next(
       activeDings.filter((d) => d.id_str !== dingId).concat([ding])
     )
+    this.onNewDing.next(ding)
 
     setTimeout(() => {
       this.removeDingById(ding.id_str)

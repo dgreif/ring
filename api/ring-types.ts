@@ -648,7 +648,11 @@ export interface SessionResponse {
     created_at: string
     tfa_enabled: boolean
     tfa_phone_number: null | string
-    [extra_meta:string] : any
+    account_type: null | string
+    user_preferences: {
+      settings: any
+      preferences: any
+    }
   }
 }
 

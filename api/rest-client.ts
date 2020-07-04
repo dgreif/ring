@@ -105,7 +105,7 @@ export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private authPromise = this.getAuth()
-  private sessionPromise = this.getSession()
+  private sessionPromise?: Promise<SessionResponse> = undefined
   public using2fa = false
   public onRefreshTokenUpdated = new ReplaySubject<{
     oldRefreshToken?: string
@@ -268,10 +268,11 @@ export class RingRestClient {
     options: RequestOptions & { url: string }
   ): Promise<T & ExtendedResponse> {
     const hardwareId = await hardwareIdPromise,
-      url = options.url! as string
+      url = options.url! as string,
+      initialSessionPromise = this.sessionPromise
 
     try {
-      await this.sessionPromise
+      await initialSessionPromise
       const authTokenResponse = await this.authPromise
 
       return await requestWithRetry<T>({
@@ -324,7 +325,9 @@ export class RingRestClient {
           logError(
             'Session hardware_id not found.  Creating a new session and trying again.'
           )
-          this.refreshSession()
+          if (this.sessionPromise === initialSessionPromise) {
+            this.refreshSession()
+          }
           return this.request(options)
         }
 

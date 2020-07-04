@@ -630,7 +630,7 @@ export interface AuthTokenResponse {
   token_type: 'Bearer'
 }
 
-export interface SessionResponse {
+export interface ProfileResponse {
   profile: {
     id: number
     email: string
@@ -639,17 +639,23 @@ export interface SessionResponse {
     phone_number: string
     authentication_token: string
     features: { [name: string]: boolean | number | string | string[] }
+    user_preferences: {
+      settings: any
+      preferences: any
+    }
     hardware_id: string
     explorer_program_terms: null
-    user_flow: string
+    user_flow: 'ring' | string
     app_brand: string
     country: string
-    status: string
+    status: 'legacy' | string
     created_at: string
     tfa_enabled: boolean
     tfa_phone_number: null | string
+    account_type: 'ring' | string
   }
 }
+export interface SessionResponse extends ProfileResponse {}
 
 export interface AccountMonitoringStatus {
   accountUuid: string

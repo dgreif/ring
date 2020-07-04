@@ -93,7 +93,7 @@ Option | Default | Explanation
 ### Cameras
 
   * Camera Feed
-    * Shows a snapshot from the camera while viewing the room in Home.  There are limitations with how frequently battery cameras can take snapshots, and with the mechanism which Homebridge uses to request new snapshots.  See [the Snapshot Limitations Wiki](https://github.com/dgreif/ring/wiki/Snapshot-Limitations) for details.
+    * Shows a snapshot from the camera while viewing the room in Home.  There are limitations on when battery cameras can take snapshots.  See [the Snapshot Limitations Wiki](https://github.com/dgreif/ring/wiki/Snapshot-Limitations) for details.
     * Shows a live feed from the camera if you click on it.  The feed supports video and 2-way audio, but requires that you have `ffmpeg` with `libfdk_aac` installed.  A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg) for details.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`

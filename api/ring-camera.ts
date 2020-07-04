@@ -409,7 +409,7 @@ export class RingCamera {
   }
 
   private refreshSnapshotInProgress?: Promise<boolean>
-  public readonly snapshotLifeTime = (this.hasBattery ? 600 : 30) * 1000 // battery cams only refresh timestamp every 10 minutes
+  public readonly snapshotLifeTime = 10 * 1000
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
@@ -429,6 +429,25 @@ export class RingCamera {
     return this.isTimestampInLifeTime(this.currentTimestampAge)
   }
 
+  private checkIfSnapshotsAreBlocked() {
+    if (this.snapshotsAreBlocked) {
+      throw new Error(
+        `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
+      )
+    }
+  }
+
+  private requestSnapshotUpdate() {
+    return this.restClient.request({
+      method: 'PUT',
+      url: clientApi('snapshots/update_all'),
+      json: {
+        doorbot_ids: [this.id],
+        refresh: true,
+      },
+    })
+  }
+
   private async refreshSnapshot() {
     if (this.hasSnapshotWithinLifetime) {
       logInfo(
@@ -439,12 +458,11 @@ export class RingCamera {
       return true
     }
 
+    this.checkIfSnapshotsAreBlocked()
+    await this.requestSnapshotUpdate()
+
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      if (this.snapshotsAreBlocked) {
-        throw new Error(
-          `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
-        )
-      }
+      this.checkIfSnapshotsAreBlocked()
 
       const { timestamp, inLifeTime } = await this.getSnapshotTimestamp()
 
@@ -466,7 +484,7 @@ export class RingCamera {
     )
   }
 
-  async getSnapshot(allowStale = false) {
+  async getSnapshot() {
     this.refreshSnapshotInProgress =
       this.refreshSnapshotInProgress || this.refreshSnapshot()
 
@@ -480,9 +498,7 @@ export class RingCamera {
     } catch (e) {
       this.refreshSnapshotInProgress = undefined
       logError(e.message)
-      if (!allowStale) {
-        throw e
-      }
+      throw e
     }
 
     this.lastSnapshotPromise = this.restClient.request<Buffer>({

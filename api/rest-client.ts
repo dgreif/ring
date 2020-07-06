@@ -75,7 +75,9 @@ async function requestWithRetry<T>(
         const url = parseUrl(requestOptions.url)
         logDebug(
           `DNS Cache for ${url.hostname}: ${JSON.stringify(
-            await dnsCache.query(url.hostname!)
+            await dnsCache
+              .query(url.hostname!)
+              .catch((queryError) => queryError)
           )}`
         )
         dnsCache.clear(url.hostname!)

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.4.1](https://github.com/dgreif/ring/compare/v9.4.0...v9.4.1) (2020-07-06)
+
+
+### Bug Fixes
+
+* catch errors from dns query logging ([cfd68da](https://github.com/dgreif/ring/commit/cfd68dac4a961fbc2c437a7d128a9f779d385c88)), closes [#374](https://github.com/dgreif/ring/issues/374) [#393](https://github.com/dgreif/ring/issues/393)
+
 ## [9.4.0](https://github.com/dgreif/ring/compare/v9.3.6...v9.4.0) (2020-07-04)
 
 

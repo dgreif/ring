@@ -50,7 +50,7 @@ async function example() {
       devices = await location.getDevices()
 
     console.log(
-      `\nLocation ${location.name} has the following ${cameras.length} camera(s):`
+      `\nLocation ${location.name} (${location.id}) has the following ${cameras.length} camera(s):`
     )
 
     for (const camera of cameras) {
@@ -58,7 +58,7 @@ async function example() {
     }
 
     console.log(
-      `\nLocation ${location.name} has the following ${devices.length} device(s):`
+      `\nLocation ${location.name} (${location.id}) has the following ${devices.length} device(s):`
     )
 
     for (const device of devices) {

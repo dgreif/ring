@@ -162,12 +162,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
   }
 
   async connectToApi() {
-    const ringApi = new RingApi({
+    const { api, config } = this,
+      ringApi = new RingApi({
         controlCenterDisplayName: 'homebridge-ring',
-        ...this.config,
+        ...config,
       }),
       locations = await ringApi.getLocations(),
-      { api } = this,
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
       platformAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
@@ -202,9 +202,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
               AccessoryClass,
             }
           }),
-          hideDeviceIds = this.config.hideDeviceIds || []
+          hideDeviceIds = config.hideDeviceIds || [],
+          onlyDeviceTypes = config.onlyDeviceTypes?.length
+            ? config.onlyDeviceTypes
+            : undefined
 
-        if (this.config.showPanicButtons && securityPanel) {
+        if (config.showPanicButtons && securityPanel) {
           hapDevices.push({
             deviceType: securityPanel.deviceType,
             device: securityPanel,
@@ -216,7 +219,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         }
 
         if (
-          this.config.locationModePollingSeconds &&
+          config.locationModePollingSeconds &&
           (await location.supportsLocationModeSwitching())
         ) {
           hapDevices.push({
@@ -239,11 +242,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
             if (
               !AccessoryClass ||
-              (this.config.hideLightGroups &&
+              (config.hideLightGroups &&
                 deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
-              (this.config.hideUnsupportedServices &&
+              (config.hideUnsupportedServices &&
                 unsupportedDeviceTypes.includes(deviceType as any)) ||
-              hideDeviceIds.includes(uuid)
+              hideDeviceIds.includes(uuid) ||
+              (onlyDeviceTypes && !onlyDeviceTypes.includes(deviceType))
             ) {
               this.log.info(
                 `Hidden accessory ${uuid} ${deviceType} ${displayName}`
@@ -261,7 +265,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 )
 
                 this.log.info(
-                  `Adding new accessory ${deviceType} ${displayName}`
+                  `Adding new accessory ${uuid} ${deviceType} ${displayName}`
                 )
                 platformAccessories.push(accessory)
 
@@ -283,7 +287,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 device as any,
                 homebridgeAccessory,
                 this.log,
-                this.config
+                config
               )
             accessory.initBase()
 
@@ -326,8 +330,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
           return
         }
 
-        updateHomebridgeConfig(this.api, (config) => {
-          return config.replace(oldRefreshToken, newRefreshToken)
+        updateHomebridgeConfig(this.api, (configContents) => {
+          return configContents.replace(oldRefreshToken, newRefreshToken)
         })
       }
     )

@@ -119,6 +119,13 @@
         "items": {
           "type": "string"
         }
+      },
+      "onlyDeviceTypes": {
+        "title": "Device Types",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
     "required": ["refreshToken"]
@@ -131,7 +138,7 @@
     },
     {
       "type": "fieldset",
-      "title": "Optional Configuration - Only adjust these if you actually need to",
+      "title": "Optional Configuration",
       "expandable": true,
       "items": [
         "alarmOnEntryDelay",
@@ -173,7 +180,6 @@
         },
         {
           "key": "locationIds",
-          "add": "Add Another Location ID",
           "type": "array",
           "items": [
             {
@@ -192,6 +198,27 @@
         {
           "type": "help",
           "helpvalue": "<p>If you have multiple locations configured in Ring but only want some of them in HomeKit, enter the desired location IDs above.  The ID for each location is logged every time homebridge starts.</p>"
+        },
+        {
+          "key": "onlyDeviceTypes",
+          "type": "array",
+          "items": [
+            {
+              "type": "div",
+              "displayFlex": true,
+              "flex-direction": "row",
+              "items": [
+                {
+                  "key": "onlyDeviceTypes[]",
+                  "placeholder": "Device Type"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "help",
+          "helpvalue": "<p>If you only want to display certain device types, you can specify a those device types here.  All other device types will be removed from HomeKit.  Example: security-panel to show your alarm, hp_cam_v1 to show floodlight cams.</p>"
         }
       ]
     }

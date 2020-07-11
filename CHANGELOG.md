@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.5.0](https://github.com/dgreif/ring/compare/v9.4.1...v9.5.0) (2020-07-11)
+
+
+### Features
+
+* **homebridge:** add `onlyDeviceTypes` option ([f9c1c1b](https://github.com/dgreif/ring/commit/f9c1c1b84a62be6fd9919f23a5891babce0e5924)), closes [#394](https://github.com/dgreif/ring/issues/394)
+
+
+### Bug Fixes
+
+* handle EREFUSED dns errors ([8c33921](https://github.com/dgreif/ring/commit/8c33921f46e326479ba0493bc3d7297dfda80373)), closes [#397](https://github.com/dgreif/ring/issues/397)
+* log error from auth request ([f7caabd](https://github.com/dgreif/ring/commit/f7caabda9648a7b5fb5fc7595f5d56eaf0921fa0))
+
 ### [9.4.1](https://github.com/dgreif/ring/compare/v9.4.0...v9.4.1) (2020-07-06)
 
 

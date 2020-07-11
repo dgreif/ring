@@ -44,8 +44,8 @@ export class Chime extends BaseDataAccessory<RingChime> {
       characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: snoozeService,
       getValue: (data) => data.do_not_disturb.seconds_left > 0 ?
-                            Characteristic.TargetHeatingCoolingState.HEAT :
-                            Characteristic.TargetHeatingCoolingState.OFF,
+                            Characteristic.CurrentHeatingCoolingState.HEAT :
+                            Characteristic.CurrentHeatingCoolingState.OFF,
     })
     this.registerCharacteristic({
       characteristicType: Characteristic.TargetHeatingCoolingState,
@@ -58,7 +58,7 @@ export class Chime extends BaseDataAccessory<RingChime> {
             logInfo(device.name + ' snooze cleared')
             snoozeService
               .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-              .updateValue(Characteristic.TargetHeatingCoolingState.OFF)
+              .updateValue(Characteristic.CurrentHeatingCoolingState.OFF)
             snoozeService
               .getCharacteristic(Characteristic.TargetTemperature)
               .updateValue(0)
@@ -84,6 +84,8 @@ export class Chime extends BaseDataAccessory<RingChime> {
           logInfo(`${device.name} snoozed for ${elapsedTime(snoozeHours)}`)
           snoozeService
             .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+            .updateValue(Characteristic.CurrentHeatingCoolingState.HEAT)
+            .getCharacteristic(Characteristic.TargetHeatingCoolingState)
             .updateValue(Characteristic.TargetHeatingCoolingState.HEAT)
 
           return device.snooze(Math.round(snoozeHours * 60)) // in minutes

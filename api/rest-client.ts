@@ -71,7 +71,7 @@ async function requestWithRetry<T>(
       )
       logDebug(e)
 
-      if (e.code === 'ENOTFOUND') {
+      if (e.code === 'ENOTFOUND' || e.code === 'EREFUSED') {
         const url = parseUrl(requestOptions.url)
         logDebug(
           `DNS Cache for ${url.hostname}: ${JSON.stringify(

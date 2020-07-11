@@ -5,7 +5,14 @@ import { Logging, PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
 import { logInfo } from '../api/util'
 
-const minutesFor24Hours = 24 * 60
+const secondsFor1Hour = 60 * 60
+const elapsedTime = (elapsed: number) => {
+    elapsed *= secondsFor1Hour
+    const hours = Math.floor(elapsed / secondsFor1Hour),
+        minutes = Math.floor(elapsed / 60) % 60,
+        seconds = Math.round(elapsed % 60)
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
 
 export class Chime extends BaseDataAccessory<RingChime> {
   constructor(
@@ -17,7 +24,7 @@ export class Chime extends BaseDataAccessory<RingChime> {
     super()
     const { Characteristic, Service } = hap,
       snoozeService = this.getService(
-        Service.Switch,
+        Service.Thermostat,
         device.name + ' Snooze',
         'snooze'
       ),
@@ -34,21 +41,79 @@ export class Chime extends BaseDataAccessory<RingChime> {
 
     // Snooze Switch
     this.registerCharacteristic({
-      characteristicType: Characteristic.On,
+      characteristicType: Characteristic.CurrentHeatingCoolingState,
       serviceType: snoozeService,
-      getValue: (data) => Boolean(data.do_not_disturb.seconds_left),
-      setValue: (snooze: boolean) => {
-        if (snooze) {
-          logInfo(device.name + ' snoozed for 24 hours')
-          return device.snooze(minutesFor24Hours)
+      getValue: (data) => data.do_not_disturb.seconds_left > 0 ?
+                            Characteristic.TargetHeatingCoolingState.HEAT :
+                            Characteristic.TargetHeatingCoolingState.OFF,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.TargetHeatingCoolingState,
+      serviceType: snoozeService,
+      getValue: (data) => data.do_not_disturb.seconds_left > 0 ?
+                            Characteristic.TargetHeatingCoolingState.HEAT :
+                            Characteristic.TargetHeatingCoolingState.OFF,
+      setValue: (state: number) => {
+          if (state === Characteristic.TargetHeatingCoolingState.OFF) {
+            logInfo(device.name + ' snooze cleared')
+            snoozeService
+              .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+              .updateValue(Characteristic.TargetHeatingCoolingState.OFF)
+            snoozeService
+              .getCharacteristic(Characteristic.TargetTemperature)
+              .updateValue(0)
+            snoozeService
+              .getCharacteristic(Characteristic.CurrentTemperature)
+              .updateValue(0)
+            return device.clearSnooze()
+          }
+       },
+      requestUpdate: () => device.requestUpdate(),
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.CurrentTemperature,
+      serviceType: snoozeService,
+      getValue: (data) => Number(Math.round((data.do_not_disturb.seconds_left / secondsFor1Hour) * 10) / 10),
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.TargetTemperature,
+      serviceType: snoozeService,
+      getValue: (data) => Number(Math.round((data.do_not_disturb.seconds_left / secondsFor1Hour) * 10) / 10),
+      setValue: (snoozeHours: number) => {
+        if (snoozeHours > 0) {
+          logInfo(`${device.name} snoozed for ${elapsedTime(snoozeHours)}`)
+          snoozeService
+            .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+            .updateValue(Characteristic.TargetHeatingCoolingState.HEAT)
+
+          return device.snooze(Math.round(snoozeHours * 60)) // in minutes
         }
 
-        logInfo(device.name + ' snooze cleared')
-
-        return device.clearSnooze()
+        snoozeService
+          .setCharacteristic(Characteristic.TargetHeatingCoolingState, Characteristic.TargetHeatingCoolingState.OFF)
       },
       requestUpdate: () => device.requestUpdate(),
     })
+
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      .setProps({
+          validValues: [Characteristic.TargetHeatingCoolingState.OFF, Characteristic.TargetHeatingCoolingState.HEAT]
+      })
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.CurrentTemperature)
+      .setProps({
+        minValue: 0.0,
+        maxValue: 24.0,
+        minStep: 0.1
+      })
+    this.getService(snoozeService)
+      .getCharacteristic(Characteristic.TargetTemperature)
+      .setProps({
+        minValue: 0.0,
+        maxValue: 24.0,
+        minStep: 0.1
+      })
     snoozeService.setPrimaryService(true)
 
     // Speaker Service

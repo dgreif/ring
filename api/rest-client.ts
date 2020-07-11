@@ -168,8 +168,9 @@ export class RingRestClient {
       return response
     } catch (requestError) {
       if (grantData.refresh_token) {
-        // failed request with refresh token, try again with username/password
+        // failed request with refresh token
         this.refreshToken = undefined
+        logError(requestError)
         return this.getAuth()
       }
 
@@ -336,11 +337,16 @@ export class RingRestClient {
         throw new Error('Not found with response: ' + stringify(response.body))
       }
 
-      logError(
-        `Request to ${url} failed with status ${
-          response.statusCode
-        }. Response body: ${stringify(response.body)}`
-      )
+      if (response.statusCode) {
+        logError(
+          `Request to ${url} failed with status ${
+            response.statusCode
+          }. Response body: ${stringify(response.body)}`
+        )
+      } else {
+        logError(`Request to ${url} failed:`)
+        logError(e)
+      }
 
       throw e
     }

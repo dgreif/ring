@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.6.0](https://github.com/dgreif/ring/compare/v9.5.0...v9.6.0) (2020-07-12)
+
+
+### Features
+
+* add amazon key locks to device discovery tool ([4bbbb02](https://github.com/dgreif/ring/commit/4bbbb025631f453ba134ff5fa1a457a559d56b40)), closes [#384](https://github.com/dgreif/ring/issues/384)
+* **api:** `api.disconnect()` to unsubscribe current instance ([add754f](https://github.com/dgreif/ring/commit/add754f8abe426d755642d8252b2cde5cd9f4f3c)), closes [#378](https://github.com/dgreif/ring/issues/378)
+
 ## [9.5.0](https://github.com/dgreif/ring/compare/v9.4.1...v9.5.0) (2020-07-11)
 
 

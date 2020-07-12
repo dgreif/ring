@@ -1,4 +1,4 @@
-import { interval, ReplaySubject, Subscription } from 'rxjs'
+import { interval, ReplaySubject } from 'rxjs'
 import {
   createCryptoLine,
   releasePorts,
@@ -11,6 +11,7 @@ import { RingCamera } from './ring-camera'
 import { FfmpegProcess } from './ffmpeg'
 import { mapTo, switchMap, take, takeUntil } from 'rxjs/operators'
 import { RtpLatchGenerator } from './rtp-latch-generator'
+import { Subscribed } from './subscribed'
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -23,11 +24,10 @@ export interface FfmpegOptions {
 const keepAliveInterval = 15,
   keepAliveMessage = Buffer.alloc(8)
 
-export class SipSession {
+export class SipSession extends Subscribed {
   private hasStarted = false
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
-  public readonly subscriptions: Subscription[] = []
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
   private rtpLatchGenerator = new RtpLatchGenerator(
     this.rtpOptions.audio,
@@ -47,7 +47,9 @@ export class SipSession {
     public readonly audioSplitter: RtpSplitter,
     private readonly tlsPort: number,
     public readonly camera: RingCamera
-  ) {}
+  ) {
+    super()
+  }
 
   createSipCall(sipOptions: SipOptions) {
     if (this.sipCall) {
@@ -60,7 +62,7 @@ export class SipSession {
       this.tlsPort
     ))
 
-    this.subscriptions.push(
+    this.addSubscriptions(
       call.onEndedByRemote.subscribe(() => this.callEnded(false))
     )
 
@@ -107,7 +109,7 @@ export class SipSession {
       // punch to begin with to make sure we get through NAT
       sendKeepAlive()
 
-      this.subscriptions.push(
+      this.addSubscriptions(
         // hole punch every 15 seconds to keep stream alive and port open
         interval(keepAliveInterval * 1000).subscribe(sendKeepAlive),
 
@@ -248,7 +250,7 @@ export class SipSession {
     this.sipCall.destroy()
     this.videoSplitter.close()
     this.audioSplitter.close()
-    this.subscriptions.forEach((subscription) => subscription.unsubscribe())
+    this.unsubscribe()
     this.rtpLatchGenerator.stop()
     releasePorts(this.reservedPorts)
   }

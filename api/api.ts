@@ -20,6 +20,7 @@ import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
+import { Subscribed } from './subscribed'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -34,13 +35,15 @@ export interface RingApiOptions extends SessionOptions {
   }
 }
 
-export class RingApi {
+export class RingApi extends Subscribed {
   public readonly restClient = new RingRestClient(this.options)
   public readonly onRefreshTokenUpdated = this.restClient.onRefreshTokenUpdated.asObservable()
 
   private locations = this.fetchAndBuildLocations()
 
   constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
+    super()
+
     if (options.debug) {
       enableDebug()
     }
@@ -129,56 +132,64 @@ export class RingApi {
       return
     }
 
-    merge(onCamerasRequestUpdate, onChimesRequestUpdate, onPollForStatusUpdate)
-      .pipe(
-        throttleTime(500),
-        switchMap(async () => {
-          const response = await this.fetchRingDevices().catch(() => null)
-          return response
-        })
+    this.addSubscriptions(
+      merge(
+        onCamerasRequestUpdate,
+        onChimesRequestUpdate,
+        onPollForStatusUpdate
       )
-      .subscribe((response) => {
-        onUpdateReceived.next()
+        .pipe(
+          throttleTime(500),
+          switchMap(async () => {
+            const response = await this.fetchRingDevices().catch(() => null)
+            return response
+          })
+        )
+        .subscribe((response) => {
+          onUpdateReceived.next()
 
-        if (!response) {
-          return
-        }
-
-        response.allCameras.forEach((data) => {
-          const camera = camerasById[data.id]
-          if (camera) {
-            camera.updateData(data)
+          if (!response) {
+            return
           }
-        })
 
-        response.chimes.forEach((data) => {
-          const chime = chimesById[data.id]
-          if (chime) {
-            chime.updateData(data)
-          }
+          response.allCameras.forEach((data) => {
+            const camera = camerasById[data.id]
+            if (camera) {
+              camera.updateData(data)
+            }
+          })
+
+          response.chimes.forEach((data) => {
+            const chime = chimesById[data.id]
+            if (chime) {
+              chime.updateData(data)
+            }
+          })
         })
-      })
+    )
 
     if (cameraStatusPollingSeconds) {
       onUpdateReceived.next() // kick off polling
     }
 
-    merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
-      async () => {
-        const activeDings = await this.fetchActiveDings().catch(() => null)
-        onActiveDingsReceived.next()
+    this.addSubscriptions(
+      merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
+        async () => {
+          const activeDings = await this.fetchActiveDings().catch(() => null)
+          onActiveDingsReceived.next()
 
-        if (!activeDings || !activeDings.length) {
-          return
-        }
-
-        activeDings.forEach((activeDing) => {
-          const camera = camerasById[activeDing.doorbot_id]
-          if (camera) {
-            camera.processActiveDing(activeDing)
+          if (!activeDings || !activeDings.length) {
+            return
           }
-        })
-      }
+
+          activeDings.forEach((activeDing) => {
+            const camera = camerasById[activeDing.doorbot_id]
+            if (camera) {
+              camera.processActiveDing(activeDing)
+            }
+          })
+        }
+      )
     )
 
     if (cameras.length && cameraDingsPollingSeconds) {
@@ -274,5 +285,12 @@ export class RingApi {
     return this.restClient.request<ProfileResponse>({
       url: clientApi('profile'),
     })
+  }
+
+  disconnect() {
+    this.unsubscribe()
+    this.locations.then((locations) =>
+      locations.forEach((location) => location.disconnect())
+    )
   }
 }

@@ -41,6 +41,7 @@ import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { RingDevice } from './ring-device'
+import { Subscribed } from './subscribed'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
 
@@ -52,7 +53,7 @@ function flattenDeviceData(data: any): RingDeviceData {
   )
 }
 
-export class Location {
+export class Location extends Subscribed {
   private seq = 1
 
   onMessage = new Subject<SocketIoMessage>()
@@ -109,6 +110,7 @@ export class Location {
   onLocationMode = new ReplaySubject<LocationMode>(1)
   private onLocationModeRequested = new Subject()
   reconnecting = false
+  private disconnected = false
   connectionPromise?: Promise<SocketIOClient.Socket>
   securityPanel?: RingDevice
   assets?: TicketAsset[]
@@ -128,41 +130,47 @@ export class Location {
     },
     private restClient: RingRestClient
   ) {
-    // start listening for devices immediately
-    this.onDevices.subscribe()
+    super()
 
-    // watch for sessions to come online
-    this.onSessionInfo.subscribe((sessions) => {
-      sessions.forEach(({ connectionStatus, assetUuid }) => {
-        const assetWasOffline = this.offlineAssets.includes(assetUuid),
-          asset = this.assets && this.assets.find((x) => x.uuid === assetUuid)
+    this.addSubscriptions(
+      // start listening for devices immediately
+      this.onDevices.subscribe(),
 
-        if (!asset) {
-          // we don't know about this asset, so don't worry about it
-          return
-        }
+      // watch for sessions to come online
+      this.onSessionInfo.subscribe((sessions) => {
+        sessions.forEach(({ connectionStatus, assetUuid }) => {
+          const assetWasOffline = this.offlineAssets.includes(assetUuid),
+            asset = this.assets && this.assets.find((x) => x.uuid === assetUuid)
 
-        if (connectionStatus === 'online') {
-          if (assetWasOffline) {
-            this.requestList(deviceListMessageType, assetUuid)
-            this.offlineAssets = this.offlineAssets.filter(
-              (id) => id !== assetUuid
-            )
-            logInfo(`Ring ${asset.kind} ${assetUuid} has come back online`)
+          if (!asset) {
+            // we don't know about this asset, so don't worry about it
+            return
           }
-        } else if (!assetWasOffline) {
-          logError(
-            `Ring ${asset.kind} ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
-          )
-          this.offlineAssets.push(assetUuid)
-        }
+
+          if (connectionStatus === 'online') {
+            if (assetWasOffline) {
+              this.requestList(deviceListMessageType, assetUuid)
+              this.offlineAssets = this.offlineAssets.filter(
+                (id) => id !== assetUuid
+              )
+              logInfo(`Ring ${asset.kind} ${assetUuid} has come back online`)
+            }
+          } else if (!assetWasOffline) {
+            logError(
+              `Ring ${asset.kind} ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
+            )
+            this.offlineAssets.push(assetUuid)
+          }
+        })
       })
-    })
+    )
 
     if (!options.hasAlarmBaseStation && options.locationModePollingSeconds) {
-      merge(this.onLocationModeRequested, this.onLocationMode)
-        .pipe(debounceTime(options.locationModePollingSeconds * 1000))
-        .subscribe(() => this.getLocationMode())
+      this.addSubscriptions(
+        merge(this.onLocationModeRequested, this.onLocationMode)
+          .pipe(debounceTime(options.locationModePollingSeconds * 1000))
+          .subscribe(() => this.getLocationMode())
+      )
 
       void this.getLocationMode()
     }
@@ -181,6 +189,10 @@ export class Location {
   }
 
   async createConnection(): Promise<SocketIOClient.Socket> {
+    if (this.disconnected) {
+      return Promise.resolve({ disconnected: true } as any)
+    }
+
     logInfo('Creating location socket.io connection')
     const { assets, ticket, host } = await this.restClient.request<{
       assets: TicketAsset[]
@@ -210,7 +222,10 @@ export class Location {
 
         this.onConnected.next(false)
 
-        logInfo('Reconnecting location socket.io connection')
+        if (!this.disconnected) {
+          logInfo('Reconnecting location socket.io connection')
+        }
+
         this.reconnecting = true
         connection.close()
         return (this.connectionPromise = delay(1000).then(() => {
@@ -344,9 +359,9 @@ export class Location {
     return this.getNextMessageOfType(listType, assetId)
   }
 
-  getDevices() {
+  getDevices(): Promise<RingDevice[]> {
     if (!this.hasHubs) {
-      return [] as RingDevice[]
+      return Promise.resolve([])
     }
 
     if (!this.connectionPromise) {
@@ -530,5 +545,18 @@ export class Location {
       !notYetParticipatingInMode?.length &&
       !disabledLocationModes.includes(mode)
     )
+  }
+
+  disconnect() {
+    this.disconnected = true
+    this.unsubscribe()
+    this.cameras.forEach((camera) => camera.disconnect())
+    this.getDevices().then((devices) => {
+      devices.forEach((device) => device.disconnect())
+    })
+
+    if (this.connectionPromise) {
+      this.connectionPromise.then((connection) => connection.close())
+    }
   }
 }

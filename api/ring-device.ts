@@ -2,8 +2,9 @@ import { BehaviorSubject } from 'rxjs'
 import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
 import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
+import { Subscribed } from './subscribed'
 
-export class RingDevice {
+export class RingDevice extends Subscribed {
   onData = new BehaviorSubject(this.initialData)
   zid = this.initialData.zid
   id = this.zid
@@ -18,9 +19,13 @@ export class RingDevice {
     public location: Location,
     public assetId: string
   ) {
-    location.onDeviceDataUpdate
-      .pipe(filter((update) => update.zid === this.zid))
-      .subscribe((update) => this.updateData(update))
+    super()
+
+    this.addSubscriptions(
+      location.onDeviceDataUpdate
+        .pipe(filter((update) => update.zid === this.zid))
+        .subscribe((update) => this.updateData(update))
+    )
   }
 
   updateData(update: Partial<RingDeviceData>) {
@@ -95,5 +100,9 @@ export class RingDevice {
       null,
       2
     )
+  }
+
+  disconnect() {
+    this.unsubscribe()
   }
 }

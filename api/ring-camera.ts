@@ -35,6 +35,7 @@ import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { isFfmpegInstalled } from './ffmpeg'
+import { Subscribed } from './subscribed'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 35, // needs to be 30+ because battery cam can't take snapshot while recording
@@ -103,7 +104,7 @@ export function getSearchQueryString(
   return queryString.length ? `?${queryString}` : ''
 }
 
-export class RingCamera {
+export class RingCamera extends Subscribed {
   id = this.initialData.id
   deviceType = this.initialData.kind
   model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
@@ -148,6 +149,8 @@ export class RingCamera {
     public isDoorbot: boolean,
     private restClient: RingRestClient
   ) {
+    super()
+
     if (!initialData.subscribed) {
       this.subscribeToDingEvents().catch((e) => {
         logError(
@@ -287,11 +290,13 @@ export class RingCamera {
 
   private pollForActiveDing() {
     // try every second until a new ding is received
-    interval(1000)
-      .pipe(takeUntil(this.onNewDing))
-      .subscribe(() => {
-        this.onRequestActiveDings.next()
-      })
+    this.addSubscriptions(
+      interval(1000)
+        .pipe(takeUntil(this.onNewDing))
+        .subscribe(() => {
+          this.onRequestActiveDings.next()
+        })
+    )
   }
 
   private expiredDingIds: string[] = []
@@ -629,6 +634,10 @@ export class RingCamera {
       method: 'POST',
       url: this.doorbotUrl('motions_unsubscribe'),
     })
+  }
+
+  disconnect() {
+    this.unsubscribe()
   }
 }
 

@@ -206,7 +206,7 @@ export class CameraSource implements CameraStreamingDelegate {
         ]),
         onReturnPacketReceived = new Subject()
 
-      sipSession.subscriptions.push(
+      sipSession.addSubscriptions(
         merge(of(true).pipe(delay(15000)), onReturnPacketReceived)
           .pipe(debounceTime(5000))
           .subscribe(() => {

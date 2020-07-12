@@ -66,6 +66,7 @@ export async function logDeviceData() {
 
   console.log('Successfully logged in.  Fetching devices...')
   const locations = await ringApi.getLocations(),
+    amazonKeyLocks = await ringApi.fetchAmazonKeyLocks(),
     locationsWithDevices = await mapAsync(locations, async (location) => {
       const devices = await location.getDevices()
       return {
@@ -74,11 +75,15 @@ export async function logDeviceData() {
         chimes: location.chimes.map((chime) => chime.data),
         devices: devices.map((device) => device.data),
       }
-    })
+    }),
+    results = {
+      locations: locationsWithDevices,
+      amazonKeyLocks,
+    }
 
-  stripSensitiveFields(locationsWithDevices)
+  stripSensitiveFields(results)
 
   console.log('\nPlease copy and paste everything AFTER THIS LINE:\n\n')
-  console.log(JSON.stringify(locationsWithDevices))
+  console.log(JSON.stringify(results))
   process.exit(0)
 }

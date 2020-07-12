@@ -211,6 +211,13 @@ export class RingApi extends Subscribed {
     return rawLocations
   }
 
+  fetchAmazonKeyLocks() {
+    return this.restClient.request<any[]>({
+      url:
+        'https://api.ring.com/integrations/amazonkey/v2/devices/lock_associations',
+    })
+  }
+
   async fetchAndBuildLocations() {
     const rawLocations = await this.fetchRawLocations(),
       {

@@ -197,6 +197,7 @@ export class Location extends Subscribed {
     const { assets, ticket, host } = await this.restClient.request<{
       assets: TicketAsset[]
       host: string
+      subscriptionTopics: string[]
       ticket: string
     }>({
       url: appApi('clap/tickets?locationID=' + this.id),

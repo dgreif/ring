@@ -499,6 +499,11 @@ export type DingKind =
   | 'on_demand' // Live View
   | 'alarm' // Linked Event - Alarm
   | 'on_demand_link' // Linked Event - Motion
+  | 'door_activity'
+  | 'key_access'
+  | 'DELETED_FOOTAGE'
+  | 'OFFLINE_FOOTAGE'
+  | 'OFFLINE_MOTION'
 
 export interface CameraEvent {
   created_at: string
@@ -590,10 +595,12 @@ export interface RingDeviceHistoryEvent {
   body: any // Skipping for now
 }
 
+export type DingState = 'ringing' | 'connected' | 'timed_out' | 'completed'
+
 export interface ActiveDing {
   id: number
   id_str: string
-  state: 'ringing'
+  state: DingState
   protocol: 'sip'
   doorbot_id: number
   doorbot_description: string

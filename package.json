@@ -8,9 +8,9 @@
     "ring-device-data-cli": "ring-device-data-cli.js"
   },
   "scripts": {
-    "test": "jest && eslint **/*.ts",
+    "test": "jest && eslint '**/*.ts'",
     "watch:tests": "jest --watch",
-    "lint": "eslint **/*.ts --fix",
+    "lint": "eslint '**/*.ts' --fix",
     "build": "rm -rf lib && tsc --declaration",
     "example": "npm run build && node ./lib/examples/example.js",
     "api-example": "npm run build && node ./lib/examples/api-example.js",

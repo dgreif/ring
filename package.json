@@ -59,7 +59,6 @@
     "ffmpeg-for-homebridge": "0.0.7",
     "get-port": "^5.1.1",
     "got": "^11.5.1",
-    "ip": "1.1.5",
     "node-machine-id": "^1.1.12",
     "public-ip": "4.0.2",
     "rxjs": "^6.6.2",

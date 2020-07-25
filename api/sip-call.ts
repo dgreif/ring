@@ -3,12 +3,12 @@ import { logError, logInfo } from './util'
 import {
   createCryptoLine,
   decodeCryptoValue,
+  getIpAddress,
   RtpOptions,
   RtpStreamOptions,
 } from './rtp-utils'
 
-const ip = require('ip'),
-  sip = require('sip'),
+const sip = require('sip'),
   sdp = require('sdp')
 
 export const expiredDingError = new Error('Ding expired, received 480')
@@ -114,7 +114,7 @@ export class SipCall {
   ) {
     const { address, audio, video } = rtpOptions,
       { from } = this.sipOptions,
-      host = ip.address()
+      host = getIpAddress()
 
     this.sipClient = sip.create(
       {

@@ -2,6 +2,7 @@ import { RingCamera, SipSession } from '../api'
 import { hap } from './hap'
 import {
   createCryptoLine,
+  getIpAddress,
   getSrtpValue,
   getSsrc,
   RtpSplitter,
@@ -28,7 +29,6 @@ import { merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 
-const ip = require('ip')
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
   snapshotsBlockedPath = require.resolve('../../media/snapshots-blocked.jpg')
@@ -398,12 +398,8 @@ export class CameraSource implements CameraStreamingDelegate {
         } (${getDurationSeconds(start)}s)`
       )
 
-      const currentAddress = ip.address()
       callback(undefined, {
-        address: {
-          address: currentAddress,
-          type: ip.isV4Format(currentAddress) ? 'v4' : 'v6',
-        },
+        address: getIpAddress(),
         audio: {
           port: returnAudioPort,
           ssrc: audioSsrc,

@@ -282,10 +282,20 @@ export class RingCamera extends Subscribed {
   }
 
   startVideoOnDemand() {
-    return this.restClient.request<ActiveDing | ''>({
-      method: 'POST',
-      url: this.doorbotUrl('live_view'), // Ring app uses vod for battery cams, but doesn't appear to be necessary
-    })
+    return this.restClient
+      .request<ActiveDing | ''>({
+        method: 'POST',
+        url: this.doorbotUrl('live_view'), // Ring app uses vod for battery cams, but doesn't appear to be necessary
+      })
+      .catch((e) => {
+        if (e.response?.statusCode === 403) {
+          const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
+          logError(errorMessage)
+          throw new Error(errorMessage)
+        }
+
+        throw e
+      })
   }
 
   private pollForActiveDing() {

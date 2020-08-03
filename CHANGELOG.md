@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.7.0](https://github.com/dgreif/ring/compare/v9.6.0...v9.7.0) (2020-08-03)
+
+
+### Features
+
+* additional ring data types ([590e1cd](https://github.com/dgreif/ring/commit/590e1cd3e37e369d96b50c0b91fbbd5b1c51e052))
+
+
+### Bug Fixes
+
+* better logging when live streams are blocked by modes settings ([ae809f5](https://github.com/dgreif/ring/commit/ae809f54180ae61c9453b11b7b4ac8efc34f7c46)), closes [#414](https://github.com/dgreif/ring/issues/414)
+* determine host ip without `ip` module ([15d2ace](https://github.com/dgreif/ring/commit/15d2ace49584d3bae9bb1f6318b60b410f91d9b1))
+
 ## [9.6.0](https://github.com/dgreif/ring/compare/v9.5.0...v9.6.0) (2020-07-12)
 
 

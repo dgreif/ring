@@ -102,5 +102,15 @@
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"
   },
-  "homepage": "https://github.com/dgreif/ring#readme"
+  "homepage": "https://github.com/dgreif/ring#readme",
+  "funding": [
+    {
+      "type": "paypal",
+      "url": "https://www.paypal.me/dustingreif"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/dgreif"
+    }
+  ]
 }

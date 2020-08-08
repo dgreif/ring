@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.7.2](https://github.com/dgreif/ring/compare/v9.7.1...v9.7.2) (2020-08-08)
+
+
+### Bug Fixes
+
+* use default interface for local ip address ([bab2d66](https://github.com/dgreif/ring/commit/bab2d66917db1b74097d37a33d426a38ef97d8be)), closes [#424](https://github.com/dgreif/ring/issues/424)
+
 ### [9.7.1](https://github.com/dgreif/ring/compare/v9.7.0...v9.7.1) (2020-08-07)
 
 ## [9.7.0](https://github.com/dgreif/ring/compare/v9.6.0...v9.7.0) (2020-08-03)

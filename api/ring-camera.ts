@@ -26,6 +26,7 @@ import {
 } from 'rxjs/operators'
 import {
   generateSrtpOptions,
+  getDefaultIpAddress,
   getPublicIp,
   reservePorts,
   RtpSplitter,
@@ -547,6 +548,7 @@ export class RingCamera extends Subscribed {
       to: ding.sip_to,
       from: ding.sip_from,
       dingId: ding.id_str,
+      localIp: await getDefaultIpAddress(),
     }
   }
 

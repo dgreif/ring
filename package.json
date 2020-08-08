@@ -66,6 +66,7 @@
     "sip": "0.0.6",
     "socket.io": "^2.3.0",
     "stun": "2.1.0",
+    "systeminformation": "4.26.10",
     "uuid": "^8.3.0"
   },
   "devDependencies": {

@@ -5,10 +5,10 @@ import { fromEvent, merge, ReplaySubject } from 'rxjs'
 import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
 import { randomBytes } from 'crypto'
-import { logError } from './util'
+import { logError, logInfo } from './util'
 import os from 'os'
-const stun = require('stun'),
-  ip = require('ip')
+import { networkInterfaceDefault } from 'systeminformation'
+const stun = require('stun')
 
 export interface SrtpOptions {
   srtpKey: Buffer
@@ -30,6 +30,32 @@ export async function getPublicIpViaStun() {
   return response.getXorAddress().address
 }
 
+export async function getDefaultIpAddress() {
+  const interfaces = os.networkInterfaces(),
+    defaultInterfaceName = await networkInterfaceDefault(),
+    defaultInterface = interfaces[defaultInterfaceName],
+    externalInfo = defaultInterface?.filter((info) => !info.internal),
+    addressInfo =
+      externalInfo?.find((info) => info.family === 'IPv4') || externalInfo?.[0]
+
+  if (!addressInfo) {
+    logInfo(
+      JSON.stringify(
+        {
+          defaultInterfaceName,
+          interfaces,
+        },
+        null,
+        2
+      )
+    )
+
+    throw new Error('Unable to get default network address')
+  }
+
+  return addressInfo.address
+}
+
 export function getPublicIp() {
   return fetchPublicIp()
     .catch(() => getPublicIpViaStun())
@@ -37,7 +63,7 @@ export function getPublicIp() {
       logError(
         'Failed to retrieve public ip address.  Falling back to local ip and RTP latching'
       )
-      return ip.address()
+      return getDefaultIpAddress()
     })
 }
 
@@ -235,47 +261,4 @@ export function generateSrtpOptions(): SrtpOptions {
     srtpKey: randomBytes(16),
     srtpSalt: randomBytes(14),
   }
-}
-
-export function getIpAddresses(family = 'ipv4'): Array<string> {
-  const interfaces = os.networkInterfaces(),
-    familyLower = family.toLowerCase()
-
-  return Object.entries(interfaces).reduce(
-    (addresses, [key, interfaceInfos]) => {
-      // Skip all virtual and bridge interfaces
-      if (key.startsWith('v') || key.startsWith('br')) {
-        return addresses
-      }
-
-      const matchingAddresses = (interfaceInfos || []).reduce(
-        (matches, interfaceInfo) => {
-          // Remove addresses that have incorrect family or are internal
-          if (
-            interfaceInfo.internal ||
-            interfaceInfo.family.toLowerCase() !== familyLower
-          ) {
-            return matches
-          }
-
-          return matches.concat([interfaceInfo.address])
-        },
-        [] as string[]
-      )
-
-      return addresses.concat(matchingAddresses)
-    },
-    [] as string[]
-  )
-}
-
-export function getIpAddress(family?: string) {
-  const addresses = getIpAddresses(family),
-    address = addresses[0]
-
-  if (!address) {
-    throw new Error('Unable to detect you IP Address')
-  }
-
-  return address
 }

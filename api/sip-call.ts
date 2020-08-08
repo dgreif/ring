@@ -3,7 +3,6 @@ import { logError, logInfo } from './util'
 import {
   createCryptoLine,
   decodeCryptoValue,
-  getIpAddress,
   RtpOptions,
   RtpStreamOptions,
 } from './rtp-utils'
@@ -59,6 +58,7 @@ export interface SipOptions {
   to: string
   from: string
   dingId: string
+  localIp: string
 }
 
 function getRandomId() {
@@ -114,7 +114,7 @@ export class SipCall {
   ) {
     const { address, audio, video } = rtpOptions,
       { from } = this.sipOptions,
-      host = getIpAddress()
+      host = this.sipOptions.localIp
 
     this.sipClient = sip.create(
       {

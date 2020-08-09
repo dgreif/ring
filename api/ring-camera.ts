@@ -495,14 +495,21 @@ export class RingCamera extends Subscribed {
       await delay(snapshotRefreshDelay)
     }
 
+    const extraMessageForBatteryCam = this.hasBattery
+      ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
+      : ''
     throw new Error(
-      `Snapshot failed to refresh after ${maxSnapshotRefreshAttempts} attempts`
+      `Snapshot for ${this.name} failed to refresh after ${maxSnapshotRefreshAttempts} attempts${extraMessageForBatteryCam}`
     )
   }
 
   async getSnapshot() {
     this.refreshSnapshotInProgress =
-      this.refreshSnapshotInProgress || this.refreshSnapshot()
+      this.refreshSnapshotInProgress ||
+      this.refreshSnapshot().catch((e) => {
+        logError(e.message)
+        throw e
+      })
 
     try {
       const useLastSnapshot = await this.refreshSnapshotInProgress
@@ -513,7 +520,6 @@ export class RingCamera extends Subscribed {
       }
     } catch (e) {
       this.refreshSnapshotInProgress = undefined
-      logError(e.message)
       throw e
     }
 

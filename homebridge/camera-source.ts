@@ -2,6 +2,7 @@ import { RingCamera, SipSession } from '../api'
 import { hap } from './hap'
 import {
   createCryptoLine,
+  getDefaultIpAddress,
   getSrtpValue,
   getSsrc,
   RtpSplitter,
@@ -398,7 +399,7 @@ export class CameraSource implements CameraStreamingDelegate {
       )
 
       callback(undefined, {
-        address: sipSession.sipOptions.localIp,
+        address: await getDefaultIpAddress(request.addressVersion === 'ipv6'),
         audio: {
           port: returnAudioPort,
           ssrc: audioSsrc,

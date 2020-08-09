@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.7.3](https://github.com/dgreif/ring/compare/v9.7.2...v9.7.3) (2020-08-09)
+
+
+### Bug Fixes
+
+* clearer error message when snapshot fails for battery cams ([ac63e05](https://github.com/dgreif/ring/commit/ac63e05a078f10a70d1dc7ca0bcf5f65e119e577))
+* **homebridge:** respect request for ipv6 address in live stream ([a826256](https://github.com/dgreif/ring/commit/a8262566d60204f7a73cf70c3bd5a051c1f17316))
+
 ### [9.7.2](https://github.com/dgreif/ring/compare/v9.7.1...v9.7.2) (2020-08-08)
 
 

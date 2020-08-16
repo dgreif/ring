@@ -1,11 +1,10 @@
 import { createSocket, RemoteInfo, Socket } from 'dgram'
 import { AddressInfo } from 'net'
-import { v4 as fetchPublicIp } from 'public-ip'
 import { fromEvent, merge, ReplaySubject } from 'rxjs'
 import { map, share, takeUntil } from 'rxjs/operators'
 import getPort from 'get-port'
 import { randomBytes } from 'crypto'
-import { logError, logInfo } from './util'
+import { logDebug, logError, logInfo } from './util'
 import os from 'os'
 import { networkInterfaceDefault } from 'systeminformation'
 const stun = require('stun')
@@ -20,14 +19,20 @@ export interface RtpStreamOptions extends SrtpOptions {
 }
 
 export interface RtpOptions {
-  address: string
   audio: RtpStreamOptions
   video: RtpStreamOptions
 }
 
-export async function getPublicIpViaStun() {
-  const response = await stun.request('stun.l.google.com:19302')
-  return response.getXorAddress().address
+export interface RtpStreamDescription extends RtpStreamOptions {
+  ssrc: number
+  iceUFrag: string
+  icePwd: string
+}
+
+export interface RtpDescription {
+  address: string
+  audio: RtpStreamDescription
+  video: RtpStreamDescription
 }
 
 export async function getDefaultIpAddress(preferIpv6 = false) {
@@ -56,17 +61,6 @@ export async function getDefaultIpAddress(preferIpv6 = false) {
   }
 
   return addressInfo.address
-}
-
-export function getPublicIp() {
-  return fetchPublicIp()
-    .catch(() => getPublicIpViaStun())
-    .catch(() => {
-      logError(
-        'Failed to retrieve public ip address.  Falling back to local ip and RTP latching'
-      )
-      return getDefaultIpAddress()
-    })
 }
 
 let reservedPorts: number[] = []
@@ -120,14 +114,14 @@ export function getPayloadType(message: Buffer) {
   return message.readUInt8(1) & 0x7f
 }
 
-export function isRtpMessage(message: Buffer) {
-  const payloadType = getPayloadType(message)
+function isRtpMessagePayloadType(payloadType: number) {
   return payloadType > 90 || payloadType === 0
 }
 
 export function getSsrc(message: Buffer) {
   try {
-    const isRtp = isRtpMessage(message)
+    const payloadType = getPayloadType(message),
+      isRtp = isRtpMessagePayloadType(payloadType)
     return message.readUInt32BE(isRtp ? 8 : 4)
   } catch (_) {
     return null
@@ -148,15 +142,6 @@ export async function bindToPort(socket: Socket) {
   })
 }
 
-export function sendUdpHolePunch(
-  socket: Socket,
-  localPort: number,
-  remotePort: number,
-  remoteAddress: string
-) {
-  socket.send(Buffer.alloc(8), remotePort, remoteAddress)
-}
-
 export interface SocketTarget {
   port: number
   address?: string
@@ -164,6 +149,8 @@ export interface SocketTarget {
 
 interface RtpMessageDescription {
   isRtpMessage: boolean
+  isStunMessage: boolean
+  payloadType: number
   info: RemoteInfo
   message: Buffer
 }
@@ -179,11 +166,17 @@ export class RtpSplitter {
     this.socket,
     'message'
   ).pipe(
-    map(([message, info]) => ({
-      message,
-      info,
-      isRtpMessage: isRtpMessage(message),
-    })),
+    map(([message, info]) => {
+      const payloadType = getPayloadType(message)
+
+      return {
+        message,
+        info,
+        isRtpMessage: isRtpMessagePayloadType(payloadType),
+        isStunMessage: payloadType === 1,
+        payloadType,
+      }
+    }),
     takeUntil(this.onClose),
     share()
   )
@@ -263,4 +256,55 @@ export function generateSrtpOptions(): SrtpOptions {
     srtpKey: randomBytes(16),
     srtpSalt: randomBytes(14),
   }
+}
+
+export function sendStunBindingRequest({
+  rtpDescription,
+  rtpSplitter,
+  localUfrag,
+  type,
+}: {
+  rtpSplitter: RtpSplitter
+  rtpDescription: RtpDescription
+  localUfrag: string
+  type: 'video' | 'audio'
+}) {
+  const message = stun.createMessage(1),
+    remoteDescription = rtpDescription[type]
+
+  message.addUsername(remoteDescription.iceUFrag + ':' + localUfrag)
+  message.addMessageIntegrity(remoteDescription.icePwd)
+  stun
+    .request(`${rtpDescription.address}:${remoteDescription.port}`, {
+      socket: rtpSplitter.socket,
+      message,
+    })
+    .then(() => logDebug(`${type} stun complete`))
+    .catch((e: Error) => {
+      logError(`${type} stun error`)
+      logError(e)
+    })
+}
+
+export function createStunResponder(rtpSplitter: RtpSplitter) {
+  return rtpSplitter.onMessage.subscribe(({ message, info, isStunMessage }) => {
+    if (!isStunMessage) {
+      return
+    }
+
+    try {
+      const decodedMessage = stun.decode(message),
+        response = stun.createMessage(
+          stun.constants.STUN_BINDING_RESPONSE,
+          decodedMessage.transactionId
+        )
+
+      response.addXorAddress(info.address, info.port)
+      rtpSplitter.send(stun.encode(response), info).catch(logError)
+    } catch (e) {
+      logDebug('Failed to Decode STUN Message')
+      logDebug(message.toString('hex'))
+      logDebug(e)
+    }
+  })
 }

@@ -1,10 +1,18 @@
 import { Subject } from 'rxjs'
-import { logError, logInfo } from './util'
+import {
+  delay,
+  logDebug,
+  logError,
+  logInfo,
+  randomInteger,
+  randomString,
+} from './util'
 import {
   createCryptoLine,
   decodeCryptoValue,
+  RtpDescription,
   RtpOptions,
-  RtpStreamOptions,
+  RtpStreamDescription,
 } from './rtp-utils'
 
 const sip = require('sip'),
@@ -68,28 +76,36 @@ function getRandomId() {
 function getRtpDescription(
   sections: string[],
   mediaType: 'audio' | 'video'
-): RtpStreamOptions {
+): RtpStreamDescription {
   const section = sections.find((s) => s.startsWith('m=' + mediaType)),
     { port } = sdp.parseMLine(section),
     lines = sdp.splitLines(section),
     cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
+    ssrcLine = lines.find((l: string) => l.startsWith('a=ssrc')),
+    iceUFragLine = lines.find((l: string) => l.startsWith('a=ice-ufrag')),
+    icePwdLine = lines.find((l: string) => l.startsWith('a=ice-pwd')),
     encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
 
   return {
     port,
+    ssrc: +ssrcLine.match(/ssrc:(\S*)/)[1],
+    iceUFrag: iceUFragLine.match(/ice-ufrag:(\S*)/)[1],
+    icePwd: icePwdLine.match(/ice-pwd:(\S*)/)[1],
     ...decodeCryptoValue(encodedCrypto),
   }
 }
 
-function parseRtpOptions(inviteResponse: { content: string }): RtpOptions {
+function parseRtpDescription(inviteResponse: {
+  content: string
+}): RtpDescription {
   const sections: string[] = sdp.splitSections(inviteResponse.content),
-    oLine = sdp.parseOLine(sections[0]),
-    rtpOptions = {
-      address: oLine.address,
-      audio: getRtpDescription(sections, 'audio'),
-      video: getRtpDescription(sections, 'video'),
-    }
-  return rtpOptions
+    oLine = sdp.parseOLine(sections[0])
+
+  return {
+    address: oLine.address,
+    audio: getRtpDescription(sections, 'audio'),
+    video: getRtpDescription(sections, 'video'),
+  }
 }
 
 export class SipCall {
@@ -106,13 +122,15 @@ export class SipCall {
   })
 
   public readonly sdp: string
+  public readonly audioUfrag = randomString(16)
+  public readonly videoUfrag = randomString(16)
 
   constructor(
     private sipOptions: SipOptions,
     rtpOptions: RtpOptions,
     tlsPort: number
   ) {
-    const { address, audio, video } = rtpOptions,
+    const { audio, video } = rtpOptions,
       { from } = this.sipOptions,
       host = this.sipOptions.localIp
 
@@ -138,6 +156,7 @@ export class SipCall {
           request.method === 'MESSAGE' &&
           request.content === 'event=camera_connected'
         ) {
+          logDebug('camera connected to ring server')
           this.cameraConnected?.()
         }
       }
@@ -145,21 +164,36 @@ export class SipCall {
 
     this.sdp = [
       'v=0',
-      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${address}`,
+      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${host}`,
       's=Talk',
-      `c=IN IP4 ${address}`,
+      `c=IN IP4 ${host}`,
       'b=AS:380',
       't=0 0',
-      'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
-
-      `m=audio ${audio.port} RTP/${audio.srtpKey ? 'S' : ''}AVP 0 101`,
+      `m=audio ${audio.port} RTP/SAVP 0`,
       'a=rtpmap:0 PCMU/8000',
       createCryptoLine(audio),
       'a=rtcp-mux',
-      `m=video ${video.port} RTP/${video.srtpKey ? 'S' : ''}AVP 99`,
+      'a=rtcp-fb:* trr-int 5',
+      'a=rtcp-fb:* ccm tmmbr',
+      `a=ice-ufrag:${this.audioUfrag}`,
+      `a=ice-pwd:${randomString(22)}`,
+      `a=candidate:${randomInteger()} 1 udp ${randomInteger()} ${host} ${
+        audio.port
+      } typ host generation 0 network-id 1 network-cost 50`,
+      `m=video ${video.port} RTP/SAVP 99`,
       'a=rtpmap:99 H264/90000',
       createCryptoLine(video),
       'a=rtcp-mux',
+      'a=rtcp-fb:* trr-int 5',
+      'a=rtcp-fb:* ccm tmmbr',
+      'a=rtcp-fb:99 nack pli',
+      'a=rtcp-fb:99 ccm tstr',
+      'a=rtcp-fb:99 ccm fir',
+      `a=ice-ufrag:${this.videoUfrag}`,
+      `a=ice-pwd:${randomString(22)}`,
+      `a=candidate:${randomInteger()} 1 udp ${randomInteger()} ${host} ${
+        video.port
+      } typ host generation 0 network-id 1 network-cost 50`,
     ]
       .filter((l) => l)
       .join('\r\n')
@@ -289,11 +323,13 @@ export class SipCall {
         content: this.sdp,
       })
 
-    return parseRtpOptions(inviteResponse)
+    return parseRtpDescription(inviteResponse)
   }
 
   async requestKeyFrame() {
-    await this.cameraConnectedPromise
+    // camera connected event doesn't always happen if cam is already streaming.  2 second fallback
+    await Promise.race([this.cameraConnectedPromise, delay(2000)])
+    logDebug('requesting key frame')
     await this.request({
       method: 'INFO',
       headers: {

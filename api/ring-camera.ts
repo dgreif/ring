@@ -27,7 +27,6 @@ import {
 import {
   generateSrtpOptions,
   getDefaultIpAddress,
-  getPublicIp,
   reservePorts,
   RtpSplitter,
   SrtpOptions,
@@ -315,11 +314,7 @@ export class RingCamera extends Subscribed {
     const vodPromise = this.onNewDing.pipe(take(1)).toPromise(),
       videoOnDemandDing = await this.startVideoOnDemand()
 
-    if (
-      videoOnDemandDing &&
-      'sip_from' in videoOnDemandDing &&
-      !this.expiredDingIds.includes(videoOnDemandDing.id_str)
-    ) {
+    if (videoOnDemandDing && 'sip_from' in videoOnDemandDing) {
       // wired cams return a ding from live_view so we don't need to wait
       return videoOnDemandDing
     }
@@ -544,12 +539,6 @@ export class RingCamera extends Subscribed {
         .reverse()[0],
       ding = existingDing || (await this.getSipConnectionDetails())
 
-    if (this.expiredDingIds.includes(ding.id_str)) {
-      logInfo('Waiting for a new live stream to start...')
-      await delay(500)
-      return this.getSipOptions()
-    }
-
     return {
       to: ding.sip_to,
       from: ding.sip_from,
@@ -571,21 +560,18 @@ export class RingCamera extends Subscribed {
       audioSplitter = new RtpSplitter(),
       [
         sipOptions,
-        publicIp,
         ffmpegIsInstalled,
         videoPort,
         audioPort,
         [tlsPort],
       ] = await Promise.all([
         this.getSipOptions(),
-        getPublicIp(),
         isFfmpegInstalled(),
         videoSplitter.portPromise,
         audioSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
-        address: publicIp,
         audio: {
           port: audioPort,
           ...(srtpOption.audio || generateSrtpOptions()),

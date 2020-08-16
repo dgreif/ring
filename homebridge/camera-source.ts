@@ -24,7 +24,7 @@ import {
 } from 'homebridge'
 import { logDebug, logError } from '../api/util'
 import { doesFfmpegSupportCodec, FfmpegProcess } from '../api/ffmpeg'
-import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
+import { debounceTime, delay, filter, take } from 'rxjs/operators'
 import { merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
@@ -216,6 +216,18 @@ export class CameraSource implements CameraStreamingDelegate {
               } appears to be inactive. (${getDurationSeconds(start)}s)`
             )
             sipSession.stop()
+          }),
+        sipSession.videoSplitter.onMessage
+          .pipe(
+            filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
+            take(1)
+          )
+          .subscribe(() => {
+            this.logger.info(
+              `Received stream data from ${
+                this.ringCamera.name
+              } (${getDurationSeconds(start)}s)`
+            )
           })
       )
 
@@ -223,15 +235,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
       const audioSsrc = hap.CameraController.generateSynchronisationSource(),
         incomingAudioRtcpPort = await sipSession.reservePort(),
-        videoSsrcPromise = sipSession.videoSplitter.onMessage
-          .pipe(
-            filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
-            map(({ message }) => getSsrc(message)),
-            filter((ssrc): ssrc is number => ssrc !== null),
-            take(1)
-          )
-          .toPromise(),
-        ringRtpOptions = await sipSession.start(
+        ringRtpDescription = await sipSession.start(
           libfdkAacInstalled
             ? {
                 input: ['-vn'],
@@ -284,13 +288,18 @@ export class CameraSource implements CameraStreamingDelegate {
             : undefined
         )
 
-      sipSession.videoSplitter.addMessageHandler(({ info }) => {
+      sipSession.videoSplitter.addMessageHandler(({ info, isStunMessage }) => {
         if (info.address === targetAddress) {
           onReturnPacketReceived.next()
           return {
-            port: ringRtpOptions.video.port,
-            address: ringRtpOptions.address,
+            port: ringRtpDescription.video.port,
+            address: ringRtpDescription.address,
           }
+        }
+
+        if (isStunMessage) {
+          // we don't need to forward stun messages to HomeKit since they are for connection establishment purposes only
+          return null
         }
 
         return {
@@ -349,8 +358,8 @@ export class CameraSource implements CameraStreamingDelegate {
             'HomeKit Return Audio'
           ),
           ringAudioLocation = {
-            address: ringRtpOptions.address,
-            port: ringRtpOptions.audio.port,
+            address: ringRtpDescription.address,
+            port: ringRtpDescription.audio.port,
           }
 
         returnAudioTranscodedSplitter.addMessageHandler((description) => {
@@ -386,16 +395,9 @@ export class CameraSource implements CameraStreamingDelegate {
       }
 
       this.logger.info(
-        `Waiting for stream data from ${
-          this.ringCamera.name
-        } (${getDurationSeconds(start)}s)`
-      )
-      const videoSsrc = await videoSsrcPromise
-
-      this.logger.info(
-        `Received stream data from ${
-          this.ringCamera.name
-        } (${getDurationSeconds(start)}s)`
+        `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(
+          start
+        )}s)`
       )
 
       callback(undefined, {
@@ -408,9 +410,9 @@ export class CameraSource implements CameraStreamingDelegate {
         },
         video: {
           port: await sipSession.videoSplitter.portPromise,
-          ssrc: videoSsrc,
-          srtp_key: ringRtpOptions.video.srtpKey,
-          srtp_salt: ringRtpOptions.video.srtpSalt,
+          ssrc: ringRtpDescription.video.ssrc,
+          srtp_key: ringRtpDescription.video.srtpKey,
+          srtp_salt: ringRtpDescription.video.srtpSalt,
         },
       })
     } catch (e) {

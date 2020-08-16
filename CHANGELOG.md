@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.8.0](https://github.com/dgreif/ring/compare/v9.7.3...v9.8.0) (2020-08-16)
+
+
+### Features
+
+* faster and more reliable stream connections using stun ([8299ec9](https://github.com/dgreif/ring/commit/8299ec966856215144f36f6242c1ea4b8c6a9788))
+
 ### [9.7.3](https://github.com/dgreif/ring/compare/v9.7.2...v9.7.3) (2020-08-09)
 
 

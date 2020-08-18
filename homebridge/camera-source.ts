@@ -187,6 +187,7 @@ export class CameraSource implements CameraStreamingDelegate {
               srtpKey: videoSrtpKey,
               srtpSalt: videoSrtpSalt,
             },
+            skipFfmpegCheck: true,
           }),
           doesFfmpegSupportCodec('libfdk_aac')
             .then((supported) => {

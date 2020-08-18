@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.8.1](https://github.com/dgreif/ring/compare/v9.8.0...v9.8.1) (2020-08-18)
+
+
+### Bug Fixes
+
+* **homebridge:** allow video-only streams without ffmpeg ([2e39797](https://github.com/dgreif/ring/commit/2e39797742cdff6f01256537c21e58d685c72b8b))
+
 ## [9.8.0](https://github.com/dgreif/ring/compare/v9.7.3...v9.8.0) (2020-08-16)
 
 

@@ -215,6 +215,10 @@ export class SipSession extends Subscribed {
     return this.sipCall.requestKeyFrame()
   }
 
+  activateCameraSpeaker() {
+    return this.sipCall.activateCameraSpeaker()
+  }
+
   private callEnded(sendBye: boolean) {
     if (this.hasCallEnded) {
       return

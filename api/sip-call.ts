@@ -290,16 +290,23 @@ export class SipCall {
       seq, // The ACK must have the original sequence number.
     })
 
-    // SIP session will be terminated after 30 seconds if INFO isn't sent.
-    await this.request({
+    // SIP session will be terminated after 60 seconds if these aren't sent
+    await this.sendDtmf('2')
+    await this.sendKeyFrameRequest()
+  }
+
+  sendDtmf(key: string) {
+    return this.request({
       method: 'INFO',
       headers: {
         'Content-Type': 'application/dtmf-relay',
       },
-      content: 'Signal=2\r\nDuration=250',
+      content: `Signal=${key}\r\nDuration=250`,
     })
+  }
 
-    await this.request({
+  private sendKeyFrameRequest() {
+    return this.request({
       method: 'INFO',
       headers: {
         'Content-Type': 'application/media_control+xml',
@@ -330,13 +337,20 @@ export class SipCall {
     // camera connected event doesn't always happen if cam is already streaming.  2 second fallback
     await Promise.race([this.cameraConnectedPromise, delay(2000)])
     logDebug('requesting key frame')
-    await this.request({
-      method: 'INFO',
-      headers: {
-        'Content-Type': 'application/media_control+xml',
-      },
-      content:
-        '<?xml version="1.0" encoding="utf-8" ?><media_control>  <vc_primitive>    <to_encoder>      <picture_fast_update></picture_fast_update>    </to_encoder>  </vc_primitive></media_control>',
+    await this.sendKeyFrameRequest()
+  }
+
+  private speakerActivated = false
+  async activateCameraSpeaker() {
+    if (this.speakerActivated) {
+      return
+    }
+
+    this.speakerActivated = true
+    logDebug('Activating camera speaker')
+    await this.sendDtmf('1').catch((e) => {
+      logError('Failed to activate camera speaker')
+      logError(e)
     })
   }
 

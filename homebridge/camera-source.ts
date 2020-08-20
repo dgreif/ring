@@ -392,6 +392,10 @@ export class CameraSource implements CameraStreamingDelegate {
           returnAudioTranscodedSplitter.close()
         })
 
+        returnAudioTranscodedSplitter.onMessage.pipe(take(1)).subscribe(() => {
+          void sipSession.activateCameraSpeaker()
+        })
+
         returnAudioPort = await returnAudioSplitter.portPromise
       }
 

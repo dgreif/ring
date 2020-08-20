@@ -3,7 +3,7 @@ import { RingApi } from '../api'
 import { cleanOutputDirectory, outputDirectory } from './util'
 import * as path from 'path'
 import { FfmpegProcess } from '../api/ffmpeg'
-import { decodeCryptoValue, getSrtpValue, RtpSplitter } from '../api/rtp-utils'
+import { getSrtpValue, RtpSplitter } from '../api/rtp-utils'
 import { take } from 'rxjs/operators'
 
 /**
@@ -17,7 +17,7 @@ async function example() {
       debug: true,
     }),
     cameras = await ringApi.getCameras(),
-    camera = cameras.find((x) => x.name.startsWith('Back'))
+    camera = cameras[0]
 
   if (!camera) {
     console.log('No cameras found')
@@ -27,11 +27,7 @@ async function example() {
   // clean/create the output directory
   await cleanOutputDirectory()
 
-  const sipSession = await camera.createSipSession({
-      // these should be random crypto keys
-      audio: decodeCryptoValue('8rHc1Q2FWUKT3rX/L1GbDKZJ2CsVy9wlEbLygPiq'),
-      video: decodeCryptoValue('IxOwCA1T1hMRG2xnjHEULwiSILbDHLyto5NFBX+d'),
-    }),
+  const sipSession = await camera.createSipSession(),
     ringRtpOptions = await sipSession.start({
       output: ['-t', 60, path.join(outputDirectory, 'example.mp4')],
     }),
@@ -74,6 +70,9 @@ async function example() {
     speakerFf.stop()
     audioOutForwarder.close()
   })
+
+  // Some older models won't play audio unless the speaker is explicitly activated (doorbell_v3)
+  await sipSession.activateCameraSpeaker()
 
   setTimeout(() => {
     sipSession.stop()

@@ -77,21 +77,27 @@ function getRtpDescription(
   sections: string[],
   mediaType: 'audio' | 'video'
 ): RtpStreamDescription {
-  const section = sections.find((s) => s.startsWith('m=' + mediaType)),
-    { port } = sdp.parseMLine(section),
-    lines = sdp.splitLines(section),
-    cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
-    ssrcLine = lines.find((l: string) => l.startsWith('a=ssrc')),
-    iceUFragLine = lines.find((l: string) => l.startsWith('a=ice-ufrag')),
-    icePwdLine = lines.find((l: string) => l.startsWith('a=ice-pwd')),
-    encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
+  try {
+    const section = sections.find((s) => s.startsWith('m=' + mediaType)),
+      { port } = sdp.parseMLine(section),
+      lines = sdp.splitLines(section),
+      cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
+      ssrcLine = lines.find((l: string) => l.startsWith('a=ssrc')),
+      iceUFragLine = lines.find((l: string) => l.startsWith('a=ice-ufrag')),
+      icePwdLine = lines.find((l: string) => l.startsWith('a=ice-pwd')),
+      encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
 
-  return {
-    port,
-    ssrc: +ssrcLine.match(/ssrc:(\S*)/)[1],
-    iceUFrag: iceUFragLine.match(/ice-ufrag:(\S*)/)[1],
-    icePwd: icePwdLine.match(/ice-pwd:(\S*)/)[1],
-    ...decodeCryptoValue(encodedCrypto),
+    return {
+      port,
+      ssrc: +ssrcLine.match(/ssrc:(\S*)/)[1],
+      iceUFrag: iceUFragLine.match(/ice-ufrag:(\S*)/)[1],
+      icePwd: icePwdLine.match(/ice-pwd:(\S*)/)[1],
+      ...decodeCryptoValue(encodedCrypto),
+    }
+  } catch (e) {
+    logError('Failed to parse SDP from Ring')
+    logError(sections.join('\r\n'))
+    throw e
   }
 }
 
@@ -169,7 +175,7 @@ export class SipCall {
       `c=IN IP4 ${host}`,
       'b=AS:380',
       't=0 0',
-      `m=audio ${audio.port} RTP/SAVP 0`,
+      `m=audio ${audio.port} RTP/SAVPF 0`,
       'a=rtpmap:0 PCMU/8000',
       createCryptoLine(audio),
       'a=rtcp-mux',
@@ -180,7 +186,7 @@ export class SipCall {
       `a=candidate:${randomInteger()} 1 udp ${randomInteger()} ${host} ${
         audio.port
       } typ host generation 0 network-id 1 network-cost 50`,
-      `m=video ${video.port} RTP/SAVP 99`,
+      `m=video ${video.port} RTP/SAVPF 99`,
       'a=rtpmap:99 H264/90000',
       createCryptoLine(video),
       'a=rtcp-mux',

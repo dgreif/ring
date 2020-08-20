@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.8.2](https://github.com/dgreif/ring/compare/v9.8.1...v9.8.2) (2020-08-20)
+
+
+### Bug Fixes
+
+* explicitly enable camera speaker for return audio ([1f0a3ed](https://github.com/dgreif/ring/commit/1f0a3edb0a59685f3c16d4bf9bc6a9093432e959)), closes [#431](https://github.com/dgreif/ring/issues/431)
+* request SAVPF to force ice candidates ([f31f6fa](https://github.com/dgreif/ring/commit/f31f6fac1d189c6acfa232c6496a5465086c6259)), closes [#438](https://github.com/dgreif/ring/issues/438)
+
 ### [9.8.1](https://github.com/dgreif/ring/compare/v9.8.0...v9.8.1) (2020-08-18)
 
 

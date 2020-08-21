@@ -51,7 +51,6 @@ export enum RingDeviceCategory {
 }
 
 export enum RingCameraKind {
-  cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
   doorbot = 'doorbot',
   doorbell = 'doorbell',
   doorbell_v3 = 'doorbell_v3',
@@ -65,15 +64,17 @@ export enum RingCameraKind {
   jbox_v1 = 'jbox_v1',
   stickup_cam = 'stickup_cam',
   stickup_cam_v3 = 'stickup_cam_v3',
-  stickup_cam_v4 = 'stickup_cam_v4',
   stickup_cam_elite = 'stickup_cam_elite',
   stickup_cam_lunar = 'stickup_cam_lunar',
-  stickup_cam_mini = 'stickup_cam_mini',
   spotlightw_v2 = 'spotlightw_v2',
   hp_cam_v1 = 'hp_cam_v1',
   hp_cam_v2 = 'hp_cam_v2',
+  stickup_cam_v4 = 'stickup_cam_v4',
   floodlight_v1 = 'floodlight_v1',
   floodlight_v2 = 'floodlight_v2',
+  cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
+  cocoa_doorbell = 'cocoa_doorbell',
+  stickup_cam_mini = 'stickup_cam_mini',
 }
 
 // RegExp taken from ring.com app
@@ -85,7 +86,6 @@ export function isBatteryCameraKind(kind: RingCameraKind) {
 }
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
-  cocoa_camera: 'Stick Up Cam',
   doorbot: 'Doorbell',
   doorbell: 'Doorbell',
   doorbell_v3: 'Doorbell',
@@ -101,13 +101,15 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   stickup_cam_v3: 'Stick Up Cam',
   stickup_cam_elite: 'Stick Up Cam',
   stickup_cam_lunar: 'Stick Up Cam',
-  stickup_cam_mini: 'Indoor Cam',
   spotlightw_v2: 'Spotlight Cam',
   hp_cam_v1: 'Floodlight Cam',
   hp_cam_v2: 'Spotlight Cam',
   stickup_cam_v4: 'Spotlight Cam',
   floodlight_v1: 'Floodlight Cam',
   floodlight_v2: 'Floodlight Cam',
+  cocoa_camera: 'Stick Up Cam',
+  cocoa_doorbell: 'Doorbell Gen 2',
+  stickup_cam_mini: 'Indoor Cam',
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'

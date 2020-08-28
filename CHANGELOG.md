@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.9.0](https://github.com/dgreif/ring/compare/v9.8.2...v9.9.0) (2020-08-28)
+
+
+### Features
+
+* **homebridge:** support generic zwave sensors ([9e3356d](https://github.com/dgreif/ring/commit/9e3356d417662c87885d67e87c6484d863fbb922)), closes [#442](https://github.com/dgreif/ring/issues/442)
+
+
+### Bug Fixes
+
+* updated camera models ([c5031a2](https://github.com/dgreif/ring/commit/c5031a21347080ca5ddc50fddc64b6821de65fd9))
+
 ### [9.8.2](https://github.com/dgreif/ring/compare/v9.8.1...v9.8.2) (2020-08-20)
 
 

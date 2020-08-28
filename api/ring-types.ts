@@ -28,6 +28,7 @@ export enum RingDeviceType {
   RetrofitBridge = 'bridge.flatline',
   RetrofitZone = 'sensor.zone',
   Thermostat = 'temperature-control.thermostat',
+  Sensor = 'sensor',
 }
 
 export enum RingDeviceCategory {

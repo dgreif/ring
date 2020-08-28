@@ -111,6 +111,14 @@ function getAccessoryClass(
     return Lock
   }
 
+  if (deviceType === RingDeviceType.Sensor) {
+    // Generic sensor that could be any type of sensor, but should at least have `faulted`
+    if (device.name.toLowerCase().includes('motion')) {
+      return MotionSensor
+    }
+    return ContactSensor
+  }
+
   return null
 }
 

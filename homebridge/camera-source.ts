@@ -1,12 +1,12 @@
 import { RingCamera, SipSession } from '../api'
 import { hap } from './hap'
 import {
-  createCryptoLine,
+  doesFfmpegSupportCodec,
+  encodeSrtpOptions,
   getDefaultIpAddress,
-  getSrtpValue,
-  getSsrc,
+  ReturnAudioTranscoder,
   RtpSplitter,
-} from '../api/rtp-utils'
+} from '@homebridge/camera-utils'
 import {
   AudioStreamingCodecType,
   AudioStreamingSamplerate,
@@ -23,11 +23,12 @@ import {
   StreamRequestCallback,
 } from 'homebridge'
 import { logDebug, logError } from '../api/util'
-import { doesFfmpegSupportCodec, FfmpegProcess } from '../api/ffmpeg'
-import { debounceTime, delay, filter, take } from 'rxjs/operators'
+import { debounceTime, delay, take } from 'rxjs/operators'
 import { merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
+import { isStunMessage } from '../api/rtp-utils'
+import { getFfmpegPath } from '../api/ffmpeg'
 
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
@@ -217,18 +218,6 @@ export class CameraSource implements CameraStreamingDelegate {
               } appears to be inactive. (${getDurationSeconds(start)}s)`
             )
             sipSession.stop()
-          }),
-        sipSession.videoSplitter.onMessage
-          .pipe(
-            filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
-            take(1)
-          )
-          .subscribe(() => {
-            this.logger.info(
-              `Received stream data from ${
-                this.ringCamera.name
-              } (${getDurationSeconds(start)}s)`
-            )
           })
       )
 
@@ -280,7 +269,7 @@ export class CameraSource implements CameraStreamingDelegate {
                   '-srtp_out_suite',
                   'AES_CM_128_HMAC_SHA1_80',
                   '-srtp_out_params',
-                  getSrtpValue(sipSession.rtpOptions.audio),
+                  encodeSrtpOptions(sipSession.rtpOptions.audio),
                   `srtp://${targetAddress}:${audioPort}?localrtcpport=${incomingAudioRtcpPort}&pkt_size=188`,
                 ],
                 video: false,
@@ -289,7 +278,8 @@ export class CameraSource implements CameraStreamingDelegate {
             : undefined
         )
 
-      sipSession.videoSplitter.addMessageHandler(({ info, isStunMessage }) => {
+      let videoPacketReceived = false
+      sipSession.videoSplitter.addMessageHandler(({ info, payloadType }) => {
         if (info.address === targetAddress) {
           onReturnPacketReceived.next()
           return {
@@ -298,9 +288,18 @@ export class CameraSource implements CameraStreamingDelegate {
           }
         }
 
-        if (isStunMessage) {
+        if (isStunMessage(payloadType)) {
           // we don't need to forward stun messages to HomeKit since they are for connection establishment purposes only
           return null
+        }
+
+        if (!videoPacketReceived) {
+          videoPacketReceived = true
+          this.logger.info(
+            `Received stream data from ${
+              this.ringCamera.name
+            } (${getDurationSeconds(start)}s)`
+          )
         }
 
         return {
@@ -309,37 +308,33 @@ export class CameraSource implements CameraStreamingDelegate {
         }
       })
 
-      let returnAudioPort = incomingAudioRtcpPort
+      let returnAudioPort: number | null = null
       if (libfdkAacInstalled) {
-        const returnAudioRtpPort = await sipSession.reservePort(1),
-          returnAudioRtcpPort = returnAudioRtpPort + 1,
-          returnAudioSplitter = new RtpSplitter(({ isRtpMessage, message }) => {
-            onReturnPacketReceived.next()
-
-            if (!isRtpMessage && getSsrc(message) === audioSsrc) {
-              return {
-                port: incomingAudioRtcpPort,
-              }
+        let cameraSpeakerActived = false
+        const ringAudioLocation = {
+            address: ringRtpDescription.address,
+            port: ringRtpDescription.audio.port,
+          },
+          returnAudioTranscodedSplitter = new RtpSplitter((description) => {
+            if (!cameraSpeakerActived) {
+              cameraSpeakerActived = true
+              void sipSession.activateCameraSpeaker()
             }
 
-            return {
-              port: isRtpMessage ? returnAudioRtpPort : returnAudioRtcpPort,
-            }
+            sipSession.audioSplitter.send(
+              description.message,
+              ringAudioLocation
+            )
+
+            return null
           }),
-          returnAudioTranscodedSplitter = new RtpSplitter(),
-          ffReturnAudio = new FfmpegProcess(
-            [
-              '-hide_banner',
-              '-protocol_whitelist',
-              'pipe,udp,rtp,file,crypto',
-              '-f',
-              'sdp',
-              '-acodec',
-              'libfdk_aac',
-              '-i',
-              'pipe:',
-              '-map',
-              '0:0',
+          returnAudioTranscoder = new ReturnAudioTranscoder({
+            prepareStreamRequest: request,
+            incomingAudioOptions: {
+              ssrc: audioSsrc,
+              rtcpPort: incomingAudioRtcpPort,
+            },
+            outputArgs: [
               '-acodec',
               'pcm_mulaw',
               '-flags',
@@ -353,50 +348,23 @@ export class CameraSource implements CameraStreamingDelegate {
               '-srtp_out_suite',
               'AES_CM_128_HMAC_SHA1_80',
               '-srtp_out_params',
-              getSrtpValue(sipSession.rtpOptions.audio),
+              encodeSrtpOptions(sipSession.rtpOptions.audio),
               `srtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}?pkt_size=188`,
             ],
-            'HomeKit Return Audio'
-          ),
-          ringAudioLocation = {
-            address: ringRtpDescription.address,
-            port: ringRtpDescription.audio.port,
-          }
+            ffmpegPath: getFfmpegPath(),
+            logger: {
+              info: logDebug,
+              error: logError,
+            },
+            logLabel: `Return Audio (${this.ringCamera.name})`,
+          })
 
-        returnAudioTranscodedSplitter.addMessageHandler((description) => {
-          sipSession.audioSplitter.send(description.message, ringAudioLocation)
-
-          return null
-        })
-        ffReturnAudio.start(
-          [
-            'v=0',
-            'o=- 0 0 IN IP4 127.0.0.1',
-            's=Talk',
-            `c=IN IP4 ${targetAddress}`,
-            't=0 0',
-            'a=tool:libavformat 58.38.100',
-            `m=audio ${returnAudioRtpPort} RTP/AVP 110`,
-            'b=AS:24',
-            'a=rtpmap:110 MPEG4-GENERIC/16000/1',
-            'a=fmtp:110 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=F8F0212C00BC00',
-            createCryptoLine({
-              srtpKey: audioSrtpKey,
-              srtpSalt: audioSrtpSalt,
-            }),
-          ].join('\n')
-        )
         sipSession.onCallEnded.pipe(take(1)).subscribe(() => {
-          ffReturnAudio.stop()
-          returnAudioSplitter.close()
+          returnAudioTranscoder.stop()
           returnAudioTranscodedSplitter.close()
         })
 
-        returnAudioTranscodedSplitter.onMessage.pipe(take(1)).subscribe(() => {
-          void sipSession.activateCameraSpeaker()
-        })
-
-        returnAudioPort = await returnAudioSplitter.portPromise
+        returnAudioPort = await returnAudioTranscoder.start()
       }
 
       this.logger.info(
@@ -406,13 +374,16 @@ export class CameraSource implements CameraStreamingDelegate {
       )
 
       callback(undefined, {
+        // SOMEDAY: remove address as it is not needed after homebridge 1.1.3
         address: await getDefaultIpAddress(request.addressVersion === 'ipv6'),
-        audio: {
-          port: returnAudioPort,
-          ssrc: audioSsrc,
-          srtp_key: audioSrtpKey,
-          srtp_salt: audioSrtpSalt,
-        },
+        audio: returnAudioPort
+          ? {
+              port: returnAudioPort,
+              ssrc: audioSsrc,
+              srtp_key: audioSrtpKey,
+              srtp_salt: audioSrtpSalt,
+            }
+          : undefined,
         video: {
           port: await sipSession.videoSplitter.portPromise,
           ssrc: ringRtpDescription.video.ssrc,

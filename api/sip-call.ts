@@ -7,13 +7,8 @@ import {
   randomInteger,
   randomString,
 } from './util'
-import {
-  createCryptoLine,
-  decodeCryptoValue,
-  RtpDescription,
-  RtpOptions,
-  RtpStreamDescription,
-} from './rtp-utils'
+import { RtpDescription, RtpOptions, RtpStreamDescription } from './rtp-utils'
+import { createCryptoLine, decodeSrtpOptions } from '@homebridge/camera-utils'
 
 const sip = require('sip'),
   sdp = require('sdp')
@@ -92,7 +87,7 @@ function getRtpDescription(
       ssrc: +ssrcLine.match(/ssrc:(\S*)/)[1],
       iceUFrag: iceUFragLine.match(/ice-ufrag:(\S*)/)[1],
       icePwd: icePwdLine.match(/ice-pwd:(\S*)/)[1],
-      ...decodeCryptoValue(encodedCrypto),
+      ...decodeSrtpOptions(encodedCrypto),
     }
   } catch (e) {
     logError('Failed to parse SDP from Ring')

@@ -2,9 +2,13 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import { cleanOutputDirectory, outputDirectory } from './util'
 import * as path from 'path'
-import { FfmpegProcess } from '../api/ffmpeg'
-import { getSrtpValue, RtpSplitter } from '../api/rtp-utils'
+import {
+  encodeSrtpOptions,
+  FfmpegProcess,
+  RtpSplitter,
+} from '@homebridge/camera-utils'
 import { take } from 'rxjs/operators'
+import { logError, logInfo } from '../api/util'
 
 /**
  * This example takes an audio clip from examples/example.mp4 and pipes it to a ring camera
@@ -36,12 +40,12 @@ async function example() {
       address: ringRtpOptions.address,
     },
     audioOutForwarder = new RtpSplitter(({ message }) => {
-      // Forwarder is needed so that transcoded audio can be sent out through the same port as audio in
+      // Splitter is needed so that transcoded audio can be sent out through the same port as audio in
       sipSession.audioSplitter.send(message, ringAudioLocation)
       return null
     }),
-    speakerFf = new FfmpegProcess(
-      [
+    speakerFf = new FfmpegProcess({
+      ffmpegArgs: [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
@@ -61,11 +65,15 @@ async function example() {
         '-srtp_out_suite',
         'AES_CM_128_HMAC_SHA1_80',
         '-srtp_out_params',
-        getSrtpValue(sipSession.rtpOptions.audio),
+        encodeSrtpOptions(sipSession.rtpOptions.audio),
         `srtp://127.0.0.1:${await audioOutForwarder.portPromise}?pkt_size=188`,
       ],
-      'Return Audio'
-    )
+      logLabel: 'Return Audio',
+      logger: {
+        error: logError,
+        info: logInfo,
+      },
+    })
   sipSession.onCallEnded.pipe(take(1)).subscribe(() => {
     speakerFf.stop()
     audioOutForwarder.close()

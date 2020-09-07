@@ -1,19 +1,23 @@
 import { ReplaySubject } from 'rxjs'
 import {
-  createCryptoLine,
   createStunResponder,
-  releasePorts,
-  reservePorts,
+  isStunMessage,
   RtpDescription,
   RtpOptions,
-  RtpSplitter,
   sendStunBindingRequest,
 } from './rtp-utils'
+import {
+  createCryptoLine,
+  FfmpegProcess,
+  reservePorts,
+  releasePorts,
+  RtpSplitter,
+} from '@homebridge/camera-utils'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
-import { FfmpegProcess } from './ffmpeg'
-import { takeUntil } from 'rxjs/operators'
 import { Subscribed } from './subscribed'
+import { logDebug, logError } from './util'
+import { getFfmpegPath } from './ffmpeg'
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -88,10 +92,8 @@ export class SipSession extends Subscribed {
         )
       }
 
-      this.addSubscriptions(
-        createStunResponder(this.videoSplitter),
-        createStunResponder(this.audioSplitter)
-      )
+      createStunResponder(this.videoSplitter)
+      createStunResponder(this.audioSplitter)
 
       sendStunBindingRequest({
         rtpSplitter: this.videoSplitter,
@@ -130,7 +132,7 @@ export class SipSession extends Subscribed {
     videoPort: number
   ) {
     const transcodeVideoStream = ffmpegOptions.video !== false,
-      ffOptions = [
+      ffmpegArgs = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
@@ -145,7 +147,16 @@ export class SipSession extends Subscribed {
           : []),
         ...(ffmpegOptions.output || []),
       ],
-      ff = new FfmpegProcess(ffOptions, 'From Ring'),
+      ff = new FfmpegProcess({
+        ffmpegArgs,
+        ffmpegPath: getFfmpegPath(),
+        exitCallback: () => this.callEnded(true),
+        logLabel: `From Ring (${this.camera.name})`,
+        logger: {
+          error: logError,
+          info: logDebug,
+        },
+      }),
       inputSdpLines = [
         'v=0',
         'o=105202070 3747 461 IN IP4 127.0.0.1',
@@ -169,33 +180,28 @@ export class SipSession extends Subscribed {
       )
 
       let haveReceivedStreamPacket = false
-      this.videoSplitter.addMessageHandler(
-        ({ isRtpMessage, isStunMessage }) => {
-          if (isStunMessage) {
-            return null
-          }
-
-          if (!haveReceivedStreamPacket) {
-            void this.sipCall.requestKeyFrame()
-            haveReceivedStreamPacket = true
-          }
-
-          return {
-            port: isRtpMessage ? videoPort : videoPort + 1,
-          }
+      this.videoSplitter.addMessageHandler(({ isRtpMessage, payloadType }) => {
+        if (isStunMessage(payloadType)) {
+          return null
         }
-      )
+
+        if (!haveReceivedStreamPacket) {
+          void this.sipCall.requestKeyFrame()
+          haveReceivedStreamPacket = true
+        }
+
+        return {
+          port: isRtpMessage ? videoPort : videoPort + 1,
+        }
+      })
     }
 
-    this.onCallEnded.pipe(takeUntil(ff.onClosed)).subscribe(() => ff.stop())
-    ff.onClosed
-      .pipe(takeUntil(this.onCallEnded))
-      .subscribe(() => this.callEnded(true))
+    this.onCallEnded.subscribe(() => ff.stop())
 
-    ff.start(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
+    ff.writeStdin(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
 
-    this.audioSplitter.addMessageHandler(({ isRtpMessage, isStunMessage }) => {
-      if (isStunMessage) {
+    this.audioSplitter.addMessageHandler(({ isRtpMessage, payloadType }) => {
+      if (isStunMessage(payloadType)) {
         return null
       }
 

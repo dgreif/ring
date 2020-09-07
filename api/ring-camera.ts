@@ -27,14 +27,14 @@ import {
 import {
   generateSrtpOptions,
   getDefaultIpAddress,
+  isFfmpegInstalled,
   reservePorts,
   RtpSplitter,
   SrtpOptions,
-} from './rtp-utils'
+} from '@homebridge/camera-utils'
 import { delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
-import { isFfmpegInstalled } from './ffmpeg'
 import { Subscribed } from './subscribed'
 
 const snapshotRefreshDelay = 500,

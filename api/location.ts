@@ -1,4 +1,7 @@
-import { connect as connectSocketIo } from 'socket.io-client'
+import {
+  connect as connectSocketIo,
+  Socket as SocketIOSocket,
+} from 'socket.io-client'
 import { BehaviorSubject, merge, ReplaySubject, Subject } from 'rxjs'
 import {
   concatMap,
@@ -111,7 +114,7 @@ export class Location extends Subscribed {
   private onLocationModeRequested = new Subject()
   reconnecting = false
   private disconnected = false
-  connectionPromise?: Promise<SocketIOClient.Socket>
+  connectionPromise?: Promise<typeof SocketIOSocket>
   securityPanel?: RingDevice
   assets?: TicketAsset[]
   receivedAssetDeviceLists: string[] = []
@@ -188,7 +191,7 @@ export class Location extends Subscribed {
     return this.locationDetails.name
   }
 
-  async createConnection(): Promise<SocketIOClient.Socket> {
+  async createConnection(): Promise<typeof SocketIOSocket> {
     if (this.disconnected) {
       return Promise.resolve({ disconnected: true } as any)
     }
@@ -248,7 +251,7 @@ export class Location extends Subscribed {
     )
     connection.on('error', reconnect)
     connection.on('disconnect', reconnect)
-    return new Promise<SocketIOClient.Socket>((resolve, reject) => {
+    return new Promise<typeof SocketIOSocket>((resolve, reject) => {
       connection.once('connect', () => {
         resolve(connection)
         this.onConnected.next(true)

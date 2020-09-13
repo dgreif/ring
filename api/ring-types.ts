@@ -1,5 +1,6 @@
 type Firmware = string | 'Up To Date'
 
+// eslint-disable-next-line no-shadow
 export enum RingDeviceType {
   BaseStation = 'hub.redsky',
   Keypad = 'security-keypad',
@@ -32,6 +33,7 @@ export enum RingDeviceType {
   Sensor = 'sensor',
 }
 
+// eslint-disable-next-line no-shadow
 export enum RingDeviceCategory {
   Outlets = 1,
   Lights = 2,
@@ -52,6 +54,7 @@ export enum RingDeviceCategory {
   PanicButtons = 35,
 }
 
+// eslint-disable-next-line no-shadow
 export enum RingCameraKind {
   doorbot = 'doorbot',
   doorbell = 'doorbell',
@@ -377,6 +380,7 @@ export interface TicketAsset {
   uuid: string
 }
 
+// eslint-disable-next-line no-shadow
 export enum DoorbellType {
   Mechanical = 0,
   Digital = 1,
@@ -687,6 +691,7 @@ export interface AccountMonitoringStatus {
   dispatchSetupComplete: boolean
 }
 
+// eslint-disable-next-line no-shadow
 export enum DispatchSignalType {
   Burglar = 'user-verified-burglar-xa',
   Fire = 'user-verified-fire-xa',

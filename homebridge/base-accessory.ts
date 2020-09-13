@@ -73,7 +73,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
     return service
   }
 
-  registerObservableCharacteristic<T extends CharacteristicValue>({
+  registerObservableCharacteristic<U extends CharacteristicValue>({
     characteristicType,
     serviceType,
     serviceSubType,
@@ -85,8 +85,8 @@ export abstract class BaseAccessory<T extends { name: string }> {
     characteristicType: CharacteristicType
     serviceType: ServiceType
     serviceSubType?: string
-    onValue: Observable<T>
-    setValue?: (value: T) => any
+    onValue: Observable<U>
+    setValue?: (value: U) => any
     name?: string
     requestUpdate?: () => any
   }) {
@@ -124,7 +124,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
           newValue: CharacteristicValue,
           callback: CharacteristicSetCallback
         ) => {
-          Promise.resolve(setValue(newValue as T)).catch((e) => {
+          Promise.resolve(setValue(newValue as U)).catch((e) => {
             this.logger.error(e)
           })
           callback()

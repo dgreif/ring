@@ -18,6 +18,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  mapTo,
   publishReplay,
   refCount,
   share,
@@ -132,6 +133,11 @@ export class RingCamera extends Subscribed {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
+  )
+  onMotionStarted = this.onMotionDetected.pipe(
+    filter((currentlyDetected) => currentlyDetected),
+    mapTo(null), // no value needed, event is what matters
+    share()
   )
   onBatteryLevel = this.onData.pipe(
     map(getBatteryLevel),

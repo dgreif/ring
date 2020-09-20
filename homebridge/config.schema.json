@@ -31,6 +31,10 @@
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
       },
+      "sendCameraMotionNotificationsToTv": {
+        "title": "Create a 'Doorbell' accessory triggered by non-doorbell camera motion alerts for tvOS 14 notification support",
+        "type": "boolean"
+      },
       "hideCameraSirenSwitch": {
         "title": "Hide Camera Siren Switch",
         "type": "boolean"

@@ -8,6 +8,7 @@ import { Logging, PlatformAccessory } from 'homebridge'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
+  private cameraSource = new CameraSource(this.device, this.logger)
 
   constructor(
     public readonly device: RingCamera,
@@ -25,10 +26,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     }
 
     const { Characteristic, Service } = hap,
-      { StatusLowBattery } = Characteristic,
-      cameraSource = new CameraSource(device, logger)
+      { StatusLowBattery } = Characteristic
 
-    accessory.configureController(cameraSource.controller)
+    accessory.configureController(this.cameraSource.controller)
 
     this.registerCharacteristic({
       characteristicType: Characteristic.Mute,
@@ -47,32 +47,12 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         characteristicType: Characteristic.MotionDetected,
         serviceType: Service.MotionSensor,
         onValue: device.onMotionDetected.pipe(
-          switchMap(async (motion) => {
+          switchMap((motion) => {
             if (!motion) {
-              return false
+              return Promise.resolve(false)
             }
 
-            if (device.hasBattery) {
-              // battery cameras cannot fetch a new snapshot while recording is in progress
-              this.logger.info(device.name + ' Detected Motion')
-              return true
-            }
-
-            this.logger.info(
-              device.name +
-                ' Detected Motion. Loading snapshot before sending event to HomeKit'
-            )
-
-            try {
-              await cameraSource.loadSnapshot()
-            } catch (e) {
-              this.logger.info(
-                device.name +
-                  ' Failed to load snapshot.  Sending motion to HomeKit without new snapshot'
-              )
-            }
-
-            return true
+            return this.loadSnapshotForEvent('Detected Motion', true)
           })
         ),
       })
@@ -83,28 +63,11 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
         onValue: device.onDoorbellPressed.pipe(
-          switchMap(async () => {
-            if (device.hasBattery) {
-              // battery cameras cannot fetch a new snapshot while recording is in progress
-              this.logger.info(device.name + ' Button Pressed')
-              return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
-            }
-
-            this.logger.info(
-              device.name +
-                ' Button Pressed. Loading snapshot before sending event to HomeKit'
+          switchMap(() => {
+            return this.loadSnapshotForEvent(
+              'Button Pressed',
+              Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
             )
-
-            try {
-              await cameraSource.loadSnapshot()
-            } catch (e) {
-              this.logger.info(
-                device.name +
-                  ' Failed to load snapshot.  Sending motion to HomeKit without new snapshot'
-              )
-            }
-
-            return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
           })
         ),
       })
@@ -125,6 +88,21 @@ export class Camera extends BaseDataAccessory<RingCamera> {
             maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
           })
       }
+    } else if (config.sendCameraMotionNotificationsToTv) {
+      // allow standalone cameras to act as a doorbell press when motion is detected
+      // this allows tvOS 14 notifications to show camera motion alerts
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.ProgrammableSwitchEvent,
+        serviceType: Service.Doorbell,
+        onValue: device.onMotionStarted.pipe(
+          switchMap(() => {
+            return this.loadSnapshotForEvent(
+              'Motion Detected - Simulating Doorbell Press',
+              Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+            )
+          })
+        ),
+      })
     }
 
     if (device.hasLight) {
@@ -211,5 +189,32 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         ),
       })
     }
+  }
+
+  private async loadSnapshotForEvent<T>(
+    eventDescription: string,
+    characteristicValue: T
+  ) {
+    if (this.device.hasBattery) {
+      // battery cameras cannot fetch a new snapshot while recording is in progress
+      this.logger.info(this.device.name + ' ' + eventDescription)
+      return characteristicValue
+    }
+
+    this.logger.info(
+      this.device.name +
+        ` ${eventDescription}. Loading snapshot before sending event to HomeKit`
+    )
+
+    try {
+      await this.cameraSource.loadSnapshot()
+    } catch (e) {
+      this.logger.info(
+        this.device.name +
+          ' Failed to load snapshot.  Sending event to HomeKit without new snapshot'
+      )
+    }
+
+    return characteristicValue
   }
 }

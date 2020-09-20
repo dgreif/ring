@@ -125,6 +125,51 @@ export class Camera extends BaseDataAccessory<RingCamera> {
             maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
           })
       }
+    } else if (config.sendCameraMotionNotificationsToTV) {
+      // allow standalone cameras to act as a doorbell press when motion is detected
+      // this allows tvOS 14 notifications to show camera motion alerts
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.ProgrammableSwitchEvent,
+        serviceType: Service.Doorbell,
+        onValue: device.onMotionStart.pipe(
+          switchMap(async (motion) => {
+            if (!motion) {
+              return false
+            }
+
+            if (device.hasBattery) {
+              // battery cameras cannot fetch a new snapshot while recording is in progress
+              this.logger.info(
+                device.name + ' Motion Detected - simulate Doorbell'
+              )
+              return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+            }
+
+            this.logger.info(
+              device.name +
+                ' Motion Detected - simulate Doorbell Pressed. Loading snapshot before sending event to HomeKit'
+            )
+
+            try {
+              await cameraSource.loadSnapshot()
+            } catch (e) {
+              this.logger.info(
+                device.name +
+                  ' Failed to load snapshot. Sending motion to HomeKit doorbell without new snapshot'
+              )
+            }
+
+            return Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+          })
+        ),
+      })
+
+      // Hide long and double press events by setting max value
+      this.getService(Service.StatelessProgrammableSwitch)
+        .getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+        .setProps({
+          maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+        })
     }
 
     if (device.hasLight) {

@@ -31,6 +31,10 @@
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
       },
+      "sendCameraMotionNotificationsToTV": {
+        "title": "Show Camera New Motion Alerts as a Doorbell accessory press. This allows cameras to trigger automatic tvOS 14+ notifications and PiP video to appear when motion is detected.",
+        "type": "boolean"
+      },
       "hideCameraSirenSwitch": {
         "title": "Hide Camera Siren Switch",
         "type": "boolean"

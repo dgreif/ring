@@ -127,6 +127,11 @@ export class RingCamera extends Subscribed {
     filter((ding) => ding.kind === 'ding'),
     share()
   )
+  onMotionStart = this.onNewDing.pipe(
+    // allow new motion alerts to trigger one-off events
+    filter((ding) => ding.kind === 'motion'),
+    share()
+  )
   onMotionDetected = this.onActiveDings.pipe(
     map((dings) => dings.some((ding) => ding.motion || ding.kind === 'motion')),
     distinctUntilChanged(),

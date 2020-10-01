@@ -13,17 +13,18 @@ import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 import { parse as parseUrl } from 'url'
 
+function createDnsCache() {
+  return new CacheableLookup({
+    maxTtl: 60,
+    fallbackDuration: 0,
+  })
+}
+
+let dnsCache = createDnsCache()
 const defaultRequestOptions: RequestOptions = {
     http2: true,
     responseType: 'json',
     method: 'GET',
-  },
-  dnsCache = new CacheableLookup({
-    maxTtl: 60,
-    fallbackDuration: 0,
-  }),
-  cacheKeepaliveRequestOptions = {
-    dnsCache,
     agent: { http: new HttpAgent(), https: new HttpsAgent() },
   },
   ringErrorCodes: { [code: number]: string } = {
@@ -54,7 +55,7 @@ async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string }
 ): Promise<T & ExtendedResponse> {
   try {
-    const options = { ...defaultRequestOptions, ...requestOptions },
+    const options = { ...defaultRequestOptions, dnsCache, ...requestOptions },
       { headers, body } = (await got(options)) as {
         headers: Headers
         body: any
@@ -74,13 +75,15 @@ async function requestWithRetry<T>(
       if (e.code === 'ENOTFOUND' || e.code === 'EREFUSED') {
         const url = parseUrl(requestOptions.url)
         logDebug(
-          `DNS Cache for ${url.hostname}: ${JSON.stringify(
+          `Resetting DNS Cache.  DNS Cache for ${
+            url.hostname
+          }: ${JSON.stringify(
             await dnsCache
               .query(url.hostname!)
               .catch((queryError) => queryError)
           )}`
         )
-        dnsCache.clear(url.hostname!)
+        dnsCache = createDnsCache()
       }
 
       await delay(5000)
@@ -279,7 +282,6 @@ export class RingRestClient {
       const authTokenResponse = await this.authPromise
 
       return await requestWithRetry<T>({
-        ...cacheKeepaliveRequestOptions,
         ...options,
         headers: {
           ...options.headers,

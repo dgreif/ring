@@ -11,6 +11,7 @@ async function example() {
       refreshToken: env.RING_REFRESH_TOKEN!,
       // Listen for dings and motion events
       cameraDingsPollingSeconds: 2,
+      debug: true,
     }),
     locations = await ringApi.getLocations(),
     allCameras = await ringApi.getCameras()

@@ -127,7 +127,7 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Set Volume (Not currently supported in Home, but works in other apps like Eve)
     * Battery status
     * Can be hidden with `hideUnsupportedServices`
-  * Contact Sensor & Retrofit Alarm Zones
+  * Contact Sensor/Retrofit Alarm Zones/Tilt Sensor
     * Detect if sensor is open or closed
     * Tamper status
     * Battery status

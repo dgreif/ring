@@ -106,7 +106,7 @@ export class CameraSource implements CameraStreamingDelegate {
           this.ringCamera.name
         } (${getDurationSeconds(
           start
-        )}s), The camera currently reports that is it ${
+        )}s), The camera currently reports that it is ${
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )

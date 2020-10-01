@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.10.0](https://github.com/dgreif/ring/compare/v9.9.0...v9.10.0) (2020-10-01)
+
+
+### Features
+
+* **homebridge:** option to expose regular cameras as doorbell to show tvOS 14 notifications ([114d868](https://github.com/dgreif/ring/commit/114d8689731841a448fedd7f63862d280c783ce0))
+* **homebridge:** support tilt sensor ([f9ac587](https://github.com/dgreif/ring/commit/f9ac58755faa32e60c6b735439c27e78f8c7e672))
+
+
+### Bug Fixes
+
+* hard dns cache reset on failure ([75dba2f](https://github.com/dgreif/ring/commit/75dba2faf5b5567b658bbfd069a873fd4beeb334)), closes [#449](https://github.com/dgreif/ring/issues/449)
+
 ## [9.9.0](https://github.com/dgreif/ring/compare/v9.8.2...v9.9.0) (2020-08-28)
 
 

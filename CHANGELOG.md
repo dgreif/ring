@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.11.0](https://github.com/dgreif/ring/compare/v9.10.0...v9.11.0) (2020-10-12)
+
+
+### Features
+
+* **homebridge:** `sendDoorbellMotionNotificationsToTv` option for tvOS 14 ([7e1c315](https://github.com/dgreif/ring/commit/7e1c31511cd8d22fae63a33bc87cec89494ec6a9)), closes [#469](https://github.com/dgreif/ring/issues/469)
+* `avoidSnapshotBatteryDrain` option ([7d1b530](https://github.com/dgreif/ring/commit/7d1b530acf21be583f91dc83eab3c1ba021d2831)), closes [#427](https://github.com/dgreif/ring/issues/427)
+
 ## [9.10.0](https://github.com/dgreif/ring/compare/v9.9.0...v9.10.0) (2020-10-01)
 
 

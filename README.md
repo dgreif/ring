@@ -44,6 +44,7 @@ Option | Default | Explanation
 `ffmpegPath` | undefined | A custom path to the `ffmpeg` executable.  By default, `ffmpeg` will be installed using `ffmpeg-for-homebridge`, and then fall back to using the `PATH` environment variable.
 `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridg) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
 `controlCenterDisplayName` | 'ring-client-api' | This allows you to change the displayed name for the Authorized Device within Control Center in the Ring app
+`avoidSnapshotBatteryDrain` | false | Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.
 
 ## Locations
 ```typescript

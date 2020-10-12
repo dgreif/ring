@@ -153,7 +153,8 @@ export class RingCamera extends Subscribed {
   constructor(
     private initialData: CameraData,
     public isDoorbot: boolean,
-    private restClient: RingRestClient
+    private restClient: RingRestClient,
+    private avoidSnapshotBatteryDrain: boolean
   ) {
     super()
 
@@ -426,7 +427,10 @@ export class RingCamera extends Subscribed {
   }
 
   private refreshSnapshotInProgress?: Promise<boolean>
-  public readonly snapshotLifeTime = 10 * 1000
+  public readonly snapshotLifeTime =
+    this.avoidSnapshotBatteryDrain && this.hasBattery
+      ? 600 * 1000 // battery cams only refresh timestamp every 10 minutes
+      : 10 * 1000 // snapshot updates will be forced.  Limit to 10 lifetime
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
@@ -476,7 +480,11 @@ export class RingCamera extends Subscribed {
     }
 
     this.checkIfSnapshotsAreBlocked()
-    await this.requestSnapshotUpdate()
+    if (!this.avoidSnapshotBatteryDrain || !this.hasBattery) {
+      // tell the camera to update snapshot immediately.
+      // avoidSnapshotBatteryDrain is best if you have a battery cam that you request snapshots for frequently.  This can lead to battery drain if snapshot updates are forced.
+      await this.requestSnapshotUpdate()
+    }
 
     for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
       this.checkIfSnapshotsAreBlocked()

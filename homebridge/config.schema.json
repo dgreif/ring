@@ -77,6 +77,11 @@
           }
         ]
       },
+      "avoidSnapshotBatteryDrain": {
+        "title": "Avoid Snapshot Battery Drain",
+        "type": "boolean",
+        "description": "Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.  This is useful if have the Home app open constantly, causing frequent snapshot requests."
+      },
       "beamDurationSeconds": {
         "title": "Ring Smart Lighting Timer",
         "type": "integer",
@@ -155,6 +160,7 @@
         "hideUnsupportedServices",
         "showPanicButtons",
         "nightModeBypassFor",
+        "avoidSnapshotBatteryDrain",
         "beamDurationSeconds",
         "debug",
         "cameraStatusPollingSeconds",

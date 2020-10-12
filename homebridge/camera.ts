@@ -5,6 +5,7 @@ import { BaseDataAccessory } from './base-data-accessory'
 import { map, mapTo, switchMap } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { Logging, PlatformAccessory } from 'homebridge'
+import { merge } from 'rxjs'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
@@ -59,13 +60,25 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     }
 
     if (device.isDoorbot) {
+      const onDoorbellPressed = device.onDoorbellPressed.pipe(
+          mapTo('Doorbell Pressed')
+        ),
+        onEventDescription = config.sendDoorbellMotionNotificationsToTv
+          ? merge(
+              onDoorbellPressed,
+              device.onMotionStarted.pipe(
+                mapTo('Motion Detected - Simulating Doorbell Press')
+              )
+            )
+          : onDoorbellPressed
+
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
-        onValue: device.onDoorbellPressed.pipe(
-          switchMap(() => {
+        onValue: onEventDescription.pipe(
+          switchMap((eventDescription) => {
             return this.loadSnapshotForEvent(
-              'Button Pressed',
+              eventDescription,
               Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
             )
           })

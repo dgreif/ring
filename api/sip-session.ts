@@ -138,6 +138,8 @@ export class SipSession extends Subscribed {
         'pipe,udp,rtp,file,crypto',
         '-f',
         'sdp',
+        '-probesize', '32',
+        '-analyzeduration', '1000',
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',
@@ -175,6 +177,7 @@ export class SipSession extends Subscribed {
       inputSdpLines.push(
         `m=video ${videoPort} RTP/SAVP 99`,
         'a=rtpmap:99 H264/90000',
+        'a=framesize:99 1920-1080',
         createCryptoLine(remoteRtpOptions.video),
         'a=rtcp-mux'
       )

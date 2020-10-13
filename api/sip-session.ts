@@ -140,6 +140,7 @@ export class SipSession extends Subscribed {
         'sdp',
         '-probesize', '32',
         '-analyzeduration', '1000',
+        '-r', '15',
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',

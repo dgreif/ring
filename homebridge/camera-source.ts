@@ -4,6 +4,8 @@ import {
   doesFfmpegSupportCodec,
   encodeSrtpOptions,
   getDefaultIpAddress,
+  getSsrc,
+  isRtpMessagePayloadType,
   ReturnAudioTranscoder,
   RtpSplitter,
 } from '@homebridge/camera-utils'
@@ -23,7 +25,7 @@ import {
   StreamRequestCallback,
 } from 'homebridge'
 import { logDebug, logError } from '../api/util'
-import { debounceTime, delay, take } from 'rxjs/operators'
+import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
 import { merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
@@ -225,6 +227,14 @@ export class CameraSource implements CameraStreamingDelegate {
 
       const audioSsrc = hap.CameraController.generateSynchronisationSource(),
         incomingAudioRtcpPort = await sipSession.reservePort(),
+        videoSsrcPromise = sipSession.videoSplitter.onMessage
+          .pipe(
+            filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
+            map((m) => getSsrc(m.message)),
+            filter((ssrc): ssrc is number => ssrc !== null),
+            take(1)
+          )
+          .toPromise(),
         ringRtpDescription = await sipSession.start(
           libfdkAacInstalled
             ? {
@@ -279,34 +289,44 @@ export class CameraSource implements CameraStreamingDelegate {
         )
 
       let videoPacketReceived = false
-      sipSession.videoSplitter.addMessageHandler(({ info, payloadType }) => {
-        if (info.address === targetAddress) {
-          onReturnPacketReceived.next()
+      sipSession.videoSplitter.addMessageHandler(
+        ({ info, message, payloadType }) => {
+          if (info.address === targetAddress) {
+            // return packet from HomeKit
+            onReturnPacketReceived.next()
+
+            if (!isRtpMessagePayloadType(payloadType)) {
+              // Only need to handle RTCP packets.  We really shouldn't receive RTP, but check just in case
+              sipSession.videoRtcpSplitter.send(message, {
+                port: ringRtpDescription.video.rtcpPort,
+                address: ringRtpDescription.address,
+              })
+            }
+
+            // don't need to forward it along from the RTP splitter since it's only RTCP we care about
+            return null
+          }
+
+          if (isStunMessage(message)) {
+            // we don't need to forward stun messages to HomeKit since they are for connection establishment purposes only
+            return null
+          }
+
+          if (!videoPacketReceived) {
+            videoPacketReceived = true
+            this.logger.info(
+              `Received stream data from ${
+                this.ringCamera.name
+              } (${getDurationSeconds(start)}s)`
+            )
+          }
+
           return {
-            port: ringRtpDescription.video.port,
-            address: ringRtpDescription.address,
+            port: videoPort,
+            address: targetAddress,
           }
         }
-
-        if (isStunMessage(payloadType)) {
-          // we don't need to forward stun messages to HomeKit since they are for connection establishment purposes only
-          return null
-        }
-
-        if (!videoPacketReceived) {
-          videoPacketReceived = true
-          this.logger.info(
-            `Received stream data from ${
-              this.ringCamera.name
-            } (${getDurationSeconds(start)}s)`
-          )
-        }
-
-        return {
-          port: videoPort,
-          address: targetAddress,
-        }
-      })
+      )
 
       let returnAudioPort: number | null = null
       if (libfdkAacInstalled) {
@@ -367,11 +387,24 @@ export class CameraSource implements CameraStreamingDelegate {
         returnAudioPort = await returnAudioTranscoder.start()
       }
 
-      this.logger.info(
-        `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(
-          start
-        )}s)`
-      )
+      let videoSsrc = ringRtpDescription.video.ssrc
+      if (videoSsrc) {
+        // Server supported ICE, which means response SDP included SSRC
+        this.logger.info(
+          `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(
+            start
+          )}s)`
+        )
+      } else {
+        // Server uses RTP latching.  Need to wait for first packet to determine SSRC
+        // NOTE: we could avoid this if we want to decrypt/re-encrypt each packets with a new SSRC
+        this.logger.info(
+          `Waiting for stream data from ${
+            this.ringCamera.name
+          } (${getDurationSeconds(start)}s)`
+        )
+        videoSsrc = await videoSsrcPromise
+      }
 
       callback(undefined, {
         // SOMEDAY: remove address as it is not needed after homebridge 1.1.3
@@ -386,7 +419,7 @@ export class CameraSource implements CameraStreamingDelegate {
           : undefined,
         video: {
           port: await sipSession.videoSplitter.portPromise,
-          ssrc: ringRtpDescription.video.ssrc,
+          ssrc: videoSsrc,
           srtp_key: ringRtpDescription.video.srtpKey,
           srtp_salt: ringRtpDescription.video.srtpSalt,
         },

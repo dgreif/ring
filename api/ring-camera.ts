@@ -574,28 +574,36 @@ export class RingCamera extends Subscribed {
       skipFfmpegCheck?: boolean
     } = {}
   ) {
-    const videoSplitter = new RtpSplitter(),
-      audioSplitter = new RtpSplitter(),
+    const audioSplitter = new RtpSplitter(),
+      audioRtcpSplitter = new RtpSplitter(),
+      videoSplitter = new RtpSplitter(),
+      videoRtcpSplitter = new RtpSplitter(),
       [
         sipOptions,
         ffmpegIsInstalled,
-        videoPort,
         audioPort,
+        audioRtcpPort,
+        videoPort,
+        videoRtcpPort,
         [tlsPort],
       ] = await Promise.all([
         this.getSipOptions(),
         options.skipFfmpegCheck ? Promise.resolve(true) : isFfmpegInstalled(),
-        videoSplitter.portPromise,
         audioSplitter.portPromise,
+        audioRtcpSplitter.portPromise,
+        videoSplitter.portPromise,
+        videoRtcpSplitter.portPromise,
         reservePorts(),
       ]),
       rtpOptions = {
         audio: {
           port: audioPort,
+          rtcpPort: audioRtcpPort,
           ...(options.audio || generateSrtpOptions()),
         },
         video: {
           port: videoPort,
+          rtcpPort: videoRtcpPort,
           ...(options.video || generateSrtpOptions()),
         },
       }
@@ -609,8 +617,10 @@ export class RingCamera extends Subscribed {
     return new SipSession(
       sipOptions,
       rtpOptions,
-      videoSplitter,
       audioSplitter,
+      audioRtcpSplitter,
+      videoSplitter,
+      videoRtcpSplitter,
       tlsPort,
       this
     )

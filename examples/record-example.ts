@@ -13,7 +13,8 @@ async function example() {
       refreshToken: process.env.RING_REFRESH_TOKEN!,
       debug: true,
     }),
-    [camera] = await ringApi.getCameras()
+    cameras = await ringApi.getCameras(),
+    camera = cameras[0]
 
   if (!camera) {
     console.log('No cameras found')

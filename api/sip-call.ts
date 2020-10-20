@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs'
+import { noop, Subject } from 'rxjs'
 import {
   delay,
   logDebug,
@@ -75,18 +75,24 @@ function getRtpDescription(
   try {
     const section = sections.find((s) => s.startsWith('m=' + mediaType)),
       { port } = sdp.parseMLine(section),
-      lines = sdp.splitLines(section),
-      cryptoLine = lines.find((l: string) => l.startsWith('a=crypto')),
+      lines: string[] = sdp.splitLines(section),
+      rtcpLine = lines.find((l: string) => l.startsWith('a=rtcp:')),
+      cryptoLine = lines.find((l: string) => l.startsWith('a=crypto'))!,
       ssrcLine = lines.find((l: string) => l.startsWith('a=ssrc')),
       iceUFragLine = lines.find((l: string) => l.startsWith('a=ice-ufrag')),
       icePwdLine = lines.find((l: string) => l.startsWith('a=ice-pwd')),
-      encodedCrypto = cryptoLine.match(/inline:(\S*)/)[1]
+      encodedCrypto = cryptoLine.match(/inline:(\S*)/)![1]
 
     return {
       port,
-      ssrc: +ssrcLine.match(/ssrc:(\S*)/)[1],
-      iceUFrag: iceUFragLine.match(/ice-ufrag:(\S*)/)[1],
-      icePwd: icePwdLine.match(/ice-pwd:(\S*)/)[1],
+      rtcpPort: (rtcpLine && Number(rtcpLine.match(/rtcp:(\S*)/)?.[1])) || port, // rtcp-mux would cause this line to not be present
+      ssrc:
+        (ssrcLine && Number(ssrcLine.match(/ssrc:(\S*)/)?.[1])) || undefined,
+      iceUFrag:
+        (iceUFragLine && iceUFragLine.match(/ice-ufrag:(\S*)/)?.[1]) ||
+        undefined,
+      icePwd:
+        (icePwdLine && icePwdLine.match(/ice-pwd:(\S*)/)?.[1]) || undefined,
       ...decodeSrtpOptions(encodedCrypto),
     }
   } catch (e) {
@@ -100,10 +106,11 @@ function parseRtpDescription(inviteResponse: {
   content: string
 }): RtpDescription {
   const sections: string[] = sdp.splitSections(inviteResponse.content),
-    oLine = sdp.parseOLine(sections[0])
+    lines: string[] = sdp.splitLines(sections[0]),
+    cLine = lines.find((line: string) => line.startsWith('c='))!
 
   return {
-    address: oLine.address,
+    address: cLine.match(/c=IN IP4 (\S*)/)![1],
     audio: getRtpDescription(sections, 'audio'),
     video: getRtpDescription(sections, 'video'),
   }
@@ -148,6 +155,7 @@ export class SipCall {
       },
       (request: SipRequest) => {
         if (request.method === 'BYE') {
+          logDebug('received BYE from ring server')
           this.sipClient.send(this.sipClient.makeResponse(request, 200, 'Ok'))
 
           if (this.destroyed) {
@@ -173,7 +181,6 @@ export class SipCall {
       `m=audio ${audio.port} RTP/SAVPF 0`,
       'a=rtpmap:0 PCMU/8000',
       createCryptoLine(audio),
-      'a=rtcp-mux',
       'a=rtcp-fb:* trr-int 5',
       'a=rtcp-fb:* ccm tmmbr',
       `a=ice-ufrag:${this.audioUfrag}`,
@@ -183,8 +190,8 @@ export class SipCall {
       } typ host generation 0 network-id 1 network-cost 50`,
       `m=video ${video.port} RTP/SAVPF 99`,
       'a=rtpmap:99 H264/90000',
+      'a=fmtp:99 profile-level-id=42801F',
       createCryptoLine(video),
-      'a=rtcp-mux',
       'a=rtcp-fb:* trr-int 5',
       'a=rtcp-fb:* ccm tmmbr',
       'a=rtcp-fb:99 nack pli',
@@ -235,7 +242,9 @@ export class SipCall {
             },
             'max-forwards': 70,
             'call-id': this.callId,
-            'User-Agent': 'Android/3.15.3 (belle-sip/1.4.2)',
+            'X-Ding': this.sipOptions.dingId,
+            'X-Authorization': '',
+            'User-Agent': 'Android/3.23.0 (belle-sip/1.6.3)',
             cseq: { seq, method },
             ...headers,
           },
@@ -286,10 +295,10 @@ export class SipCall {
 
   private async ackWithInfo(seq: number) {
     // Don't wait for ack, it won't ever come back.
-    this.request({
+    void this.request({
       method: 'ACK',
       seq, // The ACK must have the original sequence number.
-    })
+    }).catch(noop)
 
     // SIP session will be terminated after 60 seconds if these aren't sent
     await this.sendDtmf('2')

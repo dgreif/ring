@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.12.0](https://github.com/dgreif/ring/compare/v9.11.0...v9.12.0) (2020-10-17)
+
+
+### Features
+
+* support new media servers with rtp latching ([9825974](https://github.com/dgreif/ring/commit/9825974eeb628a9b0e516c78443694b004c68c34)), closes [#447](https://github.com/dgreif/ring/issues/447)
+
 ## [9.11.0](https://github.com/dgreif/ring/compare/v9.10.0...v9.11.0) (2020-10-12)
 
 

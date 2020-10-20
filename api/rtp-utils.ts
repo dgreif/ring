@@ -2,8 +2,11 @@ import { logDebug, logError } from './util'
 import { RtpSplitter, SrtpOptions } from '@homebridge/camera-utils'
 const stun = require('stun')
 
+const stunMagicCookie = 0x2112a442 // https://tools.ietf.org/html/rfc5389#section-6
+
 export interface RtpStreamOptions extends SrtpOptions {
   port: number
+  rtcpPort: number
 }
 
 export interface RtpOptions {
@@ -12,9 +15,9 @@ export interface RtpOptions {
 }
 
 export interface RtpStreamDescription extends RtpStreamOptions {
-  ssrc: number
-  iceUFrag: string
-  icePwd: string
+  ssrc?: number
+  iceUFrag?: string
+  icePwd?: string
 }
 
 export interface RtpDescription {
@@ -23,8 +26,8 @@ export interface RtpDescription {
   video: RtpStreamDescription
 }
 
-export function isStunMessage(payloadType: number) {
-  return payloadType === 1
+export function isStunMessage(message: Buffer) {
+  return message.length > 8 && message.readInt32BE(4) === stunMagicCookie
 }
 
 export function sendStunBindingRequest({
@@ -56,8 +59,8 @@ export function sendStunBindingRequest({
 }
 
 export function createStunResponder(rtpSplitter: RtpSplitter) {
-  return rtpSplitter.addMessageHandler(({ message, info, payloadType }) => {
-    if (!isStunMessage(payloadType)) {
+  return rtpSplitter.addMessageHandler(({ message, info }) => {
+    if (!isStunMessage(message)) {
       return null
     }
 

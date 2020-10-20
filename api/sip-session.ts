@@ -25,6 +25,7 @@ export interface FfmpegOptions {
   video?: SpawnInput[] | false
   audio?: SpawnInput[]
   output: SpawnInput[]
+  quickStart?: boolean
 }
 
 export class SipSession extends Subscribed {
@@ -132,20 +133,26 @@ export class SipSession extends Subscribed {
     videoPort: number
   ) {
     const transcodeVideoStream = ffmpegOptions.video !== false,
+      quickStart = ffmpegOptions.quickStart === true,
       ffmpegArgs = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
         '-f',
         'sdp',
-        '-probesize', '32',
-        '-analyzeduration', '1000',
-        '-r', '15',
+        ...(quickStart
+          ? [
+            '-probesize', '32', 
+            '-analyzeduration', '1000', 
+            '-r', '15', 
+            '-fflags', 'nobuffer',
+            '-flags', 'low_delay']
+          : []),
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',
         ...(ffmpegOptions.audio || ['-acodec', 'aac']),
-        ...(transcodeVideoStream
+        ...(transcodeVideoStream && !quickStart
           ? ffmpegOptions.video || ['-vcodec', 'copy']
           : []),
         ...(ffmpegOptions.output || []),
@@ -178,7 +185,7 @@ export class SipSession extends Subscribed {
       inputSdpLines.push(
         `m=video ${videoPort} RTP/SAVP 99`,
         'a=rtpmap:99 H264/90000',
-        'a=framesize:99 1920-1080',
+        ...(quickStart ? ['a=framesize:99 1920-1080'] : []),
         createCryptoLine(remoteRtpOptions.video),
         'a=rtcp-mux'
       )

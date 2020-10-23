@@ -180,6 +180,7 @@ export class CameraSource implements CameraStreamingDelegate {
             srtp_salt: videoSrtpSalt,
           },
         } = request,
+        ffmpegPath = getFfmpegPath(),
         [sipSession, libfdkAacInstalled] = await Promise.all([
           this.ringCamera.createSipSession({
             audio: {
@@ -192,7 +193,7 @@ export class CameraSource implements CameraStreamingDelegate {
             },
             skipFfmpegCheck: true,
           }),
-          doesFfmpegSupportCodec('libfdk_aac')
+          doesFfmpegSupportCodec('libfdk_aac', ffmpegPath)
             .then((supported) => {
               if (!supported) {
                 this.logger.error(
@@ -371,7 +372,7 @@ export class CameraSource implements CameraStreamingDelegate {
               encodeSrtpOptions(sipSession.rtpOptions.audio),
               `srtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}?pkt_size=188`,
             ],
-            ffmpegPath: getFfmpegPath(),
+            ffmpegPath,
             logger: {
               info: logDebug,
               error: logError,

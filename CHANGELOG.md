@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.1](https://github.com/dgreif/ring/compare/v9.12.0...v9.12.1) (2020-10-23)
+
+
+### Bug Fixes
+
+* **homebridge:** correct audio params if audio isn't supported ([c7d4a14](https://github.com/dgreif/ring/commit/c7d4a145afad8b5fa7773785c19297aa08cf2879)), closes [#478](https://github.com/dgreif/ring/issues/478)
+* **homebridge:** use custom `ffmpegPath` when checking `libfdk_aac` support ([68af136](https://github.com/dgreif/ring/commit/68af1369c55ab5a6413b2c8f8ca236bfe2bdf86a))
+
 ## [9.12.0](https://github.com/dgreif/ring/compare/v9.11.0...v9.12.0) (2020-10-17)
 
 

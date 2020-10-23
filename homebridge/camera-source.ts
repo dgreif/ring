@@ -409,14 +409,13 @@ export class CameraSource implements CameraStreamingDelegate {
       callback(undefined, {
         // SOMEDAY: remove address as it is not needed after homebridge 1.1.3
         address: await getDefaultIpAddress(request.addressVersion === 'ipv6'),
-        audio: returnAudioPort
-          ? {
-              port: returnAudioPort,
-              ssrc: audioSsrc,
-              srtp_key: audioSrtpKey,
-              srtp_salt: audioSrtpSalt,
-            }
-          : undefined,
+        audio: {
+          // if audio isn't supported, pipe rtcp to incomingAudioRtcpPort which will not actually be bound
+          port: returnAudioPort || incomingAudioRtcpPort,
+          ssrc: audioSsrc,
+          srtp_key: audioSrtpKey,
+          srtp_salt: audioSrtpSalt,
+        },
         video: {
           port: await sipSession.videoSplitter.portPromise,
           ssrc: videoSsrc,

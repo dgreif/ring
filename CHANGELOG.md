@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.2](https://github.com/dgreif/ring/compare/v9.12.1...v9.12.2) (2020-10-31)
+
+
+### Bug Fixes
+
+* **homebridge:** live stream for more than 30 seconds on most cameras ([66b3eb7](https://github.com/dgreif/ring/commit/66b3eb7ace24f2b22c506bea7de24b86d6d287cd)), closes [#479](https://github.com/dgreif/ring/issues/479)
+
 ### [9.12.1](https://github.com/dgreif/ring/compare/v9.12.0...v9.12.1) (2020-10-23)
 
 

@@ -46,9 +46,9 @@ export class SipSession extends Subscribed {
     public readonly sipOptions: SipOptions,
     public readonly rtpOptions: RtpOptions,
     public readonly audioSplitter: RtpSplitter,
-    public readonly audioRtcpSplitter: RtpSplitter,
+    public audioRtcpSplitter: RtpSplitter,
     public readonly videoSplitter: RtpSplitter,
-    public readonly videoRtcpSplitter: RtpSplitter,
+    public videoRtcpSplitter: RtpSplitter,
     private readonly tlsPort: number,
     public readonly camera: RingCamera
   ) {
@@ -97,23 +97,32 @@ export class SipSession extends Subscribed {
         )
       }
 
+      // if rtcp-mux is supported, rtp splitter will be used for both rtp and rtcp
+      if (rtpDescription.audio.port === rtpDescription.audio.rtcpPort) {
+        this.audioRtcpSplitter.close()
+        this.audioRtcpSplitter = this.audioSplitter
+      }
+      if (rtpDescription.video.port === rtpDescription.video.rtcpPort) {
+        this.videoRtcpSplitter.close()
+        this.videoRtcpSplitter = this.videoSplitter
+      }
+
       if (rtpDescription.video.iceUFrag) {
         // ICE is supported
-        createStunResponder(this.videoSplitter)
         createStunResponder(this.audioSplitter)
-
-        sendStunBindingRequest({
-          rtpSplitter: this.videoSplitter,
-          rtpDescription,
-          localUfrag: this.sipCall.videoUfrag,
-          type: 'video',
-        })
+        createStunResponder(this.videoSplitter)
 
         sendStunBindingRequest({
           rtpSplitter: this.audioSplitter,
           rtpDescription,
           localUfrag: this.sipCall.audioUfrag,
           type: 'audio',
+        })
+        sendStunBindingRequest({
+          rtpSplitter: this.videoSplitter,
+          rtpDescription,
+          localUfrag: this.sipCall.videoUfrag,
+          type: 'video',
         })
       } else {
         // ICE is not supported, use RTP latching
@@ -139,10 +148,10 @@ export class SipSession extends Subscribed {
               videoStun = stun.encode(stun.createMessage(1))
 
             this.audioSplitter.send(audioStun, remoteAudioLocation)
-            this.audioSplitter.send(audioStun, remoteAudioRtcpLocation)
+            this.audioRtcpSplitter.send(audioStun, remoteAudioRtcpLocation)
 
             this.videoSplitter.send(videoStun, remoteVideoLocation)
-            this.videoSplitter.send(videoStun, remoteVideoRtcpLocation)
+            this.videoRtcpSplitter.send(videoStun, remoteVideoRtcpLocation)
           },
           audioLatchGenerator = new RtpLatchGenerator(this.rtpOptions.audio, 0),
           videoLatchGenerator = new RtpLatchGenerator(this.rtpOptions.video, 99)
@@ -151,19 +160,21 @@ export class SipSession extends Subscribed {
           // hole punch every .5 seconds to keep stream alive and port open (matches behavior from Ring app)
           timer(0, 500).subscribe(sendKeepAlive),
 
-          // Send a valid RTP packet to audio/video ports repeatedly until data is received.
+          // Send a valid RTP/RTCP packet to audio/video ports repeatedly until data is received.
           // This is how Ring gets through NATs.  See https://tools.ietf.org/html/rfc7362 for details
           audioLatchGenerator.onLatchPacket
             .pipe(takeUntil(this.audioSplitter.onMessage))
             .subscribe((latchPacket) => {
-              // console.log('AUDIO', latchPacket.toString('hex'))
+              // console.log('AUDIO LATCH', latchPacket.toString('hex'))
               this.audioSplitter.send(latchPacket, remoteAudioLocation)
+              this.audioRtcpSplitter.send(latchPacket, remoteAudioLocation)
             }),
           videoLatchGenerator.onLatchPacket
             .pipe(takeUntil(this.videoSplitter.onMessage))
             .subscribe((latchPacket) => {
-              // console.log('VIDEO', latchPacket.toString('hex'))
+              // console.log('VIDEO LATCH', latchPacket.toString('hex'))
               this.videoSplitter.send(latchPacket, remoteVideoLocation)
+              this.videoRtcpSplitter.send(latchPacket, remoteVideoLocation)
             })
         )
       }

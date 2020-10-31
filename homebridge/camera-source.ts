@@ -5,7 +5,6 @@ import {
   encodeSrtpOptions,
   getDefaultIpAddress,
   getSsrc,
-  isRtpMessagePayloadType,
   ReturnAudioTranscoder,
   RtpSplitter,
 } from '@homebridge/camera-utils'
@@ -291,12 +290,12 @@ export class CameraSource implements CameraStreamingDelegate {
 
       let videoPacketReceived = false
       sipSession.videoSplitter.addMessageHandler(
-        ({ info, message, payloadType }) => {
+        ({ info, message, isRtpMessage }) => {
           if (info.address === targetAddress) {
             // return packet from HomeKit
             onReturnPacketReceived.next()
 
-            if (!isRtpMessagePayloadType(payloadType)) {
+            if (!isRtpMessage) {
               // Only need to handle RTCP packets.  We really shouldn't receive RTP, but check just in case
               sipSession.videoRtcpSplitter.send(message, {
                 port: ringRtpDescription.video.rtcpPort,
@@ -308,8 +307,9 @@ export class CameraSource implements CameraStreamingDelegate {
             return null
           }
 
-          if (isStunMessage(message)) {
+          if (isStunMessage(message) || !isRtpMessage) {
             // we don't need to forward stun messages to HomeKit since they are for connection establishment purposes only
+            // if not rtp, probably rtcp which will be handled from rtcp splitter
             return null
           }
 
@@ -326,6 +326,24 @@ export class CameraSource implements CameraStreamingDelegate {
             port: videoPort,
             address: targetAddress,
           }
+        }
+      )
+      sipSession.videoRtcpSplitter.addMessageHandler(
+        ({ message, info, isRtpMessage }) => {
+          // for ICE connections, Rtcp splitter is the same as Rtp splitter, so we need to filter other messages out
+          if (
+            isStunMessage(message) ||
+            isRtpMessage ||
+            info.address === targetAddress
+          ) {
+            return null
+          }
+
+          sipSession.videoSplitter.send(message, {
+            port: videoPort,
+            address: targetAddress,
+          })
+          return null
         }
       )
 

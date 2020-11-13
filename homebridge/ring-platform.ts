@@ -29,6 +29,7 @@ import { RingPlatformConfig, updateHomebridgeConfig } from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Fan } from './fan'
+import { Outlet } from './outlet'
 import { Switch } from './switch'
 import { Camera } from './camera'
 import { PanicButtons } from './panic-buttons'
@@ -99,7 +100,10 @@ function getAccessoryClass(
     case RingDeviceType.MultiLevelBulb:
       return MultiLevelSwitch
     case RingDeviceType.Switch:
-      return Switch
+      return device instanceof RingDevice &&
+        device.categoryId === RingDeviceCategory.Outlets
+        ? Outlet
+        : Switch
     case RingDeviceType.TemperatureSensor:
       return TemperatureSensor
     case RingDeviceType.WaterSensor:

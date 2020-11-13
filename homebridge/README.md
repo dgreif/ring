@@ -173,7 +173,7 @@ If you are having issues with your cameras in the Home app, please see the [Came
   * Fans
     * On/Off
     * Speed
-  * Lights/Switches
+  * Lights/Switches/Outlets
     * On/Off
     * Brightness Level (if applicable)
     * Hue/Sat/Color Temp are _possible_, but currently not supported.

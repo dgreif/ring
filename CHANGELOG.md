@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.5](https://github.com/dgreif/ring/compare/v9.12.4...v9.12.5) (2020-11-20)
+
+
+### Bug Fixes
+
+* stop using http2 as workaround for recent errors ([9c5f4eb](https://github.com/dgreif/ring/commit/9c5f4eb16ec7b919e156d159a7caeff5a0b41ecc))
+
 ### [9.12.4](https://github.com/dgreif/ring/compare/v9.12.3...v9.12.4) (2020-11-13)
 
 

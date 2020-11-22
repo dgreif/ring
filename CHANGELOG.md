@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.6](https://github.com/dgreif/ring/compare/v9.12.5...v9.12.6) (2020-11-22)
+
+
+### Bug Fixes
+
+* dependency bump ([fc7e9e7](https://github.com/dgreif/ring/commit/fc7e9e7f813557088b2bef0d4d3e4036b2f295cb))
+
 ### [9.12.5](https://github.com/dgreif/ring/compare/v9.12.4...v9.12.5) (2020-11-20)
 
 

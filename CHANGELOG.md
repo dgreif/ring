@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.7-beta.0](https://github.com/dgreif/ring/compare/v9.12.6...v9.12.7-beta.0) (2020-11-27)
+
+
+### Bug Fixes
+
+* revert to older version of socket.io ([c4be1bc](https://github.com/dgreif/ring/commit/c4be1bc52c2c2e05653dc0745e7739b9d2cd5ae6)), closes [#497](https://github.com/dgreif/ring/issues/497)
+
 ### [9.12.6](https://github.com/dgreif/ring/compare/v9.12.5...v9.12.6) (2020-11-22)
 
 

@@ -61,7 +61,7 @@
     "rxjs": "6.6.3",
     "sdp": "3.0.2",
     "sip": "0.0.6",
-    "socket.io-client": "2.3.1",
+    "socket.io-client": "2.3.0",
     "stun": "2.1.0",
     "uuid": "8.3.1",
     "werift-rtp": "0.0.4"

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.7](https://github.com/dgreif/ring/compare/v9.12.6...v9.12.7) (2020-12-03)
+
+
+### Bug Fixes
+
+* prevent camera websocket sessions from blocking api ([53d7d61](https://github.com/dgreif/ring/commit/53d7d613e25c0cc114fa75a3295cea1e880f7903))
+
 ### [9.12.6](https://github.com/dgreif/ring/compare/v9.12.5...v9.12.6) (2020-11-22)
 
 

@@ -39,6 +39,7 @@ import {
   LocationModeSettingsResponse,
   LocationModeInput,
   disabledLocationModes,
+  isWebSocketSupportedAsset,
 } from './ring-types'
 import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
@@ -198,18 +199,19 @@ export class Location extends Subscribed {
 
     logInfo('Creating location socket.io connection')
     const { assets, ticket, host } = await this.restClient.request<{
-      assets: TicketAsset[]
-      host: string
-      subscriptionTopics: string[]
-      ticket: string
-    }>({
-      url: appApi('clap/tickets?locationID=' + this.id),
-    })
-    this.assets = assets
+        assets: TicketAsset[]
+        host: string
+        subscriptionTopics: string[]
+        ticket: string
+      }>({
+        url: appApi('clap/tickets?locationID=' + this.id),
+      }),
+      supportedAssets = assets.filter(isWebSocketSupportedAsset)
+    this.assets = supportedAssets
     this.receivedAssetDeviceLists.length = 0
     this.offlineAssets.length = 0
 
-    if (!assets.length) {
+    if (!supportedAssets.length) {
       const errorMessage = `No assets (alarm hubs or beam bridges) found for location ${this.name} - ${this.id}`
       logError(errorMessage)
       throw new Error(errorMessage)

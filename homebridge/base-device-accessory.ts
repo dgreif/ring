@@ -53,7 +53,9 @@ function hasBatteryStatus({ batteryStatus }: RingDeviceData) {
   return batteryStatus !== 'none'
 }
 
-export abstract class BaseDeviceAccessory extends BaseDataAccessory<RingDevice> {
+export abstract class BaseDeviceAccessory extends BaseDataAccessory<
+  RingDevice
+> {
   abstract readonly device: RingDevice
   abstract readonly accessory: PlatformAccessory
   abstract readonly logger: Logging

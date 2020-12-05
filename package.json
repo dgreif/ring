@@ -57,12 +57,12 @@
     "colors": "1.4.0",
     "debug": "4.3.1",
     "got": "11.8.0",
-    "node-machine-id": "1.1.12",
     "rxjs": "6.6.3",
     "sdp": "3.0.2",
     "sip": "0.0.6",
     "socket.io-client": "2.3.1",
     "stun": "2.1.0",
+    "systeminformation": "4.30.11",
     "uuid": "8.3.1",
     "werift-rtp": "0.0.4"
   },

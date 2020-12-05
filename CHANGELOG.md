@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.8](https://github.com/dgreif/ring/compare/v9.12.7...v9.12.8) (2020-12-05)
+
+
+### Bug Fixes
+
+* use `systeminformation` to get unique hardware id ([25d48c3](https://github.com/dgreif/ring/commit/25d48c382737060a14c5b70aae40a348d8d36d58))
+
 ### [9.12.7](https://github.com/dgreif/ring/compare/v9.12.6...v9.12.7) (2020-12-03)
 
 

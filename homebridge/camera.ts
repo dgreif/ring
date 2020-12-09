@@ -218,7 +218,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     eventDescription: string,
     characteristicValue: T
   ) {
-    if (this.device.hasBattery) {
+    if (this.device.operatingOnBattery) {
       // battery cameras cannot fetch a new snapshot while recording is in progress
       this.logger.info(this.device.name + ' ' + eventDescription)
       return characteristicValue

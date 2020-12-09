@@ -209,6 +209,10 @@ export class RingCamera extends Subscribed {
     return this.initialData.external_connection
   }
 
+  get operatingOnBattery() {
+    return this.hasBattery && this.data.settings.power_mode !== 'wired'
+  }
+
   get isOffline() {
     return this.data.alerts.connection === 'offline'
   }
@@ -432,10 +436,11 @@ export class RingCamera extends Subscribed {
   }
 
   private refreshSnapshotInProgress?: Promise<boolean>
-  public readonly snapshotLifeTime =
-    this.avoidSnapshotBatteryDrain && this.hasBattery
+  public get snapshotLifeTime() {
+    return this.avoidSnapshotBatteryDrain && this.operatingOnBattery
       ? 600 * 1000 // battery cams only refresh timestamp every 10 minutes
       : 10 * 1000 // snapshot updates will be forced.  Limit to 10 lifetime
+  }
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
@@ -485,7 +490,7 @@ export class RingCamera extends Subscribed {
     }
 
     this.checkIfSnapshotsAreBlocked()
-    if (!this.avoidSnapshotBatteryDrain || !this.hasBattery) {
+    if (!this.avoidSnapshotBatteryDrain || !this.operatingOnBattery) {
       // tell the camera to update snapshot immediately.
       // avoidSnapshotBatteryDrain is best if you have a battery cam that you request snapshots for frequently.  This can lead to battery drain if snapshot updates are forced.
       await this.requestSnapshotUpdate()
@@ -509,7 +514,7 @@ export class RingCamera extends Subscribed {
       await delay(snapshotRefreshDelay)
     }
 
-    const extraMessageForBatteryCam = this.hasBattery
+    const extraMessageForBatteryCam = this.operatingOnBattery
       ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
       : ''
     throw new Error(

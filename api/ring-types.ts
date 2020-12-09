@@ -444,6 +444,7 @@ export interface CameraData {
     luma_light_threshold?: number
     live_view_disabled?: boolean // set by modes
     motion_detection_enabled?: boolean // set by modes or Record Motion toggle
+    power_mode?: 'battery' | 'wired' // some battery cams can be wired and set to operate in "wired" mode
   }
   features: {
     motions_enabled: boolean

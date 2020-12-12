@@ -2,7 +2,7 @@ import debug = require('debug')
 import { red } from 'colors'
 import { createInterface } from 'readline'
 import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
-import { uuid as getSystemUuid } from 'systeminformation'
+import { machineId } from 'node-machine-id'
 
 const debugLogger = debug('ring'),
   uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739c'
@@ -59,22 +59,12 @@ export function generateUuid(seed?: string) {
 }
 
 export async function getHardwareId() {
-  const timeoutValue = '-1',
-    { os: id } = await Promise.race([
-      getSystemUuid(),
-      delay(5000).then(() => ({ os: timeoutValue })),
-    ])
+  const id = await Promise.race([machineId(), delay(5000).then(() => '')])
 
-  if (id === timeoutValue) {
+  if (!id) {
     logError(
-      'Request for system uuid timed out.  Falling back to random session id'
+      'Request for machine id timed out.  Falling back to random session id'
     )
-    return generateRandomUuid()
-  }
-
-  if (id === '-') {
-    // default value set by systeminformation if it can't find a real value
-    logError('Unable to get system uuid.  Falling back to random session id')
     return generateRandomUuid()
   }
 

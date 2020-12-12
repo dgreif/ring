@@ -138,11 +138,7 @@ export interface SocketIoMessage {
   body: any[]
 }
 
-export type AssetKind =
-  | 'base_station_v1'
-  | 'beams_bridge_v1'
-  | 'floodlight_v2'
-  | string
+export type AssetKind = 'base_station_v1' | 'beams_bridge_v1'
 
 export interface AssetSession {
   assetUuid: string
@@ -742,8 +738,4 @@ export interface LocationModeSettingsResponse extends LocationModeSettings {
 export interface LocationModeSharing {
   sharedUsersEnabled: boolean
   lastUpdateTimeMS: number
-}
-
-export function isWebSocketSupportedAsset({ kind }: { kind: AssetKind }) {
-  return kind.startsWith('base_station') || kind.startsWith('beams_bridge')
 }

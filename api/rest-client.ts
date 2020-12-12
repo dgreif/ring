@@ -22,7 +22,7 @@ function createDnsCache() {
 
 let dnsCache = createDnsCache()
 const defaultRequestOptions: RequestOptions = {
-    http2: false,
+    http2: true,
     responseType: 'json',
     method: 'GET',
     agent: { http: new HttpAgent(), https: new HttpsAgent() },

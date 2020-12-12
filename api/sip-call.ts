@@ -124,7 +124,7 @@ export class SipCall {
   private sipClient: SipClient
   public readonly onEndedByRemote = new Subject()
   private destroyed = false
-  private cameraConnected?: (value?: unknown) => void
+  private cameraConnected?: () => any
   private cameraConnectedPromise = new Promise((resolve) => {
     this.cameraConnected = resolve
   })

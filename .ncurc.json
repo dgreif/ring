@@ -1,5 +1,0 @@
-{
-  "reject": [
-    "socket.io-client"
-  ]
-}

@@ -1,6 +1,6 @@
 import got, { Options as RequestOptions, Headers } from 'got'
 import CacheableLookup from 'cacheable-lookup'
-import HttpAgent, { HttpsAgent } from 'agentkeepalive'
+// import HttpAgent, { HttpsAgent } from 'agentkeepalive'
 import {
   delay,
   getHardwareId,
@@ -25,7 +25,7 @@ const defaultRequestOptions: RequestOptions = {
     http2: true,
     responseType: 'json',
     method: 'GET',
-    agent: { http: new HttpAgent(), https: new HttpsAgent() },
+    // agent: { http: new HttpAgent(), https: new HttpsAgent() },
   },
   ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',

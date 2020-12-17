@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.9-beta.4](https://github.com/dgreif/ring/compare/v9.12.9-beta.3...v9.12.9-beta.4) (2020-12-17)
+
 ### [9.12.9-beta.3](https://github.com/dgreif/ring/compare/v9.12.9-beta.2...v9.12.9-beta.3) (2020-12-12)
 
 ### [9.12.9-beta.2](https://github.com/dgreif/ring/compare/v9.12.9-beta.1...v9.12.9-beta.2) (2020-12-12)

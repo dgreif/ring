@@ -51,6 +51,10 @@ export interface ExtendedResponse {
   responseTimestamp: number
 }
 
+function isRejectedSessionError(error: Error) {
+  return error.message.includes('NGHTTP2_ENHANCE_YOUR_CALM')
+}
+
 async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string }
 ): Promise<T & ExtendedResponse> {
@@ -67,6 +71,11 @@ async function requestWithRetry<T>(
     return data
   } catch (e) {
     if (!e.response) {
+      if (isRejectedSessionError(e)) {
+        logError('HTTP2 Session Rejected')
+        throw e
+      }
+
       logError(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
@@ -193,6 +202,10 @@ export class RingRestClient {
         )
       }
 
+      if (isRejectedSessionError(requestError)) {
+        logError('HTTP2 Session Rejected for Auth Request')
+      }
+
       const authTypeMessage =
           'refreshToken' in this.authOptions
             ? 'refresh token is'
@@ -238,7 +251,7 @@ export class RingRestClient {
       } catch (e) {
         const response = e.response || {}
 
-        if (response.statusCode === 401) {
+        if (response.statusCode === 401 || isRejectedSessionError(e)) {
           this.refreshAuth()
           return this.getSession()
         }
@@ -293,7 +306,7 @@ export class RingRestClient {
     } catch (e) {
       const response = e.response || {}
 
-      if (response.statusCode === 401) {
+      if (response.statusCode === 401 || isRejectedSessionError(e)) {
         this.refreshAuth()
         return this.request(options)
       }

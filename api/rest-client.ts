@@ -72,7 +72,7 @@ async function requestWithRetry<T>(
   } catch (e) {
     if (!e.response) {
       if (isRejectedSessionError(e)) {
-        logError('HTTP2 Session Rejected')
+        logError('HTTP2 Session Rejected for ' + requestOptions.url)
         throw e
       }
 
@@ -306,8 +306,13 @@ export class RingRestClient {
     } catch (e) {
       const response = e.response || {}
 
-      if (response.statusCode === 401 || isRejectedSessionError(e)) {
+      if (response.statusCode === 401) {
         this.refreshAuth()
+        return this.request(options)
+      }
+
+      if (isRejectedSessionError(e)) {
+        this.refreshSession()
         return this.request(options)
       }
 

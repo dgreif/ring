@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.12.9-beta.5](https://github.com/dgreif/ring/compare/v9.12.9-beta.4...v9.12.9-beta.5) (2020-12-21)
+
+
+### Bug Fixes
+
+* refresh auth after `NGHTTP2_ENHANCE_YOUR_CALM` error ([1009327](https://github.com/dgreif/ring/commit/1009327f9642e05a4e54ab0217fa1527301aac7a))
+
 ### [9.12.9-beta.4](https://github.com/dgreif/ring/compare/v9.12.9-beta.3...v9.12.9-beta.4) (2020-12-17)
 
 ### [9.12.9-beta.3](https://github.com/dgreif/ring/compare/v9.12.9-beta.2...v9.12.9-beta.3) (2020-12-12)

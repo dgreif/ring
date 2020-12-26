@@ -41,7 +41,7 @@ function getDurationSeconds(start: number) {
 
 export class CameraSource implements CameraStreamingDelegate {
   public controller = new hap.CameraController({
-    cameraStreamCount: 2,
+    cameraStreamCount: 10,
     delegate: this,
     streamingOptions: {
       supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],

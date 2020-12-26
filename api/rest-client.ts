@@ -72,7 +72,11 @@ async function requestWithRetry<T>(
       )
       logDebug(e)
 
-      if (e.code === 'ENOTFOUND' || e.code === 'EREFUSED') {
+      if (
+        e.code === 'ENOTFOUND' ||
+        e.code === 'EREFUSED' ||
+        e.code === 'ENETUNREACH'
+      ) {
         const url = parseUrl(requestOptions.url)
         logDebug(
           `Resetting DNS Cache.  DNS Cache for ${

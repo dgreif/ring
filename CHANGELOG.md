@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.13.0](https://github.com/dgreif/ring/compare/v9.12.8...v9.13.0) (2021-01-01)
+
+
+### Features
+
+* **api:** add `camera.setSettings()` ([0abe39b](https://github.com/dgreif/ring/commit/0abe39b9515692c9197e62f7c69f68a07786bdd1)), closes [#525](https://github.com/dgreif/ring/issues/525)
+
+
+### Bug Fixes
+
+* reset dns cache after `ENETUNREACH` ([c28b368](https://github.com/dgreif/ring/commit/c28b368c1f81e37692f477e0c449eee9f73b4222)), closes [#523](https://github.com/dgreif/ring/issues/523)
+* update dependencies ([e2899f1](https://github.com/dgreif/ring/commit/e2899f12318682b4bdddc572b4b0d37211aa8971))
+* **homebridge:** increase simultaneous stream limit ([6d985c4](https://github.com/dgreif/ring/commit/6d985c4d052384d13ec8d670dfe4d940f966eaa7)), closes [#518](https://github.com/dgreif/ring/issues/518)
+
 ### [9.12.8](https://github.com/dgreif/ring/compare/v9.12.7...v9.12.8) (2020-12-05)
 
 

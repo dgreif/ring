@@ -33,7 +33,7 @@ import {
   RtpSplitter,
   SrtpOptions,
 } from '@homebridge/camera-utils'
-import { delay, logError, logInfo } from './util'
+import { DeepPartial, delay, logError, logInfo } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
@@ -259,22 +259,23 @@ export class RingCamera extends Subscribed {
     return true
   }
 
+  async setSettings(settings: DeepPartial<CameraData['settings']>) {
+    await this.restClient.request({
+      method: 'PUT',
+      url: this.doorbotUrl(),
+      json: { doorbot: { settings } },
+    })
+
+    this.requestUpdate()
+  }
+
   // Enable or disable the in-home doorbell (if digital or mechanical)
   async setInHomeDoorbell(enable: boolean) {
     if (!this.hasInHomeDoorbell) {
       return false
     }
 
-    await this.restClient.request({
-      method: 'PUT',
-      url: this.doorbotUrl(),
-      json: {
-        doorbot: { settings: { chime_settings: { enable } } },
-      },
-    })
-
-    this.requestUpdate()
-
+    await this.setSettings({ chime_settings: { enable } })
     return true
   }
 

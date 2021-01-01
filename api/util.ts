@@ -122,3 +122,11 @@ export function randomString(length: number) {
   const uuid = generateUuid()
   return uuid.replace(/-/g, '').substring(0, length).toLowerCase()
 }
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T[K] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<DeepPartial<U>>
+    : DeepPartial<T[K]>
+}

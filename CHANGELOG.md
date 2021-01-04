@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.14.0](https://github.com/dgreif/ring/compare/v9.13.0...v9.14.0) (2021-01-04)
+
+
+### Features
+
+* Flush DNS cache after EHOSTUNREACH ([#543](https://github.com/dgreif/ring/issues/543)) ([b71bf33](https://github.com/dgreif/ring/commit/b71bf33300ebe94be5d5bf1ff0cb3fdf65d4e9b2))
+
+
+### Bug Fixes
+
+* lock node versions to 10, 12, and 14 ([d000d62](https://github.com/dgreif/ring/commit/d000d620104b3f73804409de5dc58ed142705576))
+
 ## [9.13.0](https://github.com/dgreif/ring/compare/v9.12.8...v9.13.0) (2021-01-01)
 
 

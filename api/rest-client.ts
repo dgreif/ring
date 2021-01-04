@@ -75,7 +75,8 @@ async function requestWithRetry<T>(
       if (
         e.code === 'ENOTFOUND' ||
         e.code === 'EREFUSED' ||
-        e.code === 'ENETUNREACH'
+        e.code === 'ENETUNREACH' ||
+        e.code === 'EHOSTUNREACH'
       ) {
         const url = parseUrl(requestOptions.url)
         logDebug(

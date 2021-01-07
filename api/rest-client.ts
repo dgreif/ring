@@ -1,6 +1,4 @@
 import got, { Options as RequestOptions, Headers } from 'got'
-import CacheableLookup from 'cacheable-lookup'
-import HttpAgent, { HttpsAgent } from 'agentkeepalive'
 import {
   delay,
   getHardwareId,
@@ -11,21 +9,11 @@ import {
 } from './util'
 import { AuthTokenResponse, SessionResponse } from './ring-types'
 import { ReplaySubject } from 'rxjs'
-import { parse as parseUrl } from 'url'
 
-function createDnsCache() {
-  return new CacheableLookup({
-    maxTtl: 60,
-    fallbackDuration: 0,
-  })
-}
-
-let dnsCache = createDnsCache()
 const defaultRequestOptions: RequestOptions = {
-    http2: false,
+    http2: true,
     responseType: 'json',
     method: 'GET',
-    agent: { http: new HttpAgent(), https: new HttpsAgent() },
   },
   ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',
@@ -55,7 +43,10 @@ async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string }
 ): Promise<T & ExtendedResponse> {
   try {
-    const options = { ...defaultRequestOptions, dnsCache, ...requestOptions },
+    const options = {
+        ...defaultRequestOptions,
+        ...requestOptions,
+      },
       { headers, body } = (await got(options)) as {
         headers: Headers
         body: any
@@ -71,25 +62,6 @@ async function requestWithRetry<T>(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
       logDebug(e)
-
-      if (
-        e.code === 'ENOTFOUND' ||
-        e.code === 'EREFUSED' ||
-        e.code === 'ENETUNREACH' ||
-        e.code === 'EHOSTUNREACH'
-      ) {
-        const url = parseUrl(requestOptions.url)
-        logDebug(
-          `Resetting DNS Cache.  DNS Cache for ${
-            url.hostname
-          }: ${JSON.stringify(
-            await dnsCache
-              .query(url.hostname!)
-              .catch((queryError) => queryError)
-          )}`
-        )
-        dnsCache = createDnsCache()
-      }
 
       await delay(5000)
       return requestWithRetry(requestOptions)

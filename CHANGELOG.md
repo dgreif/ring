@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.14.1-beta.0](https://github.com/dgreif/ring/compare/v9.14.0...v9.14.1-beta.0) (2021-01-07)
+
+
+### Bug Fixes
+
+* remove keepalive agent and enable http2 ([4062930](https://github.com/dgreif/ring/commit/4062930a4b5b40bdc0b5e65adc3ad7f34085c6c3))
+
 ## [9.14.0](https://github.com/dgreif/ring/compare/v9.13.0...v9.14.0) (2021-01-04)
 
 

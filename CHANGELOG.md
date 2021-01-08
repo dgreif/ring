@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.14.1-beta.1](https://github.com/dgreif/ring/compare/v9.14.1-beta.0...v9.14.1-beta.1) (2021-01-08)
+
+
+### Bug Fixes
+
+* remove keepalive and dns caching in favor of http2 ([9c77be3](https://github.com/dgreif/ring/commit/9c77be3f10ace692ffb1511515728aac5e795b5f))
+
 ### [9.14.1-beta.0](https://github.com/dgreif/ring/compare/v9.14.0...v9.14.1-beta.0) (2021-01-07)
 
 

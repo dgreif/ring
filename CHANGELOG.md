@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.14.1](https://github.com/dgreif/ring/compare/v9.14.0...v9.14.1) (2021-01-11)
+
+
+### Bug Fixes
+
+* log an error when opening websocket on node 15 ([abe2036](https://github.com/dgreif/ring/commit/abe2036c8a85eabc22b9211faf8b1acb20c4a00a)), closes [#539](https://github.com/dgreif/ring/issues/539)
+* **homebridge:** log all location ids before fetching devices ([b6e0eef](https://github.com/dgreif/ring/commit/b6e0eefd8d66e88cbe0438df8d3a23eef024d563)), closes [#541](https://github.com/dgreif/ring/issues/541)
+* remove keepalive and dns caching in favor of http2 ([fcfd2a6](https://github.com/dgreif/ring/commit/fcfd2a6115261543ff4a39b71391065839424223)), closes [#497](https://github.com/dgreif/ring/issues/497)
+* update dependencies ([83f0090](https://github.com/dgreif/ring/commit/83f009000df03483af5e4d3030f77e64df0605a1))
+
 ## [9.14.0](https://github.com/dgreif/ring/compare/v9.13.0...v9.14.0) (2021-01-04)
 
 

@@ -185,6 +185,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
       platformAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
 
+    this.log.info('Found the following locations:')
+
+    locations.forEach((location) => {
+      this.log.info(`  locationId: ${location.id} - ${location.name}`)
+    })
+
     await Promise.all(
       locations.map(async (location) => {
         const devices = await location.getDevices(),

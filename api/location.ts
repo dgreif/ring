@@ -197,7 +197,7 @@ export class Location extends Subscribed {
       return Promise.resolve({ disconnected: true } as any)
     }
 
-    logInfo('Creating location socket.io connection')
+    logInfo('Creating location socket.io connection - ' + this.name)
     const { assets, ticket, host } = await this.restClient.request<{
         assets: TicketAsset[]
         host: string

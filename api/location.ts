@@ -198,6 +198,13 @@ export class Location extends Subscribed {
     }
 
     logInfo('Creating location socket.io connection - ' + this.name)
+
+    if (process.version.startsWith('v15.')) {
+      logError(
+        'Node 15 is not currently supported by the Ring client. Please install the latest Node 14 instead. May not be able to fetch devices from Ring Alarm and Smart Lighting Hubs on this version of node.'
+      )
+    }
+
     const { assets, ticket, host } = await this.restClient.request<{
         assets: TicketAsset[]
         host: string

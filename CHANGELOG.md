@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.14.2](https://github.com/dgreif/ring/compare/v9.14.1...v9.14.2) (2021-01-29)
+
+
+### Bug Fixes
+
+* **homebridge:** allow `0` for `locationModePollingSeconds` in config-ui ([3e63b7a](https://github.com/dgreif/ring/commit/3e63b7a2d3f797c18eadab406f163f971346f7c1)), closes [#561](https://github.com/dgreif/ring/issues/561)
+* log wiki link for NGHTTP2_ENHANCE_YOUR_CALM error ([d26052a](https://github.com/dgreif/ring/commit/d26052a57655251f191bb287c47f74fef02c3a38)), closes [#560](https://github.com/dgreif/ring/issues/560)
+* require specific versions of node lts to avoid http2 errors ([18ca92d](https://github.com/dgreif/ring/commit/18ca92d75a6a6e61f95de4e7958a52262a2ceb1e))
+* update dependencies ([5e717be](https://github.com/dgreif/ring/commit/5e717bed6a0a4f7c03b131830c60c0d88d4a12b9))
+
 ### [9.14.1](https://github.com/dgreif/ring/compare/v9.14.0...v9.14.1) (2021-01-11)
 
 

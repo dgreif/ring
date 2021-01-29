@@ -61,6 +61,11 @@ async function requestWithRetry<T>(
       logError(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
+      if (e.message.includes('NGHTTP2_ENHANCE_YOUR_CALM')) {
+        logError(
+          `There is a known issue with your current NodeJS version (${process.version}).  Please see https://github.com/dgreif/ring/wiki/NGHTTP2_ENHANCE_YOUR_CALM-Error for details`
+        )
+      }
       logDebug(e)
 
       await delay(5000)

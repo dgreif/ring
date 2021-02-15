@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.1](https://github.com/dgreif/ring/compare/v9.15.0...v9.15.1) (2021-02-15)
+
+
+### Bug Fixes
+
+* **homebridge:** use `Service.BatteryService` instead of `Service.Battery` ([2228a05](https://github.com/dgreif/ring/commit/2228a058ff523b316aa1b1f1affadf6871a9f83f))
+
 ## [9.15.0](https://github.com/dgreif/ring/compare/v9.14.2...v9.15.0) (2021-02-15)
 
 

@@ -118,7 +118,6 @@ export class RingCamera extends Subscribed {
       this.batteryLevel !== null &&
       this.batteryLevel < 100 &&
       this.batteryLevel >= 0)
-  isCharging = this.initialData.external_connection
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -204,6 +203,10 @@ export class RingCamera extends Subscribed {
 
   get hasLowBattery() {
     return this.data.alerts.battery === 'low'
+  }
+
+  get isCharging() {
+    return this.initialData.external_connection
   }
 
   get isOffline() {

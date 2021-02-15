@@ -179,12 +179,12 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
     if (
       device.hasBattery ||
-      (device.batteryLevel !== null && device.batteryLevel <= 100) ||
-      accessory.getService(Service.BatteryService)
+      // detected as having battery in the past
+      accessory.getService(Service.Battery)
     ) {
       this.registerCharacteristic({
         characteristicType: Characteristic.StatusLowBattery,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         getValue: () => {
           return device.hasLowBattery
             ? StatusLowBattery.BATTERY_LEVEL_LOW
@@ -194,9 +194,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
       this.registerCharacteristic({
         characteristicType: Characteristic.ChargingState,
-        serviceType: Service.BatteryService,
-        getValue: () => {
-          return device.isCharging
+        serviceType: Service.Battery,
+        getValue: (data) => {
+          return data.external_connection
             ? ChargingState.CHARGING
             : ChargingState.NOT_CHARGING
         },
@@ -204,7 +204,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.BatteryLevel,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         onValue: device.onBatteryLevel.pipe(
           map((batteryLevel) => {
             return batteryLevel === null ? 100 : batteryLevel

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.15.0](https://github.com/dgreif/ring/compare/v9.14.2...v9.15.0) (2021-02-15)
+
+
+### Features
+
+* remove snapshot restrictions for battery cams in wired mode ([bc8e2cc](https://github.com/dgreif/ring/commit/bc8e2cc95f76ffe92076f9edde757f6c24bf6bad)), closes [#502](https://github.com/dgreif/ring/issues/502)
+* **homebridge:** show charging status for battery cams ([#571](https://github.com/dgreif/ring/issues/571)) ([06fdf1c](https://github.com/dgreif/ring/commit/06fdf1cb9643cd83a20cec99c3a6a45b8abf9669))
+
+
+### Bug Fixes
+
+* update dependencies ([885da2e](https://github.com/dgreif/ring/commit/885da2e24055338c0f6be72d80aa64b1a11b472b))
+
 ### [9.14.2](https://github.com/dgreif/ring/compare/v9.14.1...v9.14.2) (2021-01-29)
 
 

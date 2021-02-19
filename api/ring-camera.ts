@@ -362,7 +362,7 @@ export class RingCamera extends Subscribed {
     }, 65 * 1000) // dings last ~1 minute
   }
 
-  getEvents(options: CameraEventOptions) {
+  getEvents(options: CameraEventOptions = {}) {
     return this.restClient.request<CameraEventResponse>({
       url: clientApi(
         `locations/${this.data.location_id}/devices/${

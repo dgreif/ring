@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.2](https://github.com/dgreif/ring/compare/v9.15.1...v9.15.2) (2021-02-20)
+
+
+### Bug Fixes
+
+* update dependencies ([1964c8f](https://github.com/dgreif/ring/commit/1964c8f7a910ce3055aa9c244b813c74926896e1))
+* **api:** allow camera.getEvents() with no options ([03fd4e5](https://github.com/dgreif/ring/commit/03fd4e5c61f3ff715059152a8ce6fb4dc5873eac))
+* **homebridge:** cache snapshot longer for battery cams with `avoidSnapshotBatteryDrain` ([e5a65e8](https://github.com/dgreif/ring/commit/e5a65e80ff89e9b7eb7ae16397a4c8c32bd9ec78)), closes [#502](https://github.com/dgreif/ring/issues/502)
+
 ### [9.15.1](https://github.com/dgreif/ring/compare/v9.15.0...v9.15.1) (2021-02-15)
 
 

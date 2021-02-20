@@ -87,13 +87,13 @@ export class CameraSource implements CameraStreamingDelegate {
       this.cachedSnapshot = newSnapshot
 
       if (previousSnapshot !== newSnapshot) {
-        // Keep the snapshots in cache longer than their lifetime
+        // Keep the snapshots in cache 2 minutes longer than their lifetime
         // This allows users on LTE with wired camera to get snapshots each 60 second pull even though the cached snapshot is out of date
         setTimeout(() => {
           if (this.cachedSnapshot === newSnapshot) {
             this.cachedSnapshot = undefined
           }
-        }, 2 * 60 * 1000)
+        }, this.ringCamera.snapshotLifeTime + 2 * 60 * 1000)
       }
 
       logDebug(
@@ -133,11 +133,8 @@ export class CameraSource implements CameraStreamingDelegate {
       void this.loadSnapshot()
     }
 
-    if (this.cachedSnapshot) {
-      return this.cachedSnapshot
-    }
-
-    return undefined
+    // may or may not have a snapshot cached
+    return this.cachedSnapshot
   }
 
   async handleSnapshotRequest(

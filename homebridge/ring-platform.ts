@@ -53,7 +53,15 @@ const debug = __filename.includes('release-homebridge'),
     | RingDeviceType
     | RingCameraKind
     | RingChime['deviceType']
-  )[] = [RingDeviceType.BaseStation, RingDeviceType.Keypad]
+  )[] = [RingDeviceType.BaseStation, RingDeviceType.Keypad],
+  ignoreHiddenDeviceTypes: string[] = [
+    RingDeviceType.RingNetAdapter,
+    RingDeviceType.ZigbeeAdapter,
+    RingDeviceType.CodeVault,
+    RingDeviceType.SecurityAccessCode,
+    RingDeviceType.ZWaveAdapter,
+    RingDeviceType.ZWaveExtender,
+  ]
 
 export const platformName = 'Ring'
 export const pluginName = 'homebridge-ring'
@@ -274,9 +282,11 @@ export class RingPlatform implements DynamicPlatformPlugin {
               hideDeviceIds.includes(uuid) ||
               (onlyDeviceTypes && !onlyDeviceTypes.includes(deviceType))
             ) {
-              this.log.info(
-                `Hidden accessory ${uuid} ${deviceType} ${displayName}`
-              )
+              if (!ignoreHiddenDeviceTypes.includes(deviceType)) {
+                this.log.info(
+                  `Hidden accessory ${uuid} ${deviceType} ${displayName}`
+                )
+              }
               return
             }
 

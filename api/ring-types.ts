@@ -31,6 +31,11 @@ export enum RingDeviceType {
   RetrofitZone = 'sensor.zone',
   Thermostat = 'temperature-control.thermostat',
   Sensor = 'sensor',
+  RingNetAdapter = 'adapter.ringnet',
+  CodeVault = 'access-code.vault',
+  SecurityAccessCode = 'access-code',
+  ZWaveAdapter = 'adapter.zwave',
+  ZWaveExtender = 'range-extender.zwave',
 }
 
 // eslint-disable-next-line no-shadow

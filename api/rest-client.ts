@@ -24,8 +24,7 @@ const defaultRequestOptions: RequestOptions = {
   },
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
   appApiBaseUrl = 'https://app.ring.com/api/v1/',
-  apiVersion = 11,
-  hardwareIdPromise = getHardwareId()
+  apiVersion = 11
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
@@ -78,10 +77,12 @@ async function requestWithRetry<T>(
 export interface EmailAuth {
   email: string
   password: string
+  systemId?: string
 }
 
 export interface RefreshTokenAuth {
   refreshToken: string
+  systemId?: string
 }
 
 export interface SessionOptions {
@@ -91,6 +92,7 @@ export interface SessionOptions {
 export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
+  private hardwareIdPromise = getHardwareId(this.authOptions.systemId)
   private authPromise = this.getAuth()
   private sessionPromise?: Promise<SessionResponse> = undefined
   public using2fa = false
@@ -140,7 +142,7 @@ export class RingRestClient {
         headers: {
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
-          hardware_id: await hardwareIdPromise,
+          hardware_id: await this.hardwareIdPromise,
         },
       })
 
@@ -197,7 +199,7 @@ export class RingRestClient {
       url: clientApi('session'),
       json: {
         device: {
-          hardware_id: await hardwareIdPromise,
+          hardware_id: await this.hardwareIdPromise,
           metadata: {
             api_version: apiVersion,
             device_model:
@@ -255,7 +257,7 @@ export class RingRestClient {
   async request<T = void>(
     options: RequestOptions & { url: string }
   ): Promise<T & ExtendedResponse> {
-    const hardwareId = await hardwareIdPromise,
+    const hardwareId = await this.hardwareIdPromise,
       url = options.url! as string,
       initialSessionPromise = this.sessionPromise
 

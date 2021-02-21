@@ -58,7 +58,11 @@ export function generateUuid(seed?: string) {
   return generateRandomUuid()
 }
 
-export async function getHardwareId() {
+export async function getHardwareId(systemId?: string) {
+  if (systemId) {
+    return generateUuid(systemId)
+  }
+
   const timeoutValue = '-1',
     { os: id } = await Promise.race([
       getSystemUuid(),

@@ -25,7 +25,11 @@ import { Lock } from './lock'
 import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
-import { RingPlatformConfig, updateHomebridgeConfig } from './config'
+import {
+  getSystemId,
+  RingPlatformConfig,
+  updateHomebridgeConfig,
+} from './config'
 import { Beam } from './beam'
 import { MultiLevelSwitch } from './multi-level-switch'
 import { Fan } from './fan'
@@ -176,9 +180,11 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
   async connectToApi() {
     const { api, config } = this,
+      systemId = getSystemId(api),
       ringApi = new RingApi({
         controlCenterDisplayName: 'homebridge-ring',
         ...config,
+        systemId,
       }),
       locations = await ringApi.getLocations(),
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),

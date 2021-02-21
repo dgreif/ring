@@ -1,5 +1,10 @@
 import { AlarmMode, RingApiOptions } from '../api'
 import { readFileSync, writeFileSync } from 'fs'
+import { API } from 'homebridge'
+import { createHash, randomBytes } from 'crypto'
+import { join } from 'path'
+
+const systemIdFileName = '.ring.json'
 
 export interface RingPlatformConfig extends RingApiOptions {
   alarmOnEntryDelay?: boolean
@@ -21,7 +26,7 @@ export interface RingPlatformConfig extends RingApiOptions {
 }
 
 export function updateHomebridgeConfig(
-  homebridge: any,
+  homebridge: API,
   update: (config: string) => string
 ) {
   const configPath = homebridge.user.configPath(),
@@ -34,4 +39,35 @@ export function updateHomebridgeConfig(
   }
 
   return false
+}
+
+function createSystemId() {
+  return createHash('sha256').update(randomBytes(32)).digest('hex')
+}
+
+interface RingContext {
+  systemId: string
+}
+
+export function getSystemId(homebridge: API) {
+  const storagePath = homebridge.user.storagePath(),
+    filePath = join(storagePath, systemIdFileName)
+
+  try {
+    const ringContext: RingContext = JSON.parse(
+      readFileSync(filePath).toString()
+    )
+    if (ringContext.systemId) {
+      return ringContext.systemId
+    }
+  } catch (_) {
+    // expect errors if file doesn't exist or is in a bad format
+  }
+
+  const systemId = createSystemId(),
+    ringContext: RingContext = { systemId }
+
+  writeFileSync(filePath, JSON.stringify(ringContext))
+
+  return systemId
 }

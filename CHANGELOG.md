@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.3](https://github.com/dgreif/ring/compare/v9.15.2...v9.15.3) (2021-02-21)
+
+
+### Bug Fixes
+
+* **homebridge:** avoid logging intentionally hidden accessories ([75eb3bc](https://github.com/dgreif/ring/commit/75eb3bc6ac456e02e5ff79dced4e78034b7e9261))
+* **homebridge:** store system id on disk to avoid random session id ([8662b0c](https://github.com/dgreif/ring/commit/8662b0c5b8c77f8df166a982be7d96c2eb8d4e54)), closes [#521](https://github.com/dgreif/ring/issues/521)
+* ignore `notYetParticipatingInMode` when determining location modes support ([de61bc5](https://github.com/dgreif/ring/commit/de61bc518d84c3c536910157a3502158fbd88493)), closes [#565](https://github.com/dgreif/ring/issues/565)
+
 ### [9.15.2](https://github.com/dgreif/ring/compare/v9.15.1...v9.15.2) (2021-02-20)
 
 

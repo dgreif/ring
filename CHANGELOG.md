@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.3-beta.0](https://github.com/dgreif/ring/compare/v9.15.2...v9.15.3-beta.0) (2021-02-21)
+
+
+### Bug Fixes
+
+* log additional info about location modes ([1074403](https://github.com/dgreif/ring/commit/10744039045ba77c47b18004545bfbe5fe6cccc0))
+
 ### [9.15.2](https://github.com/dgreif/ring/compare/v9.15.1...v9.15.2) (2021-02-20)
 
 

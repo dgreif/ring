@@ -85,8 +85,12 @@ export class RingApi extends Subscribed {
       authorizedDoorbots,
       stickupCams,
       allCameras: doorbots.concat(stickupCams, authorizedDoorbots),
-      baseStations,
-      beamBridges,
+      baseStations: baseStations.filter(
+        (baseStation) => baseStation.kind === 'base_station_v1'
+      ),
+      beamBridges: beamBridges.filter(
+        (beamsBridge) => beamsBridge.kind === 'beams_bridge_v1'
+      ),
     }
   }
 

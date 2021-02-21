@@ -15,7 +15,7 @@ import {
   skip,
   take,
 } from 'rxjs/operators'
-import { delay, generateUuid, logDebug, logError, logInfo } from './util'
+import { delay, generateUuid, logError, logInfo } from './util'
 import {
   AccountMonitoringStatus,
   AlarmMode,
@@ -545,13 +545,14 @@ export class Location extends Subscribed {
 
   async supportsLocationModeSwitching() {
     if (this.hasAlarmBaseStation || !this.cameras.length) {
+      logInfo('Location Mode Skipped: ' + this.hasAlarmBaseStation)
       return false
     }
 
     const modeResponse = await this.getLocationMode(),
       { mode, readOnly, notYetParticipatingInMode } = modeResponse
 
-    logDebug('Location Mode: ' + JSON.stringify(modeResponse))
+    logInfo('Location Mode: ' + JSON.stringify(modeResponse))
 
     return (
       !readOnly &&

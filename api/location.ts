@@ -549,15 +549,11 @@ export class Location extends Subscribed {
     }
 
     const modeResponse = await this.getLocationMode(),
-      { mode, readOnly, notYetParticipatingInMode } = modeResponse
+      { mode, readOnly } = modeResponse
 
     logDebug('Location Mode: ' + JSON.stringify(modeResponse))
 
-    return (
-      !readOnly &&
-      !notYetParticipatingInMode?.length &&
-      !disabledLocationModes.includes(mode)
-    )
+    return !readOnly && !disabledLocationModes.includes(mode)
   }
 
   disconnect() {

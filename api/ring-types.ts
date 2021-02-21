@@ -715,7 +715,10 @@ export interface LocationModeResponse {
     returnTopic: string
   }
   readOnly: boolean
-  notYetParticipatingInMode?: []
+  notYetParticipatingInMode?: {
+    deviceId: number
+    deviceIdType: 'doorbot' | string
+  }[]
 }
 
 export type LocationModeAction =

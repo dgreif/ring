@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.4](https://github.com/dgreif/ring/compare/v9.15.3...v9.15.4) (2021-03-04)
+
+
+### Bug Fixes
+
+* **homebridge:** less snapshot logging ([264fe5d](https://github.com/dgreif/ring/commit/264fe5d0552d117b294efd95adac5bc25789e55c)), closes [#587](https://github.com/dgreif/ring/issues/587)
+* update dependencies ([b27d1a1](https://github.com/dgreif/ring/commit/b27d1a16af5f411839ad6885d37e254c5ba6687e))
+
 ### [9.15.3](https://github.com/dgreif/ring/compare/v9.15.2...v9.15.3) (2021-02-21)
 
 

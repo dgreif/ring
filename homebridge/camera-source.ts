@@ -14,7 +14,6 @@ import {
   CameraStreamingDelegate,
   H264Level,
   H264Profile,
-  Logging,
   PrepareStreamCallback,
   PrepareStreamRequest,
   SnapshotRequest,
@@ -23,7 +22,7 @@ import {
   StreamingRequest,
   StreamRequestCallback,
 } from 'homebridge'
-import { logDebug, logError } from '../api/util'
+import { logDebug, logError, logInfo } from '../api/util'
 import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
 import { merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
@@ -75,9 +74,25 @@ export class CameraSource implements CameraStreamingDelegate {
   private sessions: { [sessionKey: string]: SipSession } = {}
   private cachedSnapshot?: Buffer
 
-  constructor(private ringCamera: RingCamera, private logger: Logging) {}
+  constructor(private ringCamera: RingCamera) {}
 
-  async loadSnapshot() {
+  private previousLoadSnapshotPromise?: Promise<any>
+  loadSnapshot() {
+    // cache a promise of the snapshot load
+    // This prevents multiple concurrent requests for snapshot from pilling up and creating lots of logs
+    if (this.previousLoadSnapshotPromise) {
+      return this.previousLoadSnapshotPromise
+    }
+
+    this.previousLoadSnapshotPromise = this.loadAndCacheSnapshot()
+
+    this.previousLoadSnapshotPromise.catch().then(() => {
+      // clear so another it's finished request can be made
+      this.previousLoadSnapshotPromise = undefined
+    })
+  }
+
+  private async loadAndCacheSnapshot() {
     const start = Date.now()
     logDebug(`Loading new snapshot into cache for ${this.ringCamera.name}`)
 
@@ -102,7 +117,7 @@ export class CameraSource implements CameraStreamingDelegate {
         )}s)`
       )
     } catch (e) {
-      this.logger.error(
+      logDebug(
         `Failed to cache snapshot for ${
           this.ringCamera.name
         } (${getDurationSeconds(
@@ -159,7 +174,7 @@ export class CameraSource implements CameraStreamingDelegate {
     callback: PrepareStreamCallback
   ) {
     const start = Date.now()
-    this.logger.info(`Preparing Live Stream for ${this.ringCamera.name}`)
+    logInfo(`Preparing Live Stream for ${this.ringCamera.name}`)
 
     try {
       const {
@@ -192,14 +207,14 @@ export class CameraSource implements CameraStreamingDelegate {
           doesFfmpegSupportCodec('libfdk_aac', ffmpegPath)
             .then((supported) => {
               if (!supported) {
-                this.logger.error(
+                logError(
                   'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
                 )
               }
               return supported
             })
             .catch(() => {
-              this.logger.error(
+              logError(
                 'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
               )
               return false
@@ -211,7 +226,7 @@ export class CameraSource implements CameraStreamingDelegate {
         merge(of(true).pipe(delay(15000)), onReturnPacketReceived)
           .pipe(debounceTime(5000))
           .subscribe(() => {
-            this.logger.info(
+            logInfo(
               `Live stream for ${
                 this.ringCamera.name
               } appears to be inactive. (${getDurationSeconds(start)}s)`
@@ -312,7 +327,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
           if (!videoPacketReceived) {
             videoPacketReceived = true
-            this.logger.info(
+            logInfo(
               `Received stream data from ${
                 this.ringCamera.name
               } (${getDurationSeconds(start)}s)`
@@ -406,7 +421,7 @@ export class CameraSource implements CameraStreamingDelegate {
       let videoSsrc = ringRtpDescription.video.ssrc
       if (videoSsrc) {
         // Server supported ICE, which means response SDP included SSRC
-        this.logger.info(
+        logInfo(
           `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(
             start
           )}s)`
@@ -414,7 +429,7 @@ export class CameraSource implements CameraStreamingDelegate {
       } else {
         // Server uses RTP latching.  Need to wait for first packet to determine SSRC
         // NOTE: we could avoid this if we want to decrypt/re-encrypt each packets with a new SSRC
-        this.logger.info(
+        logInfo(
           `Waiting for stream data from ${
             this.ringCamera.name
           } (${getDurationSeconds(start)}s)`
@@ -440,12 +455,12 @@ export class CameraSource implements CameraStreamingDelegate {
         },
       })
     } catch (e) {
-      this.logger.error(
+      logError(
         `Failed to prepare stream for ${
           this.ringCamera.name
         } (${getDurationSeconds(start)}s)`
       )
-      this.logger.error(e)
+      logError(e)
       callback(e)
     }
   }
@@ -465,11 +480,11 @@ export class CameraSource implements CameraStreamingDelegate {
     }
 
     if (requestType === 'start') {
-      this.logger.info(`Streaming active for ${this.ringCamera.name}`)
+      logInfo(`Streaming active for ${this.ringCamera.name}`)
       // sip/rtp already started at this point, but request a key frame so that HomeKit for sure has one
       void session.requestKeyFrame()
     } else if (requestType === 'stop') {
-      this.logger.info(`Stopped Live Stream for ${this.ringCamera.name}`)
+      logInfo(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()
       delete this.sessions[sessionKey]
     }

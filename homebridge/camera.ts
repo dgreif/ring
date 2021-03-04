@@ -9,7 +9,7 @@ import { merge } from 'rxjs'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
-  private cameraSource = new CameraSource(this.device, this.logger)
+  private cameraSource = new CameraSource(this.device)
 
   constructor(
     public readonly device: RingCamera,

@@ -33,7 +33,7 @@ import {
   RtpSplitter,
   SrtpOptions,
 } from '@homebridge/camera-utils'
-import { DeepPartial, delay, logError, logInfo } from './util'
+import { DeepPartial, delay, logDebug, logError } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
@@ -481,7 +481,7 @@ export class RingCamera extends Subscribed {
 
   private async refreshSnapshot() {
     if (this.hasSnapshotWithinLifetime) {
-      logInfo(
+      logDebug(
         `Snapshot for ${this.name} is still within its life time (${
           this.currentTimestampAge / 1000
         }s old)`
@@ -518,7 +518,7 @@ export class RingCamera extends Subscribed {
       ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
       : ''
     throw new Error(
-      `Snapshot for ${this.name} failed to refresh after ${maxSnapshotRefreshAttempts} attempts${extraMessageForBatteryCam}`
+      `Snapshot for ${this.name} (${this.deviceType} - ${this.model}) failed to refresh after ${maxSnapshotRefreshAttempts} attempts${extraMessageForBatteryCam}`
     )
   }
 

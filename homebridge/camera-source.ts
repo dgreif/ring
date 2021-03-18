@@ -159,6 +159,11 @@ export class CameraSource implements CameraStreamingDelegate {
     try {
       const snapshot = await this.getCurrentSnapshot()
 
+      if (!snapshot) {
+        // return an error to prevent "empty image buffer" warnings
+        return callback(new Error('No Snapshot Cached'))
+      }
+
       // Not currently resizing the image.
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
       callback(undefined, snapshot)

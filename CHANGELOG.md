@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.5](https://github.com/dgreif/ring/compare/v9.15.4...v9.15.5) (2021-03-19)
+
+
+### Bug Fixes
+
+* **homebridge:** prevent empty image buffer warnings ([1f64c4e](https://github.com/dgreif/ring/commit/1f64c4e610b8a659d609380629650b606064f72e)), closes [#594](https://github.com/dgreif/ring/issues/594) [#592](https://github.com/dgreif/ring/issues/592)
+* update dependencies ([e9d4fe0](https://github.com/dgreif/ring/commit/e9d4fe0c3bd6bb0d78d0b2781357825429af03d1))
+
 ### [9.15.4](https://github.com/dgreif/ring/compare/v9.15.3...v9.15.4) (2021-03-04)
 
 

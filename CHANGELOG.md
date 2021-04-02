@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.15.6](https://github.com/dgreif/ring/compare/v9.15.5...v9.15.6) (2021-04-02)
+
+
+### Bug Fixes
+
+* more reliable port reservation for streams ([16d6866](https://github.com/dgreif/ring/commit/16d6866685c3eb9dfc9715d082678a5fcb5ce722))
+* update dependencies ([e8534da](https://github.com/dgreif/ring/commit/e8534da8ba53d8514ce39e280dbc34308246f9d6))
+
 ### [9.15.5](https://github.com/dgreif/ring/compare/v9.15.4...v9.15.5) (2021-03-19)
 
 

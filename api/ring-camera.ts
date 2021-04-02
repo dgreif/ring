@@ -603,7 +603,7 @@ export class RingCamera extends Subscribed {
         audioRtcpSplitter.portPromise,
         videoSplitter.portPromise,
         videoRtcpSplitter.portPromise,
-        reservePorts(),
+        reservePorts({ type: 'tcp' }),
       ]),
       rtpOptions = {
         audio: {

@@ -10,7 +10,6 @@ import {
   createCryptoLine,
   FfmpegProcess,
   reservePorts,
-  releasePorts,
   RtpSplitter,
 } from '@homebridge/camera-utils'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
@@ -35,11 +34,6 @@ export class SipSession extends Subscribed {
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
   private sipCall: SipCall = this.createSipCall(this.sipOptions)
-  public readonly reservedPorts = [
-    this.tlsPort,
-    this.rtpOptions.video.port,
-    this.rtpOptions.audio.port,
-  ]
   onCallEnded = this.onCallEndedSubject.asObservable()
 
   constructor(
@@ -283,7 +277,6 @@ export class SipSession extends Subscribed {
 
   async reservePort(bufferPorts = 0) {
     const ports = await reservePorts({ count: bufferPorts + 1 })
-    this.reservedPorts.push(...ports)
     return ports[0]
   }
 
@@ -311,7 +304,6 @@ export class SipSession extends Subscribed {
     this.videoSplitter.close()
     this.audioSplitter.close()
     this.unsubscribe()
-    releasePorts(this.reservedPorts)
   }
 
   stop() {

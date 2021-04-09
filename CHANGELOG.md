@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.16.0](https://github.com/dgreif/ring/compare/v9.15.6...v9.16.0) (2021-04-09)
+
+
+### Features
+
+* support outdoor smart plug ([79b28fb](https://github.com/dgreif/ring/commit/79b28fb81645b9c8c634c090797ae3d2d21e1dd5))
+
+
+### Bug Fixes
+
+* update dependencies ([9210476](https://github.com/dgreif/ring/commit/9210476cd82b3bcf81cf7e6679f51d658e9239ed))
+
 ### [9.15.6](https://github.com/dgreif/ring/compare/v9.15.5...v9.15.6) (2021-04-02)
 
 

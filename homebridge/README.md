@@ -161,7 +161,7 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Detect water leak
     * Tamper status
     * Battery status
-  * Ring Smart Lights (Motion Detector, Flood/Path/Spot Lights, Transformer)
+  * Ring Smart Lights (Motion Detector, Flood/Path/Spot Lights, Transformer, Outdoor Smart Plug)
     * On/Off
     * Brightness Level
     * Detect motion

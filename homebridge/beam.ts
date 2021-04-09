@@ -33,7 +33,7 @@ export class Beam extends BaseDeviceAccessory {
       this.getService(Service.Lightbulb).setPrimaryService(true)
     }
 
-    if (deviceType === RingDeviceType.BeamsSwitch) {
+    if (deviceType === RingDeviceType.BeamsMultiLevelSwitch) {
       this.registerLevelCharacteristic({
         characteristicType: Characteristic.Brightness,
         serviceType: Service.Lightbulb,
@@ -44,7 +44,7 @@ export class Beam extends BaseDeviceAccessory {
       })
     }
 
-    if (deviceType !== RingDeviceType.BeamsTransformerSwitch) {
+    if (device.data.motionStatus !== undefined) {
       this.registerCharacteristic({
         characteristicType: hap.Characteristic.MotionDetected,
         serviceType: MotionSensor,

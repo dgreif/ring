@@ -61,6 +61,7 @@ const debug = __filename.includes('release-homebridge'),
     RingDeviceType.SecurityAccessCode,
     RingDeviceType.ZWaveAdapter,
     RingDeviceType.ZWaveExtender,
+    RingDeviceType.BeamsDevice,
   ]
 
 export const platformName = 'Ring'
@@ -101,6 +102,7 @@ function getAccessoryClass(
       return SmokeCoListener
     case RingDeviceType.BeamsMotionSensor:
     case RingDeviceType.BeamsSwitch:
+    case RingDeviceType.BeamsMultiLevelSwitch:
     case RingDeviceType.BeamsTransformerSwitch:
     case RingDeviceType.BeamsLightGroupSwitch:
       return Beam

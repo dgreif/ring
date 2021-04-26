@@ -495,9 +495,34 @@ export interface CameraData {
   }
 }
 
-// There is a lot to detail here
-// These are the ones that seems could potentially support updating.
+// There is a lot of properties here. Not sure if we want separate class like this
+// or make use of DeepPartial on the Data type below.
 export interface CameraDeviceSettingsUpdate {
+  advanced_motion_settings?: {
+    active_motion_filter?: number,
+    advanced_object_settings?: {
+      human_detection_confidence?: {
+        day?: number,
+        night?: number
+      },
+      motion_zone_overlap?: {
+        day?: number,
+        night?: number
+      },
+      object_size_maximum?: {
+        day?: number,
+        night?: number
+      },
+      object_size_minimum?: {
+        day?: number,
+        night?: number
+      },
+      object_time_overlap?: {
+        day?: number,
+        night?: number
+      }
+    }
+  },
   chime_settings?: {
     duration?: number,
     enable?: boolean,
@@ -533,10 +558,63 @@ export interface CameraDeviceSettingsUpdate {
     ae_mode?: number,
     ae_mask?: string
   },
+  vod_settings?: {
+    enable?: boolean,
+    toggled_at?: string // date,
+    use_cached_vod_domain?: boolean
+  },
   volume_settings?: { 
     doorbell_volume?: number, 
     mic_volume?: number, 
     voice_volume?: number 
+  },
+  cv_settings?: {
+    detection_types?: {
+        human?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        loitering?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        motion?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        moving_vehicle?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        nearby_pom?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        other_motion?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        package_delivery?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        },
+        package_pickup?: {
+            enabled?: boolean,
+            mode?: string,
+            notification?: boolean
+        }
+    },
+    threshold?: {
+        loitering?: number,
+        package_delivery?: number
+    }
   },
   general_settings?: {
     enable_audio_recording?: boolean,
@@ -550,6 +628,15 @@ export interface CameraDeviceSettingsUpdate {
     use_wrapup_domain?: boolean,
     power_mode?: 'battery' | 'wired',
     data_collection_enabled?: boolean
+  },
+  keep_alive_settings?: {
+    keep_alive_auto?: number
+  },
+  pir_settings?: {
+    sensitivity_1?: number,
+    sensitivity_2?: number,
+    sensitivity_3?: number,
+    zone_enable?: number
   },
   snapshot_settings?: {
     frequency_secs?: number,
@@ -574,6 +661,15 @@ export interface CameraDeviceSettingsUpdate {
     cfes_eligible?: boolean,
     show_radar_data?: boolean,
     motion_zone_recommendation?: boolean
+  },
+  concierge_settings?: {
+    alexa_settings?: {
+      delay_ms: number
+    },
+    autoreply_settings?: {
+      delay_ms: number
+    },
+    mode?: string
   }
 }
 
@@ -714,6 +810,12 @@ export interface CameraDeviceSettingsData {
   },
   keep_alive_settings: {
     keep_alive_auto: number
+  },
+  pir_settings: {
+    sensitivity_1: number,
+    sensitivity_2: number,
+    sensitivity_3: number,
+    zone_enable: number
   },
   snapshot_settings: {
     frequency_secs: number,

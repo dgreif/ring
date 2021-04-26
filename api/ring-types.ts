@@ -495,6 +495,10 @@ export interface CameraData {
   }
 }
 
+export interface MotionSettings {
+  motion_detection_enabled: boolean
+}
+
 export interface CameraHealth {
   id: number
   wifi_name: string

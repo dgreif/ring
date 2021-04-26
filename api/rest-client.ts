@@ -23,11 +23,16 @@ const defaultRequestOptions: RequestOptions = {
     7063: 'MAINTENANCE',
   },
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
+  deviceApiBaseUrl = 'https://api.ring.com/devices/v1/',
   appApiBaseUrl = 'https://app.ring.com/api/v1/',
   apiVersion = 11
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
+}
+
+export function deviceApi(path: string) {
+  return deviceApiBaseUrl + path
 }
 
 export function appApi(path: string) {

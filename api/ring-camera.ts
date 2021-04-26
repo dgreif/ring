@@ -7,12 +7,13 @@ import {
   DoorbellType,
   HistoryOptions,
   isBatteryCameraKind,
+  MotionSettings,
   PeriodicFootageResponse,
   RingCameraModel,
   SnapshotTimestamp,
   VideoSearchResponse,
 } from './ring-types'
-import { clientApi, RingRestClient } from './rest-client'
+import { clientApi, deviceApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, interval, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
@@ -235,6 +236,10 @@ export class RingCamera extends Subscribed {
     return clientApi(`doorbots/${this.id}/${path}`)
   }
 
+  deviceUrl(path = '') {
+    return deviceApi(`devices/${this.id}/${path}`)
+  }
+
   async setLight(on: boolean) {
     if (!this.hasLight) {
       return false
@@ -273,7 +278,17 @@ export class RingCamera extends Subscribed {
       url: this.doorbotUrl(),
       json: { doorbot: { settings } },
     })
+    
+    this.requestUpdate()
+  }
 
+  async setMotionSettings(motion_settings: MotionSettings) {
+    await this.restClient.request({
+      method: 'PATCH',
+      url: this.deviceUrl('settings'),
+      json: { motion_settings },
+    })  
+  
     this.requestUpdate()
   }
 

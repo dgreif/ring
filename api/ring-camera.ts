@@ -2,7 +2,6 @@ import {
   ActiveDing,
   CameraData,
   CameraDeviceSettingsData,
-  CameraDeviceSettingsUpdate,
   CameraEventOptions,
   CameraEventResponse,
   CameraHealth,
@@ -283,7 +282,7 @@ export class RingCamera extends Subscribed {
     this.requestUpdate()
   }
 
-  async setDeviceSettings(settings: CameraDeviceSettingsUpdate) {
+  async setDeviceSettings(settings: DeepPartial<CameraDeviceSettingsData>) {
     const response = await this.restClient.request<CameraDeviceSettingsData>({
       method: 'PATCH',
       url: this.deviceUrl('settings'),

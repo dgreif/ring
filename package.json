@@ -1,6 +1,6 @@
 {
   "name": "ring-client-api",
-  "version": "9.16.0",
+  "version": "9.17.0",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/api/index.js",
   "bin": {
@@ -19,7 +19,7 @@
     "browser-example": "npm run build && node ./lib/examples/browser-example.js",
     "auth-cli": "npm run build && ./ring-auth-cli.js",
     "device-data-cli": "npm run build && ./ring-device-data-cli.js",
-    "test-homebridge": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge -U ./.homebridge",
+    "hb": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge -U ./.homebridge",
     "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",
     "deploy": "standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.17.0](https://github.com/dgreif/ring/compare/v9.16.0...v9.17.0) (2021-04-17)
+
+
+### Features
+
+* **api:** add support for enabling location modes ([#612](https://github.com/dgreif/ring/issues/612)) ([055e5f0](https://github.com/dgreif/ring/commit/055e5f0b350e0dc53fe8d5253da54683e3a9c25e))
+
 ## [9.16.0](https://github.com/dgreif/ring/compare/v9.15.6...v9.16.0) (2021-04-09)
 
 

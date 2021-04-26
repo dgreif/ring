@@ -495,8 +495,259 @@ export interface CameraData {
   }
 }
 
-export interface MotionSettings {
-  motion_detection_enabled: boolean
+// There is a lot to detail here
+// These are the ones that seems could potentially support updating.
+export interface CameraDeviceSettingsUpdate {
+  chime_settings?: {
+    duration?: number,
+    enable?: boolean,
+    enable_ext?: boolean,
+    type?: number
+  },
+  motion_settings?: {
+    enable_audio?: boolean,
+    motion_detection_enabled?: boolean,
+    enable_ir_led?: boolean,
+    advanced_motion_detection_enabled?: boolean,
+    advanced_motion_detection_mode?: string,
+    advanced_motion_detection_human_only_mode?: boolean,
+    advanced_motion_detection_loitering_mode?: boolean,
+    motion_snooze_privacy_timeout?: number,
+    advanced_motion_zones_enabled?: boolean,
+    advanced_motion_zones_type?: string,
+    enable_indoor_mode?: boolean,
+    enable_pir_validation?: boolean,
+    loitering_threshold?: number,
+    enable_rlmd?: boolean,
+    enable_recording?: boolean,
+    end_detection?: number,
+    advanced_motion_recording_human_mode?: boolean,
+    advanced_motion_glance_enabled?: boolean
+  },
+  video_settings?: {
+    exposure_control?: number,
+    night_color_enable?: boolean,
+    hdr_enable?: boolean,
+    clip_length_max?: number,
+    clip_length_min?: number,
+    ae_mode?: number,
+    ae_mask?: string
+  },
+  volume_settings?: { 
+    doorbell_volume?: number, 
+    mic_volume?: number, 
+    voice_volume?: number 
+  },
+  general_settings?: {
+    enable_audio_recording?: boolean,
+    lite_24x7_enabled?: boolean,
+    offline_motion_event_enabled?: boolean,
+    lite_24x7_subscribed?: boolean,
+    offline_motion_event_subscribed?: boolean,
+    firmwares_locked?: boolean,
+    utc_offset?: string,
+    theft_alarm_enable?: boolean,
+    use_wrapup_domain?: boolean,
+    power_mode?: 'battery' | 'wired',
+    data_collection_enabled?: boolean
+  },
+  snapshot_settings?: {
+    frequency_secs?: number,
+    lite_24x7_resolution_p?: number,
+    ome_resolution_p?: number,
+    max_upload_kb?: number,
+    frequency_after_secs?: number,
+    period_after_secs?: number,
+    close_container?: number
+  },
+  client_device_settings?: {
+    ringtones_enabled?: boolean,
+    people_only_enabled?: boolean,
+    advanced_motion_enabled?: boolean,
+    motion_message_enabled?: boolean,
+    shadow_correction_enabled?: boolean,
+    night_vision_enabled?: boolean,
+    light_schedule_enabled?: boolean,
+    rich_notifications_eligible?: boolean,
+    show_24x7_lite?: boolean,
+    show_offline_motion_events?: boolean,
+    cfes_eligible?: boolean,
+    show_radar_data?: boolean,
+    motion_zone_recommendation?: boolean
+  }
+}
+
+// There is a lot of stuff here, and a big area of testing what the 
+// potential values can be. Especially related to motion detection and 
+// motion detection zones.
+export interface CameraDeviceSettingsData {
+  advanced_motion_settings: {
+    active_motion_filter: number,
+    advanced_object_settings: {
+      human_detection_confidence: {
+        day: number,
+        night: number
+      },
+      motion_zone_overlap: {
+        day: number,
+        night: number
+      },
+      object_size_maximum: {
+        day: number,
+        night: number
+      },
+      object_size_minimum: {
+        day: number,
+        night: number
+      },
+      object_time_overlap: {
+        day: number,
+        night: number
+      }
+    }
+  },
+  chime_settings: {
+    duration: number,
+    enable: boolean,
+    enable_ext: boolean,
+    type: number
+  },
+  motion_settings: {
+    enable_audio: boolean,
+    motion_detection_enabled: boolean,
+    enable_ir_led: boolean,
+    advanced_motion_detection_enabled: boolean,
+    advanced_motion_detection_mode: string,
+    advanced_motion_detection_human_only_mode: boolean,
+    advanced_motion_detection_loitering_mode: boolean,
+    motion_snooze_privacy_timeout: number,
+    advanced_motion_zones_enabled: boolean,
+    advanced_motion_zones_type: string,
+    enable_indoor_mode: boolean,
+    enable_pir_validation: boolean,
+    loitering_threshold: number,
+    enable_rlmd: boolean,
+    enable_recording: boolean,
+    end_detection: number,
+    advanced_motion_recording_human_mode: boolean,
+    advanced_motion_glance_enabled: boolean
+  },
+  video_settings: {
+    exposure_control: number,
+    night_color_enable: boolean,
+    hdr_enable: boolean,
+    clip_length_max: number,
+    clip_length_min: number,
+    ae_mode: number,
+    ae_mask: string
+  },
+  vod_settings: {
+    enable: boolean,
+    toggled_at: string // date,
+    use_cached_vod_domain: boolean
+  },
+  volume_settings: { 
+    doorbell_volume: number, 
+    mic_volume: number, 
+    voice_volume: number 
+  },
+  cv_settings: {
+    detection_types: {
+        human: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        loitering: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        motion: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        moving_vehicle: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        nearby_pom: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        other_motion: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        package_delivery: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        },
+        package_pickup: {
+            enabled: boolean,
+            mode: string,
+            notification: boolean
+        }
+    },
+    threshold: {
+        loitering: number,
+        package_delivery: number
+    }
+  },
+  general_settings: {
+    enable_audio_recording: boolean,
+    lite_24x7_enabled: boolean,
+    offline_motion_event_enabled: boolean,
+    lite_24x7_subscribed: boolean,
+    offline_motion_event_subscribed: boolean,
+    firmwares_locked: boolean,
+    utc_offset: string,
+    theft_alarm_enable: boolean,
+    use_wrapup_domain: boolean,
+    power_mode: 'battery' | 'wired',
+    data_collection_enabled: boolean
+  },
+  keep_alive_settings: {
+    keep_alive_auto: number
+  },
+  snapshot_settings: {
+    frequency_secs: number,
+    lite_24x7_resolution_p: number,
+    ome_resolution_p: number,
+    max_upload_kb: number,
+    frequency_after_secs: number,
+    period_after_secs: number,
+    close_container: number
+  },
+  client_device_settings: {
+    ringtones_enabled: boolean,
+    people_only_enabled: boolean,
+    advanced_motion_enabled: boolean,
+    motion_message_enabled: boolean,
+    shadow_correction_enabled: boolean,
+    night_vision_enabled: boolean,
+    light_schedule_enabled: boolean,
+    rich_notifications_eligible: boolean,
+    show_24x7_lite: boolean,
+    show_offline_motion_events: boolean,
+    cfes_eligible: boolean,
+    show_radar_data: boolean,
+    motion_zone_recommendation: boolean
+  },
+  concierge_settings?: {
+    alexa_settings?: {
+      delay_ms: number
+    },
+    autoreply_settings?: {
+      delay_ms: number
+    },
+    mode?: string
+  }
 }
 
 export interface CameraHealth {

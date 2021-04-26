@@ -1,13 +1,14 @@
 import {
   ActiveDing,
   CameraData,
+  CameraDeviceSettingsData,
+  CameraDeviceSettingsUpdate,
   CameraEventOptions,
   CameraEventResponse,
   CameraHealth,
   DoorbellType,
   HistoryOptions,
   isBatteryCameraKind,
-  MotionSettings,
   PeriodicFootageResponse,
   RingCameraModel,
   SnapshotTimestamp,
@@ -282,14 +283,27 @@ export class RingCamera extends Subscribed {
     this.requestUpdate()
   }
 
-  async setMotionSettings(motion_settings: MotionSettings) {
-    await this.restClient.request({
+  async setDeviceSettings(settings: CameraDeviceSettingsUpdate) {
+    const response = await this.restClient.request<CameraDeviceSettingsData>({
       method: 'PATCH',
       url: this.deviceUrl('settings'),
-      json: { motion_settings },
+      json: settings,
     })  
   
     this.requestUpdate()
+
+    return response;
+  }
+
+  async getDeviceSettings() {
+    const response = await this.restClient.request<CameraDeviceSettingsData>({
+      method: 'GET',
+      url: this.deviceUrl('settings'),
+    })  
+  
+    this.requestUpdate()
+
+    return response;
   }
 
   // Enable or disable the in-home doorbell (if digital or mechanical)

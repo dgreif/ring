@@ -22,8 +22,8 @@
     "hb": "npm run build && ./build/package-homebridge.sh && homebridge -P ./release-homebridge -U ./.homebridge",
     "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",
-    "deploy": "standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",
-    "deploy-beta": "standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
+    "deploy": "git pull -r && standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",
+    "deploy-beta": "git pull -r && standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
   },
   "standard-version": {
     "scripts": {

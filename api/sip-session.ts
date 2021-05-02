@@ -14,12 +14,10 @@ import {
 } from '@homebridge/camera-utils'
 import { expiredDingError, SipCall, SipOptions } from './sip-call'
 import { RingCamera } from './ring-camera'
-import { RtpLatchGenerator } from './rtp-latch-generator'
 import { Subscribed } from './subscribed'
 import { logDebug, logError } from './util'
 import { getFfmpegPath } from './ffmpeg'
-import { takeUntil } from 'rxjs/operators'
-const stun = require('stun')
+import { take } from 'rxjs/operators'
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -80,7 +78,23 @@ export class SipSession extends Subscribed {
     try {
       const videoPort = await this.reservePort(1),
         audioPort = await this.reservePort(1),
-        rtpDescription = await this.sipCall.invite()
+        rtpDescription = await this.sipCall.invite(),
+        sendStunRequests = () => {
+          sendStunBindingRequest({
+            rtpSplitter: this.audioSplitter,
+            rtcpSplitter: this.audioRtcpSplitter,
+            rtpDescription,
+            localUfrag: this.sipCall.audioUfrag,
+            type: 'audio',
+          })
+          sendStunBindingRequest({
+            rtpSplitter: this.videoSplitter,
+            rtcpSplitter: this.audioRtcpSplitter,
+            rtpDescription,
+            localUfrag: this.sipCall.videoUfrag,
+            type: 'video',
+          })
+        }
 
       if (ffmpegOptions) {
         this.startTranscoder(
@@ -103,75 +117,28 @@ export class SipSession extends Subscribed {
 
       if (rtpDescription.video.iceUFrag) {
         // ICE is supported
+        logDebug(`Connecting to ${this.camera.name} using ICE`)
         createStunResponder(this.audioSplitter)
         createStunResponder(this.videoSplitter)
 
-        sendStunBindingRequest({
-          rtpSplitter: this.audioSplitter,
-          rtpDescription,
-          localUfrag: this.sipCall.audioUfrag,
-          type: 'audio',
-        })
-        sendStunBindingRequest({
-          rtpSplitter: this.videoSplitter,
-          rtpDescription,
-          localUfrag: this.sipCall.videoUfrag,
-          type: 'video',
-        })
+        sendStunRequests()
       } else {
-        // ICE is not supported, use RTP latching
-        const { address } = rtpDescription,
-          remoteAudioLocation = {
-            port: rtpDescription.audio.port,
-            address,
-          },
-          remoteAudioRtcpLocation = {
-            port: rtpDescription.audio.rtcpPort,
-            address,
-          },
-          remoteVideoLocation = {
-            port: rtpDescription.video.port,
-            address,
-          },
-          remoteVideoRtcpLocation = {
-            port: rtpDescription.video.rtcpPort,
-            address,
-          },
-          sendKeepAlive = () => {
-            const audioStun = stun.encode(stun.createMessage(1)),
-              videoStun = stun.encode(stun.createMessage(1))
-
-            this.audioSplitter.send(audioStun, remoteAudioLocation)
-            this.audioRtcpSplitter.send(audioStun, remoteAudioRtcpLocation)
-
-            this.videoSplitter.send(videoStun, remoteVideoLocation)
-            this.videoRtcpSplitter.send(videoStun, remoteVideoRtcpLocation)
-          },
-          audioLatchGenerator = new RtpLatchGenerator(this.rtpOptions.audio, 0),
-          videoLatchGenerator = new RtpLatchGenerator(this.rtpOptions.video, 99)
-
+        // ICE is not supported, use stun as keep alive
+        logDebug(`Connecting to ${this.camera.name} using STUN`)
         this.addSubscriptions(
           // hole punch every .5 seconds to keep stream alive and port open (matches behavior from Ring app)
-          timer(0, 500).subscribe(sendKeepAlive),
-
-          // Send a valid RTP/RTCP packet to audio/video ports repeatedly until data is received.
-          // This is how Ring gets through NATs.  See https://tools.ietf.org/html/rfc7362 for details
-          audioLatchGenerator.onLatchPacket
-            .pipe(takeUntil(this.audioSplitter.onMessage))
-            .subscribe((latchPacket) => {
-              // console.log('AUDIO LATCH', latchPacket.toString('hex'))
-              this.audioSplitter.send(latchPacket, remoteAudioLocation)
-              this.audioRtcpSplitter.send(latchPacket, remoteAudioLocation)
-            }),
-          videoLatchGenerator.onLatchPacket
-            .pipe(takeUntil(this.videoSplitter.onMessage))
-            .subscribe((latchPacket) => {
-              // console.log('VIDEO LATCH', latchPacket.toString('hex'))
-              this.videoSplitter.send(latchPacket, remoteVideoLocation)
-              this.videoRtcpSplitter.send(latchPacket, remoteVideoLocation)
-            })
+          timer(0, 500).subscribe(sendStunRequests)
         )
       }
+
+      this.addSubscriptions(
+        this.audioSplitter.onMessage.pipe(take(1)).subscribe(() => {
+          logDebug(`Audio stream latched for ${this.camera.name}`)
+        }),
+        this.videoSplitter.onMessage.pipe(take(1)).subscribe(() => {
+          logDebug(`Video stream latched for ${this.camera.name}`)
+        })
+      )
 
       return rtpDescription
     } catch (e) {

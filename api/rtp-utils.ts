@@ -33,29 +33,42 @@ export function isStunMessage(message: Buffer) {
 export function sendStunBindingRequest({
   rtpDescription,
   rtpSplitter,
+  rtcpSplitter,
   localUfrag,
   type,
 }: {
   rtpSplitter: RtpSplitter
+  rtcpSplitter: RtpSplitter
   rtpDescription: RtpDescription
-  localUfrag: string
+  localUfrag?: string
   type: 'video' | 'audio'
 }) {
   const message = stun.createMessage(1),
-    remoteDescription = rtpDescription[type]
+    remoteDescription = rtpDescription[type],
+    { address } = rtpDescription,
+    { iceUFrag, icePwd, port, rtcpPort } = remoteDescription
 
-  message.addUsername(remoteDescription.iceUFrag + ':' + localUfrag)
-  message.addMessageIntegrity(remoteDescription.icePwd)
-  stun
-    .request(`${rtpDescription.address}:${remoteDescription.port}`, {
-      socket: rtpSplitter.socket,
-      message,
-    })
-    .then(() => logDebug(`${type} stun complete`))
-    .catch((e: Error) => {
-      logError(`${type} stun error`)
-      logError(e)
-    })
+  if (iceUFrag && icePwd && localUfrag) {
+    // Full ICE supported.  Send as formal stun request
+    message.addUsername(iceUFrag + ':' + localUfrag)
+    message.addMessageIntegrity(icePwd)
+
+    stun
+      .request(`${address}:${port}`, {
+        socket: rtpSplitter.socket,
+        message,
+      })
+      .then(() => logDebug(`${type} stun complete`))
+      .catch((e: Error) => {
+        logError(`${type} stun error`)
+        logError(e)
+      })
+  } else {
+    // ICE not supported.  Fire and forget the stun request for RTP and RTCP
+    const encodedMessage = stun.encode(message)
+    rtpSplitter.send(encodedMessage, { address, port })
+    rtcpSplitter.send(encodedMessage, { address, port: rtcpPort })
+  }
 }
 
 export function createStunResponder(rtpSplitter: RtpSplitter) {

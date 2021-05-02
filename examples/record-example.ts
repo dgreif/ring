@@ -24,7 +24,7 @@ async function example() {
   // clean/create the output directory
   await cleanOutputDirectory()
 
-  console.log('Starting Video...')
+  console.log(`Starting Video from ${camera.name} ...`)
   await camera.recordToFile(path.join(outputDirectory, 'example.mp4'), 10)
   console.log('Done recording video')
   process.exit(0)

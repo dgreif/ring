@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.18.0](https://github.com/dgreif/ring/compare/v9.17.0...v9.18.0) (2021-05-02)
+
+
+### Features
+
+* update dependencies ([8e4e148](https://github.com/dgreif/ring/commit/8e4e14839653147989dce5f649f591da7267a5ca))
+* **api:** add support for updating device settings for cameras ([#625](https://github.com/dgreif/ring/issues/625)) ([77ecb45](https://github.com/dgreif/ring/commit/77ecb45f82582ce8c50edf38f234f284b8c13fcd))
+
+
+### Bug Fixes
+
+* more reliable streaming with new media servers ([6503813](https://github.com/dgreif/ring/commit/65038139074e7199236b6049b6ed62e0f0b8f932))
+
 ## [9.17.0](https://github.com/dgreif/ring/compare/v9.16.0...v9.17.0) (2021-04-17)
 
 

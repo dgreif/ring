@@ -495,6 +495,147 @@ export interface CameraData {
   }
 }
 
+export interface CvDetectionType {
+  enabled: boolean
+  mode: string
+  notification: boolean
+}
+
+export interface DayNightConfig {
+  day: number
+  night: number
+}
+
+// These types may not be complete/accurate. PRs welcome.
+export interface CameraDeviceSettingsData {
+  advanced_motion_settings: {
+    active_motion_filter: number
+    advanced_object_settings: {
+      human_detection_confidence: DayNightConfig
+      motion_zone_overlap: DayNightConfig
+      object_size_maximum: DayNightConfig
+      object_size_minimum: DayNightConfig
+      object_time_overlap: DayNightConfig
+    }
+  }
+  chime_settings: {
+    duration: number
+    enable: boolean
+    enable_ext: boolean
+    type: number
+  }
+  motion_settings: {
+    enable_audio: boolean
+    motion_detection_enabled: boolean
+    enable_ir_led: boolean
+    advanced_motion_detection_enabled: boolean
+    advanced_motion_detection_mode: string
+    advanced_motion_detection_human_only_mode: boolean
+    advanced_motion_detection_loitering_mode: boolean
+    motion_snooze_privacy_timeout: number
+    advanced_motion_zones_enabled: boolean
+    advanced_motion_zones_type: string
+    enable_indoor_mode: boolean
+    enable_pir_validation: boolean
+    loitering_threshold: number
+    enable_rlmd: boolean
+    enable_recording: boolean
+    end_detection: number
+    advanced_motion_recording_human_mode: boolean
+    advanced_motion_glance_enabled: boolean
+  }
+  video_settings: {
+    exposure_control: number
+    night_color_enable: boolean
+    hdr_enable: boolean
+    clip_length_max: number
+    clip_length_min: number
+    ae_mode: number
+    ae_mask: string
+  }
+  vod_settings: {
+    enable: boolean
+    toggled_at: string // date,
+    use_cached_vod_domain: boolean
+  }
+  volume_settings: {
+    doorbell_volume: number
+    mic_volume: number
+    voice_volume: number
+  }
+  cv_settings: {
+    detection_types: {
+      human: CvDetectionType
+      loitering: CvDetectionType
+      motion: CvDetectionType
+      moving_vehicle: CvDetectionType
+      nearby_pom: CvDetectionType
+      other_motion: CvDetectionType
+      package_delivery: CvDetectionType
+      package_pickup: CvDetectionType
+    }
+    threshold: {
+      loitering: number
+      package_delivery: number
+    }
+  }
+  general_settings: {
+    enable_audio_recording: boolean
+    lite_24x7_enabled: boolean
+    offline_motion_event_enabled: boolean
+    lite_24x7_subscribed: boolean
+    offline_motion_event_subscribed: boolean
+    firmwares_locked: boolean
+    utc_offset: string
+    theft_alarm_enable: boolean
+    use_wrapup_domain: boolean
+    power_mode: 'battery' | 'wired'
+    data_collection_enabled: boolean
+  }
+  keep_alive_settings: {
+    keep_alive_auto: number
+  }
+  pir_settings: {
+    sensitivity_1: number
+    sensitivity_2: number
+    sensitivity_3: number
+    zone_enable: number
+  }
+  snapshot_settings: {
+    frequency_secs: number
+    lite_24x7_resolution_p: number
+    ome_resolution_p: number
+    max_upload_kb: number
+    frequency_after_secs: number
+    period_after_secs: number
+    close_container: number
+  }
+  client_device_settings: {
+    ringtones_enabled: boolean
+    people_only_enabled: boolean
+    advanced_motion_enabled: boolean
+    motion_message_enabled: boolean
+    shadow_correction_enabled: boolean
+    night_vision_enabled: boolean
+    light_schedule_enabled: boolean
+    rich_notifications_eligible: boolean
+    show_24x7_lite: boolean
+    show_offline_motion_events: boolean
+    cfes_eligible: boolean
+    show_radar_data: boolean
+    motion_zone_recommendation: boolean
+  }
+  concierge_settings?: {
+    alexa_settings?: {
+      delay_ms: number
+    }
+    autoreply_settings?: {
+      delay_ms: number
+    }
+    mode?: string
+  }
+}
+
 export interface CameraHealth {
   id: number
   wifi_name: string

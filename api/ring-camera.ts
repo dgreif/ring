@@ -1,6 +1,7 @@
 import {
   ActiveDing,
   CameraData,
+  CameraDeviceSettingsData,
   CameraEventOptions,
   CameraEventResponse,
   CameraHealth,
@@ -12,7 +13,7 @@ import {
   SnapshotTimestamp,
   VideoSearchResponse,
 } from './ring-types'
-import { clientApi, RingRestClient } from './rest-client'
+import { clientApi, deviceApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, interval, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
@@ -235,6 +236,10 @@ export class RingCamera extends Subscribed {
     return clientApi(`doorbots/${this.id}/${path}`)
   }
 
+  deviceUrl(path = '') {
+    return deviceApi(`devices/${this.id}/${path}`)
+  }
+
   async setLight(on: boolean) {
     if (!this.hasLight) {
       return false
@@ -275,6 +280,25 @@ export class RingCamera extends Subscribed {
     })
 
     this.requestUpdate()
+  }
+
+  async setDeviceSettings(settings: DeepPartial<CameraDeviceSettingsData>) {
+    const response = await this.restClient.request<CameraDeviceSettingsData>({
+      method: 'PATCH',
+      url: this.deviceUrl('settings'),
+      json: settings,
+    })
+
+    this.requestUpdate()
+
+    return response
+  }
+
+  getDeviceSettings() {
+    return this.restClient.request<CameraDeviceSettingsData>({
+      method: 'GET',
+      url: this.deviceUrl('settings'),
+    })
   }
 
   // Enable or disable the in-home doorbell (if digital or mechanical)

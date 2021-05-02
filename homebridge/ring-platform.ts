@@ -218,6 +218,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
           ),
           debugPrefix = debug ? 'TEST ' : '',
           hapDevices = allDevices.map((device) => {
+            if (device instanceof RingDevice) {
+              device.categoryId =
+                config.categoryIdOverrides[
+                  hap.uuid.generate(debugPrefix + device.id)
+                ] ?? device.categoryId
+            }
             const isCamera = device instanceof RingCamera,
               cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
               AccessoryClass = (device instanceof RingCamera

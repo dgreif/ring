@@ -68,7 +68,8 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "cameraStatusPollingSeconds": 20,
   "cameraDingsPollingSeconds": 2,
   "locationModePollingSeconds": 20,
-  "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
+  "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"],
+  "categoryIdOverrides": { "f259b31c-826c-4b42-92f5-699927cbe032": 2 }
 }
 ```
 
@@ -94,6 +95,7 @@ Option | Default | Explanation
 `locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.  Will hide Location Mode switch if set to `0`
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
 `onlyDeviceTypes` | All Device Types | A subset of device types to be shown.  If set, all other device types will be hidden in HomeKit.
+`categoryIdOverrides` | `{}` | A map of device identifiers to [device categories](https://github.com/dgreif/ring/blob/154f8fa817b7287fae28ced3c976c0de2fc31eae/api/ring-types.ts#L44-L62), used to override the device category reported by the Ring API.
 `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridge) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
 

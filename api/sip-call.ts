@@ -159,7 +159,7 @@ export class SipCall {
           this.sipClient.send(this.sipClient.makeResponse(request, 200, 'Ok'))
 
           if (this.destroyed) {
-            this.onEndedByRemote.next()
+            this.onEndedByRemote.next(null)
           }
         } else if (
           request.method === 'MESSAGE' &&

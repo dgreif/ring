@@ -24,7 +24,7 @@ import {
 } from 'homebridge'
 import { logDebug, logError, logInfo } from '../api/util'
 import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
-import { merge, of, Subject } from 'rxjs'
+import { lastValueFrom, merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { isStunMessage } from '../api/rtp-utils'
@@ -244,14 +244,14 @@ export class CameraSource implements CameraStreamingDelegate {
 
       const audioSsrc = hap.CameraController.generateSynchronisationSource(),
         incomingAudioRtcpPort = await sipSession.reservePort(),
-        videoSsrcPromise = sipSession.videoSplitter.onMessage
-          .pipe(
+        videoSsrcPromise = lastValueFrom(
+          sipSession.videoSplitter.onMessage.pipe(
             filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
             map((m) => getSsrc(m.message)),
             filter((ssrc): ssrc is number => ssrc !== null),
             take(1)
           )
-          .toPromise(),
+        ),
         ringRtpDescription = await sipSession.start(
           libfdkAacInstalled
             ? {
@@ -310,7 +310,7 @@ export class CameraSource implements CameraStreamingDelegate {
         ({ info, message, isRtpMessage }) => {
           if (info.address === targetAddress) {
             // return packet from HomeKit
-            onReturnPacketReceived.next()
+            onReturnPacketReceived.next(null)
 
             if (!isRtpMessage) {
               // Only need to handle RTCP packets.  We really shouldn't receive RTP, but check just in case

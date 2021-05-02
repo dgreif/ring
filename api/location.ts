@@ -2,7 +2,13 @@ import {
   connect as connectSocketIo,
   Socket as SocketIOSocket,
 } from 'socket.io-client'
-import { BehaviorSubject, merge, ReplaySubject, Subject } from 'rxjs'
+import {
+  BehaviorSubject,
+  lastValueFrom,
+  merge,
+  ReplaySubject,
+  Subject,
+} from 'rxjs'
 import {
   concatMap,
   debounceTime,
@@ -309,9 +315,9 @@ export class Location extends Subscribed {
 
   async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
     const securityPanel = await this.getSecurityPanel(),
-      updatedDataPromise = securityPanel.onData
-        .pipe(skip(1), take(1))
-        .toPromise()
+      updatedDataPromise = lastValueFrom(
+        securityPanel.onData.pipe(skip(1), take(1))
+      )
 
     await this.sendCommandToSecurityPanel('security-panel.switch-mode', {
       mode: alarmMode,
@@ -354,13 +360,13 @@ export class Location extends Subscribed {
   }
 
   getNextMessageOfType(type: MessageType, src: string) {
-    return this.onMessage
-      .pipe(
+    return lastValueFrom(
+      this.onMessage.pipe(
         filter((m) => m.msg === type && m.src === src),
         map((m) => m.body),
         take(1)
       )
-      .toPromise()
+    )
   }
 
   requestList(listType: MessageType, assetId: string) {
@@ -381,7 +387,7 @@ export class Location extends Subscribed {
       this.getConnection()
     }
 
-    return this.onDevices.pipe(take(1)).toPromise()
+    return lastValueFrom(this.onDevices.pipe(take(1)))
   }
 
   getRoomList(assetId: string) {
@@ -481,7 +487,7 @@ export class Location extends Subscribed {
   }
 
   async getLocationMode() {
-    this.onLocationModeRequested.next()
+    this.onLocationModeRequested.next(null)
 
     const response = await this.restClient.request<LocationModeResponse>({
       method: 'GET',

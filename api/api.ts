@@ -147,7 +147,7 @@ export class RingApi extends Subscribed {
           })
         )
         .subscribe((response) => {
-          onUpdateReceived.next()
+          onUpdateReceived.next(null)
 
           if (!response) {
             return
@@ -170,14 +170,14 @@ export class RingApi extends Subscribed {
     )
 
     if (cameraStatusPollingSeconds) {
-      onUpdateReceived.next() // kick off polling
+      onUpdateReceived.next(null) // kick off polling
     }
 
     this.addSubscriptions(
       merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
         async () => {
           const activeDings = await this.fetchActiveDings().catch(() => null)
-          onActiveDingsReceived.next()
+          onActiveDingsReceived.next(null)
 
           if (!activeDings || !activeDings.length) {
             return
@@ -194,7 +194,7 @@ export class RingApi extends Subscribed {
     )
 
     if (cameras.length && cameraDingsPollingSeconds) {
-      onActiveDingsReceived.next() // kick off polling
+      onActiveDingsReceived.next(null) // kick off polling
     }
   }
 

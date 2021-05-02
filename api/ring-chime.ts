@@ -31,7 +31,7 @@ export class RingChime {
   }
 
   requestUpdate() {
-    this.onRequestUpdate.next()
+    this.onRequestUpdate.next(null)
   }
 
   get data() {

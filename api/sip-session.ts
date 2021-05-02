@@ -299,7 +299,7 @@ export class SipSession extends Subscribed {
     }
 
     // clean up
-    this.onCallEndedSubject.next()
+    this.onCallEndedSubject.next(null)
     this.sipCall.destroy()
     this.videoSplitter.close()
     this.audioSplitter.close()

@@ -60,7 +60,7 @@
     "sip": "0.0.6",
     "socket.io-client": "2.4.0",
     "stun": "2.1.0",
-    "systeminformation": "5.6.12",
+    "systeminformation": "5.6.20",
     "uuid": "8.3.2"
   },
   "devDependencies": {
@@ -71,11 +71,11 @@
     "@types/node": "14.14.43",
     "@types/socket.io-client": "1.4.36",
     "@types/uuid": "8.3.0",
-    "@typescript-eslint/eslint-plugin": "4.22.0",
-    "@typescript-eslint/parser": "4.22.0",
+    "@typescript-eslint/eslint-plugin": "4.22.1",
+    "@typescript-eslint/parser": "4.22.1",
     "conventional-github-releaser": "3.1.5",
-    "dotenv": "8.2.0",
-    "eslint": "7.25.0",
+    "dotenv": "9.0.0",
+    "eslint": "7.26.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-jest": "24.3.6",
     "eslint-plugin-prettier": "3.4.0",
@@ -86,8 +86,8 @@
     "prettier": "2.2.1",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
-    "standard-version": "9.2.0",
-    "ts-jest": "26.5.5",
+    "standard-version": "9.3.0",
+    "ts-jest": "26.5.6",
     "typescript": "4.2.4"
   },
   "engines": {

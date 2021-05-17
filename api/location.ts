@@ -520,12 +520,11 @@ export class Location extends Subscribed {
   }
 
   async enableLocationModes() {
-    const response = await this.restClient.request<LocationModeSettingsResponse>(
-      {
+    const response =
+      await this.restClient.request<LocationModeSettingsResponse>({
         method: 'POST',
         url: appApi(`mode/location/${this.id}/settings/setup`),
-      }
-    )
+      })
 
     await this.getLocationMode()
 

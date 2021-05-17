@@ -38,7 +38,8 @@ export interface RingApiOptions extends SessionOptions {
 
 export class RingApi extends Subscribed {
   public readonly restClient = new RingRestClient(this.options)
-  public readonly onRefreshTokenUpdated = this.restClient.onRefreshTokenUpdated.asObservable()
+  public readonly onRefreshTokenUpdated =
+    this.restClient.onRefreshTokenUpdated.asObservable()
 
   private locations = this.fetchAndBuildLocations()
 
@@ -97,10 +98,8 @@ export class RingApi extends Subscribed {
   }
 
   private listenForDeviceUpdates(cameras: RingCamera[], chimes: RingChime[]) {
-    const {
-        cameraStatusPollingSeconds,
-        cameraDingsPollingSeconds,
-      } = this.options,
+    const { cameraStatusPollingSeconds, cameraDingsPollingSeconds } =
+        this.options,
       onCamerasRequestUpdate = merge(
         ...cameras.map((camera) => camera.onRequestUpdate)
       ),
@@ -214,8 +213,7 @@ export class RingApi extends Subscribed {
 
   fetchAmazonKeyLocks() {
     return this.restClient.request<any[]>({
-      url:
-        'https://api.ring.com/integrations/amazonkey/v2/devices/lock_associations',
+      url: 'https://api.ring.com/integrations/amazonkey/v2/devices/lock_associations',
     })
   }
 
@@ -266,8 +264,8 @@ export class RingApi extends Subscribed {
                 hasAlarmBaseStation: baseStations.some(
                   (station) => station.location_id === location.location_id
                 ),
-                locationModePollingSeconds: this.options
-                  .locationModePollingSeconds,
+                locationModePollingSeconds:
+                  this.options.locationModePollingSeconds,
               },
               this.restClient
             )

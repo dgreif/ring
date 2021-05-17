@@ -220,13 +220,13 @@ export class RingPlatform implements DynamicPlatformPlugin {
           hapDevices = allDevices.map((device) => {
             const isCamera = device instanceof RingCamera,
               cameraIdDifferentiator = isCamera ? 'camera' : '', // this forces bridged cameras from old version of the plugin to be seen as "stale"
-              AccessoryClass = (device instanceof RingCamera
-                ? Camera
-                : device instanceof RingChime
-                ? Chime
-                : getAccessoryClass(device)) as
-                | (new (...args: any[]) => BaseAccessory<any>)
-                | null
+              AccessoryClass = (
+                device instanceof RingCamera
+                  ? Camera
+                  : device instanceof RingChime
+                  ? Chime
+                  : getAccessoryClass(device)
+              ) as (new (...args: any[]) => BaseAccessory<any>) | null
 
             return {
               deviceType: device.deviceType as string,

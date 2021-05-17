@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.1](https://github.com/dgreif/ring/compare/v9.18.0...v9.18.1) (2021-05-17)
+
+
+### Bug Fixes
+
+* update dependencies ([cbbf630](https://github.com/dgreif/ring/commit/cbbf630db42ddd75ca413aab63af4466ca30c528))
+* update dependencies ([6f05b94](https://github.com/dgreif/ring/commit/6f05b9467478350c31ad634977297a7202dfeef8))
+
 ## [9.18.0](https://github.com/dgreif/ring/compare/v9.17.0...v9.18.0) (2021-05-02)
 
 

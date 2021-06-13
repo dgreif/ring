@@ -1,5 +1,5 @@
 import { hap } from './hap'
-import { publishReplay, refCount, take } from 'rxjs/operators'
+import { shareReplay, take } from 'rxjs/operators'
 import { lastValueFrom, Observable } from 'rxjs'
 import { RingPlatformConfig } from './config'
 import {
@@ -92,7 +92,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
   }) {
     const service = this.getService(serviceType, name, serviceSubType),
       characteristic = service.getCharacteristic(characteristicType),
-      onCachedValue = onValue.pipe(publishReplay(1), refCount())
+      onCachedValue = onValue.pipe(shareReplay(1))
 
     onCachedValue.subscribe((value) => {
       characteristic.updateValue(value)

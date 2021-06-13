@@ -6,6 +6,7 @@ import {
   BehaviorSubject,
   lastValueFrom,
   merge,
+  Observable,
   ReplaySubject,
   Subject,
 } from 'rxjs'
@@ -15,9 +16,8 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  publishReplay,
-  refCount,
   scan,
+  shareReplay,
   skip,
   take,
 } from 'rxjs/operators'
@@ -78,7 +78,7 @@ export class Location extends Subscribed {
   onDeviceList = this.onMessage.pipe(
     filter((m) => m.msg === deviceListMessageType)
   )
-  onDevices = this.onDeviceList.pipe(
+  onDevices: Observable<RingDevice[]> = this.onDeviceList.pipe(
     scan((devices, { body: deviceList, src }) => {
       if (!deviceList) {
         return devices
@@ -109,8 +109,7 @@ export class Location extends Subscribed {
           )
       )
     }),
-    publishReplay(1),
-    refCount()
+    shareReplay(1)
   )
   onSessionInfo = this.onDataUpdate.pipe(
     filter((m) => m.msg === 'SessionInfo'),

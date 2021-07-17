@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.2](https://github.com/dgreif/ring/compare/v9.18.1...v9.18.2) (2021-07-17)
+
+
+### Bug Fixes
+
+* correct type dependencies for client-api use in other ts projects ([43735f7](https://github.com/dgreif/ring/commit/43735f77a2867ee60b78bd09a8bf9868889edef5))
+* update dependencies ([61b2ee6](https://github.com/dgreif/ring/commit/61b2ee67f9003fe580b272f40aadab7fca71f215))
+* update dependencies ([71e3519](https://github.com/dgreif/ring/commit/71e35199ff55f35e9ffd8b38a4b2d841e786b40f))
+
 ### [9.18.1](https://github.com/dgreif/ring/compare/v9.18.0...v9.18.1) (2021-05-17)
 
 

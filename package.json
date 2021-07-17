@@ -51,7 +51,8 @@
   "author": "dgreif",
   "license": "MIT",
   "dependencies": {
-    "@homebridge/camera-utils": "2.0.2",
+    "@homebridge/camera-utils": "2.0.3",
+    "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "4.3.2",
     "got": "11.8.2",
@@ -60,14 +61,13 @@
     "sip": "0.0.6",
     "socket.io-client": "2.4.0",
     "stun": "2.1.0",
-    "systeminformation": "5.7.7",
+    "systeminformation": "5.7.8",
     "uuid": "8.3.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.6",
     "@types/jest": "26.0.24",
     "@types/node": "16.3.3",
-    "@types/socket.io-client": "1.4.36",
     "@types/uuid": "8.3.1",
     "@typescript-eslint/eslint-plugin": "4.28.3",
     "@typescript-eslint/parser": "4.28.3",

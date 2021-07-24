@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.3](https://github.com/dgreif/ring/compare/v9.18.2...v9.18.3) (2021-07-24)
+
+
+### Bug Fixes
+
+* graceful recovery after api is unreachable ([5fdc0b3](https://github.com/dgreif/ring/commit/5fdc0b3247f2d682fd2226b52a5f7b4c97f0e77c)), closes [#616](https://github.com/dgreif/ring/issues/616)
+
 ### [9.18.2](https://github.com/dgreif/ring/compare/v9.18.1...v9.18.2) (2021-07-17)
 
 

@@ -598,8 +598,6 @@ function makeStreamParser(
 
       onMessage(m)
 
-      console.log('GOT MESSAGE', m)
-
       var s = r.substring(m.headers['content-length'])
       state = headers
       r = ''

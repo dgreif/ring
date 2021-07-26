@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.5](https://github.com/dgreif/ring/compare/v9.18.4...v9.18.5) (2021-07-26)
+
+
+### Bug Fixes
+
+* remove unnecessary log in sip ([0392904](https://github.com/dgreif/ring/commit/0392904189fafed40e479b1dc406d59aca63b265))
+
 ### [9.18.4](https://github.com/dgreif/ring/compare/v9.18.3...v9.18.4) (2021-07-26)
 
 

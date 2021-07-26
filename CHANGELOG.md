@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.4](https://github.com/dgreif/ring/compare/v9.18.3...v9.18.4) (2021-07-26)
+
+
+### Bug Fixes
+
+* keepalive to keep stream open longer than 30 seconds ([5e79527](https://github.com/dgreif/ring/commit/5e7952771eedec0c3be7fcb8b5ebebc71625818e)), closes [#479](https://github.com/dgreif/ring/issues/479)
+
 ### [9.18.3](https://github.com/dgreif/ring/compare/v9.18.2...v9.18.3) (2021-07-24)
 
 

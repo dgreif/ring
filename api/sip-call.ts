@@ -10,7 +10,7 @@ import {
 import { RtpDescription, RtpOptions, RtpStreamDescription } from './rtp-utils'
 import { createCryptoLine, decodeSrtpOptions } from '@homebridge/camera-utils'
 
-const sip = require('sip'),
+const sip = require('./sip.js'),
   sdp = require('sdp')
 
 export const expiredDingError = new Error('Ding expired, received 480')

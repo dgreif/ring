@@ -89,7 +89,7 @@ export class SipSession extends Subscribed {
           })
           sendStunBindingRequest({
             rtpSplitter: this.videoSplitter,
-            rtcpSplitter: this.audioRtcpSplitter,
+            rtcpSplitter: this.videoRtcpSplitter,
             rtpDescription,
             localUfrag: this.sipCall.videoUfrag,
             type: 'video',

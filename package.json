@@ -58,7 +58,6 @@
     "got": "11.8.2",
     "rxjs": "7.2.0",
     "sdp": "3.0.3",
-    "sip": "0.0.6",
     "socket.io-client": "2.4.0",
     "stun": "2.1.0",
     "systeminformation": "5.7.8",

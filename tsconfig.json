@@ -10,6 +10,7 @@
     "module": "commonjs",
     "outDir": "./lib",
     "esModuleInterop": true,
+    "allowJs": true,
     "strict": true
   },
   "exclude": [

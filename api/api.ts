@@ -200,7 +200,7 @@ export class RingApi extends Subscribed {
   async fetchRawLocations() {
     const { user_locations: rawLocations } = await this.restClient.request<{
       user_locations: UserLocation[]
-    }>({ url: 'https://app.ring.com/rhq/v1/devices/v1/locations' })
+    }>({ url: 'https://api.ring.com/devices/v1/locations' }) // https://app.ring.com/rhq/v1/devices/v1/locations
 
     if (!rawLocations) {
       throw new Error(

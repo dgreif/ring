@@ -1,5 +1,6 @@
 import {
   clientApi,
+  deviceApi,
   RefreshTokenAuth,
   RingRestClient,
   SessionOptions,
@@ -200,7 +201,7 @@ export class RingApi extends Subscribed {
   async fetchRawLocations() {
     const { user_locations: rawLocations } = await this.restClient.request<{
       user_locations: UserLocation[]
-    }>({ url: 'https://app.ring.com/rhq/v1/devices/v1/locations' })
+    }>({ url: deviceApi('locations') })
 
     if (!rawLocations) {
       throw new Error(

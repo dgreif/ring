@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.6](https://github.com/dgreif/ring/compare/v9.18.5...v9.18.6) (2021-07-28)
+
+
+### Bug Fixes
+
+* use new `locations` endpoint to avoid 404 ([d3b26e8](https://github.com/dgreif/ring/commit/d3b26e823978aefde2c8500244e057d9e1f8bcff)), closes [#706](https://github.com/dgreif/ring/issues/706) [#702](https://github.com/dgreif/ring/issues/702)
+
 ### [9.18.5](https://github.com/dgreif/ring/compare/v9.18.4...v9.18.5) (2021-07-26)
 
 

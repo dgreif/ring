@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.18.7-beta.0](https://github.com/dgreif/ring/compare/v9.18.6...v9.18.7-beta.0) (2021-07-28)
+
+
+### Bug Fixes
+
+* retry request for 504 response ([434157c](https://github.com/dgreif/ring/commit/434157c98eb9c197ef13c0dcae1bc65031e86e7d)), closes [#697](https://github.com/dgreif/ring/issues/697)
+
 ### [9.18.6](https://github.com/dgreif/ring/compare/v9.18.5...v9.18.6) (2021-07-28)
 
 

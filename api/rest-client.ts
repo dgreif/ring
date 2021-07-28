@@ -289,6 +289,11 @@ export class RingRestClient {
         return this.request(options)
       }
 
+      if (response.statusCode === 504) {
+        logDebug(`Gateway Timeout for endpoint ${url}. Trying again...`)
+        return this.request(options)
+      }
+
       if (
         response.statusCode === 404 &&
         response.body &&

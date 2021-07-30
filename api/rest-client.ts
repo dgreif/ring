@@ -290,7 +290,8 @@ export class RingRestClient {
       }
 
       if (response.statusCode === 504) {
-        logDebug(`Gateway Timeout for endpoint ${url}. Trying again...`)
+        // Gateway Timeout.  These should be recoverable, but wait a few seconds just to be on the safe side
+        await delay(5000)
         return this.request(options)
       }
 

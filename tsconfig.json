@@ -16,6 +16,7 @@
   "exclude": [
     "public",
     "release-api",
-    "release-homebridge"
+    "release-homebridge",
+    "homebridge-ui"
   ]
 }

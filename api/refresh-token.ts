@@ -19,7 +19,8 @@ export async function acquireRefreshToken() {
     auth: AuthTokenResponse = await restClient.getCurrentAuth().catch((e) => {
       if (restClient.using2fa) {
         console.log(
-          'Ring 2fa or verification code is enabled.  Please enter code from the text/email.'
+          restClient.promptFor2fa ||
+            'Please enter the code sent to your text/email'
         )
         return getAuthWith2fa()
       }

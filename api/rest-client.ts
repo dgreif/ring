@@ -7,7 +7,11 @@ import {
   logInfo,
   stringify,
 } from './util'
-import { AuthTokenResponse, SessionResponse } from './ring-types'
+import {
+  Auth2faResponse,
+  AuthTokenResponse,
+  SessionResponse,
+} from './ring-types'
 import { ReplaySubject } from 'rxjs'
 
 const defaultRequestOptions: RequestOptions = {
@@ -103,6 +107,7 @@ export class RingRestClient {
   private authPromise = this.getAuth()
   private sessionPromise?: Promise<SessionResponse> = undefined
   public using2fa = false
+  public promptFor2fa?: string
   public onRefreshTokenUpdated = new ReplaySubject<{
     oldRefreshToken?: string
     newRefreshToken: string
@@ -169,9 +174,11 @@ export class RingRestClient {
       }
 
       const response = requestError.response || {},
-        responseData = response.body || {},
+        responseData: Auth2faResponse = response.body || {},
         responseError =
-          typeof responseData.error === 'string' ? responseData.error : ''
+          'error' in responseData && typeof responseData.error === 'string'
+            ? responseData.error
+            : ''
 
       if (
         response.statusCode === 412 || // need 2fa code
@@ -179,6 +186,19 @@ export class RingRestClient {
           responseError.startsWith('Verification Code')) // invalid 2fa code entered
       ) {
         this.using2fa = true
+
+        if ('tsv_state' in responseData) {
+          const { tsv_state, phone } = responseData,
+            prompt =
+              tsv_state === 'totp'
+                ? 'from your authenticator app'
+                : `sent to ${phone} via ${tsv_state}`
+
+          this.promptFor2fa = `Please enter the code ${prompt}`
+        } else {
+          this.promptFor2fa = undefined
+        }
+
         throw new Error(
           'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.'
         )
@@ -190,8 +210,9 @@ export class RingRestClient {
             : 'email and password are',
         errorMessage =
           'Failed to fetch oauth token from Ring. ' +
-          (responseData.error_description ===
-          'too many requests from dependency service'
+          ('error_description' in responseData &&
+          responseData.error_description ===
+            'too many requests from dependency service'
             ? 'You have requested too many 2fa codes.  Ring limits 2fa to 10 codes within 10 minutes.  Please try again in 10 minutes.'
             : `Verify that your ${authTypeMessage} correct.`) +
           ` (error: ${responseError})`

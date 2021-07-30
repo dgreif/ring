@@ -798,6 +798,18 @@ export interface AuthTokenResponse {
   token_type: 'Bearer'
 }
 
+export type TwoStageVerificationState = 'sms' | 'email' | 'totp' // totp is "time-based OTP"
+export type Auth2faResponse =
+  | {
+      error?: string | unknown
+      error_description?: string
+    }
+  | {
+      next_time_in_secs: number
+      phone: string
+      tsv_state: TwoStageVerificationState
+    }
+
 export interface ProfileResponse {
   profile: {
     id: number

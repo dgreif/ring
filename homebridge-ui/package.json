@@ -1,0 +1,43 @@
+{
+  "name": "homebridge-ui",
+  "version": "0.1.0",
+  "homepage": "./",
+  "devDependencies": {
+    "@homebridge/plugin-ui-utils": "0.0.19",
+    "@testing-library/jest-dom": "5.14.1",
+    "@testing-library/react": "12.0.0",
+    "@testing-library/user-event": "13.2.1",
+    "@types/jest": "26.0.24",
+    "@types/node": "16.4.8",
+    "@types/react": "17.0.15",
+    "@types/react-dom": "17.0.9",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "typescript": "4.3.5"
+  },
+  "scripts": {
+    "start": "BROWSER=none react-scripts start",
+    "build": "react-scripts build && rm -rf ../lib/homebridge-ui/public && mv ./build ../release-homebridge/lib/homebridge/homebridge-ui/public",
+    "test": "react-scripts test"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "../.eslintrc.json"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

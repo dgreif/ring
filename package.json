@@ -8,6 +8,8 @@
     "ring-device-data-cli": "ring-device-data-cli.js"
   },
   "scripts": {
+    "start": "concurrently -c yellow,blue --kill-others \"npm:hb\" \"npm:watch:ui\"",
+    "watch:ui": "cd homebridge-ui && npm start",
     "test": "jest && eslint '**/*.ts'",
     "watch:tests": "jest --watch",
     "lint": "eslint '**/*.ts' --fix",
@@ -27,7 +29,7 @@
   },
   "standard-version": {
     "scripts": {
-      "prerelease": "npm run build && npm test",
+      "prerelease": "npm run build && npm test && cd ./homebridge-ui && npm run build",
       "posttag": "npm run prepare-npm-packages"
     }
   },
@@ -52,27 +54,29 @@
   "license": "MIT",
   "dependencies": {
     "@homebridge/camera-utils": "2.0.3",
+    "@homebridge/plugin-ui-utils": "0.0.19",
     "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "4.3.2",
     "got": "11.8.2",
-    "rxjs": "7.2.0",
+    "rxjs": "7.3.0",
     "sdp": "3.0.3",
     "socket.io-client": "2.4.0",
     "stun": "2.1.0",
-    "systeminformation": "5.7.8",
+    "systeminformation": "5.7.13",
     "uuid": "8.3.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.7",
     "@types/jest": "26.0.24",
-    "@types/node": "16.4.2",
+    "@types/node": "16.4.8",
     "@types/uuid": "8.3.1",
-    "@typescript-eslint/eslint-plugin": "4.28.4",
-    "@typescript-eslint/parser": "4.28.4",
+    "@typescript-eslint/eslint-plugin": "4.28.5",
+    "@typescript-eslint/parser": "4.28.5",
+    "concurrently": "^6.2.0",
     "conventional-github-releaser": "3.1.5",
     "dotenv": "10.0.0",
-    "eslint": "7.31.0",
+    "eslint": "7.32.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-jest": "24.4.0",
     "eslint-plugin-prettier": "3.4.0",

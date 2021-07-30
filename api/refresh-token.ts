@@ -17,11 +17,8 @@ export async function acquireRefreshToken() {
       }
     },
     auth: AuthTokenResponse = await restClient.getCurrentAuth().catch((e) => {
-      if (restClient.using2fa) {
-        console.log(
-          restClient.promptFor2fa ||
-            'Please enter the code sent to your text/email'
-        )
+      if (restClient.promptFor2fa) {
+        console.log(restClient.promptFor2fa)
         return getAuthWith2fa()
       }
 

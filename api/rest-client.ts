@@ -196,7 +196,7 @@ export class RingRestClient {
 
           this.promptFor2fa = `Please enter the code ${prompt}`
         } else {
-          this.promptFor2fa = undefined
+          this.promptFor2fa = 'Please enter the code sent to your text/email'
         }
 
         throw new Error(

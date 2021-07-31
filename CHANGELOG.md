@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.19.0-beta.1](https://github.com/dgreif/ring/compare/v9.19.0-beta.0...v9.19.0-beta.1) (2021-07-31)
+
+
+### Bug Fixes
+
+* **homebridge:** add built ui before publishing ([3a8f9cf](https://github.com/dgreif/ring/commit/3a8f9cf7f39f27d7d976b14779e66b881e872a7e))
+
 ## [9.19.0-beta.0](https://github.com/dgreif/ring/compare/v9.18.6...v9.19.0-beta.0) (2021-07-31)
 
 

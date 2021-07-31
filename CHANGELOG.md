@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.19.0-beta.0](https://github.com/dgreif/ring/compare/v9.18.6...v9.19.0-beta.0) (2021-07-31)
+
+
+### Features
+
+* **homebridge:** custom ui for config-ui-x ([d31332e](https://github.com/dgreif/ring/commit/d31332e9bb06f455348452c9a14b605e2ce8d8a8))
+* specific prompt for 2fa from authenticator app ([bed30d3](https://github.com/dgreif/ring/commit/bed30d34acc330ab0a9f69b7cfd7fd687d2f2053))
+
+
+### Bug Fixes
+
+* retry request for 504 response ([434157c](https://github.com/dgreif/ring/commit/434157c98eb9c197ef13c0dcae1bc65031e86e7d)), closes [#697](https://github.com/dgreif/ring/issues/697)
+
 ### [9.18.6](https://github.com/dgreif/ring/compare/v9.18.5...v9.18.6) (2021-07-28)
 
 

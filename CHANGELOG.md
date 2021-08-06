@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.20.0](https://github.com/dgreif/ring/compare/v9.19.0...v9.20.0) (2021-08-06)
+
+
+### Features
+
+* `getHealth` for chimes, and new chime models ([d78f92b](https://github.com/dgreif/ring/commit/d78f92b0914204f246d9d380abc5eb5b2b936d42)), closes [#720](https://github.com/dgreif/ring/issues/720)
+
+
+### Bug Fixes
+
+* update dependencies ([e225e96](https://github.com/dgreif/ring/commit/e225e9620e5963e1cd554de06213bd156ec343d3)), closes [#626](https://github.com/dgreif/ring/issues/626)
+
 ## [9.19.0](https://github.com/dgreif/ring/compare/v9.18.6...v9.19.0) (2021-07-31)
 
 

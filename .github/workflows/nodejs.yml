@@ -17,12 +17,16 @@ jobs:
         uses: actions/cache@v1
         id: cache
         with:
-          path: node_modules
+          path: |
+            node_modules
+            homebridge-ui/node_modules
           key: ${{ runner.OS }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install NPM
         if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: |
+          npm ci
+          npm ci --prefix homebridge-ui
 
       - name: Build
         run: npm run build

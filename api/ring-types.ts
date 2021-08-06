@@ -288,13 +288,21 @@ export interface BeamBridge {
   updated_at: string
 }
 
+type ChimeKind = 'chime' | 'chime_pro' | 'chime_v2' | 'chime_pro_v2'
+export const ChimeModel: { readonly [P in ChimeKind]: string } = {
+  chime: 'Chime',
+  chime_pro: 'Chime Pro',
+  chime_v2: 'Chime v2',
+  chime_pro_v2: 'Chime Pro v2',
+}
+
 export interface ChimeData {
   id: number
   description: string
   device_id: string
   time_zone: string
   firmware_version: Firmware
-  kind: 'chime' | 'chime_pro'
+  kind: ChimeKind
   latitude: number
   longitude: number
   address: string
@@ -636,22 +644,38 @@ export interface CameraDeviceSettingsData {
   }
 }
 
-export interface CameraHealth {
+type HealthCategory =
+  | 'very_poor'
+  | 'poor'
+  | 'good'
+  | 'very_good'
+  | 'unknown'
+  | 'NA'
+  | string
+  | null
+
+export interface ChimeHealth {
   id: number
   wifi_name: string
-  battery_percentage: string
-  battery_percentage_category: string
+  battery_percentage: HealthCategory
+  battery_percentage_category: HealthCategory
   battery_voltage: number | null
-  battery_voltage_category: string | null
+  battery_voltage_category: HealthCategory
   latest_signal_strength: number
-  latest_signal_category: string
+  latest_signal_category: HealthCategory
   average_signal_strength: number
-  average_signal_category: string
+  average_signal_category: HealthCategory
   firmware: Firmware
   updated_at: 'string'
   wifi_is_ring_network: boolean
-  packet_loss_category: string
+  packet_loss_category: HealthCategory
   packet_loss_strength: number
+}
+
+export interface CameraHealth extends ChimeHealth {
+  transformer_voltage?: number
+  transformer_voltage_category?: 'good'
+  ext_power_state?: number
 }
 
 export type DingKind =

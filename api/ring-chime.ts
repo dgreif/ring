@@ -3,6 +3,8 @@ import {
   ChimeUpdate,
   ChimeSoundKind,
   RingtoneOptions,
+  ChimeHealth,
+  ChimeModel,
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -17,7 +19,7 @@ const settingsWhichRequireReboot = [
 export class RingChime {
   id = this.initialData.id
   deviceType = this.initialData.kind
-  model = this.deviceType === 'chime_pro' ? 'Chime Pro' : 'Chime'
+  model = ChimeModel[this.deviceType] || 'Chime'
   onData = new BehaviorSubject<ChimeData>(this.initialData)
   onRequestUpdate = new Subject()
 
@@ -131,5 +133,15 @@ export class RingChime {
         volume,
       },
     })
+  }
+
+  async getHealth() {
+    const response = await this.restClient.request<{
+      device_health: ChimeHealth
+    }>({
+      url: clientApi(`chimes/${this.id}/health`),
+    })
+
+    return response.device_health
   }
 }

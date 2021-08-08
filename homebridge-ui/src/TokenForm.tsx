@@ -72,13 +72,17 @@ export default function TokenForm({
               email: {
                 title: 'Email',
                 type: 'string',
-                format: 'email',
+                'x-schema-form': {
+                  type: 'email',
+                },
                 required: true,
               },
               password: {
                 title: 'Password',
                 type: 'string',
-                format: 'password',
+                'x-schema-form': {
+                  type: 'password',
+                },
                 required: true,
               },
             },

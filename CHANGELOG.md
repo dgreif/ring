@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.20.1-beta.0](https://github.com/dgreif/ring/compare/v9.20.0...v9.20.1-beta.0) (2021-08-10)
+
+
+### Bug Fixes
+
+* **homebridge:** mask password in homebridge-ui ([2711aaa](https://github.com/dgreif/ring/commit/2711aaa69ee8064e711e2c2405e239dd20dea5bb))
+* remove http2 ([9e2abeb](https://github.com/dgreif/ring/commit/9e2abeb0a07e0ae40b4945617c3b3c8b4287c46f))
+
 ## [9.20.0](https://github.com/dgreif/ring/compare/v9.19.0...v9.20.0) (2021-08-06)
 
 

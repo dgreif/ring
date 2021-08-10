@@ -15,7 +15,6 @@ import {
 import { ReplaySubject } from 'rxjs'
 
 const defaultRequestOptions: RequestOptions = {
-    http2: true,
     responseType: 'json',
     method: 'GET',
     retry: 0,

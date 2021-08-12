@@ -13,7 +13,7 @@ body:
       description: Describe the problem you are having with live streams
       placeholder: Solution
     validations:
-      required: false
+      required: true
   - type: textarea
     id: solution
     attributes:

@@ -6,9 +6,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please see the [Camera Troubleshooting Docs](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting) first, as it contains my best advice for streaming issues.  Unless you have a suggestion of how your streaming issue can be fixed, I likely can't help you beyond what is in that wiki article.  
+        Please see the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting) first, as it contains my best advice for streaming issues.  Unless you have a suggestion of how your streaming issue can be fixed, I likely can't help you beyond what is in that wiki article.
   - type: textarea
-    id: contact
     attributes:
       label: Streaming Issue
       description: Describe the problem you are having with live streams
@@ -24,7 +23,6 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: environment
     attributes:
       label: Environment
       description: Where are you live streaming
@@ -35,7 +33,6 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: OS
     attributes:
       label: What operating system are you on?
       options:
@@ -43,17 +40,17 @@ body:
         - Mac
         - Windows
         - Other
+    validations:
+      required: true
   - type: textarea
-    id: logs
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: checkboxes
-    id: double-check
     attributes:
-      label: Verification
-      description: By submitting this issue, you agree that you have already consulted the [Camera Troubleshooting Docs](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting) and have something useful to contribute.
+      label: Honesty Time
+      description: By submitting this issue, you agree that you have already consulted the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting) and have something useful to contribute.
       options:
         - label: I swear this is worth your time!
           required: true

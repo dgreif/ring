@@ -115,7 +115,9 @@ Some other useful propeties
 * `hasSiren`: does this camera have a siren
 * `isDoorbot`: is this camera a doorbell
 
-See the `examples` directory for additional code examples.
+## Examples
+
+See the [examples directory](examples) for additional code examples.  For a full project example, see https://github.com/dgreif/ring-client-example
 
 ## Refresh Token
 

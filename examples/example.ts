@@ -89,4 +89,6 @@ async function example() {
   }
 }
 
-example()
+example().catch((e) => {
+  console.error('Example threw an error:', e)
+})

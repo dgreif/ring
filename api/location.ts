@@ -158,7 +158,8 @@ export class Location extends Subscribed {
 
           if (connectionStatus === 'online') {
             if (assetWasOffline) {
-              this.requestList(deviceListMessageType, assetUuid)
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              this.requestList(deviceListMessageType, assetUuid).catch(() => {})
               this.offlineAssets = this.offlineAssets.filter(
                 (id) => id !== assetUuid
               )
@@ -346,7 +347,7 @@ export class Location extends Subscribed {
   }
 
   setLightGroup(groupId: string, on: boolean, durationSeconds = 60) {
-    this.restClient.request<any>({
+    return this.restClient.request<any>({
       method: 'POST',
       url: `https://api.ring.com/groups/v1/locations/${this.id}/groups/${groupId}/devices`,
       json: {
@@ -369,21 +370,21 @@ export class Location extends Subscribed {
   }
 
   requestList(listType: MessageType, assetId: string) {
-    this.sendMessage({ msg: listType, dst: assetId })
+    return this.sendMessage({ msg: listType, dst: assetId })
   }
 
-  getList(listType: MessageType, assetId: string) {
-    this.requestList(listType, assetId)
+  async getList(listType: MessageType, assetId: string) {
+    await this.requestList(listType, assetId)
     return this.getNextMessageOfType(listType, assetId)
   }
 
-  getDevices(): Promise<RingDevice[]> {
+  async getDevices(): Promise<RingDevice[]> {
     if (!this.hasHubs) {
       return Promise.resolve([])
     }
 
     if (!this.connectionPromise) {
-      this.getConnection()
+      await this.getConnection()
     }
 
     return lastValueFrom(this.onDevices.pipe(take(1)))

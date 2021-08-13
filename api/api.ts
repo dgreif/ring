@@ -42,8 +42,6 @@ export class RingApi extends Subscribed {
   public readonly onRefreshTokenUpdated =
     this.restClient.onRefreshTokenUpdated.asObservable()
 
-  private locations = this.fetchAndBuildLocations()
-
   constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
     super()
 
@@ -141,10 +139,7 @@ export class RingApi extends Subscribed {
       )
         .pipe(
           throttleTime(500),
-          switchMap(async () => {
-            const response = await this.fetchRingDevices().catch(() => null)
-            return response
-          })
+          switchMap(() => this.fetchRingDevices().catch(() => null))
         )
         .subscribe((response) => {
           onUpdateReceived.next(null)
@@ -277,12 +272,17 @@ export class RingApi extends Subscribed {
     return locations
   }
 
+  private locationsPromise: Promise<Location[]> | undefined
   getLocations() {
-    return this.locations
+    if (!this.locationsPromise) {
+      this.locationsPromise = this.fetchAndBuildLocations()
+    }
+
+    return this.locationsPromise
   }
 
   async getCameras() {
-    const locations = await this.locations
+    const locations = await this.getLocations()
     return locations.reduce(
       (cameras, location) => [...cameras, ...location.cameras],
       [] as RingCamera[]
@@ -297,8 +297,16 @@ export class RingApi extends Subscribed {
 
   disconnect() {
     this.unsubscribe()
-    this.locations.then((locations) =>
-      locations.forEach((location) => location.disconnect())
-    )
+    if (!this.locationsPromise) {
+      return
+    }
+
+    this.getLocations()
+      .then((locations) =>
+        locations.forEach((location) => location.disconnect())
+      )
+      .catch((e) => {
+        logError(e)
+      })
   }
 }

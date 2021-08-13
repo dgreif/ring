@@ -103,7 +103,14 @@ export class RingRestClient {
   // prettier-ignore
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private hardwareIdPromise = getHardwareId(this.authOptions.systemId)
-  private authPromise = this.getAuth()
+  private _authPromise: Promise<AuthTokenResponse> | undefined
+  private get authPromise() {
+    if (!this._authPromise) {
+      this._authPromise = this.getAuth()
+    }
+
+    return this._authPromise
+  }
   private sessionPromise?: Promise<SessionResponse> = undefined
   public using2fa = false
   public promptFor2fa?: string
@@ -250,7 +257,7 @@ export class RingRestClient {
         const response = e.response || {}
 
         if (response.statusCode === 401) {
-          this.refreshAuth()
+          await this.refreshAuth()
           return this.getSession()
         }
 
@@ -273,8 +280,9 @@ export class RingRestClient {
     })
   }
 
-  private refreshAuth() {
-    this.authPromise = this.getAuth()
+  private async refreshAuth() {
+    this._authPromise = this.getAuth()
+    await this._authPromise
   }
 
   private refreshSession() {
@@ -305,7 +313,7 @@ export class RingRestClient {
       const response = e.response || {}
 
       if (response.statusCode === 401) {
-        this.refreshAuth()
+        await this.refreshAuth()
         return this.request(options)
       }
 

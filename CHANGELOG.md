@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.21.0](https://github.com/dgreif/ring/compare/v9.20.1...v9.21.0) (2021-08-14)
+
+
+### Features
+
+* add panic button to known device types ([ff26b8d](https://github.com/dgreif/ring/commit/ff26b8d79182ccacf977b0479e30da2229b81367)), closes [#610](https://github.com/dgreif/ring/issues/610)
+
+
+### Bug Fixes
+
+* handle uncaught promise rejections ([93622c0](https://github.com/dgreif/ring/commit/93622c094ee903aa8b9f008202a49aa12965998a)), closes [#443](https://github.com/dgreif/ring/issues/443)
+* **homebridge:** keep alarm in night mode when armed in night mode ([f192fd9](https://github.com/dgreif/ring/commit/f192fd962bf2f5c0a2a8ff7eac6cc5bb977a3e89)), closes [#726](https://github.com/dgreif/ring/issues/726) [#545](https://github.com/dgreif/ring/issues/545)
+* prevent auth token from being used after it expires ([9298758](https://github.com/dgreif/ring/commit/9298758738a9b98e2a184954e1381153aca19f83))
+* update dependencies ([3e81c68](https://github.com/dgreif/ring/commit/3e81c68cd949ae9ca01af61fefa5be07a4209dac))
+
 ### [9.20.1](https://github.com/dgreif/ring/compare/v9.20.0...v9.20.1) (2021-08-12)
 
 

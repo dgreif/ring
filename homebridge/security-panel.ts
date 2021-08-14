@@ -74,6 +74,10 @@ export class SecurityPanel extends BaseDeviceAccessory {
     this.getService(Service.SecuritySystem).setPrimaryService(true)
   }
 
+  getTargetNightMode() {
+    return this.targetingNightMode && this.config.nightModeBypassFor
+  }
+
   getCurrentState({ mode, alarmInfo }: RingDeviceData) {
     const {
       Characteristic: { SecuritySystemCurrentState: State },
@@ -81,6 +85,14 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
     if (alarmInfo && this.alarmStates.includes(alarmInfo.state)) {
       return State.ALARM_TRIGGERED
+    }
+
+    if (mode === this.getTargetNightMode()) {
+      setTimeout(() => {
+        // clear in next tick so that Target and Current state both get night mode
+        this.targetingNightMode = false
+      })
+      return State.NIGHT_ARM
     }
 
     switch (mode) {
@@ -95,6 +107,8 @@ export class SecurityPanel extends BaseDeviceAccessory {
     }
   }
 
+  private targetingNightMode = false
+
   async setTargetState(state: any) {
     const {
         Characteristic: { SecuritySystemTargetState: State },
@@ -103,6 +117,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
       { nightModeBypassFor } = this.config
 
     let bypass = false
+    this.targetingNightMode = state === State.NIGHT_ARM
 
     if (state === State.NIGHT_ARM) {
       if (

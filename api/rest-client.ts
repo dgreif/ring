@@ -104,9 +104,22 @@ export class RingRestClient {
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private hardwareIdPromise = getHardwareId(this.authOptions.systemId)
   private _authPromise: Promise<AuthTokenResponse> | undefined
+  private clearPreviousAuth() {
+    this._authPromise = undefined
+  }
   private get authPromise() {
     if (!this._authPromise) {
-      this._authPromise = this.getAuth()
+      const authPromise = this.getAuth()
+      this._authPromise = authPromise
+
+      authPromise.then(({ expires_in }) => {
+        // clear the existing auth promise 1 minute before it expires
+        setTimeout(() => {
+          if (this._authPromise === authPromise) {
+            this.clearPreviousAuth()
+          }
+        }, ((expires_in || 3600) - 60) * 1000)
+      })
     }
 
     return this._authPromise
@@ -281,8 +294,8 @@ export class RingRestClient {
   }
 
   private async refreshAuth() {
-    this._authPromise = this.getAuth()
-    await this._authPromise
+    this.clearPreviousAuth()
+    await this.authPromise
   }
 
   private refreshSession() {

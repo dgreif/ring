@@ -38,6 +38,7 @@ export enum RingDeviceType {
   SecurityAccessCode = 'access-code',
   ZWaveAdapter = 'adapter.zwave',
   ZWaveExtender = 'range-extender.zwave',
+  PanicButton = 'security-panic',
 }
 
 // eslint-disable-next-line no-shadow

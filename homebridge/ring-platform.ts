@@ -62,6 +62,7 @@ const debug = __filename.includes('release-homebridge'),
     RingDeviceType.ZWaveAdapter,
     RingDeviceType.ZWaveExtender,
     RingDeviceType.BeamsDevice,
+    RingDeviceType.PanicButton,
   ]
 
 export const platformName = 'Ring'

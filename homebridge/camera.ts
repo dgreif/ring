@@ -6,6 +6,7 @@ import { map, mapTo, switchMap } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { Logging, PlatformAccessory } from 'homebridge'
 import { merge } from 'rxjs'
+import { TargetValueTimer } from './target-value-timer'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
@@ -119,11 +120,22 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     }
 
     if (device.hasLight) {
+      const lightTargetTimer = new TargetValueTimer<boolean>()
       this.registerCharacteristic({
         characteristicType: Characteristic.On,
         serviceType: Service.Lightbulb,
-        getValue: (data) => data.led_status === 'on',
-        setValue: (value) => device.setLight(value),
+        getValue: (data) => {
+          const value = lightTargetTimer.hasTarget()
+            ? lightTargetTimer.getTarget()
+            : data.led_status === 'on'
+
+          return value
+        },
+        setValue: (value: boolean) => {
+          // Allow 5 seconds for the light value to update in our status updates from Ring
+          lightTargetTimer.setTarget(value, 5000)
+          return device.setLight(value)
+        },
         requestUpdate: () => device.requestUpdate(),
       })
     }

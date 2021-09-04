@@ -48,7 +48,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
     this.registerCharacteristic({
       characteristicType: Characteristic.SecuritySystemTargetState,
       serviceType: Service.SecuritySystem,
-      getValue: (data) => this.getCurrentState(data),
+      getValue: (data) => this.getTargetState(data),
       setValue: (value) => this.setTargetState(value),
     })
 
@@ -78,14 +78,10 @@ export class SecurityPanel extends BaseDeviceAccessory {
     return this.targetingNightMode && this.config.nightModeBypassFor
   }
 
-  getCurrentState({ mode, alarmInfo }: RingDeviceData) {
+  getTargetState({ mode }: RingDeviceData) {
     const {
-      Characteristic: { SecuritySystemCurrentState: State },
+      Characteristic: { SecuritySystemTargetState: State },
     } = hap
-
-    if (alarmInfo && this.alarmStates.includes(alarmInfo.state)) {
-      return State.ALARM_TRIGGERED
-    }
 
     if (mode === this.getTargetNightMode()) {
       setTimeout(() => {
@@ -101,10 +97,20 @@ export class SecurityPanel extends BaseDeviceAccessory {
       case 'some':
         return State.STAY_ARM
       case 'none':
-        return State.DISARMED
+        return State.DISARM
       default:
-        return State.DISARMED
+        return State.DISARM
     }
+  }
+
+  getCurrentState(data: RingDeviceData) {
+    const { alarmInfo } = data
+
+    if (alarmInfo && this.alarmStates.includes(alarmInfo.state)) {
+      return hap.Characteristic.SecuritySystemCurrentState.ALARM_TRIGGERED
+    }
+
+    return this.getTargetState(data)
   }
 
   private targetingNightMode = false
@@ -161,7 +167,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
       this.logger.error(e)
       this.getService(hap.Service.SecuritySystem)
         .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
-        .updateValue(this.getCurrentState(this.device.data))
+        .updateValue(this.getTargetState(this.device.data))
     }
   }
 }

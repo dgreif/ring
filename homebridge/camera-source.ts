@@ -167,7 +167,7 @@ export class CameraSource implements CameraStreamingDelegate {
       // Not currently resizing the image.
       // HomeKit does a good job of resizing and doesn't seem to care if it's not right
       callback(undefined, snapshot)
-    } catch (e) {
+    } catch (e: any) {
       logError(`Error fetching snapshot for ${this.ringCamera.name}`)
       logError(e)
       callback(e)
@@ -459,7 +459,7 @@ export class CameraSource implements CameraStreamingDelegate {
           srtp_salt: ringRtpDescription.video.srtpSalt,
         },
       })
-    } catch (e) {
+    } catch (e: any) {
       logError(
         `Failed to prepare stream for ${
           this.ringCamera.name

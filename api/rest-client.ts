@@ -65,7 +65,7 @@ async function requestWithRetry<T>(
       data.responseTimestamp = new Date(headers.date as string).getTime()
     }
     return data
-  } catch (e) {
+  } catch (e: any) {
     if (!e.response) {
       logError(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
@@ -184,7 +184,7 @@ export class RingRestClient {
       this.refreshToken = response.refresh_token
 
       return response
-    } catch (requestError) {
+    } catch (requestError: any) {
       if (grantData.refresh_token) {
         // failed request with refresh token
         this.refreshToken = undefined
@@ -266,7 +266,7 @@ export class RingRestClient {
     return this.authPromise.then(async (authToken) => {
       try {
         return await this.fetchNewSession(authToken)
-      } catch (e) {
+      } catch (e: any) {
         const response = e.response || {}
 
         if (response.statusCode === 401) {
@@ -322,7 +322,7 @@ export class RingRestClient {
           'User-Agent': 'android:com.ringapp',
         },
       })
-    } catch (e) {
+    } catch (e: any) {
       const response = e.response || {}
 
       if (response.statusCode === 401) {

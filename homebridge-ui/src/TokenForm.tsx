@@ -53,7 +53,7 @@ export default function TokenForm({
           })
 
           onRefreshToken(refreshToken)
-        } catch (e) {
+        } catch (e: any) {
           // eslint-disable-next-line no-console
           console.error(e)
           homebridge.toast.error(e.message, 'Failed to Link Account')
@@ -112,7 +112,7 @@ export default function TokenForm({
               codePrompt: response.codePrompt,
             })
           }
-        } catch (e) {
+        } catch (e: any) {
           // eslint-disable-next-line no-console
           console.error(e)
           homebridge.toast.error(e.message, 'Ring Login Failed')

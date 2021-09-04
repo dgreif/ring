@@ -163,7 +163,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
         this.logger.info(`Arming (Home) ${this.device.name}${bypassLog}`)
         await location.armHome(bypassSensorZids)
       }
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error(e)
       this.getService(hap.Service.SecuritySystem)
         .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)

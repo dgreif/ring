@@ -38,7 +38,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
 
       // If we get here, 2fa was not required.  I'm not sure this is possible anymore, but it's here just in case
       return { refreshToken: refresh_token }
-    } catch (e) {
+    } catch (e: any) {
       if (this.restClient.promptFor2fa) {
         console.log(this.restClient.promptFor2fa)
         return { codePrompt: this.restClient.promptFor2fa }
@@ -58,7 +58,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
       const authResponse = await this.restClient.getAuth(code)
 
       return { refreshToken: authResponse.refresh_token }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Incorrect 2fa Code')
       throw new RequestError('Please check the code and try again', e)
     }

@@ -56,7 +56,7 @@ export abstract class BaseDataAccessory<
             const value = getValue(device.data)
             callback(null, value)
             requestUpdate()
-          } catch (e) {
+          } catch (e: any) {
             callback(e)
           }
         }

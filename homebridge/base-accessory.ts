@@ -109,7 +109,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
               const value = await lastValueFrom(onCachedValue.pipe(take(1)))
               callback(null, value)
               requestUpdate()
-            } catch (e) {
+            } catch (e: any) {
               callback(e)
             }
           }

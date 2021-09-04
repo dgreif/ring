@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.21.1](https://github.com/dgreif/ring/compare/v9.21.0...v9.21.1) (2021-09-04)
+
+
+### Bug Fixes
+
+* **homebridge:** avoid setting `ALARM_TRIGGERED` as alarm target state ([a011ea4](https://github.com/dgreif/ring/commit/a011ea47633a6605f46a8fc0fe4f81322e02635d)), closes [#755](https://github.com/dgreif/ring/issues/755)
+* **homebridge:** prevent camera light from showing wrong status after toggling ([93c3b92](https://github.com/dgreif/ring/commit/93c3b92c9e0c5645e955bf99a50347d6e404e6b7)), closes [#751](https://github.com/dgreif/ring/issues/751)
+* update dependencies ([c13501e](https://github.com/dgreif/ring/commit/c13501e3e6b630214e48185225bb8c8d655c2a06))
+
 ## [9.21.0](https://github.com/dgreif/ring/compare/v9.20.1...v9.21.0) (2021-08-14)
 
 

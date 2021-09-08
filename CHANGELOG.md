@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.21.2](https://github.com/dgreif/ring/compare/v9.21.1...v9.21.2) (2021-09-08)
+
+
+### Bug Fixes
+
+* handle uncaught auth errors ([5442434](https://github.com/dgreif/ring/commit/544243497c6a4361f4eacecfa5e06bd6f24b29bd)), closes [#443](https://github.com/dgreif/ring/issues/443)
+
 ### [9.21.1](https://github.com/dgreif/ring/compare/v9.21.0...v9.21.1) (2021-09-04)
 
 

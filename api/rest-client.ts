@@ -112,14 +112,18 @@ export class RingRestClient {
       const authPromise = this.getAuth()
       this._authPromise = authPromise
 
-      authPromise.then(({ expires_in }) => {
-        // clear the existing auth promise 1 minute before it expires
-        setTimeout(() => {
-          if (this._authPromise === authPromise) {
-            this.clearPreviousAuth()
-          }
-        }, ((expires_in || 3600) - 60) * 1000)
-      })
+      authPromise
+        .then(({ expires_in }) => {
+          // clear the existing auth promise 1 minute before it expires
+          setTimeout(() => {
+            if (this._authPromise === authPromise) {
+              this.clearPreviousAuth()
+            }
+          }, ((expires_in || 3600) - 60) * 1000)
+        })
+        .catch(() => {
+          // ignore these errors here, they should be handled by the function making a rest request
+        })
     }
 
     return this._authPromise

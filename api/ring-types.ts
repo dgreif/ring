@@ -39,6 +39,7 @@ export enum RingDeviceType {
   ZWaveAdapter = 'adapter.zwave',
   ZWaveExtender = 'range-extender.zwave',
   PanicButton = 'security-panic',
+  UnknownZWave = 'unknown.zwave',
 }
 
 // eslint-disable-next-line no-shadow
@@ -240,6 +241,7 @@ export interface RingDeviceData {
   setPoint?: number
   setPointMax?: number
   setPointMin?: number
+  basicValue?: number // unknown.zwave - 0 for off, 255 for on
   componentDevices?: {
     rel: string
     zid: string

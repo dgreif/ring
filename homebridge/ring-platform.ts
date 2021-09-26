@@ -46,6 +46,7 @@ import { TemperatureSensor } from './temperature-sensor'
 import { WaterSensor } from './water-sensor'
 import { LocationModeSwitch } from './location-mode-switch'
 import { Thermostat } from './thermostat'
+import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch'
 import { generateMacAddress } from './util'
 
 const debug = __filename.includes('release-homebridge'),
@@ -125,6 +126,8 @@ function getAccessoryClass(
       return WaterSensor
     case RingDeviceType.Thermostat:
       return Thermostat
+    case RingDeviceType.UnknownZWave:
+      return UnknownZWaveSwitchSwitch
   }
 
   if (/^lock($|\.)/.test(deviceType)) {

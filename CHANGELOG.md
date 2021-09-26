@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.22.0-beta.0](https://github.com/dgreif/ring/compare/v9.21.2...v9.22.0-beta.0) (2021-09-26)
+
+
+### Features
+
+* support unknown zwave switch ([45ee375](https://github.com/dgreif/ring/commit/45ee37508436bb84b64c7816f228620333934f25)), closes [#775](https://github.com/dgreif/ring/issues/775)
+
 ### [9.21.2](https://github.com/dgreif/ring/compare/v9.21.1...v9.21.2) (2021-09-08)
 
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.22.0](https://github.com/dgreif/ring/compare/v9.21.2...v9.22.0) (2021-10-02)
+
+
+### Features
+
+* support unknown zwave switch ([9a0a0b9](https://github.com/dgreif/ring/commit/9a0a0b9a3518e2ab9ec732d61fc1102a4e3b9458)), closes [#775](https://github.com/dgreif/ring/issues/775)
+
+
+### Bug Fixes
+
+* handle promise rejections ([2df5591](https://github.com/dgreif/ring/commit/2df559128fbaeda7de6a64fa7029c86a08b26633))
+* **homebridge:** handle camera stream ending before it is active ([4a0edc0](https://github.com/dgreif/ring/commit/4a0edc031fa6093ec0fa873f04479efa98307bc1)), closes [#762](https://github.com/dgreif/ring/issues/762)
+* update dependencies ([24d5fde](https://github.com/dgreif/ring/commit/24d5fde5f456fa9bb3191c0dc8fa2b483a7ee310))
+
 ### [9.21.2](https://github.com/dgreif/ring/compare/v9.21.1...v9.21.2) (2021-09-08)
 
 

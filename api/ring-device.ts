@@ -3,6 +3,7 @@ import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
 import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
 import { Subscribed } from './subscribed'
+import { logError } from './util'
 
 export class RingDevice extends Subscribed {
   onData = new BehaviorSubject(this.initialData)
@@ -85,7 +86,7 @@ export class RingDevice extends Subscribed {
           },
         ],
       },
-    })
+    }).catch(logError)
   }
 
   toString() {

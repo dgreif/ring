@@ -1,4 +1,4 @@
-import { ReplaySubject, timer } from 'rxjs'
+import { noop, ReplaySubject, timer } from 'rxjs'
 import {
   createStunResponder,
   isStunMessage,
@@ -217,7 +217,7 @@ export class SipSession extends Subscribed {
         }
 
         if (!haveReceivedStreamPacket) {
-          void this.sipCall.requestKeyFrame()
+          this.sipCall.requestKeyFrame().catch(noop)
           haveReceivedStreamPacket = true
         }
 
@@ -262,7 +262,7 @@ export class SipSession extends Subscribed {
     this.hasCallEnded = true
 
     if (sendBye) {
-      this.sipCall.sendBye()
+      this.sipCall.sendBye().catch(logError)
     }
 
     // clean up

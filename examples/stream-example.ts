@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import * as path from 'path'
 import { cleanOutputDirectory, outputDirectory } from './util'
+import { logError } from '../api/util'
 
 /**
  * This example streams to files, each with 10 seconds of video.
@@ -54,4 +55,4 @@ async function example() {
   }, 60 * 1000) // Stop after 1 minute
 }
 
-example()
+example().catch(logError)

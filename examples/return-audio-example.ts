@@ -41,7 +41,7 @@ async function example() {
     },
     audioOutForwarder = new RtpSplitter(({ message }) => {
       // Splitter is needed so that transcoded audio can be sent out through the same port as audio in
-      sipSession.audioSplitter.send(message, ringAudioLocation)
+      sipSession.audioSplitter.send(message, ringAudioLocation).catch(logError)
       return null
     }),
     speakerFf = new FfmpegProcess({
@@ -89,4 +89,4 @@ async function example() {
   }, 20000)
 }
 
-example()
+example().catch(logError)

@@ -297,7 +297,7 @@ export class SipCall {
 
   private async ackWithInfo(seq: number) {
     // Don't wait for ack, it won't ever come back.
-    void this.request({
+    this.request({
       method: 'ACK',
       seq, // The ACK must have the original sequence number.
     }).catch(noop)

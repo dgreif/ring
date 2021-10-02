@@ -94,9 +94,7 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<RingDevice> 
         getValue: (data) => {
           return data.volume ? data.volume * 100 : 0
         },
-        setValue: (volume: number) => {
-          device.setVolume(volume / 100)
-        },
+        setValue: (volume: number) => device.setVolume(volume / 100),
       })
     }
 

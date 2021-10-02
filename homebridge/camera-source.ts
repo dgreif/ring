@@ -24,7 +24,7 @@ import {
 } from 'homebridge'
 import { logDebug, logError, logInfo } from '../api/util'
 import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
-import { lastValueFrom, merge, of, Subject } from 'rxjs'
+import { firstValueFrom, merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { isStunMessage } from '../api/rtp-utils'
@@ -77,7 +77,7 @@ export class CameraSource implements CameraStreamingDelegate {
   constructor(private ringCamera: RingCamera) {}
 
   private previousLoadSnapshotPromise?: Promise<any>
-  loadSnapshot() {
+  async loadSnapshot() {
     // cache a promise of the snapshot load
     // This prevents multiple concurrent requests for snapshot from pilling up and creating lots of logs
     if (this.previousLoadSnapshotPromise) {
@@ -86,10 +86,14 @@ export class CameraSource implements CameraStreamingDelegate {
 
     this.previousLoadSnapshotPromise = this.loadAndCacheSnapshot()
 
-    this.previousLoadSnapshotPromise.catch().then(() => {
-      // clear so another it's finished request can be made
+    try {
+      await this.previousLoadSnapshotPromise
+    } catch (_) {
+      // ignore errors
+    } finally {
+      // clear so another request can be made
       this.previousLoadSnapshotPromise = undefined
-    })
+    }
   }
 
   private async loadAndCacheSnapshot() {
@@ -145,7 +149,7 @@ export class CameraSource implements CameraStreamingDelegate {
     )
 
     if (!this.ringCamera.hasSnapshotWithinLifetime) {
-      void this.loadSnapshot()
+      this.loadSnapshot().catch(logError)
     }
 
     // may or may not have a snapshot cached
@@ -244,12 +248,11 @@ export class CameraSource implements CameraStreamingDelegate {
 
       const audioSsrc = hap.CameraController.generateSynchronisationSource(),
         incomingAudioRtcpPort = await sipSession.reservePort(),
-        videoSsrcPromise = lastValueFrom(
+        videoSsrcPromise = firstValueFrom(
           sipSession.videoSplitter.onMessage.pipe(
             filter(({ info }) => info.address !== targetAddress), // Ignore return packets from HomeKit
             map((m) => getSsrc(m.message)),
-            filter((ssrc): ssrc is number => ssrc !== null),
-            take(1)
+            filter((ssrc): ssrc is number => ssrc !== null)
           )
         ),
         ringRtpDescription = await sipSession.start(
@@ -314,10 +317,12 @@ export class CameraSource implements CameraStreamingDelegate {
 
             if (!isRtpMessage) {
               // Only need to handle RTCP packets.  We really shouldn't receive RTP, but check just in case
-              sipSession.videoRtcpSplitter.send(message, {
-                port: ringRtpDescription.video.rtcpPort,
-                address: ringRtpDescription.address,
-              })
+              sipSession.videoRtcpSplitter
+                .send(message, {
+                  port: ringRtpDescription.video.rtcpPort,
+                  address: ringRtpDescription.address,
+                })
+                .catch(logError)
             }
 
             // don't need to forward it along from the RTP splitter since it's only RTCP we care about
@@ -356,10 +361,12 @@ export class CameraSource implements CameraStreamingDelegate {
             return null
           }
 
-          sipSession.videoSplitter.send(message, {
-            port: videoPort,
-            address: targetAddress,
-          })
+          sipSession.videoSplitter
+            .send(message, {
+              port: videoPort,
+              address: targetAddress,
+            })
+            .catch(logError)
           return null
         }
       )
@@ -374,13 +381,12 @@ export class CameraSource implements CameraStreamingDelegate {
           returnAudioTranscodedSplitter = new RtpSplitter((description) => {
             if (!cameraSpeakerActived) {
               cameraSpeakerActived = true
-              void sipSession.activateCameraSpeaker()
+              sipSession.activateCameraSpeaker().catch(logError)
             }
 
-            sipSession.audioSplitter.send(
-              description.message,
-              ringAudioLocation
-            )
+            sipSession.audioSplitter
+              .send(description.message, ringAudioLocation)
+              .catch(logError)
 
             return null
           }),
@@ -487,7 +493,7 @@ export class CameraSource implements CameraStreamingDelegate {
     if (requestType === 'start') {
       logInfo(`Streaming active for ${this.ringCamera.name}`)
       // sip/rtp already started at this point, but request a key frame so that HomeKit for sure has one
-      void session.requestKeyFrame()
+      session.requestKeyFrame().catch(logError)
     } else if (requestType === 'stop') {
       logInfo(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()

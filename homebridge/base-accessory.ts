@@ -1,6 +1,6 @@
 import { hap } from './hap'
 import { shareReplay, take } from 'rxjs/operators'
-import { lastValueFrom, Observable } from 'rxjs'
+import { firstValueFrom, Observable } from 'rxjs'
 import { RingPlatformConfig } from './config'
 import {
   Characteristic,
@@ -106,7 +106,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
           CharacteristicEventTypes.GET,
           async (callback: CharacteristicGetCallback) => {
             try {
-              const value = await lastValueFrom(onCachedValue.pipe(take(1)))
+              const value = await firstValueFrom(onCachedValue)
               callback(null, value)
               requestUpdate()
             } catch (e: any) {

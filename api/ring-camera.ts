@@ -14,7 +14,7 @@ import {
   VideoSearchResponse,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, interval, lastValueFrom, Subject } from 'rxjs'
+import { BehaviorSubject, interval, firstValueFrom, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -23,7 +23,6 @@ import {
   publishReplay,
   refCount,
   share,
-  take,
   takeUntil,
 } from 'rxjs/operators'
 import {
@@ -351,7 +350,7 @@ export class RingCamera extends Subscribed {
 
   private expiredDingIds: string[] = []
   async getSipConnectionDetails() {
-    const vodPromise = lastValueFrom(this.onNewDing.pipe(take(1))),
+    const vodPromise = firstValueFrom(this.onNewDing),
       videoOnDemandDing = await this.startVideoOnDemand()
 
     if (videoOnDemandDing && 'sip_from' in videoOnDemandDing) {
@@ -571,10 +570,12 @@ export class RingCamera extends Subscribed {
       responseType: 'buffer',
     })
 
-    this.lastSnapshotPromise.catch(() => {
+    try {
+      await this.lastSnapshotPromise
+    } catch (_) {
       // snapshot request failed, don't use it again
       this.lastSnapshotPromise = undefined
-    })
+    }
 
     return this.lastSnapshotPromise
   }
@@ -665,7 +666,7 @@ export class RingCamera extends Subscribed {
       output: ['-t', duration.toString(), outputPath],
     })
 
-    await lastValueFrom(sipSession.onCallEnded.pipe(take(1)))
+    await firstValueFrom(sipSession.onCallEnded)
   }
 
   async streamVideo(ffmpegOptions: FfmpegOptions) {

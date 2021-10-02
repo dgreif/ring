@@ -4,7 +4,7 @@ import {
 } from 'socket.io-client'
 import {
   BehaviorSubject,
-  lastValueFrom,
+  firstValueFrom,
   merge,
   Observable,
   ReplaySubject,
@@ -19,7 +19,6 @@ import {
   scan,
   shareReplay,
   skip,
-  take,
 } from 'rxjs/operators'
 import { delay, generateUuid, logDebug, logError, logInfo } from './util'
 import {
@@ -182,7 +181,7 @@ export class Location extends Subscribed {
           .subscribe(() => this.getLocationMode())
       )
 
-      void this.getLocationMode()
+      this.getLocationMode().catch(logError)
     }
   }
 
@@ -315,9 +314,7 @@ export class Location extends Subscribed {
 
   async setAlarmMode(alarmMode: AlarmMode, bypassSensorZids?: string[]) {
     const securityPanel = await this.getSecurityPanel(),
-      updatedDataPromise = lastValueFrom(
-        securityPanel.onData.pipe(skip(1), take(1))
-      )
+      updatedDataPromise = firstValueFrom(securityPanel.onData.pipe(skip(1)))
 
     await this.sendCommandToSecurityPanel('security-panel.switch-mode', {
       mode: alarmMode,
@@ -360,11 +357,10 @@ export class Location extends Subscribed {
   }
 
   getNextMessageOfType(type: MessageType, src: string) {
-    return lastValueFrom(
+    return firstValueFrom(
       this.onMessage.pipe(
         filter((m) => m.msg === type && m.src === src),
-        map((m) => m.body),
-        take(1)
+        map((m) => m.body)
       )
     )
   }
@@ -387,7 +383,7 @@ export class Location extends Subscribed {
       await this.getConnection()
     }
 
-    return lastValueFrom(this.onDevices.pipe(take(1)))
+    return firstValueFrom(this.onDevices)
   }
 
   getRoomList(assetId: string) {
@@ -578,12 +574,16 @@ export class Location extends Subscribed {
     this.disconnected = true
     this.unsubscribe()
     this.cameras.forEach((camera) => camera.disconnect())
-    this.getDevices().then((devices) => {
-      devices.forEach((device) => device.disconnect())
-    })
+    this.getDevices()
+      .then((devices) => {
+        devices.forEach((device) => device.disconnect())
+      })
+      .catch(logError)
 
     if (this.connectionPromise) {
-      this.connectionPromise.then((connection) => connection.close())
+      this.connectionPromise
+        .then((connection) => connection.close())
+        .catch(logError)
     }
   }
 }

@@ -1,10 +1,10 @@
 import { Location, LocationMode } from '../api'
-import { distinctUntilChanged, take } from 'rxjs/operators'
+import { distinctUntilChanged } from 'rxjs/operators'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { logError } from '../api/util'
 import { BaseAccessory } from './base-accessory'
-import { lastValueFrom, of } from 'rxjs'
+import { firstValueFrom, of } from 'rxjs'
 import {
   Logging,
   PlatformAccessory,
@@ -55,7 +55,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         Characteristic.SecuritySystemTargetState
       ),
       getCurrentMode = () => {
-        return lastValueFrom(location.onLocationMode.pipe(take(1)))
+        return firstValueFrom(location.onLocationMode)
       },
       getCurrentState = async () => getStateFromMode(await getCurrentMode())
 

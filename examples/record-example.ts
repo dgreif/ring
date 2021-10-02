@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import { cleanOutputDirectory, outputDirectory } from './util'
 import * as path from 'path'
+import { logError } from '../api/util'
 
 /**
  * This example records a 10 second video clip to output/example.mp4
@@ -30,4 +31,4 @@ async function example() {
   process.exit(0)
 }
 
-example()
+example().catch(logError)

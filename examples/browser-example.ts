@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
 import { promisify } from 'util'
+import { logError } from '../api/util'
 const fs = require('fs'),
   path = require('path'),
   express = require('express')
@@ -68,4 +69,4 @@ async function example() {
   }, 5 * 60 * 1000) // Stop after 5 minutes.
 }
 
-example()
+example().catch(logError)

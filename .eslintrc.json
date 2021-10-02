@@ -14,7 +14,8 @@
   ],
   "parserOptions": {
     "ecmaVersion": 2018,
-    "sourceType": "module"
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "env": {
     "node": true,
@@ -90,7 +91,7 @@
     "no-sequences": 2,
     "no-throw-literal": 2,
     "no-unused-expressions": 0,
-    "no-void": 0,
+    "no-void": 2,
     "no-warning-comments": 2,
     "no-with": 2,
     "radix": 2,
@@ -171,6 +172,7 @@
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-empty-interface": 0,
+    "@typescript-eslint/no-floating-promises": 2,
     "@typescript-eslint/no-parameter-properties": 0,
     "@typescript-eslint/explicit-member-accessibility": 0,
     "@typescript-eslint/no-use-before-define": 0,

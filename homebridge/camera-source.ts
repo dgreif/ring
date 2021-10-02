@@ -24,7 +24,7 @@ import {
 } from 'homebridge'
 import { logDebug, logError, logInfo } from '../api/util'
 import { debounceTime, delay, filter, map, take } from 'rxjs/operators'
-import { firstValueFrom, merge, of, Subject } from 'rxjs'
+import { firstValueFrom, merge, noop, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { isStunMessage } from '../api/rtp-utils'
@@ -244,7 +244,7 @@ export class CameraSource implements CameraStreamingDelegate {
           })
       )
 
-      this.sessions[hap.uuid.unparse(sessionID)] = sipSession
+      this.sessions[sessionID] = sipSession
 
       const audioSsrc = hap.CameraController.generateSynchronisationSource(),
         incomingAudioRtcpPort = await sipSession.reservePort(),
@@ -254,7 +254,7 @@ export class CameraSource implements CameraStreamingDelegate {
             map((m) => getSsrc(m.message)),
             filter((ssrc): ssrc is number => ssrc !== null)
           )
-        ),
+        ).catch(() => 0),
         ringRtpDescription = await sipSession.start(
           libfdkAacInstalled
             ? {
@@ -448,6 +448,16 @@ export class CameraSource implements CameraStreamingDelegate {
         videoSsrc = await videoSsrcPromise
       }
 
+      if (!videoSsrc) {
+        // failed to get video packet
+        logInfo(
+          `Stream was closed before it was ready for ${
+            this.ringCamera.name
+          } (${getDurationSeconds(start)}s)`
+        )
+        return callback(undefined)
+      }
+
       callback(undefined, {
         // SOMEDAY: remove address as it is not needed after homebridge 1.1.3
         address: await getDefaultIpAddress(request.addressVersion === 'ipv6'),
@@ -481,8 +491,7 @@ export class CameraSource implements CameraStreamingDelegate {
     callback: StreamRequestCallback
   ) {
     const sessionID = request.sessionID,
-      sessionKey = hap.uuid.unparse(sessionID),
-      session = this.sessions[sessionKey],
+      session = this.sessions[sessionID],
       requestType = request.type
 
     if (!session) {
@@ -493,11 +502,11 @@ export class CameraSource implements CameraStreamingDelegate {
     if (requestType === 'start') {
       logInfo(`Streaming active for ${this.ringCamera.name}`)
       // sip/rtp already started at this point, but request a key frame so that HomeKit for sure has one
-      session.requestKeyFrame().catch(logError)
+      session.requestKeyFrame().catch(noop)
     } else if (requestType === 'stop') {
       logInfo(`Stopped Live Stream for ${this.ringCamera.name}`)
       session.stop()
-      delete this.sessions[sessionKey]
+      delete this.sessions[sessionID]
     }
 
     callback()

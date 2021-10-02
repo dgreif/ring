@@ -1,7 +1,0 @@
-{
-  "parserOptions": {
-    "ecmaVersion": 2018,
-    "sourceType": "module",
-    "project": "./homebridge-ui/tsconfig.json"
-  }
-}

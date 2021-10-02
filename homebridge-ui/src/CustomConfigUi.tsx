@@ -19,10 +19,13 @@ export default function CustomConfigUi() {
   }, [showTokenForm])
 
   useEffect(() => {
-    getConfigs().then((configs) => {
-      const needToken = !configs[0]?.refreshToken
-      setShowTokenForm(needToken)
-    })
+    getConfigs()
+      .then((configs) => {
+        const needToken = !configs[0]?.refreshToken
+        setShowTokenForm(needToken)
+      })
+      // eslint-disable-next-line no-console
+      .catch((e) => console.error(e))
   }, [])
 
   async function onRefreshToken(refreshToken: string) {

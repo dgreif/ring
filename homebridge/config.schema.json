@@ -10,6 +10,12 @@
   "schema": {
     "type": "object",
     "properties": {
+      "Name": {
+        "title": "Name",
+        "type": "string",
+        "required": true,
+        "default": "Ring"
+      },
       "refreshToken": {
         "title": "Refresh Token",
         "type": "string",

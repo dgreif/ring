@@ -180,6 +180,10 @@ export class RingPlatform implements DynamicPlatformPlugin {
           this.log.error('Error connecting to API')
           this.log.error(e)
         })
+      } else {
+        this.log.warn(
+          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/master/homebridge#homebridge-configuration for more information.'
+        )
       }
     })
 
@@ -213,7 +217,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       this.log.info(`  locationId: ${location.id} - ${location.name}`)
     })
 
-    await Promise.allSettled(
+    await Promise.all(
       locations.map(async (location) => {
         const devices = await location.getDevices(),
           cameras = location.cameras,

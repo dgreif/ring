@@ -175,10 +175,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
-      this.connectToApi().catch((e) => {
-        this.log.error('Error connecting to API')
-        this.log.error(e)
-      })
+      if (config.refreshToken && config.refreshToken !== '') {
+        this.connectToApi().catch((e) => {
+          this.log.error('Error connecting to API')
+          this.log.error(e)
+        })
+      }
     })
 
     this.homebridgeAccessories = {}
@@ -211,7 +213,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       this.log.info(`  locationId: ${location.id} - ${location.name}`)
     })
 
-    await Promise.all(
+    await Promise.allSettled(
       locations.map(async (location) => {
         const devices = await location.getDevices(),
           cameras = location.cameras,

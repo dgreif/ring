@@ -175,7 +175,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
-      if (config.refreshToken && config.refreshToken !== '') {
+      if (config.refreshToken) {
         this.connectToApi().catch((e) => {
           this.log.error('Error connecting to API')
           this.log.error(e)

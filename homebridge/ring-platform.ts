@@ -175,10 +175,16 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
     this.api.on('didFinishLaunching', () => {
       this.log.debug('didFinishLaunching')
-      this.connectToApi().catch((e) => {
-        this.log.error('Error connecting to API')
-        this.log.error(e)
-      })
+      if (config.refreshToken) {
+        this.connectToApi().catch((e) => {
+          this.log.error('Error connecting to API')
+          this.log.error(e)
+        })
+      } else {
+        this.log.warn(
+          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/master/homebridge#homebridge-configuration for more information.'
+        )
+      }
     })
 
     this.homebridgeAccessories = {}

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.22.1](https://github.com/dgreif/ring/compare/v9.22.0...v9.22.1) (2021-10-13)
+
+
+### Bug Fixes
+
+* **homebridge:** prevent login attempt for null refresh tokens ([#791](https://github.com/dgreif/ring/issues/791)) ([bbc9db5](https://github.com/dgreif/ring/commit/bbc9db5578f9b3ed2af49256c8581fef5af8e134))
+
 ## [9.22.0](https://github.com/dgreif/ring/compare/v9.21.2...v9.22.0) (2021-10-02)
 
 

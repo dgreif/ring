@@ -5,16 +5,16 @@
   "devDependencies": {
     "@homebridge/plugin-ui-utils": "0.0.19",
     "@testing-library/jest-dom": "5.14.1",
-    "@testing-library/react": "12.0.0",
-    "@testing-library/user-event": "13.2.1",
-    "@types/jest": "27.0.1",
-    "@types/node": "16.7.10",
-    "@types/react": "17.0.19",
+    "@testing-library/react": "12.1.2",
+    "@testing-library/user-event": "13.4.1",
+    "@types/jest": "27.0.2",
+    "@types/node": "16.11.1",
+    "@types/react": "17.0.30",
     "@types/react-dom": "17.0.9",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "typescript": "4.4.2"
+    "typescript": "4.4.4"
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",

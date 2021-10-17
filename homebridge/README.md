@@ -57,6 +57,7 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideDeviceIds": ["477e4800-fcde-4493-969b-d1a06f683102", "5aaed7a7-06df-4f18-b3af-291c89854d60"],
   "hideLightGroups": true,
   "hideDoorbellSwitch": true,
+  "hideCameraLight": true,
   "hideCameraMotionSensor": true,
   "sendCameraMotionNotificationsToTv": true,
   "sendDoorbellMotionNotificationsToTv": true,
@@ -79,6 +80,7 @@ Option | Default | Explanation
 `hideDeviceIds` | `[]` | Allows you to hide specific devices by an array of ids.  The id for each device is logged when homebridge starts.
 `hideLightGroups` | `false` | Ring smart lighting allows you to create lighting groups within the Ring app. These groups are convenient for detecting motion in an area of your yard and turning on/off all lights in the group.  However, you may wish to group the lights differently in HomeKit and ignore the groups you have configured in Ring.  If this option is `true`, your Ring groups (and their associated motion sensor) will be ignored and will not show up in HomeKit.
 `hideDoorbellSwitch` | `false` | If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`. You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden (notifications can be configured in the settings for the doorbell camera in the Home app)
+`hideCameraLight` | `false` | If `true`, hides the light for Ring cameras in HomeKit.
 `hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit.
 `sendCameraMotionNotificationsToTv` | `false` | If `true`, creates a 'Doorbell' accessory triggered by non-doorbell camera motion alerts for tvOS 14 notification support.
 `sendDoorbellMotionNotificationsToTv` | `false` | If `true`, motion events on doorbell cameras will trigger a doorbell press event for tvOS 14 notification support.

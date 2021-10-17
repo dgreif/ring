@@ -119,7 +119,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       })
     }
 
-    if (device.hasLight) {
+    if (device.hasLight && !config.hideCameraLight) {
       const lightTargetTimer = new TargetValueTimer<boolean>()
       this.registerCharacteristic({
         characteristicType: Characteristic.On,

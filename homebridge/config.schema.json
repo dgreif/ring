@@ -31,6 +31,10 @@
         "type": "boolean",
         "description": "Hides the Programmable Switch for Ring doorbells.  This switch is only useful for triggering an automation when the doorbell is pressed, so most users can safely hide it"
       },
+      "hideCameraLight": {
+        "title": "Hide Camera Light",
+        "type": "boolean"
+      },
       "hideCameraMotionSensor": {
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
@@ -161,6 +165,7 @@
         "alarmOnEntryDelay",
         "hideLightGroups",
         "hideDoorbellSwitch",
+        "hideCameraLight",
         "hideCameraMotionSensor",
         "hideCameraSirenSwitch",
         "hideInHomeDoorbellSwitch",

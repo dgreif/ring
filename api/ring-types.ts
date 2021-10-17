@@ -687,7 +687,7 @@ export type DingKind =
   | 'on_demand' // Live View
   | 'alarm' // Linked Event - Alarm
   | 'on_demand_link' // Linked Event - Motion
-  | 'door_activity'
+  | 'door_activity' // knock
   | 'key_access'
   | 'DELETED_FOOTAGE'
   | 'OFFLINE_FOOTAGE'

@@ -125,7 +125,11 @@ export class RingCamera extends Subscribed {
   onNewDing = new Subject<ActiveDing>()
   onActiveDings = new BehaviorSubject<ActiveDing[]>([])
   onDoorbellPressed = this.onNewDing.pipe(
-    filter((ding) => ding.kind === 'ding'),
+    filter(
+      (ding) =>
+        ding.kind === 'ding' ||
+        (this.treatKnockAsDing && ding.kind === 'door_activity')
+    ),
     share()
   )
   onMotionDetected = this.onActiveDings.pipe(
@@ -154,7 +158,8 @@ export class RingCamera extends Subscribed {
     private initialData: CameraData,
     public isDoorbot: boolean,
     private restClient: RingRestClient,
-    private avoidSnapshotBatteryDrain: boolean
+    private avoidSnapshotBatteryDrain: boolean,
+    private treatKnockAsDing: boolean
   ) {
     super()
 

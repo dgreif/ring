@@ -29,6 +29,7 @@ export interface RingApiOptions extends SessionOptions {
   cameraDingsPollingSeconds?: number
   locationModePollingSeconds?: number
   avoidSnapshotBatteryDrain?: boolean
+  treatKnockAsDing?: boolean
   debug?: boolean
   ffmpegPath?: string
   externalPorts?: {
@@ -234,7 +235,8 @@ export class RingApi extends Subscribed {
               authorizedDoorbots.includes(data) ||
               data.kind.startsWith('doorbell'),
             this.restClient,
-            this.options.avoidSnapshotBatteryDrain || false
+            this.options.avoidSnapshotBatteryDrain || false,
+            this.options.treatKnockAsDing || false
           )
       ),
       ringChimes = chimes.map((data) => new RingChime(data, this.restClient)),

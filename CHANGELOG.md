@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.23.0](https://github.com/dgreif/ring/compare/v9.22.1...v9.23.0) (2021-10-17)
+
+
+### Features
+
+* **homebridge:** config option to hide camera lights ([58be17c](https://github.com/dgreif/ring/commit/58be17cfee524bfb158566e59d60438e9b6f0f5d)), closes [#802](https://github.com/dgreif/ring/issues/802)
+* **homebridge:** option to treat "knock" as a ding ([7ece8b2](https://github.com/dgreif/ring/commit/7ece8b25314ef403a6c2bab6a28476a3b7229507)), closes [#514](https://github.com/dgreif/ring/issues/514)
+
+
+### Bug Fixes
+
+* update dependencies ([b685e27](https://github.com/dgreif/ring/commit/b685e27e952a94635a277848821ebfa640d50ee2))
+
 ### [9.22.1](https://github.com/dgreif/ring/compare/v9.22.0...v9.22.1) (2021-10-13)
 
 

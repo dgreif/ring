@@ -109,7 +109,7 @@ Camera also includes the following observables:
 * `onDoorbellPressed`: emits a ding every time the doorbell is pressed
 * `onMotionDetected`: `true` or `false` based on `onActiveDings` containing a motion ding
 
-Some other useful propeties
+Some other useful properties
 * `id`
 * `name`: same as `description` from `data`
 * `hasLight`: does this camera have a light

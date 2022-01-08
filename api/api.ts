@@ -310,5 +310,7 @@ export class RingApi extends Subscribed {
       .catch((e) => {
         logError(e)
       })
+
+    this.restClient.clearTimeouts()
   }
 }

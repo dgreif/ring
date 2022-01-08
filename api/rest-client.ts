@@ -104,6 +104,7 @@ export class RingRestClient {
   public refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
   private hardwareIdPromise = getHardwareId(this.authOptions.systemId)
   private _authPromise: Promise<AuthTokenResponse> | undefined
+  private timeouts: ReturnType<typeof setTimeout>[] = []
   private clearPreviousAuth() {
     this._authPromise = undefined
   }
@@ -115,11 +116,12 @@ export class RingRestClient {
       authPromise
         .then(({ expires_in }) => {
           // clear the existing auth promise 1 minute before it expires
-          setTimeout(() => {
+          const timeout = setTimeout(() => {
             if (this._authPromise === authPromise) {
               this.clearPreviousAuth()
             }
           }, ((expires_in || 3600) - 60) * 1000)
+          this.timeouts.push(timeout)
         })
         .catch(() => {
           // ignore these errors here, they should be handled by the function making a rest request
@@ -398,5 +400,9 @@ export class RingRestClient {
 
   getCurrentAuth() {
     return this.authPromise
+  }
+
+  clearTimeouts() {
+    this.timeouts.forEach(clearTimeout)
   }
 }

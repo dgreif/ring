@@ -373,14 +373,14 @@ export class CameraSource implements CameraStreamingDelegate {
 
       let returnAudioPort: number | null = null
       if (libfdkAacInstalled) {
-        let cameraSpeakerActived = false
+        let cameraSpeakerActive = false
         const ringAudioLocation = {
             address: ringRtpDescription.address,
             port: ringRtpDescription.audio.port,
           },
           returnAudioTranscodedSplitter = new RtpSplitter((description) => {
-            if (!cameraSpeakerActived) {
-              cameraSpeakerActived = true
+            if (!cameraSpeakerActive) {
+              cameraSpeakerActive = true
               sipSession.activateCameraSpeaker().catch(logError)
             }
 

@@ -1,19 +1,18 @@
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Observable } from 'rxjs'
 import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
 import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
 import { Subscribed } from './subscribed'
 import { logError } from './util'
+import { RingDeviceType } from '.'
 
 export class RingDevice extends Subscribed {
-  onData = new BehaviorSubject(this.initialData)
-  zid = this.initialData.zid
-  id = this.zid
-  deviceType = this.initialData.deviceType
-  categoryId = this.initialData.categoryId
-  onComponentDevices = this.location.onDevices.pipe(
-    map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
-  )
+  onData: BehaviorSubject<RingDeviceData>
+  zid: string
+  id: string
+  deviceType: RingDeviceType
+  categoryId: number
+  onComponentDevices: Observable<RingDevice[]>
 
   constructor(
     private initialData: RingDeviceData,
@@ -21,6 +20,15 @@ export class RingDevice extends Subscribed {
     public assetId: string
   ) {
     super()
+
+    this.onData = new BehaviorSubject(this.initialData)
+    this.zid = this.initialData.zid
+    this.id = this.zid
+    this.deviceType = this.initialData.deviceType
+    this.categoryId = this.initialData.categoryId
+    this.onComponentDevices = this.location.onDevices.pipe(
+      map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
+    )
 
     this.addSubscriptions(
       location.onDeviceDataUpdate

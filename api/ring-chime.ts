@@ -5,6 +5,7 @@ import {
   RingtoneOptions,
   ChimeHealth,
   ChimeModel,
+  ChimeKind,
 } from './ring-types'
 import { clientApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -17,16 +18,21 @@ const settingsWhichRequireReboot = [
 ]
 
 export class RingChime {
-  id = this.initialData.id
-  deviceType = this.initialData.kind
-  model = ChimeModel[this.deviceType] || 'Chime'
-  onData = new BehaviorSubject<ChimeData>(this.initialData)
+  id: number
+  deviceType: ChimeKind
+  model: string
+  onData: BehaviorSubject<ChimeData>
   onRequestUpdate = new Subject()
 
   constructor(
     private initialData: ChimeData,
     private restClient: RingRestClient
-  ) {}
+  ) {
+    this.id = this.initialData.id
+    this.deviceType = this.initialData.kind
+    this.model = ChimeModel[this.deviceType] || 'Chime'
+    this.onData = new BehaviorSubject<ChimeData>(this.initialData)
+  }
 
   updateData(update: ChimeData) {
     this.onData.next(update)

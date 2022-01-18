@@ -14,7 +14,7 @@ import {
   VideoSearchResponse,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, interval, firstValueFrom, Subject } from 'rxjs'
+import { BehaviorSubject, interval, firstValueFrom, Subject, Observable } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -37,6 +37,7 @@ import { DeepPartial, delay, logDebug, logError } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
+import { RingCameraKind } from '.'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 35, // needs to be 30+ because battery cam can't take snapshot while recording
@@ -106,18 +107,13 @@ export function getSearchQueryString(
 }
 
 export class RingCamera extends Subscribed {
-  id = this.initialData.id
-  deviceType = this.initialData.kind
-  model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
-  onData = new BehaviorSubject<CameraData>(this.initialData)
-  hasLight = this.initialData.led_status !== undefined
-  hasSiren = this.initialData.siren_status !== undefined
-  hasBattery =
-    isBatteryCameraKind(this.deviceType) ||
-    (typeof this.initialData.battery_life === 'string' &&
-      this.batteryLevel !== null &&
-      this.batteryLevel < 100 &&
-      this.batteryLevel >= 0)
+  id: number
+  deviceType: RingCameraKind
+  model: string
+  onData: BehaviorSubject<CameraData>
+  hasLight: boolean
+  hasSiren: boolean
+  hasBattery: boolean
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -143,16 +139,8 @@ export class RingCamera extends Subscribed {
     mapTo(null), // no value needed, event is what matters
     share()
   )
-  onBatteryLevel = this.onData.pipe(
-    map(getBatteryLevel),
-    distinctUntilChanged()
-  )
-  onInHomeDoorbellStatus = this.onData.pipe(
-    map(({ settings: { chime_settings } }: CameraData) => {
-      return Boolean(chime_settings?.enable)
-    }),
-    distinctUntilChanged()
-  )
+  onBatteryLevel: Observable<number | null>
+  onInHomeDoorbellStatus: Observable<boolean>
 
   constructor(
     private initialData: CameraData,
@@ -162,6 +150,30 @@ export class RingCamera extends Subscribed {
     private treatKnockAsDing: boolean
   ) {
     super()
+
+    this.id = this.initialData.id
+    this.deviceType = this.initialData.kind
+    this.model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
+    this.onData = new BehaviorSubject<CameraData>(this.initialData)
+    this.hasLight = this.initialData.led_status !== undefined
+    this.hasSiren = this.initialData.siren_status !== undefined
+    this.hasBattery =
+      isBatteryCameraKind(this.deviceType) ||
+      (typeof this.initialData.battery_life === 'string' &&
+        this.batteryLevel !== null &&
+        this.batteryLevel < 100 &&
+        this.batteryLevel >= 0)
+
+    this.onBatteryLevel = this.onData.pipe(
+      map(getBatteryLevel),
+      distinctUntilChanged()
+    )
+    this.onInHomeDoorbellStatus = this.onData.pipe(
+      map(({ settings: { chime_settings } }: CameraData) => {
+        return Boolean(chime_settings?.enable)
+      }),
+      distinctUntilChanged()
+    )
 
     if (!initialData.subscribed) {
       this.subscribeToDingEvents().catch((e) => {

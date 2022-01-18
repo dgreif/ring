@@ -31,7 +31,7 @@ export class SipSession extends Subscribed {
   private hasStarted = false
   private hasCallEnded = false
   private onCallEndedSubject = new ReplaySubject(1)
-  private sipCall: SipCall = this.createSipCall(this.sipOptions)
+  private sipCall: SipCall
   onCallEnded = this.onCallEndedSubject.asObservable()
 
   constructor(
@@ -45,6 +45,8 @@ export class SipSession extends Subscribed {
     public readonly camera: RingCamera
   ) {
     super()
+
+    this.sipCall = this.createSipCall(this.sipOptions)
   }
 
   createSipCall(sipOptions: SipOptions) {

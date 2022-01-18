@@ -158,38 +158,24 @@ export class SipSession extends Subscribed {
     }
   }
 
-  private startTranscoder(
-    ffmpegOptions: FfmpegOptions,
+  public prepareTranscoder(
+    transcodeVideoStream: boolean,
+    ffmpegInputOptions: SpawnInput[] | undefined,
     remoteRtpOptions: RtpOptions,
     audioPort: number,
-    videoPort: number
+    videoPort: number,
+    sdpInput: string
   ) {
-    const transcodeVideoStream = ffmpegOptions.video !== false,
-      ffmpegArgs = [
+    const ffmpegInputArguments = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
         '-f',
         'sdp',
-        ...(ffmpegOptions.input || []),
+        ...(ffmpegInputOptions || []),
         '-i',
-        'pipe:',
-        ...(ffmpegOptions.audio || ['-acodec', 'aac']),
-        ...(transcodeVideoStream
-          ? ffmpegOptions.video || ['-vcodec', 'copy']
-          : []),
-        ...(ffmpegOptions.output || []),
+        sdpInput,
       ],
-      ff = new FfmpegProcess({
-        ffmpegArgs,
-        ffmpegPath: getFfmpegPath(),
-        exitCallback: () => this.callEnded(true),
-        logLabel: `From Ring (${this.camera.name})`,
-        logger: {
-          error: logError,
-          info: logDebug,
-        },
-      }),
       inputSdpLines = [
         'v=0',
         'o=105202070 3747 461 IN IP4 127.0.0.1',
@@ -229,10 +215,6 @@ export class SipSession extends Subscribed {
       })
     }
 
-    this.onCallEnded.subscribe(() => ff.stop())
-
-    ff.writeStdin(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
-
     this.audioSplitter.addMessageHandler(({ isRtpMessage, message }) => {
       if (isStunMessage(message)) {
         return null
@@ -242,6 +224,48 @@ export class SipSession extends Subscribed {
         port: isRtpMessage ? audioPort : audioPort + 1,
       }
     })
+
+    return {
+      ffmpegInputArguments,
+      inputSdpLines,
+    }
+  }
+
+  private startTranscoder(
+    ffmpegOptions: FfmpegOptions,
+    remoteRtpOptions: RtpOptions,
+    audioPort: number,
+    videoPort: number
+  ) {
+    const transcodeVideoStream = ffmpegOptions.video !== false,
+      { ffmpegInputArguments, inputSdpLines } = this.prepareTranscoder(
+        transcodeVideoStream,
+        ffmpegOptions.input,
+        remoteRtpOptions,
+        audioPort,
+        videoPort,
+        'pipe:'
+      ),
+      ff = new FfmpegProcess({
+        ffmpegArgs: ffmpegInputArguments.concat(
+          ...(ffmpegOptions.audio || ['-acodec', 'aac']),
+          ...(transcodeVideoStream
+            ? ffmpegOptions.video || ['-vcodec', 'copy']
+            : []),
+          ...(ffmpegOptions.output || [])
+        ),
+        ffmpegPath: getFfmpegPath(),
+        exitCallback: () => this.callEnded(true),
+        logLabel: `From Ring (${this.camera.name})`,
+        logger: {
+          error: logError,
+          info: logDebug,
+        },
+      })
+
+    this.onCallEnded.subscribe(() => ff.stop())
+
+    ff.writeStdin(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
   }
 
   async reservePort(bufferPorts = 0) {

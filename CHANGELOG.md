@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.24.0](https://github.com/dgreif/ring/compare/v9.23.0...v9.24.0) (2022-01-22)
+
+
+### Features
+
+* support glassbreak sensor ([98271f9](https://github.com/dgreif/ring/commit/98271f91f13aaae051fccaab7165cd17f2a2377c))
+
+
+### Bug Fixes
+
+* allow process to exit when RingApi.disconnect() is called ([#851](https://github.com/dgreif/ring/issues/851)) ([8ef25ac](https://github.com/dgreif/ring/commit/8ef25acca66c533873b7fd43c7c899e34b4a7617))
+* avoid error when ring terminates video stream ([7717d5e](https://github.com/dgreif/ring/commit/7717d5eaa40afed3d34f0e8e6eea1402e21afef7)), closes [#853](https://github.com/dgreif/ring/issues/853)
+* update dependencies ([c80d052](https://github.com/dgreif/ring/commit/c80d052f9eaf4c0a50a495166177daa40299ffa7))
+
 ## [9.23.0](https://github.com/dgreif/ring/compare/v9.22.1...v9.23.0) (2021-10-17)
 
 

@@ -14,7 +14,7 @@ import {
   VideoSearchResponse,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, interval, firstValueFrom, Subject, Observable } from 'rxjs'
+import { BehaviorSubject, interval, firstValueFrom, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -37,7 +37,6 @@ import { DeepPartial, delay, logDebug, logError } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
-import { RingCameraKind } from '.'
 
 const snapshotRefreshDelay = 500,
   maxSnapshotRefreshSeconds = 35, // needs to be 30+ because battery cam can't take snapshot while recording
@@ -107,13 +106,13 @@ export function getSearchQueryString(
 }
 
 export class RingCamera extends Subscribed {
-  id: number
-  deviceType: RingCameraKind
-  model: string
-  onData: BehaviorSubject<CameraData>
-  hasLight: boolean
-  hasSiren: boolean
-  hasBattery: boolean
+  id
+  deviceType
+  model
+  onData
+  hasLight
+  hasSiren
+  hasBattery
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -139,8 +138,8 @@ export class RingCamera extends Subscribed {
     mapTo(null), // no value needed, event is what matters
     share()
   )
-  onBatteryLevel: Observable<number | null>
-  onInHomeDoorbellStatus: Observable<boolean>
+  onBatteryLevel
+  onInHomeDoorbellStatus
 
   constructor(
     private initialData: CameraData,

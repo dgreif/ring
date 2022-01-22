@@ -101,8 +101,8 @@ export interface SessionOptions {
 
 export class RingRestClient {
   // prettier-ignore
-  public refreshToken: string | undefined
-  private hardwareIdPromise: Promise<string>
+  public refreshToken
+  private hardwareIdPromise
   private _authPromise: Promise<AuthTokenResponse> | undefined
   private timeouts: ReturnType<typeof setTimeout>[] = []
   private clearPreviousAuth() {
@@ -141,7 +141,10 @@ export class RingRestClient {
   constructor(
     private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions
   ) {
-    this.refreshToken = ('refreshToken' in this.authOptions ? this.authOptions.refreshToken : undefined)
+    this.refreshToken =
+      'refreshToken' in this.authOptions
+        ? this.authOptions.refreshToken
+        : undefined
     this.hardwareIdPromise = getHardwareId(this.authOptions.systemId)
   }
 

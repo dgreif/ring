@@ -17,7 +17,7 @@ import {
 } from './ring-types'
 import { RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
-import { EMPTY, merge, Observable, Subject } from 'rxjs'
+import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
@@ -39,17 +39,15 @@ export interface RingApiOptions extends SessionOptions {
 }
 
 export class RingApi extends Subscribed {
-  public readonly restClient: RingRestClient
-  public readonly onRefreshTokenUpdated: Observable<{
-    oldRefreshToken?: string | undefined;
-    newRefreshToken: string;
-  }>
+  public readonly restClient
+  public readonly onRefreshTokenUpdated
 
   constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
     super()
 
     this.restClient = new RingRestClient(this.options)
-    this.onRefreshTokenUpdated = this.restClient.onRefreshTokenUpdated.asObservable()
+    this.onRefreshTokenUpdated =
+      this.restClient.onRefreshTokenUpdated.asObservable()
 
     if (options.debug) {
       enableDebug()

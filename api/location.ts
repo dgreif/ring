@@ -124,8 +124,8 @@ export class Location extends Subscribed {
   assets?: TicketAsset[]
   receivedAssetDeviceLists: string[] = []
   offlineAssets: string[] = []
-  hasHubs: boolean
-  hasAlarmBaseStation: boolean
+  hasHubs
+  hasAlarmBaseStation
 
   constructor(
     public readonly locationDetails: UserLocation,

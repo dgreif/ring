@@ -1,18 +1,17 @@
-import { BehaviorSubject, Observable } from 'rxjs'
+import { BehaviorSubject } from 'rxjs'
 import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
 import { filter, map } from 'rxjs/operators'
 import { Location } from './location'
 import { Subscribed } from './subscribed'
 import { logError } from './util'
-import { RingDeviceType } from '.'
 
 export class RingDevice extends Subscribed {
-  onData: BehaviorSubject<RingDeviceData>
-  zid: string
-  id: string
-  deviceType: RingDeviceType
-  categoryId: number
-  onComponentDevices: Observable<RingDevice[]>
+  onData
+  zid
+  id
+  deviceType
+  categoryId
+  onComponentDevices
 
   constructor(
     private initialData: RingDeviceData,

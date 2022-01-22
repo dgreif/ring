@@ -165,6 +165,10 @@ If you are having issues with your cameras in the Home app, please see the [Came
     * Detect water leak
     * Tamper status
     * Battery status
+  * Glassbreak Sensor (**untested**)
+    * Detect glass breaking
+    * Tamper status
+    * Battery status
   * Ring Smart Lights (Motion Detector, Flood/Path/Step/Spot Lights, Bulbs, Transformer, Outdoor Smart Plug, Mailbox Sensor)
     * On/Off
     * Brightness Level

@@ -12,6 +12,7 @@ export enum RingDeviceType {
   TemperatureSensor = 'sensor.temperature',
   WaterSensor = 'sensor.water',
   TiltSensor = 'sensor.tilt',
+  GlassbreakSensor = 'sensor.glassbreak',
   RangeExtender = 'range-extender.zwave',
   ZigbeeAdapter = 'adapter.zigbee',
   AccessCodeVault = 'access-code.vault',

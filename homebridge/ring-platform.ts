@@ -83,6 +83,7 @@ function getAccessoryClass(
     case RingDeviceType.ContactSensor:
     case RingDeviceType.RetrofitZone:
     case RingDeviceType.TiltSensor:
+    case RingDeviceType.GlassbreakSensor:
       return ContactSensor
     case RingDeviceType.MotionSensor:
       return MotionSensor

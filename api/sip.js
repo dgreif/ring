@@ -1576,6 +1576,7 @@ exports.create = function (options, callback) {
       transaction.destroy()
       transport.destroy()
     },
+    makeResponse,
   }
 }
 

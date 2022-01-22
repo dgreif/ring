@@ -291,7 +291,7 @@ export interface BeamBridge {
   updated_at: string
 }
 
-type ChimeKind = 'chime' | 'chime_pro' | 'chime_v2' | 'chime_pro_v2'
+export type ChimeKind = 'chime' | 'chime_pro' | 'chime_v2' | 'chime_pro_v2'
 export const ChimeModel: { readonly [P in ChimeKind]: string } = {
   chime: 'Chime',
   chime_pro: 'Chime Pro',

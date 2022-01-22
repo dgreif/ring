@@ -124,8 +124,8 @@ export class Location extends Subscribed {
   assets?: TicketAsset[]
   receivedAssetDeviceLists: string[] = []
   offlineAssets: string[] = []
-  hasHubs = this.options.hasHubs
-  hasAlarmBaseStation = this.options.hasAlarmBaseStation
+  hasHubs: boolean
+  hasAlarmBaseStation: boolean
 
   constructor(
     public readonly locationDetails: UserLocation,
@@ -139,6 +139,9 @@ export class Location extends Subscribed {
     private restClient: RingRestClient
   ) {
     super()
+
+    this.hasHubs = this.options.hasHubs
+    this.hasAlarmBaseStation = this.options.hasAlarmBaseStation
 
     this.addSubscriptions(
       // start listening for devices immediately

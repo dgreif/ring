@@ -1,4 +1,4 @@
-import debug = require('debug')
+import debug from 'debug'
 import { red } from 'colors'
 import { createInterface } from 'readline'
 import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'

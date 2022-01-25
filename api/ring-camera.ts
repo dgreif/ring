@@ -691,6 +691,47 @@ export class RingCamera extends Subscribed {
     return sipSession
   }
 
+  /**
+   * Exchange an Offer SDP for an Answer SDP. Unknown if this endpoint supports trickle with
+   * the same session UUID. The Answer SDP advertises trickle. Invalid SDP will result in error
+   * 400. Calling this too often will result in what seems to be a soft lockout for 5 minutes,
+   * resulting in error 500s.
+   * @param session_uuid A session UUID that can be later used to end the WebRTC session.
+   * Unknown if stopping the session is actually necessary since WebRTC knows the peer connection state.
+   * @param sdp Offer SDP. audio channel must be set to sendrecv.
+   * @returns Answer SDP.
+   */
+  async startWebRtcSession(session_uuid: string, sdp: string): Promise<string> {
+    const response = await this.restClient.request<any>({
+      method: 'POST',
+      url: 'https://api.ring.com/integrations/v1/liveview/start',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_id: session_uuid,
+        device_id: this.id,
+        sdp: sdp,
+        protocol: 'webrtc',
+      }),
+    })
+    return response.sdp
+  }
+
+  async endWebRtcSession(session_uuid: string): Promise<string> {
+    const response = await this.restClient.request<any>({
+      method: 'POST',
+      url: 'https://api.ring.com/integrations/v1/liveview/end',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_id: session_uuid,
+      }),
+    })
+    return response.sdp
+  }
+
   subscribeToDingEvents() {
     return this.restClient.request({
       method: 'POST',

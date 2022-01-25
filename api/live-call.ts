@@ -14,6 +14,7 @@ import {
   InitializationMessage,
   LiveCallNegotiation,
   OfferMessage,
+  CloseMessage,
 } from './live-call-negotiation'
 import { firstValueFrom } from 'rxjs'
 
@@ -53,7 +54,11 @@ export class LiveCall extends LiveCallNegotiation {
   }
 
   private async handleMessage(
-    message: InitializationMessage | OfferMessage | IceCandidateMessage
+    message:
+      | InitializationMessage
+      | OfferMessage
+      | IceCandidateMessage
+      | CloseMessage
   ) {
     switch (message.method) {
       case 'sdp':

@@ -22,10 +22,19 @@ export interface IceCandidateMessage {
   mlineindex: number
 }
 
+export interface CloseMessage {
+  method: 'close'
+  reason: {
+    code: number
+    text: string
+  }
+}
+
 export type LiveCallNegotiationMessage =
   | InitializationMessage
   | OfferMessage
   | IceCandidateMessage
+  | CloseMessage
 
 export class LiveCallNegotiation extends Subscribed {
   private readonly ws
@@ -115,7 +124,7 @@ export class LiveCallNegotiation extends Subscribed {
     })
   }
 
-  protected callEnded() {
+  endCall() {
     try {
       this.sendMessage({
         reason: { code: 0, text: '' },
@@ -125,7 +134,10 @@ export class LiveCallNegotiation extends Subscribed {
     } catch (_) {
       // ignore any errors since we are stopping the call
     }
+  }
 
+  protected callEnded() {
+    this.endCall()
     this.unsubscribe()
     this.onCallEnded.next()
   }

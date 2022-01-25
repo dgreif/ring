@@ -330,23 +330,24 @@ export class RingCamera extends Subscribed {
   }
 
   async startLiveCallNegotiation() {
-    const liveCall = await this.restClient
-      .request<LiveCallResponse>({
+    try {
+      const liveCall = await this.restClient.request<LiveCallResponse>({
         method: 'POST',
         url: this.doorbotUrl('live_call'),
       })
-      .catch((e) => {
-        if (e.response?.statusCode === 403) {
-          const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
-          logError(errorMessage)
-          throw new Error(errorMessage)
-        }
 
-        throw e
-      })
+      return liveCall.data.session_id
+    } catch (e: any) {
+      if (e.response?.statusCode === 403) {
+        const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
+        logError(errorMessage)
+        throw new Error(errorMessage)
+      }
 
-    return liveCall.data.session_id
+      throw e
+    }
   }
+
   async startLiveCall() {
     return new LiveCall(await this.startLiveCallNegotiation(), this)
   }
@@ -551,6 +552,37 @@ export class RingCamera extends Subscribed {
     const liveCall = await this.startLiveCall()
     await liveCall.startTranscoding(ffmpegOptions)
     return liveCall
+  }
+
+  async startWebRtcSession(session_uuid: string, sdp: string): Promise<string> {
+    const response = await this.restClient.request<any>({
+      method: 'POST',
+      url: 'https://api.ring.com/integrations/v1/liveview/start',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_id: session_uuid,
+        device_id: this.id,
+        sdp: sdp,
+        protocol: 'webrtc',
+      }),
+    })
+    return response.sdp
+  }
+
+  async endWebRtcSession(session_uuid: string): Promise<string> {
+    const response = await this.restClient.request<any>({
+      method: 'POST',
+      url: 'https://api.ring.com/integrations/v1/liveview/end',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        session_id: session_uuid,
+      }),
+    })
+    return response.sdp
   }
 
   subscribeToDingEvents() {

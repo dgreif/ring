@@ -74,6 +74,7 @@ export enum RingCameraKind {
   doorbell_portal = 'doorbell_portal',
   doorbell_scallop = 'doorbell_scallop',
   doorbell_scallop_lite = 'doorbell_scallop_lite',
+  doorbell_graham_cracker = 'doorbell_graham_cracker',
   lpd_v1 = 'lpd_v1',
   lpd_v2 = 'lpd_v2',
   jbox_v1 = 'jbox_v1',
@@ -94,7 +95,7 @@ export enum RingCameraKind {
 
 // RegExp taken from ring.com app
 const isWiredCameraRegExp = new RegExp(
-  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight))/
+  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight|doorbell_graham_cracker))/
 )
 export function isBatteryCameraKind(kind: RingCameraKind) {
   return !kind.match(isWiredCameraRegExp)
@@ -109,6 +110,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbell_portal: 'Door View Cam',
   doorbell_scallop: 'Doorbell 3 Plus',
   doorbell_scallop_lite: 'Doorbell 3',
+  doorbell_graham_cracker: 'Doorbell Wired',
   lpd_v1: 'Doorbell Pro',
   lpd_v2: 'Doorbell Pro',
   jbox_v1: 'Doorbell Elite',

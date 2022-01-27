@@ -112,7 +112,6 @@ export class RingCamera extends Subscribed {
   onData
   hasLight
   hasSiren
-  hasBattery
 
   onRequestUpdate = new Subject()
   onRequestActiveDings = new Subject()
@@ -156,12 +155,6 @@ export class RingCamera extends Subscribed {
     this.onData = new BehaviorSubject<CameraData>(this.initialData)
     this.hasLight = this.initialData.led_status !== undefined
     this.hasSiren = this.initialData.siren_status !== undefined
-    this.hasBattery =
-      isBatteryCameraKind(this.deviceType) ||
-      (typeof this.initialData.battery_life === 'string' &&
-        this.batteryLevel !== null &&
-        this.batteryLevel < 100 &&
-        this.batteryLevel >= 0)
 
     this.onBatteryLevel = this.onData.pipe(
       map(getBatteryLevel),
@@ -215,6 +208,19 @@ export class RingCamera extends Subscribed {
 
   get batteryLevel() {
     return getBatteryLevel(this.data)
+  }
+
+  get hasBattery() {
+    if (this.batteryLevel === null) {
+      return false
+    }
+
+    return (
+      isBatteryCameraKind(this.deviceType) ||
+      (typeof this.initialData.battery_life === 'string' &&
+        this.batteryLevel < 100 &&
+        this.batteryLevel >= 0)
+    )
   }
 
   get hasLowBattery() {

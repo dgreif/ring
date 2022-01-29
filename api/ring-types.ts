@@ -815,11 +815,6 @@ export interface ActiveDing {
   sip_ding_id: string
 }
 
-export interface SnapshotTimestamp {
-  timestamp: number
-  doorbot_id: number
-}
-
 export interface AuthTokenResponse {
   access_token: string
   expires_in: number

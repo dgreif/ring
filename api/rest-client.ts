@@ -46,6 +46,7 @@ export function appApi(path: string) {
 
 export interface ExtendedResponse {
   responseTimestamp: number
+  timeMillis: number
 }
 
 async function requestWithRetry<T>(
@@ -61,8 +62,14 @@ async function requestWithRetry<T>(
         body: any
       },
       data = body as T & ExtendedResponse
-    if (data !== null && typeof data === 'object' && headers.date) {
-      data.responseTimestamp = new Date(headers.date as string).getTime()
+    if (data !== null && typeof data === 'object') {
+      if (headers.date) {
+        data.responseTimestamp = new Date(headers.date as string).getTime()
+      }
+
+      if (headers['x-time-millis']) {
+        data.timeMillis = Number(headers['x-time-millis'])
+      }
     }
     return data
   } catch (e: any) {

@@ -121,6 +121,7 @@ export class CameraSource implements CameraStreamingDelegate {
         )}s)`
       )
     } catch (e) {
+      this.cachedSnapshot = undefined
       logDebug(
         `Failed to cache snapshot for ${
           this.ringCamera.name

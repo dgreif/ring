@@ -10,7 +10,6 @@ import {
   isBatteryCameraKind,
   PeriodicFootageResponse,
   RingCameraModel,
-  SnapshotTimestamp,
   VideoSearchResponse,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
@@ -38,10 +37,7 @@ import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
 
-const snapshotRefreshDelay = 500,
-  maxSnapshotRefreshSeconds = 35, // needs to be 30+ because battery cam can't take snapshot while recording
-  maxSnapshotRefreshAttempts =
-    (maxSnapshotRefreshSeconds * 1000) / snapshotRefreshDelay,
+const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
 
 function parseBatteryLife(batteryLife: string | number | null | undefined) {
@@ -458,47 +454,17 @@ export class RingCamera extends Subscribed {
     return this.data.settings.motion_detection_enabled === false
   }
 
-  private async getSnapshotTimestamp() {
-    const { timestamps, responseTimestamp } = await this.restClient.request<{
-        timestamps: SnapshotTimestamp[]
-      }>({
-        url: clientApi('snapshots/timestamps'),
-        method: 'POST',
-        json: {
-          doorbot_ids: [this.id],
-        },
-      }),
-      deviceTimestamp = timestamps[0],
-      timestamp = deviceTimestamp ? deviceTimestamp.timestamp : 0,
-      timestampAge = Math.abs(responseTimestamp - timestamp)
-
-    this.lastSnapshotTimestampLocal = timestamp ? Date.now() - timestampAge : 0
-
-    return {
-      timestamp,
-      inLifeTime: this.isTimestampInLifeTime(timestampAge),
-    }
-  }
-
-  private refreshSnapshotInProgress?: Promise<boolean>
   public get snapshotLifeTime() {
     return this.avoidSnapshotBatteryDrain && this.operatingOnBattery
       ? 600 * 1000 // battery cams only refresh timestamp every 10 minutes
-      : 10 * 1000 // snapshot updates will be forced.  Limit to 10 lifetime
+      : 10 * 1000 // snapshot updates will be forced.  Limit to 10s lifetime
   }
+  private lastSnapshotTimestamp = 0
   private lastSnapshotTimestampLocal = 0
   private lastSnapshotPromise?: Promise<Buffer>
 
   get currentTimestampAge() {
     return Date.now() - this.lastSnapshotTimestampLocal
-  }
-
-  get currentTimestampExpiresIn() {
-    // Gets 0 if stale snapshot is used because snapshot timestamp refused to update (recording in progress on battery cam)
-    return Math.max(
-      this.lastSnapshotTimestampLocal - Date.now() + this.snapshotLifeTime,
-      0
-    )
   }
 
   get hasSnapshotWithinLifetime() {
@@ -511,20 +477,19 @@ export class RingCamera extends Subscribed {
         `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
       )
     }
+
+    if (this.isOffline) {
+      throw new Error(
+        `Cannot fetch snapshot for ${this.name} because it is offline`
+      )
+    }
   }
 
-  private requestSnapshotUpdate() {
-    return this.restClient.request({
-      method: 'PUT',
-      url: clientApi('snapshots/update_all'),
-      json: {
-        doorbot_ids: [this.id],
-        refresh: true,
-      },
-    })
-  }
+  private shouldUseExistingSnapshotPromise() {
+    if (this.fetchingSnapshot) {
+      return true
+    }
 
-  private async refreshSnapshot() {
     if (this.hasSnapshotWithinLifetime) {
       logDebug(
         `Snapshot for ${this.name} is still within its life time (${
@@ -534,72 +499,75 @@ export class RingCamera extends Subscribed {
       return true
     }
 
-    this.checkIfSnapshotsAreBlocked()
     if (!this.avoidSnapshotBatteryDrain || !this.operatingOnBattery) {
       // tell the camera to update snapshot immediately.
       // avoidSnapshotBatteryDrain is best if you have a battery cam that you request snapshots for frequently.  This can lead to battery drain if snapshot updates are forced.
-      await this.requestSnapshotUpdate()
+      return false
     }
-
-    for (let i = 0; i < maxSnapshotRefreshAttempts; i++) {
-      this.checkIfSnapshotsAreBlocked()
-
-      const { timestamp, inLifeTime } = await this.getSnapshotTimestamp()
-
-      if (!timestamp && this.isOffline) {
-        throw new Error(
-          `No snapshot available and device ${this.name} is offline`
-        )
-      }
-
-      if (inLifeTime) {
-        return false
-      }
-
-      await delay(snapshotRefreshDelay)
-    }
-
-    const extraMessageForBatteryCam = this.operatingOnBattery
-      ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
-      : ''
-    throw new Error(
-      `Snapshot for ${this.name} (${this.deviceType} - ${this.model}) failed to refresh after ${maxSnapshotRefreshAttempts} attempts${extraMessageForBatteryCam}`
-    )
   }
 
+  private fetchingSnapshot = false
   async getSnapshot() {
-    this.refreshSnapshotInProgress =
-      this.refreshSnapshotInProgress ||
-      this.refreshSnapshot().catch((e) => {
-        logError(e.message)
-        throw e
-      })
-
-    try {
-      const useLastSnapshot = await this.refreshSnapshotInProgress
-      this.refreshSnapshotInProgress = undefined
-
-      if (useLastSnapshot && this.lastSnapshotPromise) {
-        return this.lastSnapshotPromise
-      }
-    } catch (e) {
-      this.refreshSnapshotInProgress = undefined
-      throw e
+    if (this.lastSnapshotPromise && this.shouldUseExistingSnapshotPromise()) {
+      return this.lastSnapshotPromise
     }
 
-    this.lastSnapshotPromise = this.restClient.request<Buffer>({
-      url: clientApi(`snapshots/image/${this.id}`),
-      responseType: 'buffer',
-    })
+    this.checkIfSnapshotsAreBlocked()
+
+    this.lastSnapshotPromise = Promise.race([
+      this.getNextSnapshot({
+        afterMs: this.lastSnapshotTimestamp,
+        force: true,
+      }),
+      delay(maxSnapshotRefreshSeconds * 1000).then(() => {
+        const extraMessageForBatteryCam = this.operatingOnBattery
+          ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
+          : ''
+        throw new Error(
+          `Snapshot for ${this.name} (${this.deviceType} - ${this.model}) failed to refresh after ${maxSnapshotRefreshSeconds} seconds${extraMessageForBatteryCam}`
+        )
+      }),
+    ])
 
     try {
       await this.lastSnapshotPromise
-    } catch (_) {
+    } catch (e) {
       // snapshot request failed, don't use it again
       this.lastSnapshotPromise = undefined
+      throw e
     }
+    this.fetchingSnapshot = false
 
     return this.lastSnapshotPromise
+  }
+
+  public async getNextSnapshot({
+    afterMs,
+    maxWaitMs,
+    force,
+  }: {
+    afterMs?: number
+    maxWaitMs?: number
+    force?: boolean
+  }) {
+    const response = await this.restClient.request<Buffer>({
+        url: `https://app-snaps.ring.com/snapshots/next/${this.id}?extras=force`,
+        responseType: 'buffer',
+        searchParams: {
+          'after-ms': afterMs,
+          'max-wait-ms': maxWaitMs,
+          extras: force ? 'force' : undefined,
+        },
+        headers: {
+          accept: 'image/jpeg',
+        },
+      }),
+      { responseTimestamp, timeMillis } = response,
+      timestampAge = Math.abs(responseTimestamp - timeMillis)
+
+    this.lastSnapshotTimestamp = timeMillis
+    this.lastSnapshotTimestampLocal = Date.now() - timestampAge
+    return response
   }
 
   async getSipOptions(): Promise<SipOptions> {

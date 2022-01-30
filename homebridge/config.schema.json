@@ -12,9 +12,7 @@
     "properties": {
       "Name": {
         "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Ring"
+        "type": "string"
       },
       "refreshToken": {
         "title": "Refresh Token",

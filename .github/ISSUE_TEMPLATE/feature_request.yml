@@ -13,14 +13,14 @@ body:
         Is your feature request related to a problem? Please describe.
   - type: input
     attributes:
-      label: Problem
-      placeholder: A clear and concise description of what the problem is. Ex. I am always frustrated when [...]
+      label: Description
+      placeholder: A clear and concise description of the problem or missing capability...
     validations:
       required: false
   - type: input
     attributes:
-      label: Solution
-      placeholder: A clear and concise description of what you want to happen.
+      label: Describe the solution you would like
+      placeholder: If you have a solution in mind, please describe it.
     validations:
       required: true
   - type: input

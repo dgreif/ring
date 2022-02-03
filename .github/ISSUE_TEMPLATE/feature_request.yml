@@ -1,23 +1,38 @@
----
 name: Feature Request
-about: Suggest an idea for this project
-labels: 'enhancement'
----
-<!--
-Please DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
-Before opening an issue, search for open and closed GitHub issues that match your request.
--->
-
-# Feature Request
-
-### Description
-<!-- ✍️--> A clear and concise description of the problem or missing capability...
-
-### Describe the solution you'd like
-<!-- ✍️--> If you have a solution in mind, please describe it.
-
-### Describe alternatives you've considered
-<!-- ✍️--> Have you considered any alternative solutions or workarounds?
-
-### Device data
-<!-- ✍️-->  If you are requesting a new device be added to homebridge-ring, please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+description: Suggest an idea for this project
+title: 'Feature Request: '
+labels: [enhancement]
+assignees: 'donavanbecker'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You must use the issue template below when submitting a feature request.
+  - type: markdown
+    attributes:
+      value: |
+        Is your feature request related to a problem? Please describe.
+  - type: input
+    attributes:
+      label: Problem
+      placeholder: A clear and concise description of what the problem is. Ex. I am always frustrated when [...]
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Solution
+      placeholder: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Alternatives
+      placeholder: A clear and concise description of any alternative solutions or features you have considered.
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Additional context
+      placeholder: Add any other context or screenshots about the feature request here. Post device logs here.
+    validations:
+      required: false

@@ -32,6 +32,7 @@ body:
   - type: input
     attributes:
       label: Device data
-      placeholder: If you are requesting a new device be added to homebridge-ring, please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+      description: please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+      placeholder: If you are requesting a new device be added to homebridge-ring
     validations:
       required: false

@@ -1,13 +1,12 @@
-name: Bug Report (ring-client-api)
-description: Report a bug in ring-client-api
+name: Bug Report (homebridge-ring)
+description: Report a bug in homebridge-ring
 title: 'Bug: '
 labels: [bug]
-assignees: 'donavanbecker'
 body:
   - type: markdown
     attributes:
       value: |
-        Please DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
+        lease DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
         Before opening an issue, search for open and closed GitHub issues that match your situation.
         If this is a Live Stream issue please go back and use the Live Streaming issue template.
   - type: input
@@ -19,7 +18,7 @@ body:
   - type: input
     attributes:
       label: To Reproduce
-      placeholder: Steps to reproduce the behavior.  - Create an `ApiClient` - Attempt to ...  - See error
+      placeholder: Steps to reproduce the behavior: Start Homebridge, Attempt to ..., See error
     validations:
       required: true
   - type: input
@@ -43,6 +42,14 @@ body:
       placeholder: You can attach images by clicking this area to highlight it and then dragging files in.
     validations:
       required: false
+  - type: textarea
+    id: Config
+    attributes:
+      label: Homebridge Ring Config
+      placeholder: Post homebridge-ring platform config  _without sensitive information_
+      render: shell
+    validations:
+      required: true
   - type: input
     attributes:
       label: Additional context
@@ -71,10 +78,16 @@ body:
       placeholder: v7.22.0
     validations:
       required: true
+      - type: input
+    attributes:
+      label: Homebridge/HOOBs Version
+      placeholder: v1.4.0/v4.0.0
+    validations:
+      required: true
   - type: input
     attributes:
-      label: ring-client-api
-      placeholder: v6.0.3
+      label: Homebridge Ring Plugin Version
+      placeholder: v9.24.0
     validations:
       required: true
   - type: input

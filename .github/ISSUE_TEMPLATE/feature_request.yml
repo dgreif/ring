@@ -29,10 +29,10 @@ body:
       placeholder: Have you considered any alternative solutions or workarounds?
     validations:
       required: false
-  - type: input
+  - type: textarea
     attributes:
       label: Device data
-      description: please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+      description: Please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
       placeholder: If you are requesting a new device be added to homebridge-ring
     validations:
       required: false

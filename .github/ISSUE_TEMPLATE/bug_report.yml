@@ -78,7 +78,7 @@ body:
       placeholder: v7.22.0
     validations:
       required: true
-      - type: input
+  - type: input
     attributes:
       label: Homebridge/HOOBs Version
       placeholder: v1.4.0/v4.0.0

@@ -25,13 +25,13 @@ body:
       required: true
   - type: input
     attributes:
-      label: Alternatives
-      placeholder: A clear and concise description of any alternative solutions or features you have considered.
+      label: Describe alternatives you have considered
+      placeholder: Have you considered any alternative solutions or workarounds?
     validations:
       required: false
   - type: input
     attributes:
-      label: Additional context
-      placeholder: Add any other context or screenshots about the feature request here. Post device logs here.
+      label: Device data
+      placeholder: If you are requesting a new device be added to homebridge-ring, please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
     validations:
       required: false

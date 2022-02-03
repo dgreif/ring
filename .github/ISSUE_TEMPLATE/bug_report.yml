@@ -18,7 +18,7 @@ body:
   - type: input
     attributes:
       label: To Reproduce
-      placeholder: Steps to reproduce the behavior: Start Homebridge, Attempt to..., See error
+      placeholder: Steps to reproduce the behavior.  - Start Homebridge - Attempt to ...  - See error
     validations:
       required: true
   - type: input

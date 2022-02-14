@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.25.0-beta.1](https://github.com/dgreif/ring/compare/v9.25.0-beta.0...v9.25.0-beta.1) (2022-02-14)
+
+
+### Features
+
+* use new WebRTC endpoint for live calls ([6e7779f](https://github.com/dgreif/ring/commit/6e7779feef9789583921fc44bab32c099f3026d2))
+
 ## [9.25.0-beta.0](https://github.com/dgreif/ring/compare/v9.24.0...v9.25.0-beta.0) (2022-01-29)
 
 

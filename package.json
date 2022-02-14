@@ -18,6 +18,7 @@
     "example": "npm run build-quick && node ./lib/examples/example.js",
     "api-example": "npm run build-quick && node ./lib/examples/api-example.js",
     "record-example": "npm run build-quick && node ./lib/examples/record-example.js",
+    "return-audio-example": "npm run build-quick && node ./lib/examples/return-audio-example.js",
     "stream-example": "npm run build-quick && node ./lib/examples/stream-example.js",
     "browser-example": "npm run build-quick && node ./lib/examples/browser-example.js",
     "auth-cli": "npm run build-quick && ./ring-auth-cli.js",
@@ -54,8 +55,9 @@
   "author": "dgreif",
   "license": "MIT",
   "dependencies": {
-    "@homebridge/camera-utils": "2.0.4",
+    "@homebridge/camera-utils": "2.1.0",
     "@homebridge/plugin-ui-utils": "0.0.19",
+    "@koush/werift": "0.14.5-beta5",
     "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "4.3.3",
@@ -65,13 +67,15 @@
     "socket.io-client": "2.4.0",
     "stun": "2.1.0",
     "systeminformation": "5.10.7",
-    "uuid": "8.3.2"
+    "uuid": "8.3.2",
+    "ws": "8.4.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.7",
     "@types/jest": "27.4.0",
     "@types/node": "17.0.10",
     "@types/uuid": "8.3.4",
+    "@types/ws": "^8.2.2",
     "@typescript-eslint/eslint-plugin": "5.10.0",
     "@typescript-eslint/parser": "5.10.0",
     "concurrently": "^7.0.0",

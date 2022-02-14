@@ -19,7 +19,8 @@
   },
   "env": {
     "node": true,
-    "es6": true
+    "es6": true,
+    "es2020": true
   },
   "rules": {
     "comma-dangle": [2,"only-multiline"],

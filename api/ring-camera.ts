@@ -8,6 +8,7 @@ import {
   DoorbellType,
   HistoryOptions,
   isBatteryCameraKind,
+  LiveCallResponse,
   PeriodicFootageResponse,
   RingCameraModel,
   VideoSearchResponse,
@@ -36,6 +37,7 @@ import { DeepPartial, delay, logDebug, logError } from './util'
 import { FfmpegOptions, SipSession } from './sip-session'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
+import { LiveCall } from './live-call'
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -336,6 +338,25 @@ export class RingCamera extends Subscribed {
     })
 
     return response.device_health
+  }
+
+  async startLiveCall() {
+    const liveCall = await this.restClient
+      .request<LiveCallResponse>({
+        method: 'POST',
+        url: this.doorbotUrl('live_call'),
+      })
+      .catch((e) => {
+        if (e.response?.statusCode === 403) {
+          const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
+          logError(errorMessage)
+          throw new Error(errorMessage)
+        }
+
+        throw e
+      })
+
+    return new LiveCall(liveCall.data.session_id, this)
   }
 
   startVideoOnDemand() {
@@ -652,11 +673,13 @@ export class RingCamera extends Subscribed {
   }
 
   async recordToFile(outputPath: string, duration = 30) {
-    const sipSession = await this.streamVideo({
+    const liveCall = await this.startLiveCall()
+
+    await liveCall.startTranscoding({
       output: ['-t', duration.toString(), outputPath],
     })
 
-    await firstValueFrom(sipSession.onCallEnded)
+    await firstValueFrom(liveCall.onCallEnded)
   }
 
   async streamVideo(ffmpegOptions: FfmpegOptions) {

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [9.25.0-beta.1](https://github.com/dgreif/ring/compare/v9.25.0-beta.0...v9.25.0-beta.1) (2022-02-14)
+
+
+### Features
+
+* use new WebRTC endpoint for live calls ([6e7779f](https://github.com/dgreif/ring/commit/6e7779feef9789583921fc44bab32c099f3026d2))
+
+## [9.25.0-beta.0](https://github.com/dgreif/ring/compare/v9.24.0...v9.25.0-beta.0) (2022-01-29)
+
+
+### Features
+
+* **api:** decouple ffmpeg prep from execution ([#859](https://github.com/dgreif/ring/issues/859)) ([e3cc9d1](https://github.com/dgreif/ring/commit/e3cc9d15584377bf2be94a9d457efc3dfcb4bd8b))
+* handle new camera types with no battery ([11ae286](https://github.com/dgreif/ring/commit/11ae28697d8cb0e2da71e880c82e1883f04047b9))
+* slightly faster snapshots via new endpoint ([b840471](https://github.com/dgreif/ring/commit/b840471bc6b7b66e5873370251bd57c1a35b267a))
+
 ## [9.24.0](https://github.com/dgreif/ring/compare/v9.23.0...v9.24.0) (2022-01-22)
 
 

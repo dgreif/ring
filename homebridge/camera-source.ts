@@ -2,7 +2,6 @@ import { RingCamera } from '../api'
 import { hap } from './hap'
 import {
   generateSrtpOptions,
-  getDefaultIpAddress,
   RtpSplitter,
   SrtpOptions,
 } from '@homebridge/camera-utils'
@@ -392,8 +391,6 @@ export class CameraSource implements CameraStreamingDelegate {
       )
 
       callback(undefined, {
-        // SOMEDAY: remove address as it is not needed after homebridge 1.1.3
-        address: await getDefaultIpAddress(request.addressVersion === 'ipv6'),
         audio: {
           port: await session.audioSplitter.portPromise,
           ssrc: session.audioSsrc,

@@ -98,7 +98,7 @@
   },
   "engines": {
     "node": "^10 || ^12.20 || ^14 || ^16",
-    "homebridge": ">=1.0.0"
+    "homebridge": ">=1.4.0"
   },
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"

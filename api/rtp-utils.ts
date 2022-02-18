@@ -25,7 +25,7 @@ export interface LiveCallSession {
 
 export function parseLiveCallSession(sessionId: string) {
   const encodedSession = sessionId.split('.')[1],
-    buff = new Buffer(encodedSession, 'base64'),
+    buff = Buffer.from(encodedSession, 'base64'),
     text = buff.toString('ascii')
   return JSON.parse(text) as LiveCallSession
 }

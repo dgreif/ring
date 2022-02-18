@@ -2,7 +2,6 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import * as path from 'path'
 import { cleanOutputDirectory, outputDirectory } from './util'
-import { logError } from '../api/util'
 
 /**
  * This example streams to files, each with 10 seconds of video.
@@ -25,7 +24,7 @@ async function example() {
   await cleanOutputDirectory()
 
   console.log('Starting Video...')
-  const sipSession = await camera.streamVideo({
+  const call = await camera.streamVideo({
     // save video 10 second parts so the mp4s are playable and not corrupted:
     // https://superuser.com/questions/999400/how-to-use-ffmpeg-to-extract-live-stream-into-a-sequence-of-mp4
     output: [
@@ -44,15 +43,18 @@ async function example() {
   })
   console.log('Video started, streaming to part files...')
 
-  sipSession.onCallEnded.subscribe(() => {
+  call.onCallEnded.subscribe(() => {
     console.log('Call has ended')
     process.exit()
   })
 
   setTimeout(function () {
     console.log('Stopping call...')
-    sipSession.stop()
+    call.stop()
   }, 60 * 1000) // Stop after 1 minute
 }
 
-example().catch(logError)
+example().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

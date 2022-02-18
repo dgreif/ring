@@ -1,11 +1,8 @@
 import { RingCamera } from '../api'
 import { hap } from './hap'
 import {
-  doesFfmpegSupportCodec,
-  encodeSrtpOptions,
   generateSrtpOptions,
   getDefaultIpAddress,
-  ReturnAudioTranscoder,
   RtpSplitter,
   SrtpOptions,
 } from '@homebridge/camera-utils'
@@ -25,11 +22,10 @@ import {
   StreamRequestCallback,
 } from 'homebridge'
 import { logDebug, logError, logInfo } from '../api/util'
-import { debounceTime, delay, take } from 'rxjs/operators'
+import { debounceTime, delay } from 'rxjs/operators'
 import { interval, merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
-import { getFfmpegPath } from '../api/ffmpeg'
 import { LiveCall } from '../api/live-call'
 import {
   RtcpSenderInfo,
@@ -66,25 +62,7 @@ class StreamingSession {
   videoSrtp = generateSrtpOptions()
   audioSplitter = new RtpSplitter()
   videoSplitter = new RtpSplitter()
-
-  libfdkAacInstalledPromise = doesFfmpegSupportCodec(
-    'libfdk_aac',
-    getFfmpegPath()
-  )
-    .then((supported) => {
-      if (!supported) {
-        logError(
-          'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
-        )
-      }
-      return supported
-    })
-    .catch(() => {
-      logError(
-        'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
-      )
-      return false
-    })
+  cameraSpeakerActive = false
 
   constructor(
     public liveCall: LiveCall,
@@ -94,8 +72,16 @@ class StreamingSession {
   ) {
     const {
         targetAddress,
+        audio: { srtp_key: remoteAudioSrtpKey, srtp_salt: remoteAudioSrtpSalt },
         video: { port: videoPort },
       } = prepareStreamRequest,
+      // used to decrypt return audio from HomeKit
+      returnAudioSrtpSession = new SrtpSession(
+        getSessionConfig({
+          srtpKey: remoteAudioSrtpKey,
+          srtpSalt: remoteAudioSrtpSalt,
+        })
+      ),
       // used to encrypt rtcp to HomeKit for keepalive
       videoSrtcpSession = new SrtcpSession(getSessionConfig(this.videoSrtp)),
       onReturnPacketReceived = new Subject()
@@ -107,9 +93,26 @@ class StreamingSession {
       onReturnPacketReceived.next(null)
       return null
     })
-    this.audioSplitter.addMessageHandler(() => {
+    this.audioSplitter.addMessageHandler(({ message, isRtpMessage }) => {
+      if (!isRtpMessage) {
+        return null
+      }
       // return packet from HomeKit
       onReturnPacketReceived.next(null)
+
+      // Make sure the external speaker on the camera is active since we will be sending packets to it
+      if (!this.cameraSpeakerActive) {
+        this.cameraSpeakerActive = true
+        this.liveCall.activateCameraSpeaker().catch(logError)
+      }
+
+      // decrypt the packet
+      const decryptedMessage = returnAudioSrtpSession.decrypt(message),
+        rtp = RtpPacket.deSerialize(decryptedMessage)
+
+      // send to Ring - werift will handle encryption and other header params
+      this.liveCall.sendAudioPacket(rtp)
+
       return null
     })
     liveCall.addSubscriptions(
@@ -155,15 +158,37 @@ class StreamingSession {
     let sentVideo = false
     const {
         targetAddress,
-        audio: {
-          port: audioPort,
-          srtp_key: remoteAudioSrtpKey,
-          srtp_salt: remoteAudioSrtpSalt,
-        },
+        audio: { port: audioPort },
         video: { port: videoPort },
       } = this.prepareStreamRequest,
       // use to encrypt Ring video to HomeKit
+      audioSrtpSession = new SrtpSession(getSessionConfig(this.audioSrtp)),
       videoSrtpSession = new SrtpSession(getSessionConfig(this.videoSrtp))
+
+    let firstTimestamp = 0,
+      packetCount = 0
+
+    // Set up packet forwarding for audio stream
+    this.liveCall.addSubscriptions(
+      this.liveCall.onAudioRtp.subscribe(({ header, payload }) => {
+        if (!firstTimestamp) {
+          firstTimestamp = header.timestamp
+        }
+
+        header.ssrc = this.audioSsrc
+        header.payloadType = request.audio.pt
+        header.timestamp = firstTimestamp + packetCount * 3 * 160
+        packetCount++
+
+        const encryptedPacket = audioSrtpSession.encrypt(payload, header)
+        this.audioSplitter
+          .send(encryptedPacket, {
+            port: audioPort,
+            address: targetAddress,
+          })
+          .catch(logError)
+      })
+    )
 
     // Set up packet forwarding for video stream
     this.liveCall.addSubscriptions(
@@ -191,123 +216,7 @@ class StreamingSession {
       })
     )
 
-    const shouldTranscodeAudio = await this.libfdkAacInstalledPromise
-    if (!shouldTranscodeAudio) {
-      return this.liveCall.activate()
-    }
-
-    const transcodingPromise = this.liveCall.startTranscoding({
-      input: ['-vn'],
-      audio: [
-        '-map',
-        '0:a',
-
-        // OPUS specific - it works, but audio is very choppy
-        // '-acodec',
-        // 'libopus',
-        // '-vbr',
-        // 'on',
-        // '-frame_duration',
-        // 20,
-        // '-application',
-        // 'lowdelay',
-
-        // AAC-eld specific
-        '-acodec',
-        'libfdk_aac',
-        '-profile:a',
-        'aac_eld',
-
-        // Shared options
-        '-flags',
-        '+global_header',
-        '-ac',
-        `${request.audio.channel}`,
-        '-ar',
-        `${request.audio.sample_rate}k`,
-        '-b:a',
-        `${request.audio.max_bit_rate}k`,
-        '-bufsize',
-        `${request.audio.max_bit_rate * 4}k`,
-        '-payload_type',
-        request.audio.pt,
-        '-ssrc',
-        this.audioSsrc,
-        '-f',
-        'rtp',
-        '-srtp_out_suite',
-        'AES_CM_128_HMAC_SHA1_80',
-        '-srtp_out_params',
-        encodeSrtpOptions(this.audioSrtp),
-        `srtp://${targetAddress}:${audioPort}?pkt_size=188`,
-      ],
-      video: false,
-      output: [],
-    })
-
-    let cameraSpeakerActive = false
-    // used to decrypt return audio from HomeKit to Ring
-    const remoteAudioSrtpOptions: SrtpOptions = {
-        srtpKey: remoteAudioSrtpKey,
-        srtpSalt: remoteAudioSrtpSalt,
-      },
-      audioSrtpSession = new SrtpSession(
-        getSessionConfig(remoteAudioSrtpOptions)
-      ),
-      returnAudioTranscodedSplitter = new RtpSplitter(({ message }) => {
-        if (!cameraSpeakerActive) {
-          cameraSpeakerActive = true
-          this.liveCall.activateCameraSpeaker().catch(logError)
-        }
-
-        // decrypt the message
-        try {
-          const rtp = RtpPacket.deSerialize(message)
-          rtp.payload = audioSrtpSession.decrypt(rtp.payload)
-
-          // send to Ring - werift will handle encryption and other header params
-          this.liveCall.sendAudioPacket(rtp)
-        } catch (_) {
-          // deSerialize will sometimes fail, but the errors can be ignored
-        }
-
-        return null
-      }),
-      returnAudioTranscoder = new ReturnAudioTranscoder({
-        prepareStreamRequest: this.prepareStreamRequest,
-        incomingAudioOptions: {
-          ssrc: this.audioSsrc,
-          rtcpPort: 0, // we don't care about rtcp for incoming audio
-        },
-        outputArgs: [
-          '-acodec',
-          'libopus',
-          '-flags',
-          '+global_header',
-          '-ac',
-          1,
-          '-ar',
-          '48k',
-          '-f',
-          'rtp',
-          `rtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}`,
-        ],
-        ffmpegPath: getFfmpegPath(),
-        logger: {
-          info: logDebug,
-          error: logError,
-        },
-        logLabel: `Return Audio (${this.ringCamera.name})`,
-        returnAudioSplitter: this.audioSplitter,
-      })
-
-    this.liveCall.onCallEnded.pipe(take(1)).subscribe(() => {
-      returnAudioTranscoder.stop()
-      returnAudioTranscodedSplitter.close()
-    })
-
-    await returnAudioTranscoder.start()
-    await transcodingPromise
+    await this.liveCall.activate()
   }
 
   stop() {
@@ -343,8 +252,8 @@ export class CameraSource implements CameraStreamingDelegate {
       audio: {
         codecs: [
           {
-            type: AudioStreamingCodecType.AAC_ELD,
-            samplerate: AudioStreamingSamplerate.KHZ_16,
+            type: AudioStreamingCodecType.OPUS,
+            samplerate: AudioStreamingSamplerate.KHZ_24,
           },
         ],
       },

@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.0](https://github.com/dgreif/ring/compare/v9.25.0-beta.1...v10.0.0-beta.0) (2022-02-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* `ring-client-api` only (homebridge not impacted) - All streaming will now be done using the new Ring api via WebRTC + WebSockets.  For those using `camera.streamVideo`, you should not notice any difference.  Anyone directly interacting with sip sessions, you will need to migrate to the new `LiveCall` api.  It's fairly similar, and should be more reliable long term.  A number of other sip-specific methods have been removed from the `RingCamera` api as well.
+* Node 10 is no longer officially supported.  It may still work, but could break without warning in the future.
+* **homebridge:** The minimum supported homebridge version for this plugin is now 1.4.0
+* **homebridge:** This change will break all existing automations related to cameras, and will likely move them back to the default room in HomeKit.  Once updated, you will have to set up your automations again manually.  This is necessary to get camera audio working again after the switch to Opus
+* **homebridge:** Switching to Opus requires the camera to be removed and re-added to HomeKit.  Until this is done, you will not receive audio from your cameras.
+
+### Features
+
+* add floodlight pro ([f749d38](https://github.com/dgreif/ring/commit/f749d38e0528e631864bf20819692a466744e1f2)), closes [#889](https://github.com/dgreif/ring/issues/889)
+* **homebridge:** stream opus audio without ffmpeg for transcoding ([ee142bc](https://github.com/dgreif/ring/commit/ee142bc0eee9dcfda41d162b2105535b8fdcbf9a))
+
+
+### Bug Fixes
+
+* drop support for node 10 ([509d556](https://github.com/dgreif/ring/commit/509d55670b3dd4efee1be968618f6bc6b142ae2b))
+* **homebridge:** force cameras to be recreated in HomeKit ([94a1520](https://github.com/dgreif/ring/commit/94a15204f4a9ccbe94968be8db05add6baa5fcfa))
+* **homebridge:** increase minimum homebridge version to 1.4.0 ([d5be74a](https://github.com/dgreif/ring/commit/d5be74aae45a3e353bcaba4fc42fa25c6b2fa37e))
+* remove sip calling in favor of live calls ([7aeae37](https://github.com/dgreif/ring/commit/7aeae37e6e93b68747e14983cea9c0a9229faec6))
+* use Buffer.from ([2b28d90](https://github.com/dgreif/ring/commit/2b28d9028fc7f2c2e11b11cf3b27cc03f097eab2))
+
 ## [9.25.0-beta.1](https://github.com/dgreif/ring/compare/v9.25.0-beta.0...v9.25.0-beta.1) (2022-02-14)
 
 

@@ -18,14 +18,7 @@ import { Subscribed } from './subscribed'
 import { logDebug, logError } from './util'
 import { getFfmpegPath } from './ffmpeg'
 import { take } from 'rxjs/operators'
-
-type SpawnInput = string | number
-export interface FfmpegOptions {
-  input?: SpawnInput[]
-  video?: SpawnInput[] | false
-  audio?: SpawnInput[]
-  output: SpawnInput[]
-}
+import { SpawnInput, FfmpegOptions } from './ffmpeg-options'
 
 export class SipSession extends Subscribed {
   private hasStarted = false

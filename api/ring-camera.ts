@@ -34,7 +34,8 @@ import {
   SrtpOptions,
 } from '@homebridge/camera-utils'
 import { DeepPartial, delay, logDebug, logError } from './util'
-import { FfmpegOptions, SipSession } from './sip-session'
+import { SipSession } from './sip-session'
+import { FfmpegOptions } from './ffmpeg-options'
 import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
 import { LiveCall } from './live-call'
@@ -340,7 +341,7 @@ export class RingCamera extends Subscribed {
     return response.device_health
   }
 
-  async startLiveCall() {
+  async startLiveCallNegotiation() {
     const liveCall = await this.restClient
       .request<LiveCallResponse>({
         method: 'POST',
@@ -356,7 +357,10 @@ export class RingCamera extends Subscribed {
         throw e
       })
 
-    return new LiveCall(liveCall.data.session_id, this)
+    return liveCall.data.session_id
+  }
+  async startLiveCall() {
+    return new LiveCall(await this.startLiveCallNegotiation(), this)
   }
 
   startVideoOnDemand() {

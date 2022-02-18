@@ -1,11 +1,7 @@
-import { parseLiveCallSession } from './rtp-utils'
-import { WebSocket } from 'ws'
-import { firstValueFrom, fromEvent, ReplaySubject } from 'rxjs'
 import { PeerConnection } from './peer-connection'
 import { logDebug, logError } from './util'
 import { RingCamera } from './ring-camera'
 import { concatMap } from 'rxjs/operators'
-import { Subscribed } from './subscribed'
 import {
   FfmpegProcess,
   reservePorts,
@@ -13,92 +9,38 @@ import {
 } from '@homebridge/camera-utils'
 import { getFfmpegPath } from './ffmpeg'
 import { RtpPacket } from '@koush/werift'
+import {
+  IceCandidateMessage,
+  InitializationMessage,
+  LiveCallNegotiation,
+  OfferMessage,
+} from './live-call-negotiation'
+import { SpawnInput, FfmpegOptions } from './ffmpeg-options'
 
-interface InitializationMessage {
-  method: 'initialization'
-  text: 'Done'
-}
-
-interface OfferMessage {
-  method: 'sdp'
-  sdp: string
-  type: 'offer'
-}
-
-interface IceCandidateMessage {
-  method: 'ice'
-  ice: string
-  mlineindex: number
-}
-
-type SpawnInput = string | number
-export interface FfmpegOptions {
-  input?: SpawnInput[]
-  video?: SpawnInput[] | false
-  audio?: SpawnInput[]
-  output: SpawnInput[]
-}
-
-export class LiveCall extends Subscribed {
-  private readonly ws
-  private readonly onWsOpen
-  private readonly onMessage
+export class LiveCall extends LiveCallNegotiation {
   private readonly pc
-  readonly onCallAnswered = new ReplaySubject<void>(1)
-  readonly onCallEnded = new ReplaySubject<void>(1)
 
   private readonly audioSplitter = new RtpSplitter()
   private readonly videoSplitter = new RtpSplitter()
   readonly onVideoRtp
   readonly onAudioRtp
 
-  constructor(private sessionId: string, private camera: RingCamera) {
-    super()
+  constructor(sessionId: string, camera: RingCamera) {
+    super(sessionId, camera)
 
-    const liveCallSession = parseLiveCallSession(sessionId)
     this.pc = new PeerConnection()
-    this.ws = new WebSocket(
-      `wss://${liveCallSession.rms_fqdn}:${liveCallSession.webrtc_port}/`,
-      {
-        headers: {
-          API_VERSION: '3.1',
-          API_TOKEN: sessionId,
-          CLIENT_INFO:
-            'Ring/3.48.0;Platform/Android;OS/7.0;Density/2.0;Device/samsung-SM-T710;Locale/en-US;TimeZone/GMT-07:00',
-        },
-      }
-    )
 
     this.onAudioRtp = this.pc.onAudioRtp
     this.onVideoRtp = this.pc.onVideoRtp
 
-    this.onMessage = fromEvent(this.ws, 'message')
-    this.onWsOpen = fromEvent(this.ws, 'open')
-    const onError = fromEvent(this.ws, 'error'),
-      onClose = fromEvent(this.ws, 'close')
     this.addSubscriptions(
       this.onMessage
         .pipe(
           concatMap((message) => {
-            return this.handleMessage(
-              JSON.parse((message as MessageEvent).data)
-            )
+            return this.handleMessage(message)
           })
         )
-        .subscribe(),
-
-      this.onWsOpen.subscribe(() => {
-        logDebug(`WebSocket connected for ${this.camera.name}`)
-      }),
-
-      onError.subscribe((e) => {
-        logError(e)
-        this.callEnded()
-      }),
-
-      onClose.subscribe(() => {
-        this.callEnded()
-      })
+        .subscribe()
     )
   }
 
@@ -109,12 +51,7 @@ export class LiveCall extends Subscribed {
       case 'sdp':
         const answer = await this.pc.createAnswer(message)
 
-        this.sendMessage({
-          method: 'sdp',
-          ...answer,
-        })
-
-        this.onCallAnswered.next()
+        this.sendAnswer(answer)
         return
       case 'ice':
         await this.pc.addIceCandidate({
@@ -241,47 +178,9 @@ export class LiveCall extends Subscribed {
     await this.activate()
   }
 
-  activated = false
-  async activate() {
-    if (this.activated) {
-      return
-    }
-    this.activated = true
+  protected callEnded() {
+    super.callEnded()
 
-    await firstValueFrom(this.onCallAnswered)
-    this.sendMessage({ method: 'activate_session' })
-    this.sendMessage({
-      video_enabled: true,
-      audio_enabled: true,
-      method: 'stream_options',
-    })
-  }
-
-  async activateCameraSpeaker() {
-    await firstValueFrom(this.onCallAnswered)
-    this.sendMessage({
-      stealth_mode: false,
-      method: 'camera_options',
-    })
-  }
-
-  private sendMessage(message: Record<any, any>) {
-    this.ws.send(JSON.stringify(message))
-  }
-
-  private callEnded() {
-    try {
-      this.sendMessage({
-        reason: { code: 0, text: '' },
-        method: 'close',
-      })
-      this.ws.close()
-    } catch (_) {
-      // ignore any errors since we are stopping the call
-    }
-
-    this.unsubscribe()
-    this.onCallEnded.next()
     this.pc.close()
     this.audioSplitter.close()
     this.videoSplitter.close()

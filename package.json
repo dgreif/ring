@@ -1,6 +1,6 @@
 {
   "name": "ring-client-api",
-  "version": "9.25.0-beta.1",
+  "version": "10.0.0-beta.0",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/api/index.js",
   "bin": {
@@ -57,15 +57,13 @@
   "dependencies": {
     "@homebridge/camera-utils": "2.1.0",
     "@homebridge/plugin-ui-utils": "0.0.19",
-    "@koush/werift": "0.14.5-beta5",
+    "@koush/werift": "0.14.5-beta7",
     "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "4.3.3",
     "got": "11.8.3",
     "rxjs": "7.5.2",
-    "sdp": "3.0.3",
     "socket.io-client": "2.4.0",
-    "stun": "2.1.0",
     "systeminformation": "5.10.7",
     "uuid": "8.3.2",
     "ws": "8.4.2"
@@ -97,8 +95,8 @@
     "typescript": "4.5.5"
   },
   "engines": {
-    "node": "^10 || ^12.20 || ^14 || ^16",
-    "homebridge": ">=1.0.0"
+    "node": "^12.20 || ^14 || ^16",
+    "homebridge": ">=1.4.0"
   },
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"

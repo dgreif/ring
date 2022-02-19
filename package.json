@@ -14,7 +14,7 @@
     "watch:tests": "jest --watch",
     "lint": "eslint '**/*.ts' --fix",
     "build": "rm -rf lib && tsc --declaration",
-    "build-quick": "rm -rf lib && esbuild ./{api,examples,homebridge}/*.ts ./api/*.js --target=es2017 --format=cjs --outdir=lib",
+    "build-quick": "rm -rf lib && esbuild ./{api,examples,homebridge}/*.ts --target=es2017 --format=cjs --outdir=lib",
     "example": "npm run build-quick && node ./lib/examples/example.js",
     "api-example": "npm run build-quick && node ./lib/examples/api-example.js",
     "record-example": "npm run build-quick && node ./lib/examples/record-example.js",

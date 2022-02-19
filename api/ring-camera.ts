@@ -14,7 +14,7 @@ import {
   VideoSearchResponse,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, interval, firstValueFrom, Subject } from 'rxjs'
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
@@ -23,22 +23,10 @@ import {
   publishReplay,
   refCount,
   share,
-  takeUntil,
 } from 'rxjs/operators'
-import {
-  generateSrtpOptions,
-  getDefaultIpAddress,
-  isFfmpegInstalled,
-  reservePorts,
-  RtpSplitter,
-  SrtpOptions,
-} from '@homebridge/camera-utils'
 import { DeepPartial, delay, logDebug, logError } from './util'
-import { SipSession } from './sip-session'
-import { FfmpegOptions } from './ffmpeg-options'
-import { SipOptions } from './sip-call'
 import { Subscribed } from './subscribed'
-import { LiveCall } from './live-call'
+import { FfmpegOptions, LiveCall } from './live-call'
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -363,49 +351,6 @@ export class RingCamera extends Subscribed {
     return new LiveCall(await this.startLiveCallNegotiation(), this)
   }
 
-  startVideoOnDemand() {
-    return this.restClient
-      .request<ActiveDing | ''>({
-        method: 'POST',
-        url: this.doorbotUrl('live_view'), // Ring app uses vod for battery cams, but doesn't appear to be necessary
-      })
-      .catch((e) => {
-        if (e.response?.statusCode === 403) {
-          const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
-          logError(errorMessage)
-          throw new Error(errorMessage)
-        }
-
-        throw e
-      })
-  }
-
-  private pollForActiveDing() {
-    // try every second until a new ding is received
-    this.addSubscriptions(
-      interval(1000)
-        .pipe(takeUntil(this.onNewDing))
-        .subscribe(() => {
-          this.onRequestActiveDings.next(null)
-        })
-    )
-  }
-
-  private expiredDingIds: string[] = []
-  async getSipConnectionDetails() {
-    const vodPromise = firstValueFrom(this.onNewDing),
-      videoOnDemandDing = await this.startVideoOnDemand()
-
-    if (videoOnDemandDing && 'sip_from' in videoOnDemandDing) {
-      // wired cams return a ding from live_view so we don't need to wait
-      return videoOnDemandDing
-    }
-
-    // battery cams return '' from live_view so we need to request active dings and wait
-    this.pollForActiveDing()
-    return vodPromise
-  }
-
   private removeDingById(idToRemove: string) {
     const allActiveDings = this.activeDings,
       otherDings = allActiveDings.filter((ding) => ding.id_str !== idToRemove)
@@ -424,7 +369,6 @@ export class RingCamera extends Subscribed {
 
     setTimeout(() => {
       this.removeDingById(ding.id_str)
-      this.expiredDingIds = this.expiredDingIds.filter((id) => id !== dingId)
     }, 65 * 1000) // dings last ~1 minute
   }
 
@@ -595,91 +539,8 @@ export class RingCamera extends Subscribed {
     return response
   }
 
-  async getSipOptions(): Promise<SipOptions> {
-    const activeDings = this.onActiveDings.getValue(),
-      existingDing = activeDings
-        .filter((ding) => !this.expiredDingIds.includes(ding.id_str))
-        .slice()
-        .reverse()[0],
-      ding = existingDing || (await this.getSipConnectionDetails())
-
-    return {
-      to: ding.sip_to,
-      from: ding.sip_from,
-      dingId: ding.id_str,
-      localIp: await getDefaultIpAddress(),
-    }
-  }
-
-  getUpdatedSipOptions(expiredDingId: string) {
-    // Got a 480 from sip session, which means it's no longer active
-    this.expiredDingIds.push(expiredDingId)
-    return this.getSipOptions()
-  }
-
-  async createSipSession(
-    options: {
-      audio?: SrtpOptions
-      video?: SrtpOptions
-      skipFfmpegCheck?: boolean
-    } = {}
-  ) {
-    const audioSplitter = new RtpSplitter(),
-      audioRtcpSplitter = new RtpSplitter(),
-      videoSplitter = new RtpSplitter(),
-      videoRtcpSplitter = new RtpSplitter(),
-      [
-        sipOptions,
-        ffmpegIsInstalled,
-        audioPort,
-        audioRtcpPort,
-        videoPort,
-        videoRtcpPort,
-        [tlsPort],
-      ] = await Promise.all([
-        this.getSipOptions(),
-        options.skipFfmpegCheck ? Promise.resolve(true) : isFfmpegInstalled(),
-        audioSplitter.portPromise,
-        audioRtcpSplitter.portPromise,
-        videoSplitter.portPromise,
-        videoRtcpSplitter.portPromise,
-        reservePorts({ type: 'tcp' }),
-      ]),
-      rtpOptions = {
-        audio: {
-          port: audioPort,
-          rtcpPort: audioRtcpPort,
-          ...(options.audio || generateSrtpOptions()),
-        },
-        video: {
-          port: videoPort,
-          rtcpPort: videoRtcpPort,
-          ...(options.video || generateSrtpOptions()),
-        },
-      }
-
-    if (!ffmpegIsInstalled) {
-      throw new Error(
-        'Ffmpeg is not installed.  See https://github.com/dgreif/ring/wiki/FFmpeg for directions.'
-      )
-    }
-
-    return new SipSession(
-      sipOptions,
-      rtpOptions,
-      audioSplitter,
-      audioRtcpSplitter,
-      videoSplitter,
-      videoRtcpSplitter,
-      tlsPort,
-      this
-    )
-  }
-
   async recordToFile(outputPath: string, duration = 30) {
-    const liveCall = await this.startLiveCall()
-
-    await liveCall.startTranscoding({
+    const liveCall = await this.streamVideo({
       output: ['-t', duration.toString(), outputPath],
     })
 
@@ -687,50 +548,9 @@ export class RingCamera extends Subscribed {
   }
 
   async streamVideo(ffmpegOptions: FfmpegOptions) {
-    const sipSession = await this.createSipSession()
-    await sipSession.start(ffmpegOptions)
-    return sipSession
-  }
-
-  /**
-   * Exchange an Offer SDP for an Answer SDP. Unknown if this endpoint supports trickle with
-   * the same session UUID. The Answer SDP advertises trickle. Invalid SDP will result in error
-   * 400. Calling this too often will result in what seems to be a soft lockout for 5 minutes,
-   * resulting in error 500s.
-   * @param session_uuid A session UUID that can be later used to end the WebRTC session.
-   * Unknown if stopping the session is actually necessary since WebRTC knows the peer connection state.
-   * @param sdp Offer SDP. audio channel must be set to sendrecv.
-   * @returns Answer SDP.
-   */
-  async startWebRtcSession(session_uuid: string, sdp: string): Promise<string> {
-    const response = await this.restClient.request<any>({
-      method: 'POST',
-      url: 'https://api.ring.com/integrations/v1/liveview/start',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        session_id: session_uuid,
-        device_id: this.id,
-        sdp: sdp,
-        protocol: 'webrtc',
-      }),
-    })
-    return response.sdp
-  }
-
-  async endWebRtcSession(session_uuid: string): Promise<string> {
-    const response = await this.restClient.request<any>({
-      method: 'POST',
-      url: 'https://api.ring.com/integrations/v1/liveview/end',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        session_id: session_uuid,
-      }),
-    })
-    return response.sdp
+    const liveCall = await this.startLiveCall()
+    await liveCall.startTranscoding(ffmpegOptions)
+    return liveCall
   }
 
   subscribeToDingEvents() {
@@ -765,6 +585,3 @@ export class RingCamera extends Subscribed {
     this.unsubscribe()
   }
 }
-
-// SOMEDAY: extract image from video file?
-// ffmpeg -i input.mp4 -r 1 -f image2 image-%2d.png

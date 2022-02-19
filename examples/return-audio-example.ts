@@ -75,4 +75,7 @@ async function example() {
   }, 20000)
 }
 
-example().catch(logError)
+example().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

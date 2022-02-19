@@ -31,7 +31,7 @@ export class LiveCallNegotiation extends Subscribed {
   private readonly ws
   private readonly onWsOpen
   readonly onMessage
-  readonly onCallAnswered = new ReplaySubject<void>(1)
+  readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
 
   constructor(private sessionId: string, public camera: RingCamera) {
@@ -88,7 +88,7 @@ export class LiveCallNegotiation extends Subscribed {
       ...answer,
     })
 
-    this.onCallAnswered.next()
+    this.onCallAnswered.next(answer.sdp!)
   }
 
   activated = false

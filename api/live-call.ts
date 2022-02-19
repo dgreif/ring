@@ -15,7 +15,15 @@ import {
   LiveCallNegotiation,
   OfferMessage,
 } from './live-call-negotiation'
-import { SpawnInput, FfmpegOptions } from './ffmpeg-options'
+import { firstValueFrom } from 'rxjs'
+
+type SpawnInput = string | number
+export interface FfmpegOptions {
+  input?: SpawnInput[]
+  video?: SpawnInput[] | false
+  audio?: SpawnInput[]
+  output: SpawnInput[]
+}
 
 export class LiveCall extends LiveCallNegotiation {
   private readonly pc
@@ -67,14 +75,11 @@ export class LiveCall extends LiveCallNegotiation {
     return ports[0]
   }
 
-  public prepareTranscoder(
-    transcodeVideoStream: boolean,
-    ffmpegInputOptions: SpawnInput[] | undefined,
-    audioPort: number,
-    videoPort: number,
-    sdpInput: string
-  ) {
-    const ffmpegInputArguments = [
+  async startTranscoding(ffmpegOptions: FfmpegOptions) {
+    const videoPort = await this.reservePort(1),
+      audioPort = await this.reservePort(1),
+      transcodeVideoStream = ffmpegOptions.video !== false,
+      ffmpegInputArguments = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
@@ -82,77 +87,13 @@ export class LiveCall extends LiveCallNegotiation {
         'libopus',
         '-f',
         'sdp',
-        ...(ffmpegInputOptions || []),
+        ...(ffmpegOptions.input || []),
         '-i',
-        sdpInput,
+        'pipe:',
       ],
-      inputSdpLines = [
-        'v=0',
-        'o=105202070 3747 461 IN IP4 127.0.0.1',
-        's=Talk',
-        'c=IN IP4 127.0.0.1',
-        'b=AS:380',
-        't=0 0',
-        'a=rtcp-xr:rcvr-rtt=all:10000 stat-summary=loss,dup,jitt,TTL voip-metrics',
-        `m=audio ${audioPort} RTP/SAVP 101`,
-        'a=rtpmap:101 OPUS/48000/2',
-        'a=rtcp-fb:101 nack pli',
-        'a=fmtp:101 useinbandfec=1;sprop-stereo=0',
-        'a=rtcp-mux',
-      ]
-
-    if (transcodeVideoStream) {
-      inputSdpLines.push(
-        `m=video ${videoPort} RTP/SAVP 96`,
-        'a=rtpmap:96 H264/90000',
-        'a=rtcp-fb:96 nack',
-        'a=rtcp-fb:96 nack pli',
-        'a=fmtp:96 packetization-mode=1;profile-level-id=640029;level-asymmetry-allowed=1',
-        'a=rtcp-mux'
-      )
-
-      this.addSubscriptions(
-        this.onVideoRtp
-          .pipe(
-            concatMap((rtp) => {
-              return this.videoSplitter.send(rtp.serialize(), {
-                port: videoPort,
-              })
-            })
-          )
-          .subscribe()
-      )
-    }
-
-    this.addSubscriptions(
-      this.onAudioRtp
-        .pipe(
-          concatMap((rtp) => {
-            return this.audioSplitter.send(rtp.serialize(), {
-              port: audioPort,
-            })
-          })
-        )
-        .subscribe()
-    )
-
-    return {
-      ffmpegInputArguments,
-      inputSdpLines,
-    }
-  }
-
-  async startTranscoding(ffmpegOptions: FfmpegOptions) {
-    const videoPort = await this.reservePort(1),
-      audioPort = await this.reservePort(1),
-      transcodeVideoStream = ffmpegOptions.video !== false,
-      { ffmpegInputArguments, inputSdpLines } = this.prepareTranscoder(
-        transcodeVideoStream,
-        ffmpegOptions.input,
-        audioPort,
-        videoPort,
-        'pipe:'
-      ),
+      inputSdp = (await firstValueFrom(this.onCallAnswered))
+        .replace(/m=audio \d+/, `m=audio ${audioPort}`)
+        .replace(/m=video \d+/, `m=video ${videoPort}`),
       ff = new FfmpegProcess({
         ffmpegArgs: ffmpegInputArguments.concat(
           ...(ffmpegOptions.audio || ['-acodec', 'aac']),
@@ -170,9 +111,35 @@ export class LiveCall extends LiveCallNegotiation {
         },
       })
 
+    this.addSubscriptions(
+      this.onAudioRtp
+        .pipe(
+          concatMap((rtp) => {
+            return this.audioSplitter.send(rtp.serialize(), {
+              port: audioPort,
+            })
+          })
+        )
+        .subscribe()
+    )
+
+    if (transcodeVideoStream) {
+      this.addSubscriptions(
+        this.onVideoRtp
+          .pipe(
+            concatMap((rtp) => {
+              return this.videoSplitter.send(rtp.serialize(), {
+                port: videoPort,
+              })
+            })
+          )
+          .subscribe()
+      )
+    }
+
     this.onCallEnded.subscribe(() => ff.stop())
 
-    ff.writeStdin(inputSdpLines.filter((x) => Boolean(x)).join('\n'))
+    ff.writeStdin(inputSdp)
 
     // Activate the stream now that ffmpeg is ready to receive
     await this.activate()

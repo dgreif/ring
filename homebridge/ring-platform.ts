@@ -283,7 +283,9 @@ export class RingPlatform implements DynamicPlatformPlugin {
         )
         hapDevices.forEach(
           ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
-            const uuid = hap.uuid.generate(debugPrefix + id),
+            // the opus qualifier is used to force new camera accessories to be created that support opus instead of aac
+            const cameraOpusQualifier = isCamera ? 'opus' : '',
+              uuid = hap.uuid.generate(debugPrefix + id + cameraOpusQualifier),
               displayName = debugPrefix + name
 
             if (

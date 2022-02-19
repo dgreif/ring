@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
 import { promisify } from 'util'
-import { logError } from '../api/util'
 const fs = require('fs'),
   path = require('path'),
   express = require('express')
@@ -38,7 +37,7 @@ async function example() {
     await promisify(fs.mkdir)(publicOutputDirectory)
   }
 
-  const sipSession = await camera.streamVideo({
+  const call = await camera.streamVideo({
     output: [
       '-preset',
       'veryfast',
@@ -58,15 +57,18 @@ async function example() {
     ],
   })
 
-  sipSession.onCallEnded.subscribe(() => {
+  call.onCallEnded.subscribe(() => {
     console.log('Call has ended')
     process.exit()
   })
 
   setTimeout(function () {
     console.log('Stopping call...')
-    sipSession.stop()
+    call.stop()
   }, 5 * 60 * 1000) // Stop after 5 minutes.
 }
 
-example().catch(logError)
+example().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

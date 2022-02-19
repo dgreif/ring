@@ -39,6 +39,15 @@ export interface FfmpegOptions {
   output: SpawnInput[]
 }
 
+function getCleanSdp(sdp: string, includeVideo: boolean) {
+  return sdp
+    .split('\nm=')
+    .slice(1)
+    .map((section) => 'm=' + section)
+    .filter((section) => includeVideo || !section.startsWith('m=video'))
+    .join('\n')
+}
+
 export class LiveCall extends Subscribed {
   private readonly ws
   private readonly onWsOpen
@@ -146,7 +155,8 @@ export class LiveCall extends Subscribed {
         '-i',
         'pipe:',
       ],
-      inputSdp = (await firstValueFrom(this.onCallAnswered))
+      ringSdp = await firstValueFrom(this.onCallAnswered),
+      inputSdp = getCleanSdp(ringSdp, transcodeVideoStream)
         .replace(/m=audio \d+/, `m=audio ${audioPort}`)
         .replace(/m=video \d+/, `m=video ${videoPort}`),
       ff = new FfmpegProcess({

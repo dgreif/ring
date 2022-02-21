@@ -96,7 +96,7 @@ export enum RingCameraKind {
 
 // RegExp taken from ring.com app
 const isWiredCameraRegExp = new RegExp(
-  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight|doorbell_graham_cracker))/
+  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight|doorbell_graham_cracker|cocoa_floodlight))/
 )
 export function isBatteryCameraKind(kind: RingCameraKind) {
   return !kind.match(isWiredCameraRegExp)

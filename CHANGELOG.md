@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.1](https://github.com/dgreif/ring/compare/v10.0.0-beta.0...v10.0.0-beta.1) (2022-02-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **homebridge:** For anyone who updated to the 10.0 beta and had their cameras reset in HomeKit, this change will cause another reset.  This moves the audio codecs back to what they were before the 10.0 beta, which means anyone upgrading directly from v9 will _not_ experience a reset of the cameras.  Using native Opus was an experimental feature, which ultimately lead to a degraded user experience.
+
+### Bug Fixes
+
+* allow video transcoding to be skipped ([1ef8cdd](https://github.com/dgreif/ring/commit/1ef8cdd54d1f118a8fdcfd28f6970d9c8b7c65f9))
+* **homebridge:** switch back to aac-eld from opus ([7dcd2a0](https://github.com/dgreif/ring/commit/7dcd2a087da7c1b24cc9bdd3c3919af5e6fb7997))
+
 ## [10.0.0-beta.0](https://github.com/dgreif/ring/compare/v9.25.0-beta.1...v10.0.0-beta.0) (2022-02-18)
 
 

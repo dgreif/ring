@@ -50,7 +50,7 @@ export interface ExtendedResponse {
 }
 
 async function requestWithRetry<T>(
-  requestOptions: RequestOptions & { url: string }
+  requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean }
 ): Promise<T & ExtendedResponse> {
   try {
     const options = {
@@ -73,7 +73,7 @@ async function requestWithRetry<T>(
     }
     return data
   } catch (e: any) {
-    if (!e.response) {
+    if (!e.response && !requestOptions.allowNoResponse) {
       logError(
         `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`
       )
@@ -322,7 +322,7 @@ export class RingRestClient {
   }
 
   async request<T = void>(
-    options: RequestOptions & { url: string }
+    options: RequestOptions & { url: string; allowNoResponse?: boolean }
   ): Promise<T & ExtendedResponse> {
     const hardwareId = await this.hardwareIdPromise,
       url = options.url! as string,

@@ -517,7 +517,7 @@ export class RingCamera extends Subscribed {
     force?: boolean
   }) {
     const response = await this.restClient.request<Buffer>({
-        url: `https://app-snaps.ring.com/snapshots/next/${this.id}?extras=force`,
+        url: `https://app-snaps.ring.com/snapshots/next/${this.id}`,
         responseType: 'buffer',
         searchParams: {
           'after-ms': afterMs,

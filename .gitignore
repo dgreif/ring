@@ -10,3 +10,4 @@ yarn.lock
 .homebridge
 .hoobs
 examples/test-example.ts
+lib-esnext

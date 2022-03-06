@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "target":"ES2021",
+    "target":"esnext",
     "lib": [
-      "ES2021",
+      "es5",
+      "es2015",
+      "es2017",
       "dom"
     ],
     "module": "commonjs",
-    "outDir": "./lib",
+    "outDir": "./lib-esnext",
     "esModuleInterop": true,
     "allowJs": true,
     "strict": true

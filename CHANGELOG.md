@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.2](https://github.com/dgreif/ring/compare/v10.0.0-beta.1...v10.0.0-beta.2) (2022-03-26)
+
+
+### Features
+
+* support ring edge camera streaming ([b30d99f](https://github.com/dgreif/ring/commit/b30d99f9ffaa1fabc1d09b830cf8ba0e69fe84a0))
+
+
+### Bug Fixes
+
+* **api:** allow snapshot to be force-updated based on options ([fa0212a](https://github.com/dgreif/ring/commit/fa0212ab539cc268f8000c5b9ea39a00799cb8d7))
+
 ## [10.0.0-beta.1](https://github.com/dgreif/ring/compare/v10.0.0-beta.0...v10.0.0-beta.1) (2022-02-27)
 
 

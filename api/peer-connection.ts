@@ -43,7 +43,8 @@ export class PeerConnection {
                 { type: 'nack', parameter: 'pli' },
                 { type: 'goog-remb' },
               ],
-              parameters: 'profile-level-id=42801F',
+              parameters:
+                'packetization-mode=1;profile-level-id=42801F;level-asymmetry-allowed=1',
             }),
           ],
         },
@@ -112,6 +113,14 @@ export class PeerConnection {
     await this.pc.setLocalDescription(offer)
 
     return offer
+  }
+
+  async createAnswer(offer: { type: 'offer'; sdp: string }) {
+    await this.pc.setRemoteDescription(offer)
+    const answer = await this.pc.createAnswer()
+    await this.pc.setLocalDescription(answer)
+
+    return answer
   }
 
   async acceptAnswer(answer: { type: 'answer'; sdp: string }) {

@@ -1,9 +1,9 @@
 import { WebSocket } from 'ws'
-import { firstValueFrom, fromEvent, interval, ReplaySubject } from 'rxjs'
+import { firstValueFrom, fromEvent, ReplaySubject } from 'rxjs'
 import { PeerConnection } from './peer-connection'
-import { logDebug, logError, logInfo } from './util'
+import { logDebug, logError } from './util'
 import { RingCamera } from './ring-camera'
-import { concatMap, filter, switchMap } from 'rxjs/operators'
+import { concatMap } from 'rxjs/operators'
 import { Subscribed } from './subscribed'
 import {
   FfmpegProcess,
@@ -12,77 +12,24 @@ import {
 } from '@homebridge/camera-utils'
 import { getFfmpegPath } from './ffmpeg'
 import { RtpPacket } from '@koush/werift'
+import { DingKind } from './ring-types'
 
-interface SessionBody {
-  doorbot_id: number
-  session_id: string
+interface InitializationMessage {
+  method: 'initialization'
+  text: 'Done'
 }
 
-interface AnswerMessage {
+interface OfferMessage {
   method: 'sdp'
-  body: {
-    sdp: string
-    type: 'answer'
-  } & SessionBody
+  sdp: string
+  type: 'offer'
 }
 
 interface IceCandidateMessage {
   method: 'ice'
-  body: {
-    ice: string
-    mlineindex: number
-  } & SessionBody
+  ice: string
+  mlineindex: number
 }
-
-interface SessionCreatedMessage {
-  method: 'session_created'
-  body: SessionBody
-}
-
-interface SessionStartedMessage {
-  method: 'session_started'
-  body: SessionBody
-}
-
-interface PongMessage {
-  method: 'pong'
-  body: SessionBody
-}
-
-interface NotificationMessage {
-  method: 'notification'
-  body: {
-    is_ok: boolean
-    text: string
-  } & SessionBody
-}
-
-// eslint-disable-next-line no-shadow
-enum CloseReasonCode {
-  NormalClose = 0,
-  // reason: { code: 5, text: '[rsl-apps/webrtc-liveview-server/Session.cpp:429] [Auth] [0xd540]: [rsl-apps/session-manager/Manager.cpp:227] [AppAuth] Unauthorized: invalid or expired token' }
-  // reason: { code: 5, text: 'Authentication failed: -1' }
-  // reason: { code: 5, text: 'Sessions with the provided ID not found' }
-  AuthenticationFailed = 5,
-  // reason: { code: 6, text: 'Timeout waiting for ping' }
-  Timeout = 6,
-}
-
-interface CloseMessage {
-  method: 'close'
-  body: {
-    reason: { code: CloseReasonCode; text: string }
-  } & SessionBody
-}
-
-type IncomingMessage =
-  | AnswerMessage
-  | IceCandidateMessage
-  | SessionCreatedMessage
-  | SessionStartedMessage
-  | PongMessage
-  | CloseMessage
-  | NotificationMessage
 
 type SpawnInput = string | number
 export interface FfmpegOptions {
@@ -101,12 +48,41 @@ function getCleanSdp(sdp: string, includeVideo: boolean) {
     .join('\n')
 }
 
+interface LiveCallSession {
+  alexa_port: number
+  app_session_token: string
+  availability_zone: 'availability-zone'
+  custom_timer: { max_sec: number }
+  ding_id: string
+  ding_kind: DingKind
+  doorbot_id: number
+  exp: number
+  ip: string
+  port: number
+  private_ip: string
+  rms_fqdn: string
+  rms_version: string
+  rsp_port: number
+  rtsp_port: number
+  session_id: string
+  sip_port: number
+  webrtc_port: number
+  webrtc_url: string
+  wwr_port: number
+}
+
+function parseLiveCallSession(sessionId: string) {
+  const encodedSession = sessionId.split('.')[1],
+    buff = Buffer.from(encodedSession, 'base64'),
+    text = buff.toString('ascii')
+  return JSON.parse(text) as LiveCallSession
+}
+
 export class LiveCall extends Subscribed {
   private readonly ws
   private readonly onWsOpen
   private readonly onMessage
   private readonly pc
-  readonly onSessionId = new ReplaySubject<string>(1)
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
 
@@ -114,22 +90,20 @@ export class LiveCall extends Subscribed {
   private readonly videoSplitter = new RtpSplitter()
   readonly onVideoRtp
   readonly onAudioRtp
-  private readonly onOfferSent = new ReplaySubject<void>(1)
 
-  constructor(authToken: string, private camera: RingCamera) {
+  constructor(private sessionId: string, private camera: RingCamera) {
     super()
 
+    const liveCallSession = parseLiveCallSession(sessionId)
     this.pc = new PeerConnection()
     this.ws = new WebSocket(
-      'wss://api.prod.signalling.ring.devices.a2z.com:443/ws',
+      `wss://${liveCallSession.rms_fqdn}:${liveCallSession.webrtc_port}/`,
       {
         headers: {
-          Authorization: `Bearer ${authToken}`,
-          'X-Sig-API-Version': '4.0',
-          'X-Sig-Client-ID': 'ring_android-aabb123', // required but value doesn't matter
-          'X-Sig-Client-Info':
+          API_VERSION: '3.1',
+          API_TOKEN: sessionId,
+          CLIENT_INFO:
             'Ring/3.49.0;Platform/Android;OS/7.0;Density/2.0;Device/samsung-SM-T710;Locale/en-US;TimeZone/GMT-07:00',
-          'X-Sig-Auth-Type': 'ring_oauth',
         },
       }
     )
@@ -154,10 +128,6 @@ export class LiveCall extends Subscribed {
 
       this.onWsOpen.subscribe(() => {
         logDebug(`WebSocket connected for ${this.camera.name}`)
-        this.initiateCall().catch((e) => {
-          logError(e)
-          this.callEnded()
-        })
       }),
 
       onError.subscribe((e) => {
@@ -167,117 +137,31 @@ export class LiveCall extends Subscribed {
 
       onClose.subscribe(() => {
         this.callEnded()
-      }),
-
-      this.onCallAnswered
-        .pipe(switchMap(() => interval(5000)))
-        .subscribe(() => {
-          if (!this.sessionId) {
-            return
-          }
-
-          this.sendSessionMessage('ping')
-        }),
-
-      this.pc.onIceCandidate.subscribe(async (iceCandidate) => {
-        await firstValueFrom(this.onOfferSent)
-        this.sendMessage({
-          method: 'ice',
-          body: {
-            doorbot_id: this.camera.id,
-            ice: iceCandidate.candidate,
-            mlineindex: 0,
-          },
-        })
-        // HACK: send ice candidate with both mline indexes to convince ring edge to connect both audio and video
-        // Without this, only audio will connect unless you connect from the network of the Ring Edge router
-        this.sendMessage({
-          method: 'ice',
-          body: {
-            doorbot_id: this.camera.id,
-            ice: iceCandidate.candidate,
-            mlineindex: 1,
-          },
-        })
-      }),
-
-      this.pc.onConnectionState.subscribe((state) => {
-        if (state === 'failed') {
-          logError('Stream connection failed')
-          this.callEnded()
-        }
-
-        if (state === 'closed') {
-          logDebug('Stream connection closed')
-          this.callEnded()
-        }
       })
     )
   }
 
-  private async initiateCall() {
-    const offer = await this.pc.createOffer()
-    offer.sdp = offer.sdp.replace('\na=group:BUNDLE 0 1', '')
-
-    this.sendMessage({
-      method: 'live_view',
-      body: {
-        doorbot_id: this.camera.id,
-        stream_options: { audio_enabled: true, video_enabled: true },
-        sdp: offer.sdp,
-      },
-    })
-
-    this.onOfferSent.next()
-  }
-
-  private sessionId: string | null = null
-  private async handleMessage(message: IncomingMessage) {
-    if (message.body.doorbot_id !== this.camera.id) {
-      // ignore messages for other cameras
-      return
-    }
-
-    if (
-      ['session_created', 'session_started'].includes(message.method) &&
-      'session_id' in message.body &&
-      !this.sessionId
-    ) {
-      this.sessionId = message.body.session_id
-      this.onSessionId.next(this.sessionId)
-    }
-
-    if (message.body.session_id && message.body.session_id !== this.sessionId) {
-      // ignore messages for other sessions
-      return
-    }
-
+  private async handleMessage(
+    message: InitializationMessage | OfferMessage | IceCandidateMessage
+  ) {
     switch (message.method) {
-      case 'session_created':
-      case 'session_started':
-        // session already stored above
-        return
       case 'sdp':
-        await this.pc.acceptAnswer(message.body)
-        this.onCallAnswered.next(message.body.sdp)
+        const answer = await this.pc.createAnswer(message)
+
+        this.sendMessage({
+          method: 'sdp',
+          ...answer,
+        })
+
+        this.onCallAnswered.next(message.sdp)
         return
       case 'ice':
         await this.pc.addIceCandidate({
-          candidate: message.body.ice,
-          sdpMLineIndex: message.body.mlineindex,
+          candidate: message.ice,
+          sdpMLineIndex: message.mlineindex,
         })
         return
-      case 'pong':
-        return
-      case 'close':
-        logError('Video stream closed')
-        logError(message.body)
-        this.callEnded()
-        return
     }
-
-    logError('UNKNOWN MESSAGE')
-    logError(message)
   }
 
   async reservePort(bufferPorts = 0) {
@@ -362,40 +246,22 @@ export class LiveCall extends Subscribed {
       return
     }
     this.activated = true
-    await firstValueFrom(
-      this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
-    )
 
-    logInfo('Activating Session')
-    this.sendSessionMessage('activate_session')
+    await firstValueFrom(this.onCallAnswered)
+    this.sendMessage({ method: 'activate_session' })
+    this.sendMessage({
+      video_enabled: true,
+      audio_enabled: true,
+      method: 'stream_options',
+    })
   }
 
   async activateCameraSpeaker() {
     await firstValueFrom(this.onCallAnswered)
-    this.sendSessionMessage('camera_options', {
+    this.sendMessage({
       stealth_mode: false,
+      method: 'camera_options',
     })
-  }
-
-  private sendSessionMessage(method: string, body: Record<any, any> = {}) {
-    const message = {
-      method,
-      body: {
-        ...body,
-        doorbot_id: this.camera.id,
-        session_id: this.sessionId,
-      },
-    }
-
-    if (this.sessionId) {
-      // Send immediately if we already have a session id
-      // This is needed to send `close` before closing the websocket
-      this.sendMessage(message)
-    } else {
-      firstValueFrom(this.onSessionId)
-        .then(() => this.sendMessage(message))
-        .catch((e) => logError(e))
-    }
   }
 
   private sendMessage(message: Record<any, any>) {
@@ -404,8 +270,9 @@ export class LiveCall extends Subscribed {
 
   private callEnded() {
     try {
-      this.sendSessionMessage('close', {
-        reason: { code: CloseReasonCode.NormalClose, text: '' },
+      this.sendMessage({
+        reason: { code: 0, text: '' },
+        method: 'close',
       })
       this.ws.close()
     } catch (_) {

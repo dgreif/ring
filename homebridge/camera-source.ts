@@ -30,6 +30,7 @@ import { readFile } from 'fs'
 import { promisify } from 'util'
 import { getFfmpegPath } from '../api/ffmpeg'
 import { LiveCall } from '../api/live-call'
+import { LiveCallRingEdge } from '../api/live-call-ring-edge'
 import {
   RtcpSenderInfo,
   RtcpSrPacket,
@@ -86,7 +87,7 @@ class StreamingSession {
     })
 
   constructor(
-    public liveCall: LiveCall,
+    public liveCall: LiveCall | LiveCallRingEdge,
     public prepareStreamRequest: PrepareStreamRequest,
     public ringCamera: RingCamera,
     public start: number

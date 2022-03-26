@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.3](https://github.com/dgreif/ring/compare/v10.0.0-beta.2...v10.0.0-beta.3) (2022-03-26)
+
+
+### Bug Fixes
+
+* separate streaming setup for ring edge vs regular cameras ([6281cf9](https://github.com/dgreif/ring/commit/6281cf966de12dcea8acc6516cd9079634734dec))
+
 ## [10.0.0-beta.2](https://github.com/dgreif/ring/compare/v10.0.0-beta.1...v10.0.0-beta.2) (2022-03-26)
 
 

@@ -468,6 +468,13 @@ export interface CameraData {
     live_view_disabled?: boolean // set by modes
     motion_detection_enabled?: boolean // set by modes or Record Motion toggle
     power_mode?: 'battery' | 'wired' // some battery cams can be wired and set to operate in "wired" mode
+    sheila_settings: {
+      cv_processing_enabled: boolean | null
+      local_storage_enabled: boolean | null // true for Ring Edge devices
+    }
+    server_settings: {
+      ring_media_server_enabled: boolean
+    }
   }
   features: {
     motions_enabled: boolean
@@ -815,22 +822,6 @@ export interface ActiveDing {
   optimization_level: number
   sip_token: string
   sip_ding_id: string
-}
-
-export interface LiveCallResponse {
-  ding_id: string
-  ding_kind: DingKind
-  device_id: number
-  device_kind: RingCameraKind
-  device_description: string
-  state: DingState
-  protocol: 'ring_media_server' | unknown
-  now: number
-  video_jitter_buffer_ms: number
-  audio_jitter_buffer_ms: number
-  data: {
-    session_id: string
-  }
 }
 
 export interface AuthTokenResponse {

@@ -1,4 +1,5 @@
 import {
+  ConnectionState,
   MediaStreamTrack,
   RTCIceCandidate,
   RTCPeerConnection,
@@ -6,7 +7,7 @@ import {
   RTCRtpCodecParameters,
   RtpPacket,
 } from '@koush/werift'
-import { Subject } from 'rxjs'
+import { ReplaySubject, Subject } from 'rxjs'
 import { logError, logInfo } from './util'
 
 const debug = false
@@ -17,6 +18,8 @@ export class PeerConnection {
   onAudioRtcp = new Subject<RtcpPacket>()
   onVideoRtp = new Subject<RtpPacket>()
   onVideoRtcp = new Subject<RtcpPacket>()
+  onIceCandidate = new Subject<RTCIceCandidate>()
+  onConnectionState = new ReplaySubject<ConnectionState>(1)
   returnAudioTrack = new MediaStreamTrack({ kind: 'audio' })
 
   constructor() {
@@ -40,8 +43,7 @@ export class PeerConnection {
                 { type: 'nack', parameter: 'pli' },
                 { type: 'goog-remb' },
               ],
-              parameters:
-                'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f',
+              parameters: 'profile-level-id=42801F',
             }),
           ],
         },
@@ -89,14 +91,31 @@ export class PeerConnection {
         )
       })
     })
+    this.pc.onIceCandidate.subscribe((iceCandidate) => {
+      this.onIceCandidate.next(iceCandidate)
+    })
+
+    pc.iceConnectionStateChange.subscribe(() => {
+      logInfo(`iceConnectionStateChange: ${pc.iceConnectionState}`)
+      if (pc.iceConnectionState === 'closed') {
+        this.onConnectionState.next('closed')
+      }
+    })
+    pc.connectionStateChange.subscribe(() => {
+      logInfo(`connectionStateChange: ${pc.connectionState}`)
+      this.onConnectionState.next(pc.connectionState)
+    })
   }
 
-  async createAnswer(offer: { type: 'offer'; sdp: string }) {
-    await this.pc.setRemoteDescription(offer)
-    const answer = await this.pc.createAnswer()
-    await this.pc.setLocalDescription(answer)
+  async createOffer() {
+    const offer = await this.pc.createOffer()
+    await this.pc.setLocalDescription(offer)
 
-    return answer
+    return offer
+  }
+
+  async acceptAnswer(answer: { type: 'answer'; sdp: string }) {
+    await this.pc.setRemoteDescription(answer)
   }
 
   addIceCandidate(candidate: RTCIceCandidate) {

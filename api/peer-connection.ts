@@ -10,7 +10,17 @@ import {
 import { ReplaySubject, Subject } from 'rxjs'
 import { logError, logInfo } from './util'
 
-const debug = false
+const debug = false,
+  ringIceServers = [
+    'stun:stun.kinesisvideo.us-east-1.amazonaws.com:443',
+    'stun:stun.kinesisvideo.us-east-2.amazonaws.com:443',
+    'stun:stun.kinesisvideo.us-west-2.amazonaws.com:443',
+    'stun:stun.l.google.com:19302',
+    'stun:stun1.l.google.com:19302',
+    'stun:stun2.l.google.com:19302',
+    'stun:stun3.l.google.com:19302',
+    'stun:stun4.l.google.com:19302',
+  ]
 
 export class PeerConnection {
   pc
@@ -44,10 +54,12 @@ export class PeerConnection {
                 { type: 'goog-remb' },
               ],
               parameters:
-                'packetization-mode=1;profile-level-id=42801F;level-asymmetry-allowed=1',
+                'packetization-mode=1;profile-level-id=640029;level-asymmetry-allowed=1',
             }),
           ],
         },
+        iceServers: ringIceServers.map((server) => ({ urls: server })),
+        iceTransportPolicy: 'all',
       })),
       audioTransceiver = pc.addTransceiver(this.returnAudioTrack, {
         direction: 'sendrecv',

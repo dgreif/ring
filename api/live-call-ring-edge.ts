@@ -3,7 +3,7 @@ import { firstValueFrom, fromEvent, interval, ReplaySubject } from 'rxjs'
 import { PeerConnection } from './peer-connection'
 import { logDebug, logError, logInfo } from './util'
 import { RingCamera } from './ring-camera'
-import { concatMap, filter, switchMap } from 'rxjs/operators'
+import { concatMap, switchMap } from 'rxjs/operators'
 import { Subscribed } from './subscribed'
 import {
   FfmpegProcess,
@@ -362,9 +362,7 @@ export class LiveCallRingEdge extends Subscribed {
       return
     }
     this.activated = true
-    await firstValueFrom(
-      this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
-    )
+    await firstValueFrom(this.onCallAnswered)
 
     logInfo('Activating Session')
     this.sendSessionMessage('activate_session')

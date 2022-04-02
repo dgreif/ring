@@ -5,7 +5,7 @@ import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
 import { uuid as getSystemUuid } from 'systeminformation'
 
 const debugLogger = debug('ring'),
-  uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739c'
+  uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739d'
 
 interface Logger {
   logInfo: (message: string) => void

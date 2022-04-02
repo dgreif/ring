@@ -86,11 +86,6 @@
         "type": "boolean",
         "description": "Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.  This is useful if have the Home app open constantly, causing frequent snapshot requests."
       },
-      "treatKnockAsDing": {
-        "title": "Treat Knock as Ding",
-        "type": "boolean",
-        "description": "When someone knocks on your door, it will be recognized as a doorbell press in HomeKit.  Limited to select camera models (Peephole Cam)"
-      },
       "sendCameraMotionNotificationsToTv": {
         "title": "Create a 'Doorbell' accessory triggered by non-doorbell camera motion alerts for tvOS 14 notification support",
         "type": "boolean"
@@ -117,13 +112,6 @@
         "minimum": 1,
         "placeholder": "Get camera status every __ seconds",
         "description": "Camera/Chime status (such as light/siren/volume/snooze state) does not update live and must be fetched periodically.  By default this is done every 20 seconds"
-      },
-      "cameraDingsPollingSeconds": {
-        "title": "Camera Event Polling",
-        "type": "integer",
-        "minimum": 1,
-        "placeholder": "Get camera events every __ seconds",
-        "description": "Camera motion and ding events does not update live and must be fetched periodically.  By default this is done every 2 seconds"
       },
       "locationModePollingSeconds": {
         "title": "Location Mode Polling",
@@ -179,13 +167,11 @@
         "showPanicButtons",
         "nightModeBypassFor",
         "avoidSnapshotBatteryDrain",
-        "treatKnockAsDing",
         "sendCameraMotionNotificationsToTv",
         "sendDoorbellMotionNotificationsToTv",
         "beamDurationSeconds",
         "debug",
         "cameraStatusPollingSeconds",
-        "cameraDingsPollingSeconds",
         "locationModePollingSeconds",
         {
           "key": "hideDeviceIds",

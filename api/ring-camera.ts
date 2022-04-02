@@ -1,5 +1,4 @@
 import {
-  ActiveDing,
   CameraData,
   CameraDeviceSettingsData,
   CameraEventOptions,
@@ -10,6 +9,8 @@ import {
   isBatteryCameraKind,
   LiveCallResponse,
   PeriodicFootageResponse,
+  PushNotificationAction,
+  PushNotification,
   RingCameraModel,
   VideoSearchResponse,
 } from './ring-types'
@@ -102,20 +103,20 @@ export class RingCamera extends Subscribed {
   hasSiren
 
   onRequestUpdate = new Subject()
-  onRequestActiveDings = new Subject()
-
-  onNewDing = new Subject<ActiveDing>()
-  onActiveDings = new BehaviorSubject<ActiveDing[]>([])
-  onDoorbellPressed = this.onNewDing.pipe(
+  onNewNotification = new Subject<PushNotification>()
+  onActiveNotifications = new BehaviorSubject<PushNotification[]>([])
+  onDoorbellPressed = this.onNewNotification.pipe(
     filter(
-      (ding) =>
-        ding.kind === 'ding' ||
-        (this.treatKnockAsDing && ding.kind === 'door_activity')
+      (notification) => notification.action === PushNotificationAction.Ding
     ),
     share()
   )
-  onMotionDetected = this.onActiveDings.pipe(
-    map((dings) => dings.some((ding) => ding.motion || ding.kind === 'motion')),
+  onMotionDetected = this.onActiveNotifications.pipe(
+    map((notifications) =>
+      notifications.some(
+        (notification) => notification.action === PushNotificationAction.Motion
+      )
+    ),
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
@@ -132,8 +133,7 @@ export class RingCamera extends Subscribed {
     private initialData: CameraData,
     public isDoorbot: boolean,
     private restClient: RingRestClient,
-    private avoidSnapshotBatteryDrain: boolean,
-    private treatKnockAsDing: boolean
+    private avoidSnapshotBatteryDrain: boolean
   ) {
     super()
 
@@ -191,7 +191,7 @@ export class RingCamera extends Subscribed {
   }
 
   get activeDings() {
-    return this.onActiveDings.getValue()
+    return this.onActiveNotifications.getValue()
   }
 
   get batteryLevel() {
@@ -358,24 +358,24 @@ export class RingCamera extends Subscribed {
     return new LiveCall(liveCall.data.session_id, this)
   }
 
-  private removeDingById(idToRemove: string) {
+  private removeDingById(idToRemove: number) {
     const allActiveDings = this.activeDings,
-      otherDings = allActiveDings.filter((ding) => ding.id_str !== idToRemove)
+      otherDings = allActiveDings.filter(({ ding }) => ding.id !== idToRemove)
 
-    this.onActiveDings.next(otherDings)
+    this.onActiveNotifications.next(otherDings)
   }
 
-  processActiveDing(ding: ActiveDing) {
+  processPushNotification(notification: PushNotification) {
     const activeDings = this.activeDings,
-      dingId = ding.id_str
+      dingId = notification.ding.id
 
-    this.onActiveDings.next(
-      activeDings.filter((d) => d.id_str !== dingId).concat([ding])
+    this.onActiveNotifications.next(
+      activeDings.filter((d) => d.ding.id !== dingId).concat([notification])
     )
-    this.onNewDing.next(ding)
+    this.onNewNotification.next(notification)
 
     setTimeout(() => {
-      this.removeDingById(ding.id_str)
+      this.removeDingById(dingId)
     }, 65 * 1000) // dings last ~1 minute
   }
 

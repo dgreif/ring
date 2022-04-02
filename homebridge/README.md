@@ -68,7 +68,6 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "avoidSnapshotBatteryDrain": true,
   "treatKnockAsDing": true,
   "cameraStatusPollingSeconds": 20,
-  "cameraDingsPollingSeconds": 2,
   "locationModePollingSeconds": 20,
   "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]
 }
@@ -92,9 +91,7 @@ Option | Default | Explanation
 `showPanicButtons` | `false` | Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app.
 `nightModeBypassFor` | no Night Mode | Allows you to use Night mode to "Bypass and Arm" a Ring Alarm.  Can be set to `all` for Away or `some` for Home.  If set and Night mode is activated from HomeKit, any open contact sensors will automatically be bypassed.
 `avoidSnapshotBatteryDrain` | false | Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.
-`treatKnockAsDing` | false | When someone knocks on your door, it will be recognized as a doorbell press in HomeKit.  Limited to select camera models (Peephole Cam).
 `cameraStatusPollingSeconds` | `20` | How frequently to poll for updates to your cameras and chimes (in seconds).  Information like light/siren/volume/snooze status do not update in real time and need to be requested periodically.
-`cameraDingsPollingSeconds` | `2` | How frequently to poll for new events from your cameras.  These include motion and doorbell presses.
 `locationModePollingSeconds` | `20` | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.  Will hide Location Mode switch if set to `0`
 `locationIds` | All Locations | Use this option if you only want a subset of your locations to appear in HomeKit. If this option is not included, all of your locations will be added to HomeKit (which is what most users will want to do).
 `onlyDeviceTypes` | All Device Types | A subset of device types to be shown.  If set, all other device types will be hidden in HomeKit.

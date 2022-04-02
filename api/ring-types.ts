@@ -797,35 +797,8 @@ export interface RingDeviceHistoryEvent {
 
 export type DingState = 'ringing' | 'connected' | 'timed_out' | 'completed'
 
-export interface ActiveDing {
-  id: number
-  id_str: string
-  state: DingState
-  protocol: 'sip'
-  doorbot_id: number
-  doorbot_description: string
-  device_kind: RingCameraKind
-  motion: boolean
-  snapshot_url: string
-  kind: DingKind
-  sip_server_ip: string
-  sip_server_port: number
-  sip_server_tls: boolean
-  sip_session_id: string
-  sip_from: string
-  sip_to: string
-  audio_jitter_buffer_ms: number
-  video_jitter_buffer_ms: number
-  sip_endpoints: null
-  expires_in: number
-  now: number
-  optimization_level: number
-  sip_token: string
-  sip_ding_id: string
-}
-
 // eslint-disable-next-line no-shadow
-export const enum NotificationDetectionType {
+export enum NotificationDetectionType {
   // Note, this list may not be complete
   Human = 'human',
   Loitering = 'loitering',
@@ -835,7 +808,13 @@ export const enum NotificationDetectionType {
   StreamBroken = 'stream_broken',
 }
 
-export interface PushNotificationData {
+// eslint-disable-next-line no-shadow
+export enum PushNotificationAction {
+  Ding = 'com.ring.push.HANDLE_NEW_DING',
+  Motion = 'com.ring.push.HANDLE_NEW_motion',
+}
+
+export interface PushNotification {
   ding: {
     streaming_protocol: 'ring_media_server'
     location_id: string
@@ -860,10 +839,7 @@ export interface PushNotificationData {
     sound: string
   }
   subtype: 'motion' | 'ding' | 'human' | string
-  action:
-    | 'com.ring.push.HANDLE_NEW_motion'
-    | 'com.ring.push.HANDLE_NEW_DING'
-    | string
+  action: PushNotificationAction | string
 }
 
 export interface LiveCallResponse {

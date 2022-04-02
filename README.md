@@ -27,7 +27,6 @@ const ringApi = new RingApi({
 
   // The following are all optional. See below for details
   cameraStatusPollingSeconds: 20,
-  cameraDingsPollingSeconds: 2,
   locationIds: ['488e4800-fcde-4493-969b-d1a06f683102', '4bbed7a7-06df-4f18-b3af-291c89854d60']
 });
 ```
@@ -37,7 +36,6 @@ const ringApi = new RingApi({
 Option | Default | Explanation
 --- | --- | ---
 `cameraStatusPollingSeconds` | `undefined` (No Polling) | How frequently to poll for updates to your cameras and chimes (in seconds).  Information like light/siren/volume/snooze status do not update in real time and need to be requested periodically.
-`cameraDingsPollingSeconds` | `undefined` (No Polling) | How frequently to poll for new events from your cameras (in seconds).  These include motion and doorbell presses.  Without this option, cameras will not emit any information about motion and doorbell presses.
 `locationModePollingSeconds` | `undefined` (No Polling) | How frequently to poll for location mode updates (in seconds).  This is only useful if you are using location modes to control camera settings and want to keep an up-to-date reference of the current mode for each location.  Polling is automatically disabled for locations equipped with a Ring Alarm.
 `locationIds` | All Locations | Allows you to limit the results to a specific set of locations. This is mainly useful for the [homebridge-ring Plugin](./homebridge), but can also be used if you only care about listening for events at a subset of your locations and don't want to create websocket connections to _all_ of your locations. This will also limit the results for `ringApi.getCameras()` to the configured locations. If this option is not included, all locations will be returned.
 `debug` | false | Turns on additional logging.  In particular, ffmpeg logging.
@@ -45,7 +43,6 @@ Option | Default | Explanation
 `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable.  By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridg) will be used.  If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`.
 `controlCenterDisplayName` | 'ring-client-api' | This allows you to change the displayed name for the Authorized Device within Control Center in the Ring app
 `avoidSnapshotBatteryDrain` | false | Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.
-`treatKnockAsDing` | false | Will cause "knock" (`door_activity`) dings to be emitted from `onDoorbellPressed`
 
 ## Locations
 ```typescript

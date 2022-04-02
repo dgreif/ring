@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../api'
+import { PushNotificationAction, RingApi } from '../api'
 import { skip } from 'rxjs/operators'
 import { readFile, writeFile } from 'fs'
 import { promisify } from 'util'
@@ -9,8 +9,6 @@ async function example() {
     ringApi = new RingApi({
       // Replace with your refresh token
       refreshToken: env.RING_REFRESH_TOKEN!,
-      // Listen for dings and motion events
-      cameraDingsPollingSeconds: 2,
       debug: true,
     }),
     locations = await ringApi.getLocations(),
@@ -69,17 +67,17 @@ async function example() {
 
   if (allCameras.length) {
     allCameras.forEach((camera) => {
-      camera.onNewDing.subscribe((ding) => {
+      camera.onNewNotification.subscribe((notification) => {
         const event =
-          ding.kind === 'motion'
+          notification.action === PushNotificationAction.Motion
             ? 'Motion detected'
-            : ding.kind === 'ding'
+            : notification.action === PushNotificationAction.Ding
             ? 'Doorbell pressed'
-            : `Video started (${ding.kind})`
+            : `Video started (${notification.action})`
 
         console.log(
           `${event} on ${camera.name} camera. Ding id ${
-            ding.id_str
+            notification.ding.id
           }.  Received at ${new Date()}`
         )
       })

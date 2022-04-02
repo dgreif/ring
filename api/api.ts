@@ -7,14 +7,12 @@ import {
 } from './rest-client'
 import { Location } from './location'
 import {
-  ActiveDing,
   BaseStation,
   BeamBridge,
   CameraData,
   ChimeData,
-  DingKind,
   ProfileResponse,
-  PushNotificationData,
+  PushNotification,
   UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
@@ -29,10 +27,8 @@ import PushReceiver from '@eneris/push-receiver'
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
   cameraStatusPollingSeconds?: number
-  cameraDingsPollingSeconds?: number
   locationModePollingSeconds?: number
   avoidSnapshotBatteryDrain?: boolean
-  treatKnockAsDing?: boolean
   debug?: boolean
   ffmpegPath?: string
   externalPorts?: {
@@ -95,12 +91,6 @@ export class RingApi extends Subscribed {
       baseStations,
       beamBridges,
     }
-  }
-
-  fetchActiveDings() {
-    return this.restClient.request<ActiveDing[]>({
-      url: clientApi('dings/active'),
-    })
   }
 
   private listenForDeviceUpdates(cameras: RingCamera[], chimes: RingChime[]) {
@@ -205,41 +195,20 @@ export class RingApi extends Subscribed {
       }
     )
 
-    pushReceiver.onNotification((notification) => {
-      const dataJson = notification.message.data?.gcmData as string
+    pushReceiver.onNotification(({ message }) => {
+      const dataJson = message.data?.gcmData as string
 
       try {
-        const { ding, subtype } = JSON.parse(dataJson) as PushNotificationData,
-          camera = camerasById[ding.doorbot_id]
+        const notification = JSON.parse(dataJson) as PushNotification
 
-        if (camera) {
-          camera.processActiveDing({
-            id: ding.id,
-            id_str: ding.id.toString(),
-            state: 'ringing',
-            protocol: 'sip', //ding.streaming_protocol,
-            doorbot_id: ding.doorbot_id,
-            doorbot_description: ding.device_name,
-            device_kind: ding.device_kind,
-            motion: subtype === 'motion',
-            snapshot_url: ding.image_uuid,
-            kind: subtype as DingKind,
-            sip_server_ip: '',
-            sip_server_port: 0,
-            sip_server_tls: true,
-            sip_session_id: '',
-            sip_from: '',
-            sip_to: '',
-            audio_jitter_buffer_ms: 0,
-            video_jitter_buffer_ms: 0,
-            sip_endpoints: null,
-            expires_in: 0,
-            now: 0,
-            optimization_level: 0,
-            sip_token: '',
-            sip_ding_id: '',
-          })
+        if (!notification.ding) {
+          // We may get notification that are not for a ding/motion, which can be ignored
+          return
         }
+
+        camerasById[notification.ding.doorbot_id].processPushNotification(
+          notification
+        )
       } catch (e) {
         logError(e)
       }
@@ -294,8 +263,7 @@ export class RingApi extends Subscribed {
               authorizedDoorbots.includes(data) ||
               data.kind.startsWith('doorbell'),
             this.restClient,
-            this.options.avoidSnapshotBatteryDrain || false,
-            this.options.treatKnockAsDing || false
+            this.options.avoidSnapshotBatteryDrain || false
           )
       ),
       ringChimes = chimes.map((data) => new RingChime(data, this.restClient)),

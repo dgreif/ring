@@ -171,7 +171,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
     }
 
     config.cameraStatusPollingSeconds = config.cameraStatusPollingSeconds ?? 20
-    config.cameraDingsPollingSeconds = config.cameraDingsPollingSeconds ?? 2
     config.locationModePollingSeconds = config.locationModePollingSeconds ?? 20
 
     this.api.on('didFinishLaunching', () => {

@@ -806,7 +806,7 @@ export interface ActiveDing {
   doorbot_description: string
   device_kind: RingCameraKind
   motion: boolean
-  snapshot_url: ''
+  snapshot_url: string
   kind: DingKind
   sip_server_ip: string
   sip_server_port: number
@@ -822,6 +822,33 @@ export interface ActiveDing {
   optimization_level: number
   sip_token: string
   sip_ding_id: string
+}
+
+export interface PushNotificationData {
+  ding: {
+    streaming_protocol: 'ring_media_server'
+    location_id: string
+    device_name: string
+    doorbot_id: number
+    e2ee_enabled: boolean
+    streaming_data_hash: string
+    device_kind: RingCameraKind
+    detection_type: 'null' | string // TODO
+    id: number
+    pod_id: number
+    request_id: string
+    image_uuid: string //'0403956b5b314d339e63024057b5e91f:46171152'
+    properties: {
+      active_streaming_profile: 'rms' | string // TODO
+      is_sidewalk: boolean
+    }
+  }
+  aps: {
+    alert: string
+    sound: string
+  }
+  subtype: 'motion' | string
+  action: 'com.ring.push.HANDLE_NEW_motion' | string
 }
 
 export interface LiveCallResponse {

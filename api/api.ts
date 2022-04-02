@@ -12,7 +12,9 @@ import {
   BeamBridge,
   CameraData,
   ChimeData,
+  DingKind,
   ProfileResponse,
+  PushNotificationData,
   UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
@@ -22,6 +24,7 @@ import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
+import PushReceiver from '@eneris/push-receiver'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -101,26 +104,19 @@ export class RingApi extends Subscribed {
   }
 
   private listenForDeviceUpdates(cameras: RingCamera[], chimes: RingChime[]) {
-    const { cameraStatusPollingSeconds, cameraDingsPollingSeconds } =
-        this.options,
-      onCamerasRequestUpdate = merge(
+    const { cameraStatusPollingSeconds } = this.options
+    if (!cameraStatusPollingSeconds) {
+      return
+    }
+    const onCamerasRequestUpdate = merge(
         ...cameras.map((camera) => camera.onRequestUpdate)
       ),
       onChimesRequestUpdate = merge(
         ...chimes.map((chime) => chime.onRequestUpdate)
       ),
-      onCamerasRequestActiveDings = merge(
-        ...cameras.map((camera) => camera.onRequestActiveDings)
-      ),
       onUpdateReceived = new Subject(),
-      onActiveDingsReceived = new Subject(),
       onPollForStatusUpdate = cameraStatusPollingSeconds
         ? onUpdateReceived.pipe(debounceTime(cameraStatusPollingSeconds * 1000))
-        : EMPTY,
-      onPollForActiveDings = cameraDingsPollingSeconds
-        ? onActiveDingsReceived.pipe(
-            debounceTime(cameraDingsPollingSeconds * 1000)
-          )
         : EMPTY,
       camerasById = cameras.reduce((byId, camera) => {
         byId[camera.id] = camera
@@ -171,29 +167,89 @@ export class RingApi extends Subscribed {
     if (cameraStatusPollingSeconds) {
       onUpdateReceived.next(null) // kick off polling
     }
+  }
 
-    this.addSubscriptions(
-      merge(onCamerasRequestActiveDings, onPollForActiveDings).subscribe(
-        async () => {
-          const activeDings = await this.fetchActiveDings().catch(() => null)
-          onActiveDingsReceived.next(null)
+  async registerPushReceiver(cameras: RingCamera[]) {
+    const pushReceiver = new PushReceiver({
+        logLevel: 'NONE',
+        senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+      }),
+      camerasById = cameras.reduce((byId, camera) => {
+        byId[camera.id] = camera
+        return byId
+      }, {} as { [id: number]: RingCamera })
 
-          if (!activeDings || !activeDings.length) {
-            return
-          }
-
-          activeDings.forEach((activeDing) => {
-            const camera = camerasById[activeDing.doorbot_id]
-            if (camera) {
-              camera.processActiveDing(activeDing)
-            }
+    pushReceiver.onCredentialsChanged(
+      async ({
+        newCredentials: {
+          fcm: { token },
+        },
+      }) => {
+        try {
+          await this.restClient.request({
+            url: clientApi('device'),
+            method: 'PATCH',
+            json: {
+              device: {
+                metadata: {
+                  pn_service: 'fcm',
+                },
+                os: 'android',
+                push_notification_token: token,
+              },
+            },
           })
+        } catch (e) {
+          logError(e)
         }
-      )
+      }
     )
 
-    if (cameras.length && cameraDingsPollingSeconds) {
-      onActiveDingsReceived.next(null) // kick off polling
+    pushReceiver.onNotification((notification) => {
+      const dataJson = notification.message.data?.gcmData as string
+
+      try {
+        const { ding, subtype } = JSON.parse(dataJson) as PushNotificationData,
+          camera = camerasById[ding.doorbot_id]
+
+        if (camera) {
+          camera.processActiveDing({
+            id: ding.id,
+            id_str: ding.id.toString(),
+            state: 'ringing',
+            protocol: 'sip', //ding.streaming_protocol,
+            doorbot_id: ding.doorbot_id,
+            doorbot_description: ding.device_name,
+            device_kind: ding.device_kind,
+            motion: subtype === 'motion',
+            snapshot_url: ding.image_uuid,
+            kind: subtype as DingKind,
+            sip_server_ip: '',
+            sip_server_port: 0,
+            sip_server_tls: true,
+            sip_session_id: '',
+            sip_from: '',
+            sip_to: '',
+            audio_jitter_buffer_ms: 0,
+            video_jitter_buffer_ms: 0,
+            sip_endpoints: null,
+            expires_in: 0,
+            now: 0,
+            optimization_level: 0,
+            sip_token: '',
+            sip_ding_id: '',
+          })
+        }
+      } catch (e) {
+        logError(e)
+      }
+    })
+
+    try {
+      await pushReceiver.connect()
+    } catch (e) {
+      logError('Failed to connect push notification receiver')
+      logError(e)
     }
   }
 
@@ -273,6 +329,9 @@ export class RingApi extends Subscribed {
         )
 
     this.listenForDeviceUpdates(cameras, ringChimes)
+    this.registerPushReceiver(cameras).catch((e) => {
+      logError(e)
+    })
 
     return locations
   }

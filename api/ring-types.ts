@@ -824,6 +824,17 @@ export interface ActiveDing {
   sip_ding_id: string
 }
 
+// eslint-disable-next-line no-shadow
+export const enum NotificationDetectionType {
+  // Note, this list may not be complete
+  Human = 'human',
+  Loitering = 'loitering',
+  Motion = 'motion',
+  OtherMotion = 'other_motion',
+  NotAvailable = 'null',
+  StreamBroken = 'stream_broken',
+}
+
 export interface PushNotificationData {
   ding: {
     streaming_protocol: 'ring_media_server'
@@ -833,13 +844,14 @@ export interface PushNotificationData {
     e2ee_enabled: boolean
     streaming_data_hash: string
     device_kind: RingCameraKind
-    detection_type: 'null' | string // TODO
+    detection_type: NotificationDetectionType
+    human_detected?: boolean
     id: number
     pod_id: number
     request_id: string
-    image_uuid: string //'0403956b5b314d339e63024057b5e91f:46171152'
+    image_uuid: string
     properties: {
-      active_streaming_profile: 'rms' | string // TODO
+      active_streaming_profile: 'rms'
       is_sidewalk: boolean
     }
   }
@@ -847,8 +859,11 @@ export interface PushNotificationData {
     alert: string
     sound: string
   }
-  subtype: 'motion' | string
-  action: 'com.ring.push.HANDLE_NEW_motion' | string
+  subtype: 'motion' | 'ding' | 'human' | string
+  action:
+    | 'com.ring.push.HANDLE_NEW_motion'
+    | 'com.ring.push.HANDLE_NEW_DING'
+    | string
 }
 
 export interface LiveCallResponse {

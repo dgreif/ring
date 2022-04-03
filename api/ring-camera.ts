@@ -6,7 +6,6 @@ import {
   CameraHealth,
   DoorbellType,
   HistoryOptions,
-  isBatteryCameraKind,
   LiveCallResponse,
   PeriodicFootageResponse,
   PushNotificationAction,
@@ -33,44 +32,19 @@ import { LiveCallRingEdge } from './live-call-ring-edge'
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
 
-function parseBatteryLife(batteryLife: string | number | null | undefined) {
-  if (batteryLife === null || batteryLife === undefined) {
-    return null
-  }
-
-  const batteryLevel =
-    typeof batteryLife === 'number'
-      ? batteryLife
-      : Number.parseFloat(batteryLife)
-
-  if (isNaN(batteryLevel)) {
-    return null
-  }
-
-  return batteryLevel
-}
-
 function getStartOfToday() {
   return new Date(new Date().toLocaleDateString()).getTime()
 }
-
 function getEndOfToday() {
   return getStartOfToday() + fullDayMs - 1
 }
 
-export function getBatteryLevel(
-  data: Pick<CameraData, 'battery_life' | 'battery_life_2'>
-) {
-  const levels = [
-    parseBatteryLife(data.battery_life),
-    parseBatteryLife(data.battery_life_2),
-  ].filter((level): level is number => level !== null)
-
-  if (!levels.length) {
+export function getBatteryLevel({ health }: Pick<CameraData, 'health'>) {
+  if (!health.battery_percentage && !health.battery_present) {
     return null
   }
 
-  return Math.min(...levels)
+  return health.battery_percentage || 0
 }
 
 export function getSearchQueryString(
@@ -204,16 +178,7 @@ export class RingCamera extends Subscribed {
   }
 
   get hasBattery() {
-    if (this.batteryLevel === null) {
-      return false
-    }
-
-    return (
-      isBatteryCameraKind(this.deviceType) ||
-      (typeof this.initialData.battery_life === 'string' &&
-        this.batteryLevel < 100 &&
-        this.batteryLevel >= 0)
-    )
+    return this.batteryLevel !== null
   }
 
   get hasLowBattery() {
@@ -221,7 +186,9 @@ export class RingCamera extends Subscribed {
   }
 
   get isCharging() {
-    return this.initialData.external_connection
+    return Boolean(
+      this.data.health.ac_power || this.data.health.ext_power_state
+    )
   }
 
   get operatingOnBattery() {

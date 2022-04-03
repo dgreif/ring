@@ -94,14 +94,6 @@ export enum RingCameraKind {
   stickup_cam_mini = 'stickup_cam_mini',
 }
 
-// RegExp taken from ring.com app
-const isWiredCameraRegExp = new RegExp(
-  /(^(lpd|jbox|stickup_cam_elite|stickup_cam_mini|hp_cam|spotlightw|floodlight|doorbell_graham_cracker))/
-)
-export function isBatteryCameraKind(kind: RingCameraKind) {
-  return !kind.match(isWiredCameraRegExp)
-}
-
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbot: 'Doorbell',
   doorbell: 'Doorbell',
@@ -515,6 +507,44 @@ export interface CameraData {
     duration?: string
     ends_at?: string
     seconds_remaining: number
+  }
+  health: {
+    device_type: RingCameraKind
+    last_update_time: number
+    connected: boolean
+    rss_connected: boolean
+    vod_enabled: boolean
+    sidewalk_connection: boolean
+    floodlight_on: boolean
+    siren_on?: boolean
+    white_led_on: boolean
+    night_mode_on: boolean
+    hatch_open: boolean
+    packet_loss: number
+    packet_loss_category: 'good' | string
+    rssi: number
+    battery_voltage: number
+    wifi_is_ring_network: boolean
+    supported_rpc_commands: string[]
+    ota_status: 'successful' | string
+    ext_power_state?: 0 | number
+    pref_run_mode?: 'low_power' | string
+    run_mode?: 'low_power' | 'full_power' | string
+    network_connection_value: 'wifi' | string
+    ac_power: number // 0 if not on ac power, 1 if ac power
+    battery_present?: boolean
+    external_connection: boolean
+    battery_percentage?: number // 0 - 100
+    battery_percentage_category: 'very_good' | 'unknown' | string
+    firmware_version: string // 'cam-1.12.13000'
+    rssi_category: 'good' | string
+    battery_voltage_category: 'very_good' | string
+    second_battery_voltage_category: 'unknown' | string
+    second_battery_percentage_category: 'unknown' | string
+    battery_save: boolean
+    firmware_version_status: 'Up to Date'
+    tx_rate: number
+    ptz_connected?: 'penguin'
   }
 }
 

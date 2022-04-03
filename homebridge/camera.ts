@@ -189,11 +189,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       getValue: (data) => data.device_id,
     })
 
-    if (
-      device.hasBattery ||
-      // detected as having battery in the past
-      accessory.getService(Service.BatteryService)
-    ) {
+    if (device.hasBattery) {
       this.registerCharacteristic({
         characteristicType: Characteristic.StatusLowBattery,
         serviceType: Service.BatteryService,
@@ -207,8 +203,8 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.registerCharacteristic({
         characteristicType: Characteristic.ChargingState,
         serviceType: Service.BatteryService,
-        getValue: (data) => {
-          return data.external_connection
+        getValue: () => {
+          return device.isCharging
             ? ChargingState.CHARGING
             : ChargingState.NOT_CHARGING
         },

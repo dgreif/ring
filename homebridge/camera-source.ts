@@ -356,14 +356,14 @@ export class CameraSource implements CameraStreamingDelegate {
   constructor(private ringCamera: RingCamera) {}
 
   private previousLoadSnapshotPromise?: Promise<any>
-  async loadSnapshot() {
+  async loadSnapshot(imageUuid?: string) {
     // cache a promise of the snapshot load
     // This prevents multiple concurrent requests for snapshot from pilling up and creating lots of logs
     if (this.previousLoadSnapshotPromise) {
       return this.previousLoadSnapshotPromise
     }
 
-    this.previousLoadSnapshotPromise = this.loadAndCacheSnapshot()
+    this.previousLoadSnapshotPromise = this.loadAndCacheSnapshot(imageUuid)
 
     try {
       await this.previousLoadSnapshotPromise
@@ -375,13 +375,18 @@ export class CameraSource implements CameraStreamingDelegate {
     }
   }
 
-  private async loadAndCacheSnapshot() {
+  fn = 1
+  private async loadAndCacheSnapshot(imageUuid?: string) {
     const start = Date.now()
-    logDebug(`Loading new snapshot into cache for ${this.ringCamera.name}`)
+    logDebug(
+      `Loading new snapshot into cache for ${this.ringCamera.name}${
+        imageUuid ? ' by uuid' : ''
+      }`
+    )
 
     try {
       const previousSnapshot = this.cachedSnapshot,
-        newSnapshot = await this.ringCamera.getSnapshot()
+        newSnapshot = await this.ringCamera.getSnapshot({ uuid: imageUuid })
       this.cachedSnapshot = newSnapshot
 
       if (previousSnapshot !== newSnapshot) {
@@ -395,9 +400,9 @@ export class CameraSource implements CameraStreamingDelegate {
       }
 
       logDebug(
-        `Snapshot cached for ${this.ringCamera.name} (${getDurationSeconds(
-          start
-        )}s)`
+        `Snapshot cached for ${this.ringCamera.name}${
+          imageUuid ? ' by uuid' : ''
+        } (${getDurationSeconds(start)}s)`
       )
     } catch (e) {
       this.cachedSnapshot = undefined

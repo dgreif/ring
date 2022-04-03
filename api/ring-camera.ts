@@ -190,8 +190,13 @@ export class RingCamera extends Subscribed {
     return this.data.description
   }
 
-  get activeDings() {
+  get activeNotifications() {
     return this.onActiveNotifications.getValue()
+  }
+
+  get latestNotification(): PushNotification | undefined {
+    const notifications = this.activeNotifications
+    return notifications[notifications.length - 1]
   }
 
   get batteryLevel() {
@@ -359,14 +364,14 @@ export class RingCamera extends Subscribed {
   }
 
   private removeDingById(idToRemove: number) {
-    const allActiveDings = this.activeDings,
+    const allActiveDings = this.activeNotifications,
       otherDings = allActiveDings.filter(({ ding }) => ding.id !== idToRemove)
 
     this.onActiveNotifications.next(otherDings)
   }
 
   processPushNotification(notification: PushNotification) {
-    const activeDings = this.activeDings,
+    const activeDings = this.activeNotifications,
       dingId = notification.ding.id
 
     this.onActiveNotifications.next(
@@ -483,7 +488,7 @@ export class RingCamera extends Subscribed {
   }
 
   private fetchingSnapshot = false
-  async getSnapshot() {
+  async getSnapshot({ uuid }: { uuid?: string } = {}) {
     if (this.lastSnapshotPromise && this.shouldUseExistingSnapshotPromise()) {
       return this.lastSnapshotPromise
     }
@@ -491,10 +496,14 @@ export class RingCamera extends Subscribed {
     this.checkIfSnapshotsAreBlocked()
 
     this.lastSnapshotPromise = Promise.race([
-      this.getNextSnapshot({
-        afterMs: this.lastSnapshotTimestamp,
-        force: true,
-      }),
+      this.getNextSnapshot(
+        uuid
+          ? { uuid }
+          : {
+              afterMs: this.lastSnapshotTimestamp,
+              force: true,
+            }
+      ),
       delay(maxSnapshotRefreshSeconds * 1000).then(() => {
         const extraMessageForBatteryCam = this.operatingOnBattery
           ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
@@ -521,10 +530,12 @@ export class RingCamera extends Subscribed {
     afterMs,
     maxWaitMs,
     force,
+    uuid,
   }: {
     afterMs?: number
     maxWaitMs?: number
     force?: boolean
+    uuid?: string
   }) {
     const response = await this.restClient.request<Buffer>({
         url: `https://app-snaps.ring.com/snapshots/next/${this.id}`,
@@ -533,6 +544,7 @@ export class RingCamera extends Subscribed {
           'after-ms': afterMs,
           'max-wait-ms': maxWaitMs,
           extras: force ? 'force' : undefined,
+          uuid,
         },
         headers: {
           accept: 'image/jpeg',
@@ -544,6 +556,16 @@ export class RingCamera extends Subscribed {
     this.lastSnapshotTimestamp = timeMillis
     this.lastSnapshotTimestampLocal = Date.now() - timestampAge
     return response
+  }
+
+  getSnapshotByUuid(uuid: string) {
+    return this.restClient.request<Buffer>({
+      url: clientApi('snapshots/uuid?uuid=' + uuid),
+      responseType: 'buffer',
+      headers: {
+        accept: 'image/jpeg',
+      },
+    })
   }
 
   async recordToFile(outputPath: string, duration = 30) {

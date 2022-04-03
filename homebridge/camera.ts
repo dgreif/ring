@@ -230,7 +230,10 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     eventDescription: string,
     characteristicValue: T
   ) {
-    if (this.device.operatingOnBattery) {
+    const latestNotification = this.device.latestNotification,
+      imageUuid = latestNotification?.ding.image_uuid
+
+    if (this.device.operatingOnBattery && !imageUuid) {
       // battery cameras cannot fetch a new snapshot while recording is in progress
       this.logger.info(this.device.name + ' ' + eventDescription)
       return characteristicValue
@@ -242,7 +245,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     )
 
     try {
-      await this.cameraSource.loadSnapshot()
+      await this.cameraSource.loadSnapshot(imageUuid)
     } catch (e) {
       this.logger.info(
         this.device.name +

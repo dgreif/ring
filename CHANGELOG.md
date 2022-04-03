@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.4](https://github.com/dgreif/ring/compare/v10.0.0-beta.3...v10.0.0-beta.4) (2022-04-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** All ding-related functionality will now use the `PushNotification` type, and the `ActiveDing` type has been removed
+* **api:** The `cameraDingsPollingSeconds` option has been removed.  Ding events will now be received via push notifications (no setup required)
+* **api:** The `treatKnockAsDing` option has been removed.  Knocks should now register as "dings" automatically, though I have not been able to test this functionality
+
+### Features
+
+* **api:** convert ding handling to use notifications ([5b62318](https://github.com/dgreif/ring/commit/5b62318b6a71bcc224a2b29cbd6e21162fc9891e))
+* **api:** update notification types ([15d3e7e](https://github.com/dgreif/ring/commit/15d3e7e40744e2c3ed48140fa94fbc0c6f9d4088))
+* **homebridge:** faster snapshots from camera notifications ([7fc821b](https://github.com/dgreif/ring/commit/7fc821b71013c36314d6d428b8152e631ea4b497))
+* receive dings from push notifications ([c9f130f](https://github.com/dgreif/ring/commit/c9f130f0f1f21b6db2454d611641ef7c29c7e620))
+
+
+### Bug Fixes
+
+* more closely match ring edge live streaming setup flow ([4bb3189](https://github.com/dgreif/ring/commit/4bb3189d6ce6614f7af64d04b410c3922957d555))
+* update uuid namespace to force new client sessions ([bc3e943](https://github.com/dgreif/ring/commit/bc3e9432c41dda085845f72f332dcf480c92475d))
+* use camera health to determine battery and charging status ([fac7033](https://github.com/dgreif/ring/commit/fac70331bdd4dd94bc6caa143eb1bcb9ead06923)), closes [#873](https://github.com/dgreif/ring/issues/873)
+
 ## [10.0.0-beta.3](https://github.com/dgreif/ring/compare/v10.0.0-beta.2...v10.0.0-beta.3) (2022-03-26)
 
 

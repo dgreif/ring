@@ -19,6 +19,7 @@ const defaultRequestOptions: RequestOptions = {
     method: 'GET',
     retry: 0,
     timeout: 20000,
+    dnsCache: true,
   },
   ringErrorCodes: { [code: number]: string } = {
     7050: 'NO_ASSET',

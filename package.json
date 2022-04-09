@@ -10,7 +10,7 @@
   "scripts": {
     "start": "concurrently -c yellow,blue --kill-others \"npm:hb\" \"npm:watch:ui\"",
     "watch:ui": "npm start --prefix homebridge-ui",
-    "test": "eslint '**/*.ts'",
+    "test": "jest && eslint '**/*.ts'",
     "watch:tests": "jest --watch",
     "lint": "eslint '**/*.ts' --fix",
     "build": "rm -rf lib && tsc --declaration",

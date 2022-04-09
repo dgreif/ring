@@ -32,19 +32,50 @@ import { LiveCallRingEdge } from './live-call-ring-edge'
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
 
+function parseBatteryLife(batteryLife: string | number | null | undefined) {
+  if (batteryLife === null || batteryLife === undefined) {
+    return null
+  }
+
+  const batteryLevel =
+    typeof batteryLife === 'number'
+      ? batteryLife
+      : Number.parseFloat(batteryLife)
+
+  if (isNaN(batteryLevel)) {
+    return null
+  }
+
+  return batteryLevel
+}
+
 function getStartOfToday() {
   return new Date(new Date().toLocaleDateString()).getTime()
 }
+
 function getEndOfToday() {
   return getStartOfToday() + fullDayMs - 1
 }
 
-export function getBatteryLevel({ health }: Pick<CameraData, 'health'>) {
-  if (!health.battery_percentage && !health.battery_present) {
+export function getBatteryLevel(
+  data: Pick<CameraData, 'battery_life' | 'battery_life_2'> & {
+    health?: Partial<CameraData['health']>
+  }
+) {
+  const levels = [
+      parseBatteryLife(data.battery_life),
+      parseBatteryLife(data.battery_life_2),
+    ].filter((level): level is number => level !== null),
+    { health } = data
+
+  if (
+    !levels.length ||
+    (health && !health.battery_percentage && !health.battery_present)
+  ) {
     return null
   }
 
-  return health.battery_percentage || 0
+  return Math.min(...levels)
 }
 
 export function getSearchQueryString(
@@ -186,9 +217,7 @@ export class RingCamera extends Subscribed {
   }
 
   get isCharging() {
-    return Boolean(
-      this.data.health.ac_power || this.data.health.ext_power_state
-    )
+    return this.initialData.external_connection
   }
 
   get operatingOnBattery() {

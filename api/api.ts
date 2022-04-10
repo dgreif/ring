@@ -206,7 +206,7 @@ export class RingApi extends Subscribed {
           return
         }
 
-        camerasById[notification.ding.doorbot_id].processPushNotification(
+        camerasById[notification.ding.doorbot_id]?.processPushNotification(
           notification
         )
       } catch (e) {

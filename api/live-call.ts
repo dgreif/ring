@@ -1,9 +1,9 @@
 import { WebSocket } from 'ws'
 import { firstValueFrom, fromEvent, ReplaySubject } from 'rxjs'
 import { PeerConnection } from './peer-connection'
-import { logDebug, logError } from './util'
+import { logDebug, logError, logInfo } from './util'
 import { RingCamera } from './ring-camera'
-import { concatMap } from 'rxjs/operators'
+import { concatMap, filter } from 'rxjs/operators'
 import { Subscribed } from './subscribed'
 import {
   FfmpegProcess,
@@ -247,7 +247,11 @@ export class LiveCall extends Subscribed {
     }
     this.activated = true
 
-    await firstValueFrom(this.onCallAnswered)
+    await firstValueFrom(
+      this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
+    )
+    logInfo('Activating Session')
+
     this.sendMessage({ method: 'activate_session' })
     this.sendMessage({
       video_enabled: true,

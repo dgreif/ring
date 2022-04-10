@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.5](https://github.com/dgreif/ring/compare/v10.0.0-beta.4...v10.0.0-beta.5) (2022-04-10)
+
+
+### Bug Fixes
+
+* **cameras:** wait to activate session until connected ([9a49389](https://github.com/dgreif/ring/commit/9a49389aa434cc5df4cfb4ba039bad0f2a30f756))
+* handle push notification for unknown camera ([cc8fc2a](https://github.com/dgreif/ring/commit/cc8fc2a6377084515d3b169a85644b2a2b13235e))
+* hide ECONNRESET errors from push receiver ([1196d96](https://github.com/dgreif/ring/commit/1196d96e67e26952f18dfbe75103419a7261bd1e))
+* restore dual battery level calculations ([26fa84d](https://github.com/dgreif/ring/commit/26fa84dbd4bbcea8208fd0ade81c54c407aabf63))
+* update dependencies ([4b97fb3](https://github.com/dgreif/ring/commit/4b97fb33623248147997944bab3de4ea3c2e5ee2))
+
 ## [10.0.0-beta.4](https://github.com/dgreif/ring/compare/v10.0.0-beta.3...v10.0.0-beta.4) (2022-04-03)
 
 

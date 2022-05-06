@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.6](https://github.com/dgreif/ring/compare/v10.0.0-beta.5...v10.0.0-beta.6) (2022-05-06)
+
+
+### Features
+
+* **api:** allow custom peer connections for streaming ([3e9e784](https://github.com/dgreif/ring/commit/3e9e78458afe2849a8c414a6b50eec8718bf77cc))
+
+
+### Bug Fixes
+
+* update dependencies ([4b25595](https://github.com/dgreif/ring/commit/4b255950bcfbf94486192d55cfc90d966cd79d24))
+
 ## [10.0.0-beta.5](https://github.com/dgreif/ring/compare/v10.0.0-beta.4...v10.0.0-beta.5) (2022-04-10)
 
 

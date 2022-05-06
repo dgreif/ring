@@ -31,7 +31,7 @@ export interface BasicPeerConnection {
   acceptAnswer(answer: { type: 'answer'; sdp: string }): Promise<void>
   addIceCandidate(candidate: RTCIceCandidate): Promise<void>
   onIceCandidate: Observable<RTCIceCandidate>
-  onConnectionState: Observable<ConnectionState> // TODO: replay?
+  onConnectionState: Observable<ConnectionState>
   close(): void
 }
 

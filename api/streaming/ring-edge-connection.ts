@@ -1,10 +1,12 @@
 import { WebSocket } from 'ws'
 import { firstValueFrom, interval, ReplaySubject } from 'rxjs'
-import { WeriftPeerConnection } from './peer-connection'
 import { logDebug, logError } from '../util'
 import { RingCamera } from '../ring-camera'
 import { switchMap } from 'rxjs/operators'
-import { StreamingConnectionBase } from './streaming-connection-base'
+import {
+  StreamingConnectionBase,
+  StreamingConnectionOptions,
+} from './streaming-connection-base'
 
 interface SessionBody {
   doorbot_id: number
@@ -81,7 +83,11 @@ export class RingEdgeConnection extends StreamingConnectionBase {
   private readonly onSessionId = new ReplaySubject<string>(1)
   private readonly onOfferSent = new ReplaySubject<void>(1)
 
-  constructor(authToken: string, private camera: RingCamera) {
+  constructor(
+    authToken: string,
+    private camera: RingCamera,
+    options: StreamingConnectionOptions
+  ) {
     super(
       new WebSocket('wss://api.prod.signalling.ring.devices.a2z.com:443/ws', {
         headers: {
@@ -93,7 +99,7 @@ export class RingEdgeConnection extends StreamingConnectionBase {
           'X-Sig-Auth-Type': 'ring_oauth',
         },
       }),
-      new WeriftPeerConnection()
+      options
     )
 
     this.addSubscriptions(

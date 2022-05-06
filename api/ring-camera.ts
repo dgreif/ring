@@ -29,6 +29,7 @@ import { Subscribed } from './subscribed'
 import { WebrtcConnection } from './streaming/webrtc-connection'
 import { RingEdgeConnection } from './streaming/ring-edge-connection'
 import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
+import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -336,10 +337,10 @@ export class RingCamera extends Subscribed {
     return response.device_health
   }
 
-  private async createStreamingConnection() {
+  private async createStreamingConnection(options: StreamingConnectionOptions) {
     if (this.isRingEdgeEnabled) {
       const auth = await this.restClient.getCurrentAuth()
-      return new RingEdgeConnection(auth.access_token, this)
+      return new RingEdgeConnection(auth.access_token, this, options)
     }
 
     const liveCall = await this.restClient
@@ -357,11 +358,11 @@ export class RingCamera extends Subscribed {
         throw e
       })
 
-    return new WebrtcConnection(liveCall.data.session_id, this)
+    return new WebrtcConnection(liveCall.data.session_id, this, options)
   }
 
-  async startLiveCall() {
-    const connection = await this.createStreamingConnection()
+  async startLiveCall(options: StreamingConnectionOptions = {}) {
+    const connection = await this.createStreamingConnection(options)
     return new StreamingSession(this, connection)
   }
 

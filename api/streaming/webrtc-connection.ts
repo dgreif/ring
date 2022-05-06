@@ -1,9 +1,11 @@
 import { WebSocket } from 'ws'
-import { WeriftPeerConnection } from './peer-connection'
 import { RingCamera } from '../ring-camera'
 
 import { DingKind } from '../ring-types'
-import { StreamingConnectionBase } from './streaming-connection-base'
+import {
+  StreamingConnectionBase,
+  StreamingConnectionOptions,
+} from './streaming-connection-base'
 import { logDebug } from '../util'
 
 interface InitializationMessage {
@@ -54,7 +56,11 @@ function parseLiveCallSession(sessionId: string) {
 }
 
 export class WebrtcConnection extends StreamingConnectionBase {
-  constructor(private sessionId: string, camera: RingCamera) {
+  constructor(
+    private sessionId: string,
+    camera: RingCamera,
+    options: StreamingConnectionOptions
+  ) {
     const liveCallSession = parseLiveCallSession(sessionId)
     super(
       new WebSocket(
@@ -68,7 +74,7 @@ export class WebrtcConnection extends StreamingConnectionBase {
           },
         }
       ),
-      new WeriftPeerConnection()
+      options
     )
 
     this.addSubscriptions(

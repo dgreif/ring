@@ -6,24 +6,38 @@ import { firstValueFrom, fromEvent, ReplaySubject, Subject } from 'rxjs'
 import { concatMap, filter } from 'rxjs/operators'
 import { logDebug, logError, logInfo } from '../util'
 
+export interface StreamingConnectionOptions {
+  createPeerConnection?: () => BasicPeerConnection
+}
+
 export abstract class StreamingConnectionBase extends Subscribed {
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
   readonly onWsOpen
+  protected readonly pc
 
   readonly onAudioRtp
   readonly onVideoRtp
 
-  constructor(protected ws: WebSocket, protected pc: BasicPeerConnection) {
+  constructor(
+    protected ws: WebSocket,
+    protected options: StreamingConnectionOptions = {}
+  ) {
     super()
 
-    if (pc instanceof WeriftPeerConnection) {
-      this.onAudioRtp = pc.onAudioRtp
-      this.onVideoRtp = pc.onVideoRtp
-    } else {
+    if (options.createPeerConnection) {
+      // we were passed a custom peer connection factory
+      this.pc = options.createPeerConnection()
+
       // passing rtp packets is not supported for custom peer connections
       this.onAudioRtp = new Subject<RtpPacket>()
       this.onVideoRtp = new Subject<RtpPacket>()
+    } else {
+      // no custom peer connection factory, use the werift and pass along rtp packets
+      const pc = new WeriftPeerConnection()
+      this.pc = pc
+      this.onAudioRtp = pc.onAudioRtp
+      this.onVideoRtp = pc.onVideoRtp
     }
 
     this.onWsOpen = fromEvent(this.ws, 'open')

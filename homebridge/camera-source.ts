@@ -29,8 +29,6 @@ import { interval, merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 import { getFfmpegPath } from '../api/ffmpeg'
-import { LiveCall } from '../api/live-call'
-import { LiveCallRingEdge } from '../api/live-call-ring-edge'
 import {
   RtcpSenderInfo,
   RtcpSrPacket,
@@ -38,6 +36,7 @@ import {
   SrtpSession,
   SrtcpSession,
 } from '@koush/werift'
+import { StreamingSession } from '../api/streaming/streaming-session'
 
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
@@ -59,7 +58,7 @@ function getSessionConfig(srtpOptions: SrtpOptions) {
   }
 }
 
-class StreamingSession {
+class StreamingSessionWrapper {
   audioSsrc = hap.CameraController.generateSynchronisationSource()
   videoSsrc = hap.CameraController.generateSynchronisationSource()
   audioSrtp = generateSrtpOptions()
@@ -87,7 +86,7 @@ class StreamingSession {
     })
 
   constructor(
-    public liveCall: LiveCall | LiveCallRingEdge,
+    public liveCall: StreamingSession,
     public prepareStreamRequest: PrepareStreamRequest,
     public ringCamera: RingCamera,
     public start: number
@@ -350,7 +349,7 @@ export class CameraSource implements CameraStreamingDelegate {
       },
     },
   })
-  private sessions: { [sessionKey: string]: StreamingSession } = {}
+  private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
 
   constructor(private ringCamera: RingCamera) {}
@@ -472,7 +471,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
     try {
       const liveCall = await this.ringCamera.startLiveCall(),
-        session = new StreamingSession(
+        session = new StreamingSessionWrapper(
           liveCall,
           request,
           this.ringCamera,

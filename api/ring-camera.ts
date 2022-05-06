@@ -26,8 +26,9 @@ import {
 } from 'rxjs/operators'
 import { DeepPartial, delay, logDebug, logError } from './util'
 import { Subscribed } from './subscribed'
-import { FfmpegOptions, LiveCall } from './live-call'
-import { LiveCallRingEdge } from './live-call-ring-edge'
+import { WebrtcConnection } from './streaming/webrtc-connection'
+import { RingEdgeConnection } from './streaming/ring-edge-connection'
+import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -335,10 +336,10 @@ export class RingCamera extends Subscribed {
     return response.device_health
   }
 
-  async startLiveCall() {
+  private async createStreamingConnection() {
     if (this.isRingEdgeEnabled) {
       const auth = await this.restClient.getCurrentAuth()
-      return new LiveCallRingEdge(auth.access_token, this)
+      return new RingEdgeConnection(auth.access_token, this)
     }
 
     const liveCall = await this.restClient
@@ -356,7 +357,12 @@ export class RingCamera extends Subscribed {
         throw e
       })
 
-    return new LiveCall(liveCall.data.session_id, this)
+    return new WebrtcConnection(liveCall.data.session_id, this)
+  }
+
+  async startLiveCall() {
+    const connection = await this.createStreamingConnection()
+    return new StreamingSession(this, connection)
   }
 
   private removeDingById(idToRemove: number) {

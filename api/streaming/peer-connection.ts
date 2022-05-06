@@ -7,8 +7,8 @@ import {
   RTCRtpCodecParameters,
   RtpPacket,
 } from '@koush/werift'
-import { ReplaySubject, Subject } from 'rxjs'
-import { logError, logInfo } from './util'
+import { Observable, ReplaySubject, Subject } from 'rxjs'
+import { logError, logInfo } from '../util'
 
 const debug = false,
   ringIceServers = [
@@ -22,8 +22,21 @@ const debug = false,
     'stun:stun4.l.google.com:19302',
   ]
 
-export class PeerConnection {
-  pc
+export interface BasicPeerConnection {
+  createOffer(): Promise<{ sdp: string }>
+  createAnswer(offer: {
+    type: 'offer'
+    sdp: string
+  }): Promise<RTCSessionDescriptionInit>
+  acceptAnswer(answer: { type: 'answer'; sdp: string }): Promise<void>
+  addIceCandidate(candidate: RTCIceCandidate): Promise<void>
+  onIceCandidate: Observable<RTCIceCandidate>
+  onConnectionState: Observable<ConnectionState> // TODO: replay?
+  close(): void
+}
+
+export class WeriftPeerConnection implements BasicPeerConnection {
+  private pc
   onAudioRtp = new Subject<RtpPacket>()
   onAudioRtcp = new Subject<RtcpPacket>()
   onVideoRtp = new Subject<RtpPacket>()

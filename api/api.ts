@@ -182,6 +182,7 @@ export class RingApi extends Subscribed {
             json: {
               device: {
                 metadata: {
+                  ...this.restClient.baseSessionMetadata,
                   pn_service: 'fcm',
                 },
                 os: 'android',

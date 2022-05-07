@@ -144,6 +144,11 @@ export class RingRestClient {
     oldRefreshToken?: string
     newRefreshToken: string
   }>(1)
+  public readonly baseSessionMetadata = {
+    api_version: apiVersion,
+    device_model:
+      this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
+  }
 
   constructor(
     private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions
@@ -266,11 +271,7 @@ export class RingRestClient {
       json: {
         device: {
           hardware_id: await this.hardwareIdPromise,
-          metadata: {
-            api_version: apiVersion,
-            device_model:
-              this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
-          },
+          metadata: this.baseSessionMetadata,
           os: 'android', // can use android, ios, ring-site, windows for sure
         },
       },

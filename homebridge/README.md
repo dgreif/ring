@@ -116,6 +116,8 @@ HomeKit with a snapshot from the camera
 
 If you are having issues with your cameras in the Home app, please see the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting)
 
+Note: Although homebridge has support for HomeKit Secure Video (HKSV), I will not be adding it to this plugin.  Please see [this issue](https://github.com/dgreif/ring/issues/860#issuecomment-1021584211) for more details.
+
 ### Supported Devices via Ring Alarm and Ring Smart Lighting Hubs
   * Security Panel
     * This is a software device that represents the alarm for a Ring location

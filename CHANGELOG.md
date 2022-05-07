@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.7](https://github.com/dgreif/ring/compare/v10.0.0-beta.6...v10.0.0-beta.7) (2022-05-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* The `sendDoorbellMotionNotificationsToTv` and `sendCameraMotionNotificationsToTv` options have been removed.  These options were originally inteded as a workaround for the fact that tvOS would only automatically start streaming for doorbell presses and not for motion events.  tvOS 15 now supports this features as an option in the UI, so we no longer need this option at the plugin level.
+
+### Features
+
+* add `cocoa_floodlight` ([c7a7e9c](https://github.com/dgreif/ring/commit/c7a7e9cabf45ec6579a7d9a1033fa01930923243)), closes [#893](https://github.com/dgreif/ring/issues/893)
+* **api:** simple webrtc session ([bac7a49](https://github.com/dgreif/ring/commit/bac7a49178bb5a22914e53fda91c0fdd522b4a74))
+
+
+### Bug Fixes
+
+* **homebridge:** add `name` option to schema so that it won't be removed by config-ui ([af6755a](https://github.com/dgreif/ring/commit/af6755aa09cf4aaad0963499ad0d1afd0beeab96)), closes [#870](https://github.com/dgreif/ring/issues/870)
+* include device name when setting push token ([2466a25](https://github.com/dgreif/ring/commit/2466a2519341771d8c79557b5a61c339f31eddf6)), closes [#920](https://github.com/dgreif/ring/issues/920)
+* npm audit fix ([c1fe605](https://github.com/dgreif/ring/commit/c1fe6051e46dac92b00bb2fd1202746fd576b15a))
+* remove doorbell press simulation options ([e1d1225](https://github.com/dgreif/ring/commit/e1d12257b2acbdafdc6995a53d9052822c8a3460))
+
 ## [10.0.0-beta.6](https://github.com/dgreif/ring/compare/v10.0.0-beta.5...v10.0.0-beta.6) (2022-05-06)
 
 

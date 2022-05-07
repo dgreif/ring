@@ -132,6 +132,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
       }
     },
     "required": ["refreshToken"]

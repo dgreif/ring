@@ -30,6 +30,7 @@ import { WebrtcConnection } from './streaming/webrtc-connection'
 import { RingEdgeConnection } from './streaming/ring-edge-connection'
 import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
 import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
+import { SimpleWebRtcSession } from './streaming/simple-webrtc-session'
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -583,6 +584,16 @@ export class RingCamera extends Subscribed {
     const liveCall = await this.startLiveCall()
     await liveCall.startTranscoding(ffmpegOptions)
     return liveCall
+  }
+
+  /**
+   * Returns a SimpleWebRtcSession, which can be initiated with an sdp offer.
+   * This session has no backplane for trickle ICE, and is designed for use in a
+   * browser setting.  Note, cameras with Ring Edge enabled will stream with the speaker
+   * enabled as soon as the stream starts, which can drain the battery more quickly.
+   */
+  createSimpleWebRtcSession() {
+    return new SimpleWebRtcSession(this, this.restClient)
   }
 
   subscribeToDingEvents() {

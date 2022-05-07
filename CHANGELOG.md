@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0-beta.8](https://github.com/dgreif/ring/compare/v10.0.0-beta.7...v10.0.0-beta.8) (2022-05-07)
+
+
+### Bug Fixes
+
+* remove unnecessary dependencies ([0acf3c3](https://github.com/dgreif/ring/commit/0acf3c35ce2b62d98e3e50ba8489996400efb4e3))
+
 ## [10.0.0-beta.7](https://github.com/dgreif/ring/compare/v10.0.0-beta.6...v10.0.0-beta.7) (2022-05-07)
 
 

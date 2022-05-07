@@ -5,7 +5,6 @@ import { BaseDataAccessory } from './base-data-accessory'
 import { map, mapTo, switchMap } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { Logging, PlatformAccessory } from 'homebridge'
-import { merge } from 'rxjs'
 import { TargetValueTimer } from './target-value-timer'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
@@ -61,25 +60,13 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     }
 
     if (device.isDoorbot) {
-      const onDoorbellPressed = device.onDoorbellPressed.pipe(
-          mapTo('Doorbell Pressed')
-        ),
-        onEventDescription = config.sendDoorbellMotionNotificationsToTv
-          ? merge(
-              onDoorbellPressed,
-              device.onMotionStarted.pipe(
-                mapTo('Motion Detected - Simulating Doorbell Press')
-              )
-            )
-          : onDoorbellPressed
-
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
-        onValue: onEventDescription.pipe(
-          switchMap((eventDescription) => {
+        onValue: device.onDoorbellPressed.pipe(
+          switchMap(() => {
             return this.loadSnapshotForEvent(
-              eventDescription,
+              'Doorbell Pressed',
               Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
             )
           })
@@ -102,21 +89,6 @@ export class Camera extends BaseDataAccessory<RingCamera> {
             maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
           })
       }
-    } else if (config.sendCameraMotionNotificationsToTv) {
-      // allow standalone cameras to act as a doorbell press when motion is detected
-      // this allows tvOS 14 notifications to show camera motion alerts
-      this.registerObservableCharacteristic({
-        characteristicType: Characteristic.ProgrammableSwitchEvent,
-        serviceType: Service.Doorbell,
-        onValue: device.onMotionStarted.pipe(
-          switchMap(() => {
-            return this.loadSnapshotForEvent(
-              'Motion Detected - Simulating Doorbell Press',
-              Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
-            )
-          })
-        ),
-      })
     }
 
     if (device.hasLight && !config.hideCameraLight) {

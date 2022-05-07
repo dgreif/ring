@@ -59,8 +59,6 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideDoorbellSwitch": true,
   "hideCameraLight": true,
   "hideCameraMotionSensor": true,
-  "sendCameraMotionNotificationsToTv": true,
-  "sendDoorbellMotionNotificationsToTv": true,
   "hideCameraSirenSwitch": true,
   "hideInHomeDoorbellSwitch": true,
   "hideAlarmSirenSwitch": true,
@@ -82,8 +80,6 @@ Option | Default | Explanation
 `hideDoorbellSwitch` | `false` | If you have a Ring video doorbell, you will see a Programmable Switch associated with it.  This switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions.  If you do not care to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`. You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden (notifications can be configured in the settings for the doorbell camera in the Home app)
 `hideCameraLight` | `false` | If `true`, hides the light for Ring cameras in HomeKit.
 `hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit.
-`sendCameraMotionNotificationsToTv` | `false` | If `true`, creates a 'Doorbell' accessory triggered by non-doorbell camera motion alerts for tvOS 14 notification support.
-`sendDoorbellMotionNotificationsToTv` | `false` | If `true`, motion events on doorbell cameras will trigger a doorbell press event for tvOS 14 notification support.
 `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit.
 `hideInHomeDoorbellSwitch` | `false` | If `true`, hides the switch for in-home doorbells in HomeKit.
 `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit.  The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying.  Set this option to `true` to hide the siren switch.
@@ -105,7 +101,6 @@ Option | Default | Explanation
     * Shows a live feed from the camera if you click on it.  The feed supports video and 2-way audio, but requires that you have `ffmpeg` with `libfdk_aac` installed.  A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`.  See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg) for details.
   * Motion Sensor
     * Can be hidden with `hideCameraMotionSensor`
-    * Can trigger doorbell events with `sendCameraMotionNotificationsToTv` and `sendDoorbellMotionNotificationsToTv` for tvOS 14 notifications
   * Light (if camera is equipped)
   * Siren Switch (if camera is equipped)
     * Can be hidden with `hideCameraSirenSwitch`

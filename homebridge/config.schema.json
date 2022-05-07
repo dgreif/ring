@@ -86,14 +86,6 @@
         "type": "boolean",
         "description": "Causes snapshots for battery cameras to be fetched at a minimum 10 minute interval to avoid draining the battery.  This is useful if have the Home app open constantly, causing frequent snapshot requests."
       },
-      "sendCameraMotionNotificationsToTv": {
-        "title": "Create a 'Doorbell' accessory triggered by non-doorbell camera motion alerts for tvOS 14 notification support",
-        "type": "boolean"
-      },
-      "sendDoorbellMotionNotificationsToTv": {
-        "title": "Motion events on doorbell cameras will trigger a doorbell press event for tvOS 14 notification support.",
-        "type": "boolean"
-      },
       "beamDurationSeconds": {
         "title": "Ring Smart Lighting Timer",
         "type": "integer",
@@ -167,8 +159,6 @@
         "showPanicButtons",
         "nightModeBypassFor",
         "avoidSnapshotBatteryDrain",
-        "sendCameraMotionNotificationsToTv",
-        "sendDoorbellMotionNotificationsToTv",
         "beamDurationSeconds",
         "debug",
         "cameraStatusPollingSeconds",

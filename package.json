@@ -63,8 +63,6 @@
     "colors": "^1.4.0",
     "debug": "^4.3.4",
     "got": "^11.8.3",
-    "homebridge-config-ui-x": "^4.43.3",
-    "homebridge-ring": "^9.24.0",
     "rxjs": "^7.5.5",
     "socket.io-client": "^2.4.0",
     "systeminformation": "^5.11.14",

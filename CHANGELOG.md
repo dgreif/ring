@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [10.0.0](https://github.com/dgreif/ring/compare/v10.0.0-beta.8...v10.0.0) (2022-05-08)
 
+### Features
+
+* support ring edge camera streaming ([b30d99f](https://github.com/dgreif/ring/commit/b30d99f9ffaa1fabc1d09b830cf8ba0e69fe84a0))
+* receive dings from push notifications ([c9f130f](https://github.com/dgreif/ring/commit/c9f130f0f1f21b6db2454d611641ef7c29c7e620))
+* **homebridge:** faster snapshots from camera notifications ([7fc821b](https://github.com/dgreif/ring/commit/7fc821b71013c36314d6d428b8152e631ea4b497))
+* add `cocoa_floodlight` ([c7a7e9c](https://github.com/dgreif/ring/commit/c7a7e9cabf45ec6579a7d9a1033fa01930923243)), closes [#893](https://github.com/dgreif/ring/issues/893)
+* **api:** simple webrtc session ([bac7a49](https://github.com/dgreif/ring/commit/bac7a49178bb5a22914e53fda91c0fdd522b4a74))
+* **api:** allow custom peer connections for streaming ([3e9e784](https://github.com/dgreif/ring/commit/3e9e78458afe2849a8c414a6b50eec8718bf77cc))
+* **api:** convert ding handling to use notifications ([5b62318](https://github.com/dgreif/ring/commit/5b62318b6a71bcc224a2b29cbd6e21162fc9891e))
+* **api:** update notification types ([15d3e7e](https://github.com/dgreif/ring/commit/15d3e7e40744e2c3ed48140fa94fbc0c6f9d4088))
+
+### Bug Fixes
+
+* **homebridge:** add `name` option to schema so that it won't be removed by config-ui ([af6755a](https://github.com/dgreif/ring/commit/af6755aa09cf4aaad0963499ad0d1afd0beeab96)), closes [#870](https://github.com/dgreif/ring/issues/870)
+* include device name when setting push token ([2466a25](https://github.com/dgreif/ring/commit/2466a2519341771d8c79557b5a61c339f31eddf6)), closes [#920](https://github.com/dgreif/ring/issues/920)
+* npm audit fix ([c1fe605](https://github.com/dgreif/ring/commit/c1fe6051e46dac92b00bb2fd1202746fd576b15a))
+* remove doorbell press simulation options ([e1d1225](https://github.com/dgreif/ring/commit/e1d12257b2acbdafdc6995a53d9052822c8a3460))
+* update dependencies ([4b25595](https://github.com/dgreif/ring/commit/4b255950bcfbf94486192d55cfc90d966cd79d24))
+* **cameras:** wait to activate session until connected ([9a49389](https://github.com/dgreif/ring/commit/9a49389aa434cc5df4cfb4ba039bad0f2a30f756))
+* handle push notification for unknown camera ([cc8fc2a](https://github.com/dgreif/ring/commit/cc8fc2a6377084515d3b169a85644b2a2b13235e))
+* hide ECONNRESET errors from push receiver ([1196d96](https://github.com/dgreif/ring/commit/1196d96e67e26952f18dfbe75103419a7261bd1e))
+* update dependencies ([4b97fb3](https://github.com/dgreif/ring/commit/4b97fb33623248147997944bab3de4ea3c2e5ee2))
+* update uuid namespace to force new client sessions ([bc3e943](https://github.com/dgreif/ring/commit/bc3e9432c41dda085845f72f332dcf480c92475d))
+* separate streaming setup for ring edge vs regular cameras ([6281cf9](https://github.com/dgreif/ring/commit/6281cf966de12dcea8acc6516cd9079634734dec))
+* **api:** allow snapshot to be force-updated based on options ([fa0212a](https://github.com/dgreif/ring/commit/fa0212ab539cc268f8000c5b9ea39a00799cb8d7))
+* drop support for node 10 ([509d556](https://github.com/dgreif/ring/commit/509d55670b3dd4efee1be968618f6bc6b142ae2b))
+* **homebridge:** increase minimum homebridge version to 1.4.0 ([d5be74a](https://github.com/dgreif/ring/commit/d5be74aae45a3e353bcaba4fc42fa25c6b2fa37e))
+* remove sip calling in favor of live calls ([7aeae37](https://github.com/dgreif/ring/commit/7aeae37e6e93b68747e14983cea9c0a9229faec6))
+* use Buffer.from ([2b28d90](https://github.com/dgreif/ring/commit/2b28d9028fc7f2c2e11b11cf3b27cc03f097eab2))
+
+### ⚠ BREAKING CHANGES
+
+* The `sendDoorbellMotionNotificationsToTv` and `sendCameraMotionNotificationsToTv` options have been removed.  These options were originally inteded as a workaround for the fact that tvOS would only automatically start streaming for doorbell presses and not for motion events.  tvOS 15 now supports this features as an option in the UI, so we no longer need this option at the plugin level.
+* **api:** All ding-related functionality will now use the `PushNotification` type, and the `ActiveDing` type has been removed
+* **api:** The `cameraDingsPollingSeconds` option has been removed.  Ding events will now be received via push notifications (no setup required)
+* **api:** The `treatKnockAsDing` option has been removed.  Knocks should now register as "dings" automatically, though I have not been able to test this functionality
+* `ring-client-api` only (homebridge not impacted) - All streaming will now be done using the new Ring api via WebRTC + WebSockets.  For those using `camera.streamVideo`, you should not notice any difference.  Anyone directly interacting with sip sessions, you will need to migrate to the new `LiveCall` api.  It's fairly similar, and should be more reliable long term.  A number of other sip-specific methods have been removed from the `RingCamera` api as well.
+* Node 10 is no longer officially supported.  It may still work, but could break without warning in the future.
+* **homebridge:** The minimum supported homebridge version for this plugin is now 1.4.0
 
 ### Bug Fixes
 

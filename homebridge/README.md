@@ -64,7 +64,6 @@ Only include an optional parameter if you actually need it.  Default behavior wi
   "hideAlarmSirenSwitch": true,
   "hideUnsupportedServices": true,
   "avoidSnapshotBatteryDrain": true,
-  "treatKnockAsDing": true,
   "cameraStatusPollingSeconds": 20,
   "locationModePollingSeconds": 20,
   "locationIds": ["488e4800-fcde-4493-969b-d1a06f683102", "4bbed7a7-06df-4f18-b3af-291c89854d60"]

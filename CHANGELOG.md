@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0](https://github.com/dgreif/ring/compare/v10.0.0-beta.8...v10.0.0) (2022-05-08)
+
+
+### Bug Fixes
+
+* prevent push receiver ECONNRESET error from logging ([644e86d](https://github.com/dgreif/ring/commit/644e86d6517e73391139b12bac4dc048c8bedf13))
+
 ## [10.0.0-beta.8](https://github.com/dgreif/ring/compare/v10.0.0-beta.7...v10.0.0-beta.8) (2022-05-07)
 
 

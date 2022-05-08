@@ -97,7 +97,7 @@
     "typescript": "4.6.4"
   },
   "engines": {
-    "node": "^12.20 || ^14 || ^16",
+    "node": "^16",
     "homebridge": ">=1.4.0"
   },
   "bugs": {

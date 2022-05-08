@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [11.0.0](https://github.com/dgreif/ring/compare/v10.0.0...v11.0.0) (2022-05-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node 12/14 are no longer supported, please update to node 16.  A dependency added in v10 did not support node 12/14, which is why I'm officially dropping support now.
+
+### Bug Fixes
+
+* officially drop node 12 & 14 support ([3d65c77](https://github.com/dgreif/ring/commit/3d65c77fab9399f29d4fb15d0e87dfe60f3db40f)), closes [#926](https://github.com/dgreif/ring/issues/926)
+
 ## [10.0.0](https://github.com/dgreif/ring/compare/v10.0.0-beta.8...v10.0.0) (2022-05-08)
 
 ### Features

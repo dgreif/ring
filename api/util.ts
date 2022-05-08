@@ -138,6 +138,15 @@ export type DeepPartial<T> = {
 
 // Override push receiver logging to avoid ECONNRESET errors leaking
 function logPushReceiver(...args: any) {
+  try {
+    if (args[0].toString().includes('ECONNRESET')) {
+      // don't log ECONNRESET errors
+      return
+    }
+  } catch (_) {
+    // proceed to log error
+  }
+
   logDebug('[Push Receiver]')
   logDebug(args[0])
 }

@@ -35,7 +35,7 @@ import {
   RtpPacket,
   SrtpSession,
   SrtcpSession,
-} from '@koush/werift'
+} from 'werift'
 import { StreamingSession } from '../api/streaming/streaming-session'
 
 const readFileAsync = promisify(readFile),

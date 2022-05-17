@@ -6,7 +6,7 @@ import {
   RtcpPacket,
   RTCRtpCodecParameters,
   RtpPacket,
-} from '@koush/werift'
+} from 'werift'
 import { Observable, ReplaySubject, Subject } from 'rxjs'
 import { logError, logInfo } from '../util'
 

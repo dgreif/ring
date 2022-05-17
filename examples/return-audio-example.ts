@@ -5,7 +5,7 @@ import * as path from 'path'
 import { FfmpegProcess, RtpSplitter } from '@homebridge/camera-utils'
 import { take } from 'rxjs/operators'
 import { logError, logInfo } from '../api/util'
-import { RtpPacket } from '@koush/werift'
+import { RtpPacket } from 'werift'
 
 /**
  * This example takes an audio clip from examples/example.mp4 and pipes it to a ring camera

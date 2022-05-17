@@ -1,7 +1,7 @@
 import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection'
 import { Subscribed } from '../subscribed'
 import { WebSocket } from 'ws'
-import { RtpPacket } from '@koush/werift'
+import { RtpPacket } from 'werift'
 import { firstValueFrom, fromEvent, ReplaySubject, Subject } from 'rxjs'
 import { concatMap, filter } from 'rxjs/operators'
 import { logDebug, logError, logInfo } from '../util'

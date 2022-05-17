@@ -1,4 +1,4 @@
-import { RtpPacket } from '@koush/werift'
+import { RtpPacket } from 'werift'
 import {
   FfmpegProcess,
   reservePorts,

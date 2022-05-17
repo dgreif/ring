@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.1](https://github.com/dgreif/ring/compare/v11.0.0...v11.0.1) (2022-05-17)
+
+
+### Bug Fixes
+
+* update webrtc package ([63d003c](https://github.com/dgreif/ring/commit/63d003c1517c158663d230e6daf911c7fc765c55)), closes [#930](https://github.com/dgreif/ring/issues/930)
+
 ## [11.0.0](https://github.com/dgreif/ring/compare/v10.0.0...v11.0.0) (2022-05-08)
 
 

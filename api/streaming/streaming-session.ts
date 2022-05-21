@@ -38,6 +38,7 @@ export class StreamingSession extends Subscribed {
 
   private readonly audioSplitter = new RtpSplitter()
   private readonly videoSplitter = new RtpSplitter()
+  private readonly returnAudioSplitter = new RtpSplitter()
 
   constructor(
     private readonly camera: RingCamera,
@@ -81,12 +82,16 @@ export class StreamingSession extends Subscribed {
     return ports[0]
   }
 
+  get isUsingOpus() {
+    return firstValueFrom(this.onUsingOpus)
+  }
+
   async startTranscoding(ffmpegOptions: FfmpegOptions) {
     const videoPort = await this.reservePort(1),
       audioPort = await this.reservePort(1),
       transcodeVideoStream = ffmpegOptions.video !== false,
       ringSdp = await firstValueFrom(this.connection.onCallAnswered),
-      usingOpus = await firstValueFrom(this.onUsingOpus),
+      usingOpus = await this.isUsingOpus,
       ffmpegInputArguments = [
         '-hide_banner',
         '-protocol_whitelist',
@@ -153,12 +158,49 @@ export class StreamingSession extends Subscribed {
     await this.activate()
   }
 
+  async transcodeReturnAudio(ffmpegOptions: { input: SpawnInput[] }) {
+    const audioOutForwarder = new RtpSplitter(({ message }) => {
+        const rtp = RtpPacket.deSerialize(message)
+        this.connection.sendAudioPacket(rtp)
+        return null
+      }),
+      usingOpus = await this.isUsingOpus,
+      ff = new FfmpegProcess({
+        ffmpegArgs: [
+          '-hide_banner',
+          '-protocol_whitelist',
+          'pipe,udp,rtp,file,crypto',
+          '-re',
+          '-i',
+          ...ffmpegOptions.input,
+          '-acodec',
+          ...(usingOpus
+            ? ['libopus', '-ac', 2, '-ar', '48k']
+            : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
+          '-flags',
+          '+global_header',
+          '-f',
+          'rtp',
+          `rtp://127.0.0.1:${await audioOutForwarder.portPromise}`,
+        ],
+        ffmpegPath: getFfmpegPath(),
+        exitCallback: () => this.callEnded(),
+        logLabel: `Return Audio (${this.camera.name})`,
+        logger: {
+          error: logError,
+          info: logDebug,
+        },
+      })
+    this.onCallEnded.subscribe(() => ff.stop())
+  }
+
   private callEnded() {
     this.unsubscribe()
     this.onCallEnded.next()
     this.connection.stop()
     this.audioSplitter.close()
     this.videoSplitter.close()
+    this.returnAudioSplitter.close()
   }
 
   stop() {

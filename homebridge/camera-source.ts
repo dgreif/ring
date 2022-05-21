@@ -86,7 +86,7 @@ class StreamingSessionWrapper {
     })
 
   constructor(
-    public liveCall: StreamingSession,
+    public streamingSession: StreamingSession,
     public prepareStreamRequest: PrepareStreamRequest,
     public ringCamera: RingCamera,
     public start: number
@@ -111,7 +111,7 @@ class StreamingSessionWrapper {
       onReturnPacketReceived.next(null)
       return null
     })
-    liveCall.addSubscriptions(
+    streamingSession.addSubscriptions(
       merge(of(true).pipe(delay(15000)), onReturnPacketReceived)
         .pipe(debounceTime(5000))
         .subscribe(() => {
@@ -120,13 +120,13 @@ class StreamingSessionWrapper {
               this.ringCamera.name
             } appears to be inactive. (${getDurationSeconds(start)}s)`
           )
-          liveCall.stop()
+          streamingSession.stop()
         })
     )
 
     // Periodically send a blank RTCP packet to the HomeKit video port
     // Without this, HomeKit assumes the stream is dead after 30 second and sends a stop request
-    liveCall.addSubscriptions(
+    streamingSession.addSubscriptions(
       interval(500).subscribe(() => {
         const senderInfo = new RtcpSenderInfo({
             ntpTimestamp: BigInt(0),
@@ -165,8 +165,8 @@ class StreamingSessionWrapper {
       videoSrtpSession = new SrtpSession(getSessionConfig(this.videoSrtp))
 
     // Set up packet forwarding for video stream
-    this.liveCall.addSubscriptions(
-      this.liveCall.onVideoRtp.subscribe(({ header, payload }) => {
+    this.streamingSession.addSubscriptions(
+      this.streamingSession.onVideoRtp.subscribe(({ header, payload }) => {
         header.ssrc = this.videoSsrc
         header.payloadType = request.video.pt
 
@@ -192,10 +192,10 @@ class StreamingSessionWrapper {
 
     const shouldTranscodeAudio = await this.libfdkAacInstalledPromise
     if (!shouldTranscodeAudio) {
-      return this.liveCall.activate()
+      return this.streamingSession.activate()
     }
 
-    const transcodingPromise = this.liveCall.startTranscoding({
+    const transcodingPromise = this.streamingSession.startTranscoding({
       input: ['-vn'],
       audio: [
         '-map',
@@ -256,7 +256,7 @@ class StreamingSessionWrapper {
       returnAudioTranscodedSplitter = new RtpSplitter(({ message }) => {
         if (!cameraSpeakerActive) {
           cameraSpeakerActive = true
-          this.liveCall.activateCameraSpeaker().catch(logError)
+          this.streamingSession.activateCameraSpeaker().catch(logError)
         }
 
         // decrypt the message
@@ -265,13 +265,14 @@ class StreamingSessionWrapper {
           rtp.payload = audioSrtpSession.decrypt(rtp.payload)
 
           // send to Ring - werift will handle encryption and other header params
-          this.liveCall.sendAudioPacket(rtp)
+          this.streamingSession.sendAudioPacket(rtp)
         } catch (_) {
           // deSerialize will sometimes fail, but the errors can be ignored
         }
 
         return null
       }),
+      usingOpus = await this.streamingSession.isUsingOpus,
       returnAudioTranscoder = new ReturnAudioTranscoder({
         prepareStreamRequest: this.prepareStreamRequest,
         incomingAudioOptions: {
@@ -280,13 +281,11 @@ class StreamingSessionWrapper {
         },
         outputArgs: [
           '-acodec',
-          'libopus',
+          ...(usingOpus
+            ? ['libopus', '-ac', 2, '-ar', '48k']
+            : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
           '-flags',
           '+global_header',
-          '-ac',
-          2,
-          '-ar',
-          '48k',
           '-f',
           'rtp',
           `rtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}`,
@@ -300,7 +299,7 @@ class StreamingSessionWrapper {
         returnAudioSplitter: this.audioSplitter,
       })
 
-    this.liveCall.onCallEnded.pipe(take(1)).subscribe(() => {
+    this.streamingSession.onCallEnded.pipe(take(1)).subscribe(() => {
       returnAudioTranscoder.stop()
       returnAudioTranscodedSplitter.close()
     })
@@ -312,7 +311,7 @@ class StreamingSessionWrapper {
   stop() {
     this.audioSplitter.close()
     this.videoSplitter.close()
-    this.liveCall.stop()
+    this.streamingSession.stop()
   }
 }
 

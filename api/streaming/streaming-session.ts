@@ -61,7 +61,7 @@ export class StreamingSession extends Subscribed {
 
   activated = false
   async activate() {
-    if (this.activated) {
+    if (this.activated || this.hasEnded) {
       return
     }
     this.activated = true
@@ -70,7 +70,7 @@ export class StreamingSession extends Subscribed {
 
   cameraSpeakerActivated = false
   async activateCameraSpeaker() {
-    if (this.cameraSpeakerActivated) {
+    if (this.cameraSpeakerActivated || this.hasEnded) {
       return
     }
     this.cameraSpeakerActivated = true
@@ -87,6 +87,10 @@ export class StreamingSession extends Subscribed {
   }
 
   async startTranscoding(ffmpegOptions: FfmpegOptions) {
+    if (this.hasEnded) {
+      return
+    }
+
     const videoPort = await this.reservePort(1),
       audioPort = await this.reservePort(1),
       transcodeVideoStream = ffmpegOptions.video !== false,
@@ -159,6 +163,10 @@ export class StreamingSession extends Subscribed {
   }
 
   async transcodeReturnAudio(ffmpegOptions: { input: SpawnInput[] }) {
+    if (this.hasEnded) {
+      return
+    }
+
     const audioOutForwarder = new RtpSplitter(({ message }) => {
         const rtp = RtpPacket.deSerialize(message)
         this.connection.sendAudioPacket(rtp)
@@ -194,7 +202,13 @@ export class StreamingSession extends Subscribed {
     this.onCallEnded.subscribe(() => ff.stop())
   }
 
+  private hasEnded = false
   private callEnded() {
+    if (this.hasEnded) {
+      return
+    }
+    this.hasEnded = true
+
     this.unsubscribe()
     this.onCallEnded.next()
     this.connection.stop()
@@ -208,6 +222,10 @@ export class StreamingSession extends Subscribed {
   }
 
   sendAudioPacket(rtp: RtpPacket) {
+    if (this.hasEnded) {
+      return
+    }
+
     this.connection.sendAudioPacket(rtp)
   }
 }

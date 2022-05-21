@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.2-beta.1](https://github.com/dgreif/ring/compare/v11.0.2-beta.0...v11.0.2-beta.1) (2022-05-21)
+
+
+### Bug Fixes
+
+* **api:** prevent duplicate events from `onCallEnded` ([75696d5](https://github.com/dgreif/ring/commit/75696d510969f706248a0f83e98fb1c99fc07213)), closes [#941](https://github.com/dgreif/ring/issues/941)
+* handle pcmu return audio ([ce29fb5](https://github.com/dgreif/ring/commit/ce29fb5638bc488c515518a0fadcaca900ebe750)), closes [#930](https://github.com/dgreif/ring/issues/930)
+
 ### [11.0.2-beta.0](https://github.com/dgreif/ring/compare/v11.0.1...v11.0.2-beta.0) (2022-05-21)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.2-beta.0](https://github.com/dgreif/ring/compare/v11.0.1...v11.0.2-beta.0) (2022-05-21)
+
+
+### Bug Fixes
+
+* handle pcmu audio streams for incoming audio ([06f6ff1](https://github.com/dgreif/ring/commit/06f6ff10ce7c8f2b05b1a12b8f244daa200fa9ab)), closes [#930](https://github.com/dgreif/ring/issues/930)
+
 ### [11.0.1](https://github.com/dgreif/ring/compare/v11.0.0...v11.0.1) (2022-05-17)
 
 

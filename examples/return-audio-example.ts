@@ -2,10 +2,6 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import { cleanOutputDirectory } from './util'
 import * as path from 'path'
-import { FfmpegProcess, RtpSplitter } from '@homebridge/camera-utils'
-import { take } from 'rxjs/operators'
-import { logError, logInfo } from '../api/util'
-import { RtpPacket } from 'werift'
 
 /**
  * This example takes an audio clip from examples/example.mp4 and pipes it to a ring camera
@@ -28,51 +24,23 @@ async function example() {
   // clean/create the output directory
   await cleanOutputDirectory()
 
-  const call = await camera.startLiveCall(),
-    audioOutForwarder = new RtpSplitter(({ message }) => {
-      const rtp = RtpPacket.deSerialize(message)
-      call.sendAudioPacket(rtp)
-      return null
-    }),
-    speakerFf = new FfmpegProcess({
-      ffmpegArgs: [
-        '-hide_banner',
-        '-protocol_whitelist',
-        'pipe,udp,rtp,file,crypto',
-        '-re',
-        '-i',
-        path.join(path.resolve('examples'), 'example.mp4'),
-        '-acodec',
-        'libopus',
-        '-flags',
-        '+global_header',
-        '-ac',
-        2,
-        '-ar',
-        '48k',
-        '-f',
-        'rtp',
-        `rtp://127.0.0.1:${await audioOutForwarder.portPromise}`,
-      ],
-      logLabel: 'Return Audio',
-      logger: {
-        error: logError,
-        info: logInfo,
-      },
-    })
-  call.onCallEnded.pipe(take(1)).subscribe(() => {
-    speakerFf.stop()
-    audioOutForwarder.close()
-  })
+  console.log(`Starting Return Audio to ${camera.name}...`)
+  const call = await camera.startLiveCall()
 
-  // Some older models won't play audio unless the speaker is explicitly activated (doorbell_v3)
-  await call.activateCameraSpeaker()
+  console.log('Call started, activating return audio...')
+  await Promise.all([
+    call.transcodeReturnAudio({
+      // You can specify any normal ffmpeg input here. In this case, we are just playing from a file
+      input: [path.join(path.resolve('examples'), 'example.mp4')],
+    }),
+    // We need to manually tell the speaker to activate when we are ready to play audio out of the speaker
+    call.activateCameraSpeaker(),
+  ])
 
   setTimeout(() => {
     call.stop()
-    speakerFf.stop()
     process.exit(0)
-  }, 20000)
+  }, 10000)
 }
 
 example().catch((e) => {

@@ -32,6 +32,7 @@ function getCleanSdp(sdp: string, includeVideo: boolean) {
 
 export class StreamingSession extends Subscribed {
   readonly onCallEnded = new ReplaySubject<void>(1)
+  private readonly onUsingOpus = new ReplaySubject<boolean>(1)
   readonly onVideoRtp = new Subject<RtpPacket>()
   readonly onAudioRtp = new Subject<RtpPacket>()
 
@@ -50,7 +51,10 @@ export class StreamingSession extends Subscribed {
   private bindToConnection(connection: RingEdgeConnection | WebrtcConnection) {
     this.addSubscriptions(
       connection.onAudioRtp.subscribe(this.onAudioRtp),
-      connection.onVideoRtp.subscribe(this.onVideoRtp)
+      connection.onVideoRtp.subscribe(this.onVideoRtp),
+      connection.onCallAnswered.subscribe((sdp) => {
+        this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
+      })
     )
   }
 
@@ -81,19 +85,20 @@ export class StreamingSession extends Subscribed {
     const videoPort = await this.reservePort(1),
       audioPort = await this.reservePort(1),
       transcodeVideoStream = ffmpegOptions.video !== false,
+      ringSdp = await firstValueFrom(this.connection.onCallAnswered),
+      usingOpus = await firstValueFrom(this.onUsingOpus),
       ffmpegInputArguments = [
         '-hide_banner',
         '-protocol_whitelist',
         'pipe,udp,rtp,file,crypto',
-        '-acodec',
-        'libopus',
+        // Ring will answer with either opus or pcmu
+        ...(usingOpus ? ['-acodec', 'libopus'] : []),
         '-f',
         'sdp',
         ...(ffmpegOptions.input || []),
         '-i',
         'pipe:',
       ],
-      ringSdp = await firstValueFrom(this.connection.onCallAnswered),
       inputSdp = getCleanSdp(ringSdp, transcodeVideoStream)
         .replace(/m=audio \d+/, `m=audio ${audioPort}`)
         .replace(/m=video \d+/, `m=video ${videoPort}`),

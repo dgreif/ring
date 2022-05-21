@@ -54,6 +54,12 @@ export class WeriftPeerConnection implements BasicPeerConnection {
               clockRate: 48000,
               channels: 2,
             }),
+            new RTCRtpCodecParameters({
+              mimeType: 'audio/PCMU',
+              clockRate: 8000,
+              channels: 1,
+              payloadType: 0,
+            }),
           ],
           video: [
             new RTCRtpCodecParameters({

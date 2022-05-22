@@ -62,6 +62,11 @@
         "type": "boolean",
         "description": "Creates a new `Panic Buttons` device in HomeKit with `Burglar Alarm` and `Fire Alarm` switches.  **Use these at your own risk.  I do not guarantee functionality in case of emergency, nor do I take responsibility for any false alarms**.  These function just like the SOS sliders in the Ring app."
       },
+      "ffmpegPath": {
+        "title": "Custom FFmpeg Path",
+        "type": "string",
+        "description": "A custom path to the ffmpeg executable. By default, the static binaries built in ffmpeg-for-homebridge will be used. If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply [ ffmpeg ] to use ffmpeg from your PATH."
+      },
       "nightModeBypassFor": {
         "title": "Night Mode as Bypass For Mode",
         "type": "string",

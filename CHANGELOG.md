@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.2](https://github.com/dgreif/ring/compare/v11.0.1...v11.0.2) (2022-05-22)
+
+
+### Bug Fixes
+
+* **api:** prevent duplicate events from `onCallEnded` ([14ee6eb](https://github.com/dgreif/ring/commit/14ee6eb90bb6ae568dcfd9e8e176c3001e422f9c)), closes [#941](https://github.com/dgreif/ring/issues/941)
+* handle pcmu audio streams for incoming audio ([06f6ff1](https://github.com/dgreif/ring/commit/06f6ff10ce7c8f2b05b1a12b8f244daa200fa9ab)), closes [#930](https://github.com/dgreif/ring/issues/930)
+* handle pcmu return audio ([7b86182](https://github.com/dgreif/ring/commit/7b8618261a6ccb85b9f760ee1fcc228be00fe5a6)), closes [#930](https://github.com/dgreif/ring/issues/930)
+* **homebride:** use shared engines config to enforce node 16 requirement ([b748cb0](https://github.com/dgreif/ring/commit/b748cb027db0c43ae109e1ea77c6bc83f86e4913))
+* prevent hanging promises from streams that fail to connect ([dd7638e](https://github.com/dgreif/ring/commit/dd7638e32626499c0be501be6b19b5d874fa974f))
+
 ### [11.0.1](https://github.com/dgreif/ring/compare/v11.0.0...v11.0.1) (2022-05-17)
 
 

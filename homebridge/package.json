@@ -20,10 +20,6 @@
     "category-hubs",
     "category-outdoor"
   ],
-  "engines": {
-    "node": ">=8.3.0",
-    "homebridge": ">=0.4.0"
-  },
   "scripts": {},
   "homepage": "https://github.com/dgreif/ring/tree/master/homebridge#homebridge-ring"
 }

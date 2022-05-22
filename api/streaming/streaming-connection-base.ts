@@ -86,31 +86,50 @@ export abstract class StreamingConnectionBase extends Subscribed {
   ): void
 
   private activated = false
-  async activate() {
+  activate() {
     if (this.activated) {
       return
     }
     this.activated = true
-    await firstValueFrom(
+
+    // Fire and forget this call so that callers don't get hung up waiting for connection (which might not happen)
+    firstValueFrom(
       this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
     )
-
-    logInfo('Activating Session')
-    this.sendSessionMessage('activate_session')
+      .then(() => {
+        logInfo('Activating Session')
+        this.sendSessionMessage('activate_session')
+      })
+      .catch((e) => {
+        logError(e)
+      })
   }
 
-  async activateCameraSpeaker() {
-    await firstValueFrom(this.onCallAnswered)
-    this.sendSessionMessage('camera_options', {
-      stealth_mode: false,
-    })
+  activateCameraSpeaker() {
+    // Fire and forget this call so that callers don't get hung up waiting for answer (which might not happen)
+    firstValueFrom(this.onCallAnswered)
+      .then(() => {
+        this.sendSessionMessage('camera_options', {
+          stealth_mode: false,
+        })
+      })
+      .catch((e) => {
+        logError(e)
+      })
   }
 
   protected sendMessage(message: Record<any, any>) {
+    if (this.hasEnded) {
+      return
+    }
     this.ws.send(JSON.stringify(message))
   }
 
   sendAudioPacket(rtp: RtpPacket) {
+    if (this.hasEnded) {
+      return
+    }
+
     if (this.pc instanceof WeriftPeerConnection) {
       this.pc.returnAudioTrack.writeRtp(rtp)
     } else {
@@ -120,7 +139,12 @@ export abstract class StreamingConnectionBase extends Subscribed {
     }
   }
 
+  private hasEnded = false
   protected callEnded() {
+    if (this.hasEnded) {
+      return
+    }
+
     try {
       this.sendMessage({
         reason: { code: 0, text: '' },
@@ -130,6 +154,7 @@ export abstract class StreamingConnectionBase extends Subscribed {
     } catch (_) {
       // ignore any errors since we are stopping the call
     }
+    this.hasEnded = true
 
     this.unsubscribe()
     this.onCallEnded.next()

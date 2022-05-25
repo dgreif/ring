@@ -2,6 +2,7 @@ import 'dotenv/config'
 import { RingApi } from '../api'
 import { cleanOutputDirectory } from './util'
 import * as path from 'path'
+import { WeriftPeerConnection } from '../api/streaming/werift-peer-connection'
 
 /**
  * This example takes an audio clip from examples/example.mp4 and pipes it to a ring camera
@@ -12,6 +13,7 @@ async function example() {
       // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
       debug: true,
+      createPeerConnection: () => new WeriftPeerConnection(),
     }),
     cameras = await ringApi.getCameras(),
     camera = cameras[0]

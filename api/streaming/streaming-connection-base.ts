@@ -1,13 +1,13 @@
-import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection'
-import { Subscribed } from '../subscribed'
-import { WebSocket } from 'ws'
-import { RtpPacket } from 'werift'
 import { firstValueFrom, fromEvent, ReplaySubject, Subject } from 'rxjs'
 import { concatMap, filter } from 'rxjs/operators'
+import type { RtpPacket } from 'werift'
+import { WebSocket } from 'ws'
+import { Subscribed } from '../subscribed'
 import { logDebug, logError, logInfo } from '../util'
+import { BasicPeerConnection } from './peer-connection'
 
 export interface StreamingConnectionOptions {
-  createPeerConnection?: () => BasicPeerConnection
+  createPeerConnection: () => BasicPeerConnection
 }
 
 export abstract class StreamingConnectionBase extends Subscribed {
@@ -21,24 +21,15 @@ export abstract class StreamingConnectionBase extends Subscribed {
 
   constructor(
     protected ws: WebSocket,
-    protected options: StreamingConnectionOptions = {}
+    protected options: StreamingConnectionOptions
   ) {
     super()
 
-    if (options.createPeerConnection) {
-      // we were passed a custom peer connection factory
-      this.pc = options.createPeerConnection()
+    this.pc = options.createPeerConnection()
 
-      // passing rtp packets is not supported for custom peer connections
-      this.onAudioRtp = new Subject<RtpPacket>()
-      this.onVideoRtp = new Subject<RtpPacket>()
-    } else {
-      // no custom peer connection factory, use the werift and pass along rtp packets
-      const pc = new WeriftPeerConnection()
-      this.pc = pc
-      this.onAudioRtp = pc.onAudioRtp
-      this.onVideoRtp = pc.onVideoRtp
-    }
+    // passing rtp packets is not supported for custom peer connections
+    this.onAudioRtp = this.pc.onAudioRtp || new Subject<RtpPacket>()
+    this.onVideoRtp = this.pc.onVideoRtp || new Subject<RtpPacket>()
 
     this.onWsOpen = fromEvent(this.ws, 'open')
     const onMessage = fromEvent(this.ws, 'message'),
@@ -125,18 +116,12 @@ export abstract class StreamingConnectionBase extends Subscribed {
     this.ws.send(JSON.stringify(message))
   }
 
-  sendAudioPacket(rtp: RtpPacket) {
+  sendAudioPacket(rtp: RtpPacket | Buffer) {
     if (this.hasEnded) {
       return
     }
 
-    if (this.pc instanceof WeriftPeerConnection) {
-      this.pc.returnAudioTrack.writeRtp(rtp)
-    } else {
-      throw new Error(
-        'Cannot send audio packets to a custom peer connection implementation'
-      )
-    }
+    this.pc.sendAudioPacket?.(rtp)
   }
 
   private hasEnded = false

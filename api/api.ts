@@ -23,6 +23,7 @@ import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
+import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -41,7 +42,11 @@ export class RingApi extends Subscribed {
   public readonly restClient
   public readonly onRefreshTokenUpdated
 
-  constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
+  constructor(
+    public readonly options: RingApiOptions &
+      RefreshTokenAuth &
+      Partial<StreamingConnectionOptions>
+  ) {
     super()
 
     this.restClient = new RingRestClient(this.options)
@@ -264,7 +269,17 @@ export class RingApi extends Subscribed {
               authorizedDoorbots.includes(data) ||
               data.kind.startsWith('doorbell'),
             this.restClient,
-            this.options.avoidSnapshotBatteryDrain || false
+            this.options.avoidSnapshotBatteryDrain || false,
+            {
+              createPeerConnection: () => {
+                if (this.options.createPeerConnection) {
+                  return this.options.createPeerConnection()
+                }
+                throw new Error(
+                  'RingApi options.createPeerConnection is undefined'
+                )
+              },
+            }
           )
       ),
       ringChimes = chimes.map((data) => new RingChime(data, this.restClient)),

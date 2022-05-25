@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { RingApi } from '../api'
 import { promisify } from 'util'
+import { WeriftPeerConnection } from '../api/streaming/werift-peer-connection'
 const fs = require('fs'),
   path = require('path'),
   express = require('express')
@@ -15,6 +16,7 @@ async function example() {
       // Replace with your refresh token
       refreshToken: process.env.RING_REFRESH_TOKEN!,
       debug: true,
+      createPeerConnection: () => new WeriftPeerConnection(),
     }),
     [camera] = await ringApi.getCameras()
 

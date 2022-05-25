@@ -1,4 +1,4 @@
-import { RtpPacket } from 'werift'
+import type { RtpPacket } from 'werift'
 import {
   FfmpegProcess,
   reservePorts,
@@ -168,8 +168,7 @@ export class StreamingSession extends Subscribed {
     }
 
     const audioOutForwarder = new RtpSplitter(({ message }) => {
-        const rtp = RtpPacket.deSerialize(message)
-        this.connection.sendAudioPacket(rtp)
+        this.connection.sendAudioPacket(message)
         return null
       }),
       usingOpus = await this.isUsingOpus,
@@ -221,7 +220,7 @@ export class StreamingSession extends Subscribed {
     this.callEnded()
   }
 
-  sendAudioPacket(rtp: RtpPacket) {
+  sendAudioPacket(rtp: RtpPacket | Buffer) {
     if (this.hasEnded) {
       return
     }

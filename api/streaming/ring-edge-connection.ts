@@ -7,6 +7,7 @@ import {
   StreamingConnectionBase,
   StreamingConnectionOptions,
 } from './streaming-connection-base'
+import crypto from 'crypto'
 
 interface SessionBody {
   doorbot_id: number
@@ -80,7 +81,7 @@ type IncomingMessage =
   | NotificationMessage
 
 export class RingEdgeConnection extends StreamingConnectionBase {
-  private readonly onSessionId = new ReplaySubject<string>(1)
+  public readonly onSessionId = new ReplaySubject<string>(1)
   private readonly onOfferSent = new ReplaySubject<void>(1)
 
   constructor(
@@ -93,7 +94,8 @@ export class RingEdgeConnection extends StreamingConnectionBase {
         headers: {
           Authorization: `Bearer ${authToken}`,
           'X-Sig-API-Version': '4.0',
-          'X-Sig-Client-ID': 'ring_android-aabb123', // required but value doesn't matter
+          'X-Sig-Client-ID':
+            'ring_android-' + crypto.randomBytes(4).toString('hex'), // required but value doesn't matter
           'X-Sig-Client-Info':
             'Ring/3.49.0;Platform/Android;OS/7.0;Density/2.0;Device/samsung-SM-T710;Locale/en-US;TimeZone/GMT-07:00',
           'X-Sig-Auth-Type': 'ring_oauth',
@@ -112,15 +114,13 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       }),
 
       // The ring-edge session needs a ping every 5 seconds to keep the connection alive
-      this.onCallAnswered
-        .pipe(switchMap(() => interval(5000)))
-        .subscribe(() => {
-          if (!this.sessionId) {
-            return
-          }
+      this.onSessionId.pipe(switchMap(() => interval(5000))).subscribe(() => {
+        if (!this.sessionId) {
+          return
+        }
 
-          this.sendSessionMessage('ping')
-        }),
+        this.sendSessionMessage('ping')
+      }),
 
       this.pc.onIceCandidate.subscribe(async (iceCandidate) => {
         await firstValueFrom(this.onOfferSent)
@@ -129,17 +129,7 @@ export class RingEdgeConnection extends StreamingConnectionBase {
           body: {
             doorbot_id: camera.id,
             ice: iceCandidate.candidate,
-            mlineindex: 0,
-          },
-        })
-        // HACK: send ice candidate with both mline indexes to convince ring edge to connect both audio and video
-        // Without this, only audio will connect unless you connect from the network of the Ring Edge router
-        this.sendMessage({
-          method: 'ice',
-          body: {
-            doorbot_id: camera.id,
-            ice: iceCandidate.candidate,
-            mlineindex: 1,
+            mlineindex: iceCandidate.sdpMLineIndex,
           },
         })
       })
@@ -154,15 +144,16 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       body: {
         doorbot_id: this.camera.id,
         stream_options: { audio_enabled: true, video_enabled: true },
-        sdp: sdp.replace('\na=group:BUNDLE 0 1', ''),
+        sdp,
       },
     })
 
     this.onOfferSent.next()
   }
 
-  private sessionId: string | null = null
   protected async handleMessage(message: IncomingMessage) {
+    this.onMessage.next(message)
+
     if (message.body.doorbot_id !== this.camera.id) {
       // ignore messages for other cameras
       return
@@ -211,22 +202,25 @@ export class RingEdgeConnection extends StreamingConnectionBase {
   }
 
   protected sendSessionMessage(method: string, body: Record<any, any> = {}) {
-    const message = {
-      method,
-      body: {
-        ...body,
-        doorbot_id: this.camera.id,
-        session_id: this.sessionId,
-      },
+    const sendSessionMessage = () => {
+      const message = {
+        method,
+        body: {
+          ...body,
+          doorbot_id: this.camera.id,
+          session_id: this.sessionId,
+        },
+      }
+      this.sendMessage(message)
     }
 
     if (this.sessionId) {
       // Send immediately if we already have a session id
       // This is needed to send `close` before closing the websocket
-      this.sendMessage(message)
+      sendSessionMessage()
     } else {
       firstValueFrom(this.onSessionId)
-        .then(() => this.sendMessage(message))
+        .then(sendSessionMessage)
         .catch((e) => logError(e))
     }
   }

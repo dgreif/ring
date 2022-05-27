@@ -57,7 +57,7 @@ function parseLiveCallSession(sessionId: string) {
 
 export class WebrtcConnection extends StreamingConnectionBase {
   constructor(
-    private sessionId: string,
+    public sessionId: string,
     camera: RingCamera,
     options: StreamingConnectionOptions
   ) {
@@ -87,6 +87,8 @@ export class WebrtcConnection extends StreamingConnectionBase {
   protected async handleMessage(
     message: InitializationMessage | OfferMessage | IceCandidateMessage
   ) {
+    this.onMessage.next(message)
+
     switch (message.method) {
       case 'sdp':
         const answer = await this.pc.createAnswer(message)

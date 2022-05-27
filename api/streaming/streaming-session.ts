@@ -42,11 +42,15 @@ export class StreamingSession extends Subscribed {
 
   constructor(
     private readonly camera: RingCamera,
-    private connection: RingEdgeConnection | WebrtcConnection
+    public connection: RingEdgeConnection | WebrtcConnection
   ) {
     super()
 
     this.bindToConnection(connection)
+  }
+
+  get sessionId() {
+    return this.connection.sessionId
   }
 
   private bindToConnection(connection: RingEdgeConnection | WebrtcConnection) {
@@ -55,7 +59,8 @@ export class StreamingSession extends Subscribed {
       connection.onVideoRtp.subscribe(this.onVideoRtp),
       connection.onCallAnswered.subscribe((sdp) => {
         this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
-      })
+      }),
+      connection.onCallEnded.subscribe(() => this.callEnded())
     )
   }
 

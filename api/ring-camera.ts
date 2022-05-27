@@ -339,14 +339,18 @@ export class RingCamera extends Subscribed {
     return response.device_health
   }
 
-  private async createStreamingConnection(options?: StreamingConnectionOptions) {
+  private async createStreamingConnection(
+    options?: StreamingConnectionOptions
+  ) {
     if (this.isRingEdgeEnabled) {
-      const auth = await this.restClient.getCurrentAuth()
-      return new RingEdgeConnection(
-        auth.access_token,
-        this,
-        options || this.streamingConnectionOptions
-      )
+      const auth = await this.restClient.getCurrentAuth(),
+        ret = new RingEdgeConnection(
+          auth.access_token,
+          this,
+          options || this.streamingConnectionOptions
+        )
+      await firstValueFrom(ret.onSessionId)
+      return ret
     }
 
     const liveCall = await this.restClient

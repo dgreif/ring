@@ -13,8 +13,10 @@ export interface StreamingConnectionOptions {
 export abstract class StreamingConnectionBase extends Subscribed {
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
+  readonly onMessage = new ReplaySubject<{ method: string }>()
   readonly onWsOpen
   protected readonly pc
+  public sessionId: string | null = null
 
   readonly onAudioRtp
   readonly onVideoRtp

@@ -1,5 +1,5 @@
 import type { Observable, Subject } from 'rxjs'
-import type { ConnectionState, RTCIceCandidate, RtpPacket } from 'werift'
+import type { ConnectionState, RtpPacket } from 'werift'
 
 export interface BasicPeerConnection {
   onAudioRtp?: Subject<RtpPacket>

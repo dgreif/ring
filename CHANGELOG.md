@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.3](https://github.com/dgreif/ring/compare/v11.0.2...v11.0.3) (2022-05-28)
+
+
+### Bug Fixes
+
+* automatically activate streams and allow key frame requests ([b129f29](https://github.com/dgreif/ring/commit/b129f29d0a3774d779e9c159fe381e4e09066c0d))
+* end streaming session when connection ends ([b6bf08b](https://github.com/dgreif/ring/commit/b6bf08ba01e344faf59f6b42ea0c3b5ce384e0bf))
+* **homebridge:** allow ffmpeg in config schema ([#946](https://github.com/dgreif/ring/issues/946)) ([3242bbd](https://github.com/dgreif/ring/commit/3242bbd34dd6847500839396a9e10509e8216023))
+* remove race condition for sending messages to ring edge connections ([a9438d3](https://github.com/dgreif/ring/commit/a9438d3dfc5e7ad8b96881b689534c84fab637f1))
+* start ring edge pings as soon as session is started ([04ad614](https://github.com/dgreif/ring/commit/04ad614cb25c9aa4b11459e5fecde9ff7766a32d))
+* update dependencies including ffmpeg ([f5cd553](https://github.com/dgreif/ring/commit/f5cd553506cf0ea31a309d1350eff19c48552809))
+* use random client id for every ring edge connection ([3ba78e3](https://github.com/dgreif/ring/commit/3ba78e39b9da392779005d7d76828ddd2e425e6b))
+
 ### [11.0.2](https://github.com/dgreif/ring/compare/v11.0.1...v11.0.2) (2022-05-22)
 
 

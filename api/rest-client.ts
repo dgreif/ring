@@ -144,7 +144,11 @@ export class RingRestClient {
     oldRefreshToken?: string
     newRefreshToken: string
   }>(1)
-  public readonly baseSessionMetadata
+  public readonly baseSessionMetadata = {
+    api_version: apiVersion,
+    device_model:
+      this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
+  }
 
   constructor(
     private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions
@@ -154,11 +158,6 @@ export class RingRestClient {
         ? this.authOptions.refreshToken
         : undefined
     this.hardwareIdPromise = getHardwareId(this.authOptions.systemId)
-    this.baseSessionMetadata = {
-      api_version: apiVersion,
-      device_model:
-        this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
-    }
   }
 
   private getGrantData(twoFactorAuthCode?: string) {

@@ -7,7 +7,6 @@
   "ignorePatterns": [
     "release-*",
     "lib",
-    "lib-esnext",
     "public",
     "json-data",
     ".homebridge",

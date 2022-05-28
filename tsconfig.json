@@ -12,8 +12,6 @@
     "strict": true
   },
   "exclude": [
-    "lib",
-    "lib-esnext",
     "public",
     "release-api",
     "release-homebridge",

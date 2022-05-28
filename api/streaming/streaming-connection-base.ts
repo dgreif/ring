@@ -13,6 +13,7 @@ export interface StreamingConnectionOptions {
 export abstract class StreamingConnectionBase extends Subscribed {
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
+  readonly onMessage = new ReplaySubject<{ method: string }>()
   readonly onWsOpen
   protected readonly pc
 
@@ -48,10 +49,10 @@ export abstract class StreamingConnectionBase extends Subscribed {
     this.addSubscriptions(
       onMessage
         .pipe(
-          concatMap((message) => {
-            return this.handleMessage(
-              JSON.parse((message as MessageEvent).data)
-            )
+          concatMap((event) => {
+            const message = JSON.parse((event as MessageEvent).data)
+            this.onMessage.next(message)
+            return this.handleMessage(message)
           })
         )
         .subscribe(),

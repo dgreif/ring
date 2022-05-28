@@ -78,26 +78,6 @@ export abstract class StreamingConnectionBase extends Subscribed {
     body?: Record<any, any>
   ): void
 
-  private activated = false
-  activate() {
-    if (this.activated) {
-      return
-    }
-    this.activated = true
-
-    // Fire and forget this call so that callers don't get hung up waiting for connection (which might not happen)
-    firstValueFrom(
-      this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
-    )
-      .then(() => {
-        logInfo('Activating Session')
-        this.sendSessionMessage('activate_session')
-      })
-      .catch((e) => {
-        logError(e)
-      })
-  }
-
   activateCameraSpeaker() {
     // Fire and forget this call so that callers don't get hung up waiting for answer (which might not happen)
     firstValueFrom(this.onCallAnswered)

@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws'
 import { firstValueFrom, interval, ReplaySubject } from 'rxjs'
-import { logDebug, logError } from '../util'
+import { logDebug, logError, logInfo } from '../util'
 import { RingCamera } from '../ring-camera'
 import { switchMap } from 'rxjs/operators'
 import {
@@ -143,7 +143,6 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       method: 'live_view',
       body: {
         doorbot_id: this.camera.id,
-        stream_options: { audio_enabled: true, video_enabled: true },
         sdp,
       },
     })
@@ -181,6 +180,14 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       case 'sdp':
         await this.pc.acceptAnswer(message.body)
         this.onCallAnswered.next(message.body.sdp)
+
+        logInfo('Activating Session')
+        this.sendSessionMessage('activate_session')
+
+        this.sendSessionMessage('stream_options', {
+          audio_enabled: true,
+          video_enabled: true,
+        })
         return
       case 'ice':
         await this.pc.addIceCandidate({

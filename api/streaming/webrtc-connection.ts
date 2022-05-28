@@ -95,6 +95,7 @@ export class WebrtcConnection extends StreamingConnectionBase {
         this.sendSessionMessage('sdp', answer)
         this.onCallAnswered.next(message.sdp)
 
+        this.sendSessionMessage('activate_session')
         this.sendSessionMessage('stream_options', {
           audio_enabled: true,
           video_enabled: true,

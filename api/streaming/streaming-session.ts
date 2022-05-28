@@ -64,15 +64,6 @@ export class StreamingSession extends Subscribed {
     )
   }
 
-  activated = false
-  activate() {
-    if (this.activated || this.hasEnded) {
-      return
-    }
-    this.activated = true
-    this.connection.activate()
-  }
-
   cameraSpeakerActivated = false
   activateCameraSpeaker() {
     if (this.cameraSpeakerActivated || this.hasEnded) {
@@ -162,9 +153,6 @@ export class StreamingSession extends Subscribed {
     this.onCallEnded.subscribe(() => ff.stop())
 
     ff.writeStdin(inputSdp)
-
-    // Activate the stream now that ffmpeg is ready to receive
-    this.activate()
   }
 
   async transcodeReturnAudio(ffmpegOptions: { input: SpawnInput[] }) {

@@ -55,7 +55,8 @@ export class StreamingSession extends Subscribed {
       connection.onVideoRtp.subscribe(this.onVideoRtp),
       connection.onCallAnswered.subscribe((sdp) => {
         this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
-      })
+      }),
+      connection.onCallEnded.subscribe(() => this.callEnded())
     )
   }
 

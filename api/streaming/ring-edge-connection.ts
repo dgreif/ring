@@ -213,22 +213,25 @@ export class RingEdgeConnection extends StreamingConnectionBase {
   }
 
   protected sendSessionMessage(method: string, body: Record<any, any> = {}) {
-    const message = {
-      method,
-      body: {
-        ...body,
-        doorbot_id: this.camera.id,
-        session_id: this.sessionId,
-      },
+    const sendSessionMessage = () => {
+      const message = {
+        method,
+        body: {
+          ...body,
+          doorbot_id: this.camera.id,
+          session_id: this.sessionId,
+        },
+      }
+      this.sendMessage(message)
     }
 
     if (this.sessionId) {
       // Send immediately if we already have a session id
       // This is needed to send `close` before closing the websocket
-      this.sendMessage(message)
+      sendSessionMessage()
     } else {
       firstValueFrom(this.onSessionId)
-        .then(() => this.sendMessage(message))
+        .then(sendSessionMessage)
         .catch((e) => logError(e))
     }
   }

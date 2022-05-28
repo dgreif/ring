@@ -2,7 +2,6 @@ import { WebSocket } from 'ws'
 import { firstValueFrom, interval, ReplaySubject } from 'rxjs'
 import { logDebug, logError } from '../util'
 import { RingCamera } from '../ring-camera'
-import { switchMap } from 'rxjs/operators'
 import {
   StreamingConnectionBase,
   StreamingConnectionOptions,
@@ -112,15 +111,9 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       }),
 
       // The ring-edge session needs a ping every 5 seconds to keep the connection alive
-      this.onCallAnswered
-        .pipe(switchMap(() => interval(5000)))
-        .subscribe(() => {
-          if (!this.sessionId) {
-            return
-          }
-
-          this.sendSessionMessage('ping')
-        }),
+      interval(5000).subscribe(() => {
+        this.sendSessionMessage('ping')
+      }),
 
       this.pc.onIceCandidate.subscribe(async (iceCandidate) => {
         await firstValueFrom(this.onOfferSent)

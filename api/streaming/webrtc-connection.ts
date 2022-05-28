@@ -93,10 +93,7 @@ export class WebrtcConnection extends StreamingConnectionBase {
         this.sendSessionMessage('sdp', answer)
         this.onCallAnswered.next(message.sdp)
 
-        this.sendSessionMessage('stream_options', {
-          audio_enabled: true,
-          video_enabled: true,
-        })
+        this.activate()
         return
       case 'ice':
         await this.pc.addIceCandidate({

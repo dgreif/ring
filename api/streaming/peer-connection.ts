@@ -1,3 +1,4 @@
+/* eslint-disable brace-style */
 import {
   ConnectionState,
   MediaStreamTrack,
@@ -7,8 +8,9 @@ import {
   RTCRtpCodecParameters,
   RtpPacket,
 } from 'werift'
-import { Observable, ReplaySubject, Subject } from 'rxjs'
+import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs'
 import { logError, logInfo } from '../util'
+import { Subscribed } from '../subscribed'
 
 const debug = false,
   ringIceServers = [
@@ -33,9 +35,13 @@ export interface BasicPeerConnection {
   onIceCandidate: Observable<RTCIceCandidate>
   onConnectionState: Observable<ConnectionState>
   close(): void
+  requestKeyFrame?: () => void
 }
 
-export class WeriftPeerConnection implements BasicPeerConnection {
+export class WeriftPeerConnection
+  extends Subscribed
+  implements BasicPeerConnection
+{
   private pc
   onAudioRtp = new Subject<RtpPacket>()
   onAudioRtcp = new Subject<RtcpPacket>()
@@ -44,8 +50,10 @@ export class WeriftPeerConnection implements BasicPeerConnection {
   onIceCandidate = new Subject<RTCIceCandidate>()
   onConnectionState = new ReplaySubject<ConnectionState>(1)
   returnAudioTrack = new MediaStreamTrack({ kind: 'audio' })
+  private onRequestKeyFrame = new Subject<void>()
 
   constructor() {
+    super()
     const pc = (this.pc = new RTCPeerConnection({
         codecs: {
           audio: [
@@ -117,10 +125,14 @@ export class WeriftPeerConnection implements BasicPeerConnection {
           logInfo('received first video packet')
         }
 
-        setInterval(
-          () => videoTransceiver.receiver.sendRtcpPLI(track.ssrc!),
-          2000
+        this.addSubscriptions(
+          merge(this.onRequestKeyFrame, interval(4000)).subscribe(() => {
+            videoTransceiver.receiver
+              .sendRtcpPLI(track.ssrc!)
+              .catch((e) => logError(e))
+          })
         )
+        this.requestKeyFrame()
       })
     })
     this.pc.onIceCandidate.subscribe((iceCandidate) => {
@@ -162,7 +174,12 @@ export class WeriftPeerConnection implements BasicPeerConnection {
     return this.pc.addIceCandidate(candidate)
   }
 
+  requestKeyFrame() {
+    this.onRequestKeyFrame.next()
+  }
+
   close() {
     this.pc.close().catch(logError)
+    this.unsubscribe()
   }
 }

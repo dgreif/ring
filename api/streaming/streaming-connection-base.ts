@@ -3,7 +3,7 @@ import { Subscribed } from '../subscribed'
 import { WebSocket } from 'ws'
 import { RtpPacket } from 'werift'
 import { firstValueFrom, fromEvent, ReplaySubject, Subject } from 'rxjs'
-import { concatMap, filter } from 'rxjs/operators'
+import { concatMap } from 'rxjs/operators'
 import { logDebug, logError, logInfo } from '../util'
 
 export interface StreamingConnectionOptions {
@@ -85,24 +85,14 @@ export abstract class StreamingConnectionBase extends Subscribed {
     body?: Record<any, any>
   ): void
 
-  private activated = false
-  activate() {
-    if (this.activated) {
-      return
-    }
-    this.activated = true
-
-    // Fire and forget this call so that callers don't get hung up waiting for connection (which might not happen)
-    firstValueFrom(
-      this.pc.onConnectionState.pipe(filter((state) => state === 'connected'))
-    )
-      .then(() => {
-        logInfo('Activating Session')
-        this.sendSessionMessage('activate_session')
-      })
-      .catch((e) => {
-        logError(e)
-      })
+  protected activate() {
+    logInfo('Activating Session')
+    // the activate_session message is required to keep the stream alive longer than 70 seconds
+    this.sendSessionMessage('activate_session')
+    this.sendSessionMessage('stream_options', {
+      audio_enabled: true,
+      video_enabled: true,
+    })
   }
 
   activateCameraSpeaker() {
@@ -163,5 +153,9 @@ export abstract class StreamingConnectionBase extends Subscribed {
 
   stop() {
     this.callEnded()
+  }
+
+  requestKeyFrame() {
+    this.pc.requestKeyFrame?.()
   }
 }

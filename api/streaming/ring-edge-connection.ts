@@ -190,6 +190,8 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       case 'sdp':
         await this.pc.acceptAnswer(message.body)
         this.onCallAnswered.next(message.body.sdp)
+
+        this.activate()
         return
       case 'ice':
         await this.pc.addIceCandidate({

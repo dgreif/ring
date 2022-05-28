@@ -192,7 +192,7 @@ class StreamingSessionWrapper {
 
     const shouldTranscodeAudio = await this.libfdkAacInstalledPromise
     if (!shouldTranscodeAudio) {
-      return this.streamingSession.activate()
+      return this.streamingSession.requestKeyFrame()
     }
 
     const transcodingPromise = this.streamingSession.startTranscoding({

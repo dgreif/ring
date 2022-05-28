@@ -59,13 +59,12 @@ export class StreamingSession extends Subscribed {
     )
   }
 
-  activated = false
+  /**
+   * @deprecated
+   * activate will be removed in the future. Please use requestKeyFrame if you want to explicitly request an initial key frame
+   */
   activate() {
-    if (this.activated || this.hasEnded) {
-      return
-    }
-    this.activated = true
-    this.connection.activate()
+    this.requestKeyFrame()
   }
 
   cameraSpeakerActivated = false
@@ -158,8 +157,8 @@ export class StreamingSession extends Subscribed {
 
     ff.writeStdin(inputSdp)
 
-    // Activate the stream now that ffmpeg is ready to receive
-    this.activate()
+    // Request a key frame now that ffmpeg is ready to receive
+    this.requestKeyFrame()
   }
 
   async transcodeReturnAudio(ffmpegOptions: { input: SpawnInput[] }) {
@@ -227,5 +226,9 @@ export class StreamingSession extends Subscribed {
     }
 
     this.connection.sendAudioPacket(rtp)
+  }
+
+  requestKeyFrame() {
+    this.connection.requestKeyFrame()
   }
 }

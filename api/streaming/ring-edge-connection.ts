@@ -6,6 +6,7 @@ import {
   StreamingConnectionBase,
   StreamingConnectionOptions,
 } from './streaming-connection-base'
+import crypto from 'crypto'
 
 interface SessionBody {
   doorbot_id: number
@@ -92,7 +93,9 @@ export class RingEdgeConnection extends StreamingConnectionBase {
         headers: {
           Authorization: `Bearer ${authToken}`,
           'X-Sig-API-Version': '4.0',
-          'X-Sig-Client-ID': 'ring_android-aabb123', // required but value doesn't matter
+          'X-Sig-Client-ID': `ring_android-${crypto
+            .randomBytes(4)
+            .toString('hex')}`, // required but value doesn't matter
           'X-Sig-Client-Info':
             'Ring/3.49.0;Platform/Android;OS/7.0;Density/2.0;Device/samsung-SM-T710;Locale/en-US;TimeZone/GMT-07:00',
           'X-Sig-Auth-Type': 'ring_oauth',

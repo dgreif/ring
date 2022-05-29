@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.4](https://github.com/dgreif/ring/compare/v11.0.3...v11.0.4) (2022-05-29)
+
+
+### Bug Fixes
+
+* handle unanswered calls when transcoding ([6f9d3df](https://github.com/dgreif/ring/commit/6f9d3dfa079f046a6b5cfa140fd67eb210669429))
+* update werift and ring edge connection strategy ([7b786f3](https://github.com/dgreif/ring/commit/7b786f3ffd9ad8eb4a8f03f5eac9ca6c67517aae))
+
 ### [11.0.3](https://github.com/dgreif/ring/compare/v11.0.2...v11.0.3) (2022-05-28)
 
 

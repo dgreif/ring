@@ -125,17 +125,7 @@ export class RingEdgeConnection extends StreamingConnectionBase {
           body: {
             doorbot_id: camera.id,
             ice: iceCandidate.candidate,
-            mlineindex: 0,
-          },
-        })
-        // HACK: send ice candidate with both mline indexes to convince ring edge to connect both audio and video
-        // Without this, only audio will connect unless you connect from the network of the Ring Edge router
-        this.sendMessage({
-          method: 'ice',
-          body: {
-            doorbot_id: camera.id,
-            ice: iceCandidate.candidate,
-            mlineindex: 1,
+            mlineindex: iceCandidate.sdpMLineIndex,
           },
         })
       })
@@ -150,7 +140,7 @@ export class RingEdgeConnection extends StreamingConnectionBase {
       body: {
         doorbot_id: this.camera.id,
         stream_options: { audio_enabled: true, video_enabled: true },
-        sdp: sdp.replace('\na=group:BUNDLE 0 1', ''),
+        sdp,
       },
     })
 

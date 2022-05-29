@@ -9,20 +9,19 @@ import {
   RtpPacket,
 } from 'werift'
 import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs'
-import { logError, logInfo } from '../util'
+import { logDebug, logError, logInfo } from '../util'
 import { Subscribed } from '../subscribed'
 
-const debug = false,
-  ringIceServers = [
-    'stun:stun.kinesisvideo.us-east-1.amazonaws.com:443',
-    'stun:stun.kinesisvideo.us-east-2.amazonaws.com:443',
-    'stun:stun.kinesisvideo.us-west-2.amazonaws.com:443',
-    'stun:stun.l.google.com:19302',
-    'stun:stun1.l.google.com:19302',
-    'stun:stun2.l.google.com:19302',
-    'stun:stun3.l.google.com:19302',
-    'stun:stun4.l.google.com:19302',
-  ]
+const ringIceServers = [
+  'stun:stun.kinesisvideo.us-east-1.amazonaws.com:443',
+  'stun:stun.kinesisvideo.us-east-2.amazonaws.com:443',
+  'stun:stun.kinesisvideo.us-west-2.amazonaws.com:443',
+  'stun:stun.l.google.com:19302',
+  'stun:stun1.l.google.com:19302',
+  'stun:stun2.l.google.com:19302',
+  'stun:stun3.l.google.com:19302',
+  'stun:stun4.l.google.com:19302',
+]
 
 export interface BasicPeerConnection {
   createOffer(): Promise<{ sdp: string }>
@@ -31,7 +30,7 @@ export interface BasicPeerConnection {
     sdp: string
   }): Promise<RTCSessionDescriptionInit>
   acceptAnswer(answer: { type: 'answer'; sdp: string }): Promise<void>
-  addIceCandidate(candidate: RTCIceCandidate): Promise<void>
+  addIceCandidate(candidate: Partial<RTCIceCandidate>): Promise<void>
   onIceCandidate: Observable<RTCIceCandidate>
   onConnectionState: Observable<ConnectionState>
   close(): void
@@ -87,6 +86,7 @@ export class WeriftPeerConnection
         },
         iceServers: ringIceServers.map((server) => ({ urls: server })),
         iceTransportPolicy: 'all',
+        bundlePolicy: 'disable',
       })),
       audioTransceiver = pc.addTransceiver(this.returnAudioTrack, {
         direction: 'sendrecv',
@@ -104,11 +104,9 @@ export class WeriftPeerConnection
         this.onAudioRtcp.next(rtcp)
       })
 
-      if (debug) {
-        track.onReceiveRtp.once(() => {
-          logInfo('received first audio packet')
-        })
-      }
+      track.onReceiveRtp.once(() => {
+        logDebug('received first audio packet')
+      })
     })
 
     videoTransceiver.onTrack.subscribe((track) => {
@@ -121,9 +119,7 @@ export class WeriftPeerConnection
       })
 
       track.onReceiveRtp.once(() => {
-        if (debug) {
-          logInfo('received first video packet')
-        }
+        logDebug('received first video packet')
 
         this.addSubscriptions(
           merge(this.onRequestKeyFrame, interval(4000)).subscribe(() => {

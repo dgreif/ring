@@ -1,5 +1,3 @@
 {
-  "reject": [
-    "socket.io-client"
-  ]
+  "reject": ["socket.io-client", "got"]
 }

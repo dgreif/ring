@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.0.7](https://github.com/dgreif/ring/compare/v11.0.6...v11.0.7) (2022-07-10)
+
+
+### Bug Fixes
+
+* hide errors from snapshot request timeouts ([f997e34](https://github.com/dgreif/ring/commit/f997e340ad3c579d059ae07c11ad82ddc5ceb181)), closes [#932](https://github.com/dgreif/ring/issues/932)
+* update dependencies ([ce0bf2a](https://github.com/dgreif/ring/commit/ce0bf2aa81d55e629931f38ba2c6ca16a79fa0d2))
+
 ### [11.0.6](https://github.com/dgreif/ring/compare/v11.0.5...v11.0.6) (2022-06-29)
 
 

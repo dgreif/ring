@@ -403,7 +403,7 @@ export class RingRestClient {
             response.statusCode
           }. Response body: ${stringify(response.body)}`
         )
-      } else {
+      } else if (!options.allowNoResponse) {
         logError(`Request to ${url} failed:`)
         logError(e)
       }

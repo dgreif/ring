@@ -402,7 +402,7 @@ export class CameraSource implements CameraStreamingDelegate {
           imageUuid ? ' by uuid' : ''
         } (${getDurationSeconds(start)}s)`
       )
-    } catch (e) {
+    } catch (e: any) {
       this.cachedSnapshot = undefined
       logDebug(
         `Failed to cache snapshot for ${
@@ -413,6 +413,11 @@ export class CameraSource implements CameraStreamingDelegate {
           this.ringCamera.isOffline ? 'offline' : 'online'
         }`
       )
+
+      // log additioanl snapshot error message if one is present
+      if (e.message.includes('Snapshot')) {
+        logDebug(e.message)
+      }
     }
   }
 

@@ -9,6 +9,7 @@ const systemIdFileName = '.ring.json'
 export interface RingPlatformConfig extends RingApiOptions {
   alarmOnEntryDelay?: boolean
   beamDurationSeconds?: number
+  ffmpegPath?: string
   hideLightGroups?: boolean
   hideDoorbellSwitch?: boolean
   hideCameraLight?: boolean
@@ -18,10 +19,10 @@ export interface RingPlatformConfig extends RingApiOptions {
   hideAlarmSirenSwitch?: boolean
   hideUnsupportedServices?: boolean
   hideDeviceIds?: string[]
+  nightModeBypassFor: AlarmMode
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
-  nightModeBypassFor: AlarmMode
-  ffmpegPath?: string
+  unbridgeCameras?: boolean
 }
 
 export function updateHomebridgeConfig(

@@ -209,6 +209,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       locations = await ringApi.getLocations(),
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
       platformAccessories: PlatformAccessory[] = [],
+      externalAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
 
     this.log.info('Found the following locations:')
@@ -283,7 +284,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
         hapDevices.forEach(
           ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
             const uuid = hap.uuid.generate(debugPrefix + id),
-              displayName = debugPrefix + name
+              displayName = debugPrefix + name,
+              isExternalCamera = isCamera && this.config.unbridgeCameras
 
             if (
               !AccessoryClass ||
@@ -302,6 +304,17 @@ export class RingPlatform implements DynamicPlatformPlugin {
               return
             }
 
+            if (isExternalCamera && this.homebridgeAccessories[uuid]) {
+              // Camera was previously bridged.  Remove it from the platform so that it can be added as an external accessory
+              this.log.warn(
+                `Camera ${displayName} was previously bridged. You will need to manually pair it as a new accessory.`
+              )
+              this.api.unregisterPlatformAccessories(pluginName, platformName, [
+                this.homebridgeAccessories[uuid],
+              ])
+              delete this.homebridgeAccessories[uuid]
+            }
+
             const createHomebridgeAccessory = () => {
                 const accessory = new api.platformAccessory(
                   displayName,
@@ -311,16 +324,24 @@ export class RingPlatform implements DynamicPlatformPlugin {
                     : hap.Categories.SECURITY_SYSTEM
                 )
 
-                this.log.info(
-                  `Adding new accessory ${uuid} ${deviceType} ${displayName}`
-                )
-                platformAccessories.push(accessory)
+                if (isExternalCamera) {
+                  this.log.info(
+                    `Configured camera ${uuid} ${deviceType} ${displayName}`
+                  )
+                  externalAccessories.push(accessory)
+                } else {
+                  this.log.info(
+                    `Adding new accessory ${uuid} ${deviceType} ${displayName}`
+                  )
+                  platformAccessories.push(accessory)
+                }
 
                 if (
                   isCamera &&
+                  !isExternalCamera &&
                   typeof hap.Accessory.cleanupAccessoryData === 'function'
                 ) {
-                  // This is a one-time cleanup that will remove persist files for old external accessories from before camera bridging in version 8
+                  // This is a one-time cleanup that will remove persist files for old external accessories from unbridged cameras
                   hap.Accessory.cleanupAccessoryData(
                     generateMacAddress(accessory.UUID)
                   )
@@ -351,6 +372,10 @@ export class RingPlatform implements DynamicPlatformPlugin {
         platformName,
         platformAccessories
       )
+    }
+
+    if (externalAccessories.length) {
+      api.publishExternalAccessories(pluginName, externalAccessories)
     }
 
     const staleAccessories = cachedAccessoryIds

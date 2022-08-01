@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [11.1.0-beta.1](https://github.com/dgreif/ring/compare/v11.1.0-beta.0...v11.1.0-beta.1) (2022-08-01)
+
+
+### Bug Fixes
+
+* **homebridge:** add unbridgeCameras option to ui schema ([638a0b3](https://github.com/dgreif/ring/commit/638a0b373fac72b0058851836ff6d2bdd237e47c))
+
 ## [11.1.0-beta.0](https://github.com/dgreif/ring/compare/v11.0.7...v11.1.0-beta.0) (2022-08-01)
 
 

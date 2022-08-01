@@ -2,7 +2,6 @@ import { RingCamera } from '../api'
 import { hap } from './hap'
 import {
   doesFfmpegSupportCodec,
-  encodeSrtpOptions,
   generateSrtpOptions,
   ReturnAudioTranscoder,
   RtpSplitter,
@@ -37,6 +36,7 @@ import {
   SrtcpSession,
 } from 'werift'
 import { StreamingSession } from '../api/streaming/streaming-session'
+import { OpusRepacketizer } from './opus-repacketizer'
 
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
@@ -65,6 +65,7 @@ class StreamingSessionWrapper {
   videoSrtp = generateSrtpOptions()
   audioSplitter = new RtpSplitter()
   videoSplitter = new RtpSplitter()
+  repacketizeAudioSplitter = new RtpSplitter()
 
   libfdkAacInstalledPromise = doesFfmpegSupportCodec(
     'libfdk_aac',
@@ -150,15 +151,78 @@ class StreamingSessionWrapper {
     )
   }
 
+  private listenForAudioPackets(startStreamRequest: StartStreamRequest) {
+    const {
+        targetAddress,
+        audio: { port: audioPort },
+      } = this.prepareStreamRequest,
+      {
+        audio: { codec: audioCodec, sample_rate: audioSampleRate },
+      } = startStreamRequest,
+      // Repacketize the audio stream after it's been transcoded
+      opusRepacketizer = new OpusRepacketizer(1),
+      audioIntervalScale = audioSampleRate / 8,
+      audioSrtpSession = new SrtpSession(getSessionConfig(this.audioSrtp))
+
+    let firstTimestamp: number,
+      audioPacketCount = 0
+
+    this.repacketizeAudioSplitter.addMessageHandler(({ message }) => {
+      let rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
+
+      if (audioCodec === AudioStreamingCodecType.OPUS) {
+        // borrowed from scrypted
+        // Original source: https://github.com/koush/scrypted/blob/c13ba09889c3e0d9d3724cb7d49253c9d787fb97/plugins/homekit/src/types/camera/camera-streaming-srtp-sender.ts#L124-L143
+        rtp = opusRepacketizer.repacketize(RtpPacket.deSerialize(message))
+
+        if (!rtp) {
+          return null
+        }
+
+        if (!firstTimestamp) {
+          firstTimestamp = rtp.header.timestamp
+        }
+
+        // from HAP spec:
+        // RTP Payload Format for Opus Speech and Audio Codec RFC 7587 with an exception
+        // that Opus audio RTP Timestamp shall be based on RFC 3550.
+        // RFC 3550 indicates that PCM audio based with a sample rate of 8k and a packet
+        // time of 20ms would have a monotonic interval of 8k / (1000 / 20) = 160.
+        // So 24k audio would have a monotonic interval of (24k / 8k) * 160 = 480.
+        // HAP spec also states that it may request packet times of 20, 30, 40, or 60.
+        // In practice, HAP has been seen to request 20 on LAN and 60 over LTE.
+        // So the RTP timestamp must scale accordingly.
+        // Further investigation indicates that HAP doesn't care about the actual sample rate at all,
+        // that's merely a suggestion. When encoding Opus, it can seemingly be an arbitrary sample rate,
+        // audio will work so long as the rtp timestamps are created properly: which is a construct of the sample rate
+        // HAP requests, and the packet time is respected,
+        // opus 48khz will work just fine.
+        rtp.header.timestamp =
+          (firstTimestamp + audioPacketCount * 180 * audioIntervalScale) %
+          0xffffffff
+        audioPacketCount++
+      }
+
+      // encrypt the packet
+      const encryptedPacket = audioSrtpSession.encrypt(rtp.payload, rtp.header)
+
+      // send the encrypted packet to HomeKit
+      this.audioSplitter
+        .send(encryptedPacket, {
+          port: audioPort,
+          address: targetAddress,
+        })
+        .catch(logError)
+
+      return null
+    })
+  }
+
   async activate(request: StartStreamRequest) {
     let sentVideo = false
     const {
         targetAddress,
-        audio: {
-          port: audioPort,
-          srtp_key: remoteAudioSrtpKey,
-          srtp_salt: remoteAudioSrtpSalt,
-        },
+        audio: { srtp_key: remoteAudioSrtpKey, srtp_salt: remoteAudioSrtpSalt },
         video: { port: videoPort },
       } = this.prepareStreamRequest,
       // use to encrypt Ring video to HomeKit
@@ -201,21 +265,23 @@ class StreamingSessionWrapper {
         '-map',
         '0:a',
 
-        // OPUS specific - it works, but audio is very choppy
-        // '-acodec',
-        // 'libopus',
-        // '-vbr',
-        // 'on',
-        // '-frame_duration',
-        // 20,
-        // '-application',
-        // 'lowdelay',
-
-        // AAC-eld specific
-        '-acodec',
-        'libfdk_aac',
-        '-profile:a',
-        'aac_eld',
+        ...(request.audio.codec === AudioStreamingCodecType.OPUS
+          ? [
+              // OPUS specific - it works, but audio is very choppy
+              '-acodec',
+              'libopus',
+              '-frame_duration',
+              request.audio.packet_time,
+              '-application',
+              'lowdelay',
+            ]
+          : [
+              // AAC-eld specific
+              '-acodec',
+              'libfdk_aac',
+              '-profile:a',
+              'aac_eld',
+            ]),
 
         // Shared options
         '-flags',
@@ -234,11 +300,8 @@ class StreamingSessionWrapper {
         this.audioSsrc,
         '-f',
         'rtp',
-        '-srtp_out_suite',
-        'AES_CM_128_HMAC_SHA1_80',
-        '-srtp_out_params',
-        encodeSrtpOptions(this.audioSrtp),
-        `srtp://${targetAddress}:${audioPort}?pkt_size=188`,
+        `rtp://127.0.0.1:${await this.repacketizeAudioSplitter
+          .portPromise}?pkt_size=188`,
       ],
       video: false,
       output: [],
@@ -272,16 +335,17 @@ class StreamingSessionWrapper {
 
         return null
       }),
-      usingOpus = await this.streamingSession.isUsingOpus,
+      isRingUsingOpus = await this.streamingSession.isUsingOpus,
       returnAudioTranscoder = new ReturnAudioTranscoder({
         prepareStreamRequest: this.prepareStreamRequest,
+        startStreamRequest: request,
         incomingAudioOptions: {
           ssrc: this.audioSsrc,
           rtcpPort: 0, // we don't care about rtcp for incoming audio
         },
         outputArgs: [
           '-acodec',
-          ...(usingOpus
+          ...(isRingUsingOpus
             ? ['libopus', '-ac', 2, '-ar', '48k']
             : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
           '-flags',
@@ -304,12 +368,14 @@ class StreamingSessionWrapper {
       returnAudioTranscodedSplitter.close()
     })
 
+    this.listenForAudioPackets(request)
     await returnAudioTranscoder.start()
     await transcodingPromise
   }
 
   stop() {
     this.audioSplitter.close()
+    this.repacketizeAudioSplitter.close()
     this.videoSplitter.close()
     this.streamingSession.stop()
   }
@@ -339,19 +405,35 @@ export class CameraSource implements CameraStreamingDelegate {
         },
       },
       audio: {
-        codecs: [
-          {
-            type: AudioStreamingCodecType.AAC_ELD,
-            samplerate: AudioStreamingSamplerate.KHZ_16,
-          },
-        ],
+        codecs: this.useOpus
+          ? [
+              {
+                type: AudioStreamingCodecType.OPUS,
+                // required by watch
+                samplerate: AudioStreamingSamplerate.KHZ_8,
+              },
+              {
+                type: AudioStreamingCodecType.OPUS,
+                samplerate: AudioStreamingSamplerate.KHZ_16,
+              },
+              {
+                type: AudioStreamingCodecType.OPUS,
+                samplerate: AudioStreamingSamplerate.KHZ_24,
+              },
+            ]
+          : [
+              {
+                type: AudioStreamingCodecType.AAC_ELD,
+                samplerate: AudioStreamingSamplerate.KHZ_16,
+              },
+            ],
       },
     },
   })
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
 
-  constructor(private ringCamera: RingCamera) {}
+  constructor(private ringCamera: RingCamera, private useOpus = false) {}
 
   private previousLoadSnapshotPromise?: Promise<any>
   async loadSnapshot(imageUuid?: string) {

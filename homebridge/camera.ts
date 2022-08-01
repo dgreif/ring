@@ -9,7 +9,10 @@ import { TargetValueTimer } from './target-value-timer'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
-  private cameraSource = new CameraSource(this.device)
+  private cameraSource = new CameraSource(
+    this.device,
+    this.config.unbridgeCameras
+  )
 
   constructor(
     public readonly device: RingCamera,

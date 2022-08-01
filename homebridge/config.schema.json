@@ -157,6 +157,7 @@
       "title": "Optional Configuration",
       "expandable": true,
       "items": [
+        "unbridgeCameras",
         "alarmOnEntryDelay",
         "hideLightGroups",
         "hideDoorbellSwitch",

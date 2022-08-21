@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [11.1.0](https://github.com/dgreif/ring/compare/v11.0.7...v11.1.0) (2022-08-21)
+
+
+### Features
+
+* **homebridge:** allow cameras to be unbridged ([7302298](https://github.com/dgreif/ring/commit/73022983eed59e6af4bfdf0d8f1ee9d8ee8f6953))
+* **homebridge:** use opus transcoding for unbridge cameras ([e9eb7a4](https://github.com/dgreif/ring/commit/e9eb7a4940ce7d01dee920593af3bdd12e25fa1a))
+
+
+### Bug Fixes
+
+* **homebridge:** add unbridgeCameras option to ui schema ([e97047d](https://github.com/dgreif/ring/commit/e97047df7d959caee95f958a3a6aed5537f93f58))
+* update dependencies ([20584cd](https://github.com/dgreif/ring/commit/20584cdb6fe3d9fa9fd598a1bec612cfe37e3e82))
+* update dependencies ([6f98cdf](https://github.com/dgreif/ring/commit/6f98cdf48895daf3217890b6631a6dbb2ccd340f))
+
 ### [11.0.7](https://github.com/dgreif/ring/compare/v11.0.6...v11.0.7) (2022-07-10)
 
 

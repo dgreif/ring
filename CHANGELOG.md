@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [11.2.0](https://github.com/dgreif/ring/compare/v11.1.0...v11.2.0) (2022-08-27)
+
+
+### Features
+
+* add `lpd_v4` camera model ([efa5491](https://github.com/dgreif/ring/commit/efa5491ff46535d7c04062bc3273609e5a1184d7)), closes [#951](https://github.com/dgreif/ring/issues/951)
+* **homebridge:** allow logs to be disabled with `disableLogs` ([67e02a0](https://github.com/dgreif/ring/commit/67e02a0effdf88f0bcf3e91d231737b52d3727c4)), closes [#906](https://github.com/dgreif/ring/issues/906)
+* **homebridge:** support brightness for alarm base station and keypads ([bbccf1e](https://github.com/dgreif/ring/commit/bbccf1e453041fd88665930fea98a0ca117a6eb4)), closes [#872](https://github.com/dgreif/ring/issues/872)
+
+
+### Bug Fixes
+
+* **homebridge:** hide motion sensor for unequipped bulbs ([3f72cb9](https://github.com/dgreif/ring/commit/3f72cb9ffb3bc4b3a3f61ad9a0d05ca59054df0c)), closes [#1001](https://github.com/dgreif/ring/issues/1001)
+* **homebridge:** maintain night mode across bridge reboots ([6610445](https://github.com/dgreif/ring/commit/6610445e4b46cc682ca4c584793157d8d182ea8d)), closes [#908](https://github.com/dgreif/ring/issues/908)
+
 ## [11.1.0](https://github.com/dgreif/ring/compare/v11.0.7...v11.1.0) (2022-08-21)
 
 

@@ -78,6 +78,7 @@ export enum RingCameraKind {
   doorbell_graham_cracker = 'doorbell_graham_cracker',
   lpd_v1 = 'lpd_v1',
   lpd_v2 = 'lpd_v2',
+  lpd_v4 = 'lpd_v4',
   jbox_v1 = 'jbox_v1',
   stickup_cam = 'stickup_cam',
   stickup_cam_v3 = 'stickup_cam_v3',
@@ -108,6 +109,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbell_graham_cracker: 'Doorbell Wired',
   lpd_v1: 'Doorbell Pro',
   lpd_v2: 'Doorbell Pro',
+  lpd_v4: 'Doorbell', // not sure of the exact model for this version
   jbox_v1: 'Doorbell Elite',
   stickup_cam: 'Stick Up Cam',
   stickup_cam_v3: 'Stick Up Cam',

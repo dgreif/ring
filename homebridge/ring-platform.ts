@@ -1,7 +1,6 @@
 import {
   RingApi,
   RingCamera,
-  RingCameraKind,
   RingChime,
   RingDevice,
   RingDeviceCategory,
@@ -16,9 +15,8 @@ import {
   PlatformConfig,
 } from 'homebridge'
 import { SecurityPanel } from './security-panel'
-import { BaseStation } from './base-station'
 import { Chime } from './chime'
-import { Keypad } from './keypad'
+import { BrightnessOnly } from './brightness-only'
 import { ContactSensor } from './contact-sensor'
 import { MotionSensor } from './motion-sensor'
 import { Lock } from './lock'
@@ -50,11 +48,6 @@ import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch'
 import { generateMacAddress } from './util'
 
 const debug = __filename.includes('release-homebridge'),
-  unsupportedDeviceTypes: (
-    | RingDeviceType
-    | RingCameraKind
-    | RingChime['deviceType']
-  )[] = [RingDeviceType.BaseStation, RingDeviceType.Keypad],
   ignoreHiddenDeviceTypes: string[] = [
     RingDeviceType.RingNetAdapter,
     RingDeviceType.ZigbeeAdapter,
@@ -94,9 +87,9 @@ function getAccessoryClass(
     case RingDeviceType.SecurityPanel:
       return SecurityPanel
     case RingDeviceType.BaseStation:
-      return BaseStation
+    case RingDeviceType.BaseStationPro:
     case RingDeviceType.Keypad:
-      return Keypad
+      return BrightnessOnly
     case RingDeviceType.SmokeAlarm:
       return SmokeAlarm
     case RingDeviceType.CoAlarm:
@@ -291,8 +284,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
               !AccessoryClass ||
               (config.hideLightGroups &&
                 deviceType === RingDeviceType.BeamsLightGroupSwitch) ||
-              (config.hideUnsupportedServices &&
-                unsupportedDeviceTypes.includes(deviceType as any)) ||
               hideDeviceIds.includes(uuid) ||
               (onlyDeviceTypes && !onlyDeviceTypes.includes(deviceType))
             ) {

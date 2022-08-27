@@ -125,9 +125,9 @@ export abstract class BaseDataAccessory<
 
         return targetLevel === undefined ? newLevel : targetLevel
       },
-      setValue: (volume: number) => {
-        targetLevel = volume
-        setValue(volume)
+      setValue: (level: number) => {
+        targetLevel = level
+        setValue(level)
       },
       setValueDebounceTime: 500,
       requestUpdate,

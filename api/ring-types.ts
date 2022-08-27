@@ -3,6 +3,7 @@ type Firmware = string | 'Up To Date'
 // eslint-disable-next-line no-shadow
 export enum RingDeviceType {
   BaseStation = 'hub.redsky',
+  BaseStationPro = 'hub.kili',
   Keypad = 'security-keypad',
   SecurityPanel = 'security-panel',
   ContactSensor = 'sensor.contact',
@@ -247,6 +248,8 @@ export interface RingDeviceData {
   }[]
   // switch.multilevel.beam
   motionSensorEnabled?: boolean
+  // security-keypad
+  brightness?: number // 0 - 1
 }
 
 export const deviceTypesWithVolume = [

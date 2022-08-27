@@ -461,7 +461,13 @@ export interface CameraData {
     people_detection_eligible: false
     pir_settings?: any
     pir_motion_zones?: number[]
-    floodlight_settings?: any
+    floodlight_settings?: {
+      priority: number
+      duration: number
+      brightness?: number
+      always_on: boolean
+      always_on_duration: null | number
+    }
     light_schedule_settings?: any
     luma_light_threshold?: number
     live_view_disabled?: boolean // set by modes

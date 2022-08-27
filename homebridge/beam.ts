@@ -44,7 +44,10 @@ export class Beam extends BaseDeviceAccessory {
       })
     }
 
-    if (device.data.motionStatus !== undefined) {
+    if (
+      device.data.motionStatus !== undefined &&
+      device.data.motionSensorEnabled !== false
+    ) {
       this.registerCharacteristic({
         characteristicType: hap.Characteristic.MotionDetected,
         serviceType: MotionSensor,

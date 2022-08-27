@@ -245,6 +245,8 @@ export interface RingDeviceData {
     rel: string
     zid: string
   }[]
+  // switch.multilevel.beam
+  motionSensorEnabled?: boolean
 }
 
 export const deviceTypesWithVolume = [

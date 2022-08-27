@@ -2,11 +2,10 @@ import { Location, LocationMode } from '../api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { logError } from '../api/util'
+import { logError, logInfo } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { firstValueFrom, of } from 'rxjs'
 import {
-  Logging,
   PlatformAccessory,
   CharacteristicEventTypes,
   CharacteristicGetCallback,
@@ -38,7 +37,6 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
   constructor(
     private readonly location: Location,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -128,13 +126,13 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         this.targetState = state
 
         if (state === State.AWAY_ARM) {
-          this.logger.info(`Setting ${this.location.name} Mode to away`)
+          logInfo(`Setting ${this.location.name} Mode to away`)
           return this.location.setLocationMode('away')
         } else if (state === State.DISARM) {
-          this.logger.info(`Setting ${this.location.name} Mode to disarmed`)
+          logInfo(`Setting ${this.location.name} Mode to disarmed`)
           return this.location.setLocationMode('disarmed')
         }
-        this.logger.info(`Setting ${this.location.name} Mode to home`)
+        logInfo(`Setting ${this.location.name} Mode to home`)
         return this.location.setLocationMode('home')
       }
     )

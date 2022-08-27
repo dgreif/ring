@@ -2,13 +2,13 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 export class Outlet extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -30,7 +30,7 @@ export class Outlet extends BaseDeviceAccessory {
   }
 
   setOnState(on: boolean) {
-    this.logger.info(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
+    logInfo(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
 
     return this.device.setInfo({ device: { v1: { on } } })
   }

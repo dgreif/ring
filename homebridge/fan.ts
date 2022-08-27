@@ -2,13 +2,13 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 export class Fan extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -36,13 +36,13 @@ export class Fan extends BaseDeviceAccessory {
   }
 
   setOnState(on: boolean) {
-    this.logger.info(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
+    logInfo(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
 
     return this.device.setInfo({ device: { v1: { on } } })
   }
 
   setLevelState(level: number) {
-    this.logger.info(`Setting speed of ${this.device.name} to ${level}%`)
+    logInfo(`Setting speed of ${this.device.name} to ${level}%`)
 
     return this.device.setInfo({
       device: { v1: { level: level / 100 } },

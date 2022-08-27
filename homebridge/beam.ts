@@ -2,7 +2,8 @@ import { RingDevice, RingDeviceType } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDeviceAccessory } from './base-device-accessory'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 export class Beam extends BaseDeviceAccessory {
   isLightGroup =
@@ -12,7 +13,6 @@ export class Beam extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -58,7 +58,7 @@ export class Beam extends BaseDeviceAccessory {
   }
 
   setOnState(on: boolean) {
-    this.logger.info(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
+    logInfo(`Turning ${this.device.name} ${on ? 'On' : 'Off'}`)
 
     const { beamDurationSeconds } = this.config,
       duration = beamDurationSeconds
@@ -75,7 +75,7 @@ export class Beam extends BaseDeviceAccessory {
   }
 
   setLevelState(level: number) {
-    this.logger.info(`Setting brightness of ${this.device.name} to ${level}%`)
+    logInfo(`Setting brightness of ${this.device.name} to ${level}%`)
 
     return this.device.setInfo({
       device: { v1: { level: level / 100 } },

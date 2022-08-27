@@ -4,7 +4,6 @@ import { firstValueFrom, Observable } from 'rxjs'
 import { RingPlatformConfig } from './config'
 import {
   Characteristic,
-  Logging,
   PlatformAccessory,
   Service,
   CharacteristicEventTypes,
@@ -13,6 +12,7 @@ import {
   CharacteristicSetCallback,
   WithUUID,
 } from 'homebridge'
+import { logError, logInfo } from '../api/util'
 
 function isServiceInstance(
   serviceType: WithUUID<typeof Service> | Service
@@ -26,7 +26,6 @@ export type ServiceType = WithUUID<typeof Service> | Service
 export abstract class BaseAccessory<T extends { name: string }> {
   abstract readonly device: T
   abstract readonly accessory: PlatformAccessory
-  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
   private servicesInUse: Service[] = []
 
@@ -125,7 +124,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
           callback: CharacteristicSetCallback
         ) => {
           Promise.resolve(setValue(newValue as U)).catch((e) => {
-            this.logger.error(e)
+            logError(e)
           })
           callback()
         }
@@ -144,7 +143,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
         !this.servicesInUse.includes(service) &&
         !safeServiceUUIDs.includes(service.UUID)
       ) {
-        this.logger.info(
+        logInfo(
           'Pruning unused service',
           service.UUID,
           service.displayName || service.name,

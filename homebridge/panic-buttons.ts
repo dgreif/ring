@@ -2,7 +2,8 @@ import { RingDevice, RingDeviceData, AlarmState } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDataAccessory } from './base-data-accessory'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 const burglarStates: AlarmState[] = [
     'burglar-alarm',
@@ -26,7 +27,6 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -42,11 +42,11 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
       getValue: (data) => matchesAnyAlarmState(data, burglarStates),
       setValue: (on) => {
         if (on) {
-          this.logger.info(`Burglar Alarm activated for ${locationName}`)
+          logInfo(`Burglar Alarm activated for ${locationName}`)
           return this.device.location.triggerBurglarAlarm()
         }
 
-        this.logger.info(`Burglar Alarm turned off for ${locationName}`)
+        logInfo(`Burglar Alarm turned off for ${locationName}`)
         return this.device.location.setAlarmMode('none')
       },
     })
@@ -59,11 +59,11 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
       getValue: (data) => matchesAnyAlarmState(data, fireStates),
       setValue: (on) => {
         if (on) {
-          this.logger.info(`Fire Alarm activated for ${locationName}`)
+          logInfo(`Fire Alarm activated for ${locationName}`)
           return this.device.location.triggerFireAlarm()
         }
 
-        this.logger.info(`Fire Alarm turned off for ${locationName}`)
+        logInfo(`Fire Alarm turned off for ${locationName}`)
         return this.device.location.setAlarmMode('none')
       },
     })

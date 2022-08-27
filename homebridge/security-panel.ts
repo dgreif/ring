@@ -9,7 +9,8 @@ import {
 } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logError, logInfo } from '../api/util'
 
 function isValidNightModeBypass(mode?: AlarmMode) {
   return mode && (mode === 'all' || mode === 'some')
@@ -23,7 +24,6 @@ export class SecurityPanel extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -154,17 +154,17 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
     try {
       if (state === State.AWAY_ARM) {
-        this.logger.info(`Arming (Away) ${this.device.name}${bypassLog}`)
+        logInfo(`Arming (Away) ${this.device.name}${bypassLog}`)
         await location.armAway(bypassSensorZids)
       } else if (state === State.DISARM) {
-        this.logger.info(`Disarming ${this.device.name}`)
+        logInfo(`Disarming ${this.device.name}`)
         await location.disarm()
       } else {
-        this.logger.info(`Arming (Home) ${this.device.name}${bypassLog}`)
+        logInfo(`Arming (Home) ${this.device.name}${bypassLog}`)
         await location.armHome(bypassSensorZids)
       }
     } catch (e: any) {
-      this.logger.error(e)
+      logError(e)
       this.getService(hap.Service.SecuritySystem)
         .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
         .updateValue(this.getTargetState(this.device.data))

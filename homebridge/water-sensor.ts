@@ -3,13 +3,13 @@ import { RingDevice } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { distinctUntilChanged, filter, map } from 'rxjs/operators'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 export class WaterSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -36,7 +36,7 @@ export class WaterSensor extends BaseDeviceAccessory {
     onWaterDetected
       .pipe(filter((faulted) => Boolean(faulted)))
       .subscribe(() => {
-        this.logger.info(device.name + ' Detected Water')
+        logInfo(device.name + ' Detected Water')
       })
   }
 }

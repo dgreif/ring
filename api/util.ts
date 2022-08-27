@@ -9,7 +9,7 @@ const debugLogger = debug('ring'),
   uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739d'
 
 interface Logger {
-  logInfo: (message: string) => void
+  logInfo: (...message: string[]) => void
   logError: (message: string) => void
 }
 
@@ -35,8 +35,8 @@ export function logDebug(message: any) {
   }
 }
 
-export function logInfo(message: any) {
-  logger.logInfo(message)
+export function logInfo(...message: any[]) {
+  logger.logInfo(...message)
 }
 
 export function logError(message: any) {

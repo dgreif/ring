@@ -3,13 +3,13 @@ import { RingDevice } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { distinctUntilChanged, filter, map } from 'rxjs/operators'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
+import { logInfo } from '../api/util'
 
 export class FloodFreezeSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -49,7 +49,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
     onFloodDetected
       .pipe(filter((faulted) => Boolean(faulted)))
       .subscribe(() => {
-        this.logger.info(device.name + ' Detected Flooding')
+        logInfo(device.name + ' Detected Flooding')
       })
 
     this.initSensorService(freezeService)
@@ -61,7 +61,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
     onFreezeDetected
       .pipe(filter((faulted) => Boolean(faulted)))
       .subscribe(() => {
-        this.logger.info(device.name + ' Detected Freezing')
+        logInfo(device.name + ' Detected Freezing')
       })
   }
 }

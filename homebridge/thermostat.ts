@@ -1,9 +1,10 @@
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
 import { Observable, combineLatest } from 'rxjs'
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 
 import { RingDevice } from '../api'
 import { RingDeviceType, ThermostatMode } from '../api/ring-types'
+import { logDebug, logError, logInfo } from '../api/util'
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingPlatformConfig } from './config'
 import { hap } from './hap'
@@ -14,7 +15,6 @@ export class Thermostat extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -31,12 +31,12 @@ export class Thermostat extends BaseDeviceAccessory {
         if (!temperatureSensor) {
           return []
         }
-        this.logger.debug(
+        logDebug(
           `Discovered a component temperature sensor for ${this.device.name}`
         )
         return temperatureSensor.onData.pipe(
           map(({ celsius: temperature }) => {
-            this.logger.debug(
+            logDebug(
               `Component temperature sensor for ${this.device.name} reported ${temperature} degrees`
             )
             return temperature
@@ -59,7 +59,7 @@ export class Thermostat extends BaseDeviceAccessory {
           }
 
           if (!temperature || !setPoint) {
-            this.logger.error(
+            logError(
               `Could not determine 'CurrentHeatingCoolingState' for ${this.device.name} given temperature: ${temperature}, set point: ${setPoint} and mode: ${mode}. Reporting 'off' state as a fallback.`
             )
             return Characteristic.CurrentHeatingCoolingState.OFF
@@ -126,12 +126,12 @@ export class Thermostat extends BaseDeviceAccessory {
           }
         })()
         if (!mode) {
-          this.logger.error(
+          logError(
             `Couldn’t match ${targetHeatingCoolingState} to a recognized mode string.`
           )
           return
         }
-        this.logger.info(`Setting ${this.device.name} mode to ${mode}`)
+        logInfo(`Setting ${this.device.name} mode to ${mode}`)
 
         return this.device.setInfo({ device: { v1: { mode } } })
       },
@@ -154,7 +154,7 @@ export class Thermostat extends BaseDeviceAccessory {
       onValue: this.onTemperature.pipe(
         map((temperature) => {
           if (!temperature) {
-            this.logger.error(
+            logError(
               `Could not determine 'CurrentTemperature' for ${this.device.name} given temperature: ${temperature}. Returning 22 degrees celsius as a fallback.`
             )
             return 22
@@ -173,9 +173,7 @@ export class Thermostat extends BaseDeviceAccessory {
         return setPoint
       },
       setValue: (setPoint: number) => {
-        this.logger.info(
-          `Setting ${this.device.name} target temperature to ${setPoint}`
-        )
+        logInfo(`Setting ${this.device.name} target temperature to ${setPoint}`)
 
         // Documentation: https://developers.homebridge.io/#/characteristic/TargetTemperature
         // 'Characteristic.TargetTemperature' has a valid range from 10 to 38 degrees celsius,
@@ -184,7 +182,7 @@ export class Thermostat extends BaseDeviceAccessory {
           setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
 
         if (setPoint < setPointMin || setPoint > setPointMax) {
-          this.logger.error(
+          logError(
             `Ignoring request to set ${this.device.name} target temperature to ${setPoint}. Target temperature must be between ${setPointMin} and ${setPointMax}.`
           )
           return
@@ -199,7 +197,7 @@ export class Thermostat extends BaseDeviceAccessory {
       // but devices may support a different range. When limits differ, accept the more strict.
       const setPointMin = Math.max(this.device.data.setPointMin || 10, 10),
         setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
-      this.logger.debug(
+      logDebug(
         `Setting ${this.device.name} target temperature range to ${setPointMin}–${setPointMax}`
       )
       this.getService(Service.Thermostat)

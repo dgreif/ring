@@ -2,7 +2,7 @@ import { RingDevice, RingDeviceData } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDataAccessory } from './base-data-accessory'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
 import { ServiceType } from './base-accessory'
 
 function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
@@ -56,7 +56,6 @@ function hasBatteryStatus({ batteryStatus }: RingDeviceData) {
 export abstract class BaseDeviceAccessory extends BaseDataAccessory<RingDevice> {
   abstract readonly device: RingDevice
   abstract readonly accessory: PlatformAccessory
-  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
 
   initBase() {

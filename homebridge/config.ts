@@ -22,6 +22,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
   unbridgeCameras?: boolean
+  disableLogs?: boolean
 }
 
 export function updateHomebridgeConfig(

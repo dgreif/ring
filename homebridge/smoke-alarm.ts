@@ -2,13 +2,12 @@ import { BaseDeviceAccessory } from './base-device-accessory'
 import { RingDevice } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
 
 export class SmokeAlarm extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()

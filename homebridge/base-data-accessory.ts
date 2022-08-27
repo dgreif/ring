@@ -8,20 +8,19 @@ import { RingCamera, RingChime, RingDevice } from '../api'
 import { RingPlatformConfig } from './config'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import {
-  Logging,
   PlatformAccessory,
   CharacteristicValue,
   CharacteristicSetCallback,
   CharacteristicGetCallback,
   CharacteristicEventTypes,
 } from 'homebridge'
+import { logError } from '../api/util'
 
 export abstract class BaseDataAccessory<
   T extends RingDevice | RingCamera | RingChime
 > extends BaseAccessory<T> {
   abstract readonly device: T
   abstract readonly accessory: PlatformAccessory
-  abstract readonly logger: Logging
   abstract readonly config: RingPlatformConfig
 
   registerCharacteristic({
@@ -85,9 +84,7 @@ export abstract class BaseDataAccessory<
           newValue: CharacteristicValue,
           callback: CharacteristicSetCallback
         ) => {
-          Promise.resolve(setValue(newValue)).catch((e) => {
-            this.logger.error(e)
-          })
+          Promise.resolve(setValue(newValue)).catch(logError)
           callback()
         }
       )

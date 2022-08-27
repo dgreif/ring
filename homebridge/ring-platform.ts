@@ -36,7 +36,7 @@ import { Switch } from './switch'
 import { Camera } from './camera'
 import { PanicButtons } from './panic-buttons'
 import { RefreshTokenAuth } from '../api/rest-client'
-import { useLogger } from '../api/util'
+import { logInfo, useLogger } from '../api/util'
 import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
@@ -149,17 +149,19 @@ export class RingPlatform implements DynamicPlatformPlugin {
     public config: PlatformConfig & RingPlatformConfig & RefreshTokenAuth,
     public api: API
   ) {
-    useLogger({
-      logInfo(message) {
-        log.info(message)
-      },
-      logError(message) {
-        log.error(message)
-      },
-    })
+    if (!config.disableLogs) {
+      useLogger({
+        logInfo(message) {
+          log.info(message)
+        },
+        logError(message) {
+          log.error(message)
+        },
+      })
+    }
 
     if (!config) {
-      this.log.info('No configuration found for platform Ring')
+      logInfo('No configuration found for platform Ring')
       return
     }
 
@@ -184,7 +186,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
   }
 
   configureAccessory(accessory: PlatformAccessory) {
-    this.log.info(
+    logInfo(
       `Configuring cached accessory ${accessory.UUID} ${accessory.displayName}`
     )
     this.log.debug('%j', accessory)
@@ -205,10 +207,10 @@ export class RingPlatform implements DynamicPlatformPlugin {
       externalAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
 
-    this.log.info('Found the following locations:')
+    logInfo('Found the following locations:')
 
     locations.forEach((location) => {
-      this.log.info(`  locationId: ${location.id} - ${location.name}`)
+      logInfo(`  locationId: ${location.id} - ${location.name}`)
     })
 
     await Promise.all(
@@ -271,7 +273,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
           })
         }
 
-        this.log.info(
+        logInfo(
           `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`
         )
         hapDevices.forEach(
@@ -288,9 +290,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
               (onlyDeviceTypes && !onlyDeviceTypes.includes(deviceType))
             ) {
               if (!ignoreHiddenDeviceTypes.includes(deviceType)) {
-                this.log.info(
-                  `Hidden accessory ${uuid} ${deviceType} ${displayName}`
-                )
+                logInfo(`Hidden accessory ${uuid} ${deviceType} ${displayName}`)
               }
               return
             }
@@ -316,12 +316,12 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 )
 
                 if (isExternalCamera) {
-                  this.log.info(
+                  logInfo(
                     `Configured camera ${uuid} ${deviceType} ${displayName}`
                   )
                   externalAccessories.push(accessory)
                 } else {
-                  this.log.info(
+                  logInfo(
                     `Adding new accessory ${uuid} ${deviceType} ${displayName}`
                   )
                   platformAccessories.push(accessory)
@@ -345,7 +345,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
               accessory = new AccessoryClass(
                 device as any,
                 homebridgeAccessory,
-                this.log,
                 config
               )
             accessory.initBase()
@@ -374,7 +373,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       .map((id) => this.homebridgeAccessories[id])
 
     staleAccessories.forEach((staleAccessory) => {
-      this.log.info(
+      logInfo(
         `Removing stale cached accessory ${staleAccessory.UUID} ${staleAccessory.displayName}`
       )
     })

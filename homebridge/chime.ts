@@ -1,7 +1,7 @@
 import { RingChime } from '../api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
 import { logInfo } from '../api/util'
 
@@ -11,7 +11,6 @@ export class Chime extends BaseDataAccessory<RingChime> {
   constructor(
     public readonly device: RingChime,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()

@@ -4,8 +4,9 @@ import { RingCamera } from '../api'
 import { BaseDataAccessory } from './base-data-accessory'
 import { map, mapTo, switchMap } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
-import { Logging, PlatformAccessory } from 'homebridge'
+import { PlatformAccessory } from 'homebridge'
 import { TargetValueTimer } from './target-value-timer'
+import { logError, logInfo } from '../api/util'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
@@ -17,7 +18,6 @@ export class Camera extends BaseDataAccessory<RingCamera> {
   constructor(
     public readonly device: RingCamera,
     public readonly accessory: PlatformAccessory,
-    public readonly logger: Logging,
     public readonly config: RingPlatformConfig
   ) {
     super()
@@ -25,7 +25,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     if (!hap.CameraController) {
       const error =
         'HAP CameraController not found.  Please make sure you are on homebridge version 1.0.0 or newer'
-      logger.error(error)
+      logError(error)
       throw new Error(error)
     }
 
@@ -206,11 +206,11 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
     if (this.device.operatingOnBattery && !imageUuid) {
       // battery cameras cannot fetch a new snapshot while recording is in progress
-      this.logger.info(this.device.name + ' ' + eventDescription)
+      logInfo(this.device.name + ' ' + eventDescription)
       return characteristicValue
     }
 
-    this.logger.info(
+    logInfo(
       this.device.name +
         ` ${eventDescription}. Loading snapshot before sending event to HomeKit`
     )
@@ -218,7 +218,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     try {
       await this.cameraSource.loadSnapshot(imageUuid)
     } catch (e) {
-      this.logger.info(
+      logInfo(
         this.device.name +
           ' Failed to load snapshot.  Sending event to HomeKit without new snapshot'
       )

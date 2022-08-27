@@ -84,12 +84,11 @@ export class SecurityPanel extends BaseDeviceAccessory {
     } = hap
 
     if (mode === this.getTargetNightMode()) {
-      setTimeout(() => {
-        // clear in next tick so that Target and Current state both get night mode
-        this.targetingNightMode = false
-      })
       return State.NIGHT_ARM
     }
+
+    // current mode does not match night mode target, so we are no longer targeting night mode
+    this.targetingNightMode = false
 
     switch (mode) {
       case 'all':
@@ -113,7 +112,12 @@ export class SecurityPanel extends BaseDeviceAccessory {
     return this.getTargetState(data)
   }
 
-  private targetingNightMode = false
+  get targetingNightMode() {
+    return this.accessory.context.targetingNightMode
+  }
+  set targetingNightMode(value: boolean) {
+    this.accessory.context.targetingNightMode = value
+  }
 
   async setTargetState(state: any) {
     const {

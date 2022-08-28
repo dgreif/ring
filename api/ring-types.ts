@@ -109,7 +109,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbell_graham_cracker: 'Doorbell Wired',
   lpd_v1: 'Doorbell Pro',
   lpd_v2: 'Doorbell Pro',
-  lpd_v4: 'Doorbell', // not sure of the exact model for this version
+  lpd_v4: 'Doorbell Pro 2',
   jbox_v1: 'Doorbell Elite',
   stickup_cam: 'Stick Up Cam',
   stickup_cam_v3: 'Stick Up Cam',

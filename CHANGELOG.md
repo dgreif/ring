@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.2.1](https://github.com/dgreif/ring/compare/v11.2.0...v11.2.1) (2022-08-28)
+
+
+### Bug Fixes
+
+* **homebridge:** prevent double ding notifications ([9b63104](https://github.com/dgreif/ring/commit/9b631046ac69f256cf129eaa92e388cce1228636)), closes [#944](https://github.com/dgreif/ring/issues/944)
+* use correct name for lpd_v4 camera ([2425a14](https://github.com/dgreif/ring/commit/2425a1496faa66f3a6080d174b2628d97bf96da1)), closes [#951](https://github.com/dgreif/ring/issues/951)
+
 ## [11.2.0](https://github.com/dgreif/ring/compare/v11.1.0...v11.2.0) (2022-08-27)
 
 

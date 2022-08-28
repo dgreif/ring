@@ -2,7 +2,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { RingCamera } from '../api'
 import { BaseDataAccessory } from './base-data-accessory'
-import { map, mapTo, switchMap } from 'rxjs/operators'
+import { map, mapTo, switchMap, throttleTime } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { PlatformAccessory } from 'homebridge'
 import { TargetValueTimer } from './target-value-timer'
@@ -67,6 +67,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         characteristicType: Characteristic.ProgrammableSwitchEvent,
         serviceType: Service.Doorbell,
         onValue: device.onDoorbellPressed.pipe(
+          throttleTime(15000),
           switchMap(() => {
             return this.loadSnapshotForEvent(
               'Doorbell Pressed',

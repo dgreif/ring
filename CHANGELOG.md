@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [11.3.0-beta.0](https://github.com/dgreif/ring/compare/v11.2.1...v11.3.0-beta.0) (2022-10-02)
+
+
+### Features
+
+* allow node 18 ([b62bcb3](https://github.com/dgreif/ring/commit/b62bcb39855152dd0207d117cdec5830d04fe508)), closes [#1048](https://github.com/dgreif/ring/issues/1048)
+
+
+### Bug Fixes
+
+* **homebridge:** prevent undefined brightness for alarms ([08aa0ea](https://github.com/dgreif/ring/commit/08aa0eaf13b790e3622016e751459126ee05bfe7)), closes [#1057](https://github.com/dgreif/ring/issues/1057)
+* **homebridge:** update homebridge ui deps ([742c316](https://github.com/dgreif/ring/commit/742c316e26d246580c57e251bdb06ea3a497e515))
+* update dependencies ([35f1932](https://github.com/dgreif/ring/commit/35f19320ab86ca53c3046fd79b013769c2b9a12a))
+
 ### [11.2.1](https://github.com/dgreif/ring/compare/v11.2.0...v11.2.1) (2022-08-28)
 
 

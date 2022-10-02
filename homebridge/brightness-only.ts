@@ -16,13 +16,16 @@ export class BrightnessOnly extends BaseDeviceAccessory {
     const { Characteristic, Service } = hap,
       { context } = accessory
 
-    if ('brightness' in device.data && !isNaN(device.data.brightness!)) {
+    if (
+      device.data.brightness !== undefined &&
+      !isNaN(device.data.brightness)
+    ) {
       this.registerLevelCharacteristic({
         characteristicType: Characteristic.Brightness,
         serviceType: Service.Lightbulb,
         getValue: (data) => {
           if (!data.brightness || isNaN(data.brightness)) {
-            return undefined
+            return 0
           }
 
           // store the brightness so that we can set it again if light is turned off then back on

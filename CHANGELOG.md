@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [11.3.1](https://github.com/dgreif/ring/compare/v11.3.0...v11.3.1) (2022-10-15)
+
+
+### Bug Fixes
+
+* update dependencies ([1c8f4f1](https://github.com/dgreif/ring/commit/1c8f4f1a12e9c77c8384477cd0b45e2b0a10aba4))
+
 ## [11.3.0](https://github.com/dgreif/ring/compare/v11.2.1...v11.3.0) (2022-10-02)
 
 

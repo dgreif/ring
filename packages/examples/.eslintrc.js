@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
-  env: {
-    browser: true,
-  },
   extends: ['shared'],
+  rules: {
+    'no-console': 'off',
+  },
 }

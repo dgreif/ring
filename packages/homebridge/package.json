@@ -20,6 +20,37 @@
     "category-hubs",
     "category-outdoor"
   ],
-  "scripts": {},
-  "homepage": "https://github.com/dgreif/ring/tree/master/homebridge#homebridge-ring"
+  "scripts": {
+    "build": "rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public",
+    "lint": "eslint . --ext .ts"
+  },
+  "homepage": "https://github.com/dgreif/ring/tree/master/homebridge#homebridge-ring",
+  "dependencies": {
+    "ring-client-api": "*"
+  },
+  "devDependencies": {
+    "@swc-node/register": "^1.5.4",
+    "@types/debug": "4.1.7",
+    "@types/jest": "29.2.2",
+    "@types/node": "18.11.9",
+    "@types/uuid": "8.3.4",
+    "@types/ws": "^8.5.3",
+    "@typescript-eslint/eslint-plugin": "5.42.0",
+    "@typescript-eslint/parser": "5.42.0",
+    "config": "*",
+    "dotenv": "16.0.3",
+    "esbuild": "^0.15.13",
+    "eslint-config-shared": "*",
+    "express": "4.18.2",
+    "homebridge": "1.5.1",
+    "homebridge-ui": "*",
+    "jest": "29.2.2",
+    "prettier": "2.7.1",
+    "reflect-metadata": "0.1.13",
+    "rimraf": "3.0.2",
+    "standard-version": "9.5.0",
+    "ts-jest": "29.0.3",
+    "tsconfig": "*",
+    "typescript": "4.8.4"
+  }
 }

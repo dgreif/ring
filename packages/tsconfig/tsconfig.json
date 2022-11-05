@@ -10,11 +10,5 @@
     "esModuleInterop": true,
     "allowJs": true,
     "strict": true
-  },
-  "exclude": [
-    "public",
-    "release-api",
-    "release-homebridge",
-    "homebridge-ui"
-  ]
+  }
 }

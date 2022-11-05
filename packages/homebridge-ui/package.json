@@ -11,15 +11,17 @@
     "@types/node": "18.7.23",
     "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
+    "eslint-config-shared": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "tsconfig": "*",
     "typescript": "4.8.4"
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",
-    "build": "react-scripts build && rm -rf ../lib/homebridge-ui/public && mv ./build ../release-homebridge/lib/homebridge/homebridge-ui/public",
-    "test": "react-scripts test"
+    "build": "react-scripts build",
+    "lint": "eslint . --ext=.js,.ts,.tsx"
   },
   "eslintConfig": {
     "extends": [

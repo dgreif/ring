@@ -1,4 +1,4 @@
-import { getBatteryLevel } from '../../api'
+import { getBatteryLevel } from '../api'
 
 describe('Ring Camera', () => {
   describe('battery level', () => {

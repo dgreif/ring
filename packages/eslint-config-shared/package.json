@@ -1,0 +1,11 @@
+{
+  "name": "eslint-config-shared",
+  "main": "eslint-config-shared.js",
+  "dependencies": {
+    "eslint": "8.26.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-jest": "27.1.4",
+    "eslint-plugin-prettier": "4.2.1",
+    "tsconfig": "*"
+  }
+}

@@ -1,4 +1,4 @@
-import { getBatteryLevel } from '../api'
+import { getBatteryLevel } from 'ring-client-api'
 
 describe('Ring Camera', () => {
   describe('battery level', () => {

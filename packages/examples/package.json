@@ -1,0 +1,11 @@
+{
+  "name": "examples",
+  "scripts": {
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "eslint-config-shared": "*",
+    "ring-client-api": "*",
+    "tsconfig": "*"
+  }
+}

@@ -8,15 +8,12 @@
     "ring-device-data-cli": "ring-device-data-cli.js"
   },
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "start": "concurrently -c yellow,blue --kill-others \"npm:hb\" \"npm:watch:ui\"",
     "watch:ui": "npm start --prefix homebridge-ui",
+    "test": "jest",
     "watch:tests": "jest --watch",
-    "buildxx": "rm -rf lib && tsc --declaration",
+    "lint": "eslint . --ext .ts",
+    "build": "rm -rf lib && tsc --declaration",
     "build-quick": "rm -rf lib && esbuild ./{api,examples,homebridge}/*.ts ./api/streaming/*.ts --target=es2017 --format=cjs --outdir=lib",
     "example": "node -r @swc-node/register ./examples/example.ts",
     "api-example": "node -r @swc-node/register ./examples/api-example.ts",
@@ -61,16 +58,16 @@
     "@eneris/push-receiver": "^3.1.2",
     "@homebridge/camera-utils": "^2.2.0",
     "@homebridge/plugin-ui-utils": "^0.0.19",
+    "werift": "0.17.0",
     "@types/socket.io-client": "1.4.36",
     "colors": "^1.4.0",
     "debug": "^4.3.4",
     "got": "^11.8.5",
     "rxjs": "^7.5.7",
-    "socket.io-client": "^2.5.0",
-    "systeminformation": "^5.12.14",
+    "socket.io-client": "^4.5.3",
+    "systeminformation": "^5.12.12",
     "uuid": "^9.0.0",
-    "werift": "^0.17.0",
-    "ws": "^8.11.0"
+    "ws": "^8.10.0"
   },
   "devDependencies": {
     "@swc-node/register": "^1.5.4",
@@ -79,21 +76,21 @@
     "@types/node": "18.11.9",
     "@types/uuid": "8.3.4",
     "@types/ws": "^8.5.3",
-    "@typescript-eslint/eslint-plugin": "5.42.1",
-    "@typescript-eslint/parser": "5.42.1",
+    "@typescript-eslint/eslint-plugin": "5.42.0",
+    "@typescript-eslint/parser": "5.42.0",
     "concurrently": "^7.5.0",
     "conventional-github-releaser": "3.1.5",
     "dotenv": "16.0.3",
     "esbuild": "^0.15.13",
+    "eslint-config-shared": "*",
     "express": "4.18.2",
     "homebridge": "1.5.1",
-    "jest": "29.3.1",
+    "jest": "29.2.2",
     "prettier": "2.7.1",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "standard-version": "9.5.0",
     "ts-jest": "29.0.3",
-    "turbo": "^1.6.3",
     "typescript": "4.8.4"
   },
   "engines": {
@@ -115,6 +112,6 @@
     }
   ],
   "workspaces": [
-    "packages/*"
+    "homebridge-ui"
   ]
 }

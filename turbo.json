@@ -12,6 +12,9 @@
     },
     "dev": {
       "cache": false
+    },
+    "homebridge-local": {
+      "dependsOn": ["^build"]
     }
   }
 }

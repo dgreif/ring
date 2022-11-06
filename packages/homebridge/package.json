@@ -1,5 +1,6 @@
 {
   "name": "homebridge-ring",
+  "version": "11.3.1",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/homebridge/index.js",
   "keywords": [
@@ -21,12 +22,12 @@
     "category-outdoor"
   ],
   "scripts": {
-    "build": "rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public",
+    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public",
     "lint": "eslint . --ext .ts"
   },
   "homepage": "https://github.com/dgreif/ring/tree/master/homebridge#homebridge-ring",
   "dependencies": {
-    "ring-client-api": "*"
+    "ring-client-api": "11.3.1"
   },
   "devDependencies": {
     "@swc-node/register": "^1.5.4",

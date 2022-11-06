@@ -2,10 +2,10 @@
   "name": "ring-client-api",
   "version": "11.3.1",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
-  "main": "lib/api/index.js",
+  "main": "lib/index.js",
   "bin": {
-    "ring-auth-cli": "ring-auth-cli.js",
-    "ring-device-data-cli": "ring-device-data-cli.js"
+    "ring-auth-cli": "lib/ring-auth-cli.js",
+    "ring-device-data-cli": "lib/ring-device-data-cli.js"
   },
   "scripts": {
     "start": "concurrently -c yellow,blue --kill-others \"npm:hb\" \"npm:watch:ui\"",
@@ -91,6 +91,7 @@
     "rimraf": "3.0.2",
     "standard-version": "9.5.0",
     "ts-jest": "29.0.3",
+    "tsconfig": "*",
     "typescript": "4.8.4"
   },
   "engines": {

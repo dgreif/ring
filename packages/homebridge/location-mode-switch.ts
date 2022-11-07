@@ -1,8 +1,8 @@
-import { Location, LocationMode } from '../api'
+import type { Location, LocationMode } from 'ring-client-api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { logError, logInfo } from '../api/util'
+import { logError, logInfo } from 'ring-client-api/lib/util'
 import { BaseAccessory } from './base-accessory'
 import { firstValueFrom, of } from 'rxjs'
 import {

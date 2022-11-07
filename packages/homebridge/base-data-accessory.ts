@@ -4,7 +4,7 @@ import {
   ServiceType,
 } from './base-accessory'
 import { Observable, Subject } from 'rxjs'
-import { RingCamera, RingChime, RingDevice } from '../api'
+import type { RingCamera, RingChime, RingDevice } from 'ring-client-api'
 import { RingPlatformConfig } from './config'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import {
@@ -14,7 +14,7 @@ import {
   CharacteristicGetCallback,
   CharacteristicEventTypes,
 } from 'homebridge'
-import { logError } from '../api/util'
+import { logError } from 'ring-client-api/lib/util'
 
 export abstract class BaseDataAccessory<
   T extends RingDevice | RingCamera | RingChime

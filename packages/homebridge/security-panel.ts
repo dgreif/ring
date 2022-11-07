@@ -10,7 +10,7 @@ import {
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'
-import { logError, logInfo } from '../api/util'
+import { logError, logInfo } from 'ring-client-api/lib/util'
 
 function isValidNightModeBypass(mode?: AlarmMode) {
   return mode && (mode === 'all' || mode === 'some')

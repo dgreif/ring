@@ -3,7 +3,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDeviceAccessory } from './base-device-accessory'
 import { PlatformAccessory } from 'homebridge'
-import { logInfo } from '../api/util'
+import { logInfo } from 'ring-client-api/lib/util'
 
 export class Beam extends BaseDeviceAccessory {
   isLightGroup =

@@ -1,12 +1,12 @@
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
-import { RingCamera } from '../api'
+import type { RingCamera } from 'ring-client-api'
 import { BaseDataAccessory } from './base-data-accessory'
 import { map, mapTo, switchMap, throttleTime } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { PlatformAccessory } from 'homebridge'
 import { TargetValueTimer } from './target-value-timer'
-import { logError, logInfo } from '../api/util'
+import { logError, logInfo } from 'ring-client-api/lib/util'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined

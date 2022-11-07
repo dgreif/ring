@@ -12,7 +12,7 @@ import {
   CharacteristicSetCallback,
   WithUUID,
 } from 'homebridge'
-import { logError, logInfo } from '../api/util'
+import { logError, logInfo } from 'ring-client-api/lib/util'
 
 function isServiceInstance(
   serviceType: WithUUID<typeof Service> | Service

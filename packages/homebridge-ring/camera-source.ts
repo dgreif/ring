@@ -1,4 +1,4 @@
-import { RingCamera } from '../api'
+import { RingCamera } from 'ring-client-api'
 import { hap } from './hap'
 import {
   doesFfmpegSupportCodec,

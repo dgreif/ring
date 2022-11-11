@@ -1,4 +1,4 @@
-import { AlarmMode, RingApiOptions } from '../api'
+import { AlarmMode, RingApiOptions } from 'ring-client-api'
 import { readFileSync, writeFileSync } from 'fs'
 import { API } from 'homebridge'
 import { createHash, randomBytes } from 'crypto'

@@ -5,7 +5,7 @@ import {
   RingDevice,
   RingDeviceCategory,
   RingDeviceType,
-} from '../api'
+} from 'ring-client-api'
 import { hap } from './hap'
 import {
   API,

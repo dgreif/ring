@@ -1,4 +1,4 @@
-import { RingDevice, RingDeviceType } from '../api'
+import { RingDevice, RingDeviceType } from 'ring-client-api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDeviceAccessory } from './base-device-accessory'

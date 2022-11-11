@@ -6,7 +6,7 @@ import {
   RingDevice,
   RingDeviceData,
   RingDeviceType,
-} from '../api'
+} from 'ring-client-api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'

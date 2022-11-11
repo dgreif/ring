@@ -1,5 +1,5 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice, RingDeviceData } from '../api'
+import { RingDevice, RingDeviceData } from 'ring-client-api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'

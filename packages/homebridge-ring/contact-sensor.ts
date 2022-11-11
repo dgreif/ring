@@ -1,10 +1,10 @@
 import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice } from '../api'
+import { RingDevice } from 'ring-client-api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'
 
-export class SmokeAlarm extends BaseDeviceAccessory {
+export class ContactSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
@@ -13,20 +13,20 @@ export class SmokeAlarm extends BaseDeviceAccessory {
     super()
 
     const {
-      Characteristic: { SmokeDetected },
-      Service: { SmokeSensor },
+      Characteristic: { ContactSensorState },
+      Service,
     } = hap
 
     this.registerCharacteristic({
-      characteristicType: SmokeDetected,
-      serviceType: SmokeSensor,
+      characteristicType: ContactSensorState,
+      serviceType: Service.ContactSensor,
       getValue: (data) => {
-        return data.alarmStatus === 'active'
-          ? SmokeDetected.SMOKE_DETECTED
-          : SmokeDetected.SMOKE_NOT_DETECTED
+        return data.faulted
+          ? ContactSensorState.CONTACT_NOT_DETECTED
+          : ContactSensorState.CONTACT_DETECTED
       },
     })
 
-    this.initSensorService(SmokeSensor)
+    this.initSensorService(Service.ContactSensor)
   }
 }

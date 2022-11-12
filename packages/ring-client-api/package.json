@@ -3,57 +3,12 @@
   "version": "11.3.1",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
-  "bin": {
-    "ring-auth-cli": "lib/ring-auth-cli.js",
-    "ring-device-data-cli": "lib/ring-device-data-cli.js"
-  },
   "scripts": {
-    "start": "concurrently -c yellow,blue --kill-others \"npm:hb\" \"npm:watch:ui\"",
-    "watch:ui": "npm start --prefix homebridge-ui",
-    "test": "jest",
-    "watch:tests": "jest --watch",
-    "lint": "eslint . --ext .ts",
     "build": "rm -rf lib && tsc --declaration",
-    "build-quick": "rm -rf lib && esbuild ./{api,examples,homebridge}/*.ts ./api/streaming/*.ts --target=es2017 --format=cjs --outdir=lib",
-    "example": "node -r @swc-node/register ./examples/example.ts",
-    "api-example": "node -r @swc-node/register ./examples/api-example.ts",
-    "record-example": "node -r @swc-node/register ./examples/record-example.ts",
-    "return-audio-example": "node -r @swc-node/register ./examples/return-audio-example.ts",
-    "stream-example": "node -r @swc-node/register ./examples/stream-example.ts",
-    "browser-example": "node -r @swc-node/register ./examples/browser-example.ts",
-    "auth-cli": "npm run build-quick && ./ring-auth-cli.js",
-    "device-data-cli": "npm run build-quick && ./ring-device-data-cli.js",
-    "hb": "npm run build-quick && ./build/package-homebridge.sh && homebridge -P ./release-homebridge -U ./.homebridge",
-    "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
-    "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",
-    "deploy": "git pull -r && standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",
-    "deploy-beta": "git pull -r && standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
+    "lint": "eslint . --ext .ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
-  "standard-version": {
-    "scripts": {
-      "prerelease": "npm run build && npm test",
-      "pretag": "npm run prepare-npm-packages && npm run --prefix homebridge-ui build"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dgreif/ring.git"
-  },
-  "keywords": [
-    "ring",
-    "doorbell",
-    "doorbot",
-    "camera",
-    "alarm",
-    "smart",
-    "light",
-    "beam",
-    "security",
-    "client",
-    "api"
-  ],
-  "author": "dgreif",
-  "license": "MIT",
   "dependencies": {
     "@eneris/push-receiver": "^3.1.2",
     "@homebridge/camera-utils": "^2.2.0",
@@ -95,10 +50,16 @@
   "engines": {
     "node": "^16 || ^18"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dgreif/ring.git"
+  },
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"
   },
   "homepage": "https://github.com/dgreif/ring#readme",
+  "author": "dgreif",
+  "license": "MIT",
   "funding": [
     {
       "type": "paypal",
@@ -109,7 +70,21 @@
       "url": "https://github.com/sponsors/dgreif"
     }
   ],
-  "workspaces": [
-    "homebridge-ui"
+  "bin": {
+    "ring-auth-cli": "lib/ring-auth-cli.js",
+    "ring-device-data-cli": "lib/ring-device-data-cli.js"
+  },
+  "keywords": [
+    "ring",
+    "doorbell",
+    "doorbot",
+    "camera",
+    "alarm",
+    "smart",
+    "light",
+    "beam",
+    "security",
+    "client",
+    "api"
   ]
 }

@@ -3,6 +3,52 @@
   "version": "11.3.1",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public && cp ./lib/homebridge-ui/server.js ./homebridge-ui",
+    "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "ring-client-api": "11.3.1"
+  },
+  "devDependencies": {
+    "config": "*",
+    "eslint-config-shared": "*",
+    "homebridge": "1.5.1",
+    "homebridge-ui": "*",
+    "tsconfig": "*",
+    "typescript": "4.8.4"
+  },
+  "engines": {
+    "node": "^16 || ^18",
+    "homebridge": ">=1.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dgreif/ring.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dgreif/ring/issues"
+  },
+  "homepage": "https://github.com/dgreif/ring/tree/master/packages/homebridge-ring#homebridge-ring",
+  "author": "dgreif",
+  "license": "MIT",
+  "funding": [
+    {
+      "type": "paypal",
+      "url": "https://www.paypal.me/dustingreif"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/dgreif"
+    }
+  ],
+  "files": [
+    "branding",
+    "config.schema.json",
+    "homebridge-ui",
+    "lib",
+    "media"
+  ],
   "keywords": [
     "homebridge",
     "homebridge-plugin",
@@ -20,35 +66,5 @@
     "category-video",
     "category-hubs",
     "category-outdoor"
-  ],
-  "scripts": {
-    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public && cp ./lib/homebridge-ui/server.js ./homebridge-ui",
-    "lint": "eslint . --ext .ts"
-  },
-  "homepage": "https://github.com/dgreif/ring/tree/master/packages/homebridge-ring#homebridge-ring",
-  "dependencies": {
-    "ring-client-api": "11.3.1"
-  },
-  "devDependencies": {
-    "config": "*",
-    "eslint-config-shared": "*",
-    "homebridge": "1.5.1",
-    "homebridge-ui": "*",
-    "tsconfig": "*",
-    "typescript": "4.8.4"
-  },
-  "engines": {
-    "node": "^16 || ^18",
-    "homebridge": ">=1.4.0"
-  },
-  "bugs": {
-    "url": "https://github.com/dgreif/ring/issues"
-  },
-  "files": [
-    "branding",
-    "config.schema.json",
-    "homebridge-ui",
-    "lib",
-    "media"
   ]
 }

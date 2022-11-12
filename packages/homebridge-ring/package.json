@@ -8,6 +8,8 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
+    "@homebridge/camera-utils": "^2.2.0",
+    "@homebridge/plugin-ui-utils": "^0.0.19",
     "ring-client-api": "11.3.1"
   },
   "devDependencies": {

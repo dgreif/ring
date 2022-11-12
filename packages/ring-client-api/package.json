@@ -12,7 +12,6 @@
   "dependencies": {
     "@eneris/push-receiver": "^3.1.2",
     "@homebridge/camera-utils": "^2.2.0",
-    "@homebridge/plugin-ui-utils": "^0.0.19",
     "werift": "0.17.0",
     "@types/socket.io-client": "1.4.36",
     "colors": "^1.4.0",
@@ -32,17 +31,10 @@
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "5.42.1",
     "@typescript-eslint/parser": "5.42.1",
-    "concurrently": "^7.5.0",
-    "conventional-github-releaser": "3.1.5",
     "dotenv": "16.0.3",
     "esbuild": "^0.15.13",
     "eslint-config-shared": "*",
-    "homebridge": "1.5.1",
     "jest": "29.3.1",
-    "prettier": "2.7.1",
-    "reflect-metadata": "0.1.13",
-    "rimraf": "3.0.2",
-    "standard-version": "9.5.0",
     "ts-jest": "29.0.3",
     "tsconfig": "*",
     "typescript": "4.8.4"
@@ -74,6 +66,9 @@
     "ring-auth-cli": "lib/ring-auth-cli.js",
     "ring-device-data-cli": "lib/ring-device-data-cli.js"
   },
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "ring",
     "doorbell",

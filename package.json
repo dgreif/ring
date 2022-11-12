@@ -1,12 +1,6 @@
 {
   "name": "ring",
   "private": true,
-  "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
-  "main": "lib/api/index.js",
-  "bin": {
-    "ring-auth-cli": "ring-auth-cli.js",
-    "ring-device-data-cli": "ring-device-data-cli.js"
-  },
   "scripts": {
     "build": "turbo run build",
     "build-quick": "turbo run build-quick",
@@ -36,39 +30,10 @@
       "pretag": "npm run prepare-npm-packages && npm run --prefix homebridge-ui build"
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/dgreif/ring.git"
-  },
-  "keywords": [
-    "ring",
-    "doorbell",
-    "doorbot",
-    "camera",
-    "alarm",
-    "smart",
-    "light",
-    "beam",
-    "security",
-    "client",
-    "api"
-  ],
-  "author": "dgreif",
-  "license": "MIT",
   "devDependencies": {
     "@swc-node/register": "^1.5.4",
     "turbo": "^1.6.3"
   },
-  "funding": [
-    {
-      "type": "paypal",
-      "url": "https://www.paypal.me/dustingreif"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/sponsors/dgreif"
-    }
-  ],
   "workspaces": [
     "packages/*"
   ]

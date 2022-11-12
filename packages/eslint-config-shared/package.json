@@ -1,5 +1,6 @@
 {
   "name": "eslint-config-shared",
+  "private": true,
   "main": "eslint-config-shared.js",
   "dependencies": {
     "eslint": "8.27.0",

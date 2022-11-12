@@ -71,3 +71,5 @@ export function getSystemId(homebridge: API) {
 
   return systemId
 }
+
+export const debug = process.env.RING_DEBUG === 'true'

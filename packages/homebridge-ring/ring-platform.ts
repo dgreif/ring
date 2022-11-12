@@ -24,6 +24,7 @@ import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
 import {
+  debug,
   getSystemId,
   RingPlatformConfig,
   updateHomebridgeConfig,
@@ -47,21 +48,19 @@ import { Thermostat } from './thermostat'
 import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch'
 import { generateMacAddress } from './util'
 
-const debug = __filename.includes('release-homebridge'),
-  ignoreHiddenDeviceTypes: string[] = [
-    RingDeviceType.RingNetAdapter,
-    RingDeviceType.ZigbeeAdapter,
-    RingDeviceType.CodeVault,
-    RingDeviceType.SecurityAccessCode,
-    RingDeviceType.ZWaveAdapter,
-    RingDeviceType.ZWaveExtender,
-    RingDeviceType.BeamsDevice,
-    RingDeviceType.PanicButton,
-  ]
+const ignoreHiddenDeviceTypes: string[] = [
+  RingDeviceType.RingNetAdapter,
+  RingDeviceType.ZigbeeAdapter,
+  RingDeviceType.CodeVault,
+  RingDeviceType.SecurityAccessCode,
+  RingDeviceType.ZWaveAdapter,
+  RingDeviceType.ZWaveExtender,
+  RingDeviceType.BeamsDevice,
+  RingDeviceType.PanicButton,
+]
 
 export const platformName = 'Ring'
 export const pluginName = 'homebridge-ring'
-process.env.RING_DEBUG = debug ? 'true' : ''
 
 function getAccessoryClass(
   device: RingDevice

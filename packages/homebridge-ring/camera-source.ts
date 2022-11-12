@@ -39,8 +39,8 @@ import type { StreamingSession } from 'ring-client-api/lib/streaming/streaming-s
 import { OpusRepacketizer } from './opus-repacketizer'
 
 const readFileAsync = promisify(readFile),
-  cameraOfflinePath = require.resolve('../../media/camera-offline.jpg'),
-  snapshotsBlockedPath = require.resolve('../../media/snapshots-blocked.jpg')
+  cameraOfflinePath = require.resolve('../media/camera-offline.jpg'),
+  snapshotsBlockedPath = require.resolve('../media/snapshots-blocked.jpg')
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000

@@ -176,7 +176,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         })
       } else {
         this.log.warn(
-          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/master/homebridge#homebridge-configuration for more information.'
+          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/main/packages/homebridge-ring#homebridge-configuration for more information.'
         )
       }
     })

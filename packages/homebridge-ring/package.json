@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"
   },
-  "homepage": "https://github.com/dgreif/ring/tree/master/packages/homebridge-ring#homebridge-ring",
+  "homepage": "https://github.com/dgreif/ring/tree/main/packages/homebridge-ring#homebridge-ring",
   "author": "dgreif",
   "license": "MIT",
   "funding": [

@@ -55,7 +55,7 @@
   "bugs": {
     "url": "https://github.com/dgreif/ring/issues"
   },
-  "homepage": "https://github.com/dgreif/ring#readme",
+  "homepage": "https://github.com/dgreif/ring/tree/main/packages/ring-client-api#ring-client-api",
   "author": "dgreif",
   "license": "MIT",
   "funding": [

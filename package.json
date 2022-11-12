@@ -24,12 +24,6 @@
     "deploy": "git pull -r && standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",
     "deploy-beta": "git pull -r && standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
   },
-  "standard-version": {
-    "scripts": {
-      "prerelease": "npm run build && npm test",
-      "pretag": "npm run prepare-npm-packages && npm run --prefix homebridge-ui build"
-    }
-  },
   "devDependencies": {
     "@swc-node/register": "^1.5.4",
     "turbo": "^1.6.3"

@@ -7,6 +7,7 @@
   "dependencies": {
     "eslint-config-shared": "*",
     "express": "4.18.2",
+    "rimraf": "^3.0.2",
     "ring-client-api": "*",
     "tsconfig": "*"
   }

@@ -19,10 +19,9 @@
     "auth-cli": "npm run build-quick && ./ring-auth-cli.js",
     "device-data-cli": "npm run build-quick && ./ring-device-data-cli.js",
     "hb": "npm run build && RING_DEBUG=true homebridge -P ./packages/homebridge-ring -U ./.homebridge",
-    "prepare-npm-packages": "./build/package-api.sh && ./build/package-homebridge.sh",
     "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",
-    "deploy": "git pull -r && standard-version && npm publish ./release-api && npm publish ./release-homebridge && npm run push-with-tags",
-    "deploy-beta": "git pull -r && standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
+    "deploy": "git pull -r && changesets version && git commit -am 'Bump versions for release' && changesets publish && npm run push-with-tags",
+    "deploy-beta": "git pull -r && changeset pre enter beta && changesets version && git commit -am 'Bump versions for beta release' && changesets publish && npm run push-with-tags"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.2",

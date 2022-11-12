@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../api'
+import { RingApi } from 'ring-client-api'
 import { promisify } from 'util'
 const fs = require('fs'),
   path = require('path'),
@@ -24,9 +24,9 @@ async function example() {
   }
 
   const app = express(),
-    publicOutputDirectory = path.join('public', 'output')
+    publicOutputDirectory = path.join(__dirname, 'public/output')
 
-  app.use('/', express.static('public'))
+  app.use('/', express.static(path.join(__dirname, 'public')))
   app.listen(3000, () => {
     console.log(
       'Listening on port 3000.  Go to http://localhost:3000 in your browser'

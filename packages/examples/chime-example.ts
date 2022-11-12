@@ -1,6 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../api'
-import { logError } from '../api/util'
+import { RingApi } from 'ring-client-api'
 
 async function example() {
   const ringApi = new RingApi({
@@ -23,4 +22,4 @@ async function example() {
   await chime.playSound('motion')
 }
 
-example().catch(logError)
+example().catch((e) => console.error(e))

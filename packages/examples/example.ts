@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { PushNotificationAction, RingApi } from '../api'
+import { PushNotificationAction, RingApi } from 'ring-client-api'
 import { skip } from 'rxjs/operators'
 import { readFile, writeFile } from 'fs'
 import { promisify } from 'util'

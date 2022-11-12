@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../api'
+import { RingApi } from 'ring-client-api'
 import { cleanOutputDirectory } from './util'
 import * as path from 'path'
 
@@ -14,7 +14,7 @@ async function example() {
       debug: true,
     }),
     cameras = await ringApi.getCameras(),
-    camera = cameras[0]
+    camera = cameras.find((c) => c.name === 'Desk')
 
   if (!camera) {
     console.log('No cameras found')
@@ -31,7 +31,7 @@ async function example() {
   await Promise.all([
     call.transcodeReturnAudio({
       // You can specify any normal ffmpeg input here. In this case, we are just playing from a file
-      input: [path.join(path.resolve('examples'), 'example.mp4')],
+      input: [path.join(__dirname, 'example.mp4')],
     }),
     // We need to manually tell the speaker to activate when we are ready to play audio out of the speaker
     call.activateCameraSpeaker(),

@@ -25,6 +25,7 @@
     "deploy-beta": "git pull -r && standard-version --prerelease beta && npm publish --tag beta ./release-api && npm publish --tag beta ./release-homebridge && npm run push-with-tags"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.25.2",
     "@swc-node/register": "^1.5.4",
     "turbo": "^1.6.3"
   },

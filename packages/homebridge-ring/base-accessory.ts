@@ -1,7 +1,7 @@
 import { hap } from './hap'
 import { shareReplay, take } from 'rxjs/operators'
 import { firstValueFrom, Observable } from 'rxjs'
-import { RingPlatformConfig } from './config'
+import { debug, RingPlatformConfig } from './config'
 import {
   Characteristic,
   PlatformAccessory,
@@ -41,8 +41,6 @@ export abstract class BaseAccessory<T extends { name: string }> {
     if (isServiceInstance(serviceType)) {
       return serviceType
     }
-
-    const debug = process.env.RING_DEBUG === 'true'
 
     if (debug) {
       name = 'TEST ' + name

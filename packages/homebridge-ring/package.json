@@ -2,7 +2,7 @@
   "name": "homebridge-ring",
   "version": "11.3.1",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
-  "main": "lib/homebridge/index.js",
+  "main": "lib/index.js",
   "keywords": [
     "homebridge",
     "homebridge-plugin",
@@ -22,10 +22,10 @@
     "category-outdoor"
   ],
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public",
+    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public && cp ./lib/homebridge-ui/server.js ./homebridge-ui",
     "lint": "eslint . --ext .ts"
   },
-  "homepage": "https://github.com/dgreif/ring/tree/master/homebridge#homebridge-ring",
+  "homepage": "https://github.com/dgreif/ring/tree/master/packages/homebridge-ring#homebridge-ring",
   "dependencies": {
     "ring-client-api": "11.3.1"
   },
@@ -36,5 +36,19 @@
     "homebridge-ui": "*",
     "tsconfig": "*",
     "typescript": "4.8.4"
-  }
+  },
+  "engines": {
+    "node": "^16 || ^18",
+    "homebridge": ">=1.4.0"
+  },
+  "bugs": {
+    "url": "https://github.com/dgreif/ring/issues"
+  },
+  "files": [
+    "branding",
+    "config.schema.json",
+    "homebridge-ui",
+    "lib",
+    "media"
+  ]
 }

@@ -1,12 +1,13 @@
 {
   "name": "eslint-config-shared",
   "private": true,
+  "version": "0.0.0",
   "main": "eslint-config-shared.js",
   "dependencies": {
     "eslint": "8.27.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-jest": "27.1.5",
     "eslint-plugin-prettier": "4.2.1",
-    "tsconfig": "*"
+    "tsconfig": "0.0.0"
   }
 }

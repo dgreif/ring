@@ -13,11 +13,10 @@
     "ring-client-api": "11.3.1"
   },
   "devDependencies": {
-    "config": "*",
-    "eslint-config-shared": "*",
+    "eslint-config-shared": "0.0.0",
     "homebridge": "1.5.1",
-    "homebridge-ui": "*",
-    "tsconfig": "*",
+    "homebridge-ui": "0.0.0",
+    "tsconfig": "0.0.0",
     "typescript": "4.8.4"
   },
   "engines": {

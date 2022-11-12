@@ -1,7 +1,7 @@
 {
   "name": "homebridge-ui",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "devDependencies": {
     "@homebridge/plugin-ui-utils": "0.0.19",
     "@testing-library/jest-dom": "5.16.5",
@@ -11,11 +11,11 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
-    "eslint-config-shared": "*",
+    "eslint-config-shared": "0.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "tsconfig": "*",
+    "tsconfig": "0.0.0",
     "typescript": "4.8.4"
   },
   "scripts": {

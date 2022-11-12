@@ -1,14 +1,15 @@
 {
   "name": "examples",
   "private": true,
+  "version": "0.0.0",
   "scripts": {
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "eslint-config-shared": "*",
+    "eslint-config-shared": "0.0.0",
     "express": "4.18.2",
     "rimraf": "^3.0.2",
-    "ring-client-api": "*",
-    "tsconfig": "*"
+    "ring-client-api": "11.3.1",
+    "tsconfig": "0.0.0"
   }
 }

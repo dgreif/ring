@@ -19,7 +19,7 @@
     "auth-cli": "npm run build-quick && ./ring-auth-cli.js",
     "device-data-cli": "npm run build-quick && ./ring-device-data-cli.js",
     "hb": "npm run build && RING_DEBUG=true homebridge -P ./packages/homebridge-ring -U ./.homebridge",
-    "push-with-tags": "git push --follow-tags && node ./build/github-releaser.js",
+    "push-with-tags": "git push --follow-tags",
     "predeploy": "git pull -r && npm run build && npm run lint && npm run test",
     "postdeploy": "npm run push-with-tags",
     "deploy": "changeset version && git commit -am 'Bump versions for release' && changeset publish",

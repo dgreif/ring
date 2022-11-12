@@ -6,7 +6,7 @@ import { map, mapTo, switchMap, throttleTime } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { PlatformAccessory } from 'homebridge'
 import { TargetValueTimer } from './target-value-timer'
-import { logError, logInfo } from 'ring-client-api/lib/util'
+import { logError, logInfo } from 'ring-client-api/util'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined

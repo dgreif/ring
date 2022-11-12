@@ -3,6 +3,12 @@
   "version": "11.3.1",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./ffmpeg": "./lib/ffmpeg.js",
+    "./util": "./lib/util.js",
+    "./rest-client": "./lib/rest-client.js"
+  },
   "scripts": {
     "build": "rm -rf lib && tsc --declaration",
     "lint": "eslint . --ext .ts",

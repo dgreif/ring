@@ -3,7 +3,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { BaseDataAccessory } from './base-data-accessory'
 import { PlatformAccessory } from 'homebridge'
-import { logInfo } from 'ring-client-api/lib/util'
+import { logInfo } from 'ring-client-api/util'
 
 const burglarStates: AlarmState[] = [
     'burglar-alarm',

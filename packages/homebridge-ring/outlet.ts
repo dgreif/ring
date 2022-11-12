@@ -3,7 +3,7 @@ import { RingDevice } from 'ring-client-api'
 import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'
-import { logInfo } from 'ring-client-api/lib/util'
+import { logInfo } from 'ring-client-api/util'
 
 export class Outlet extends BaseDeviceAccessory {
   constructor(

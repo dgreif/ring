@@ -14,7 +14,7 @@ import {
   CharacteristicGetCallback,
   CharacteristicEventTypes,
 } from 'homebridge'
-import { logError } from 'ring-client-api/lib/util'
+import { logError } from 'ring-client-api/util'
 
 export abstract class BaseDataAccessory<
   T extends RingDevice | RingCamera | RingChime

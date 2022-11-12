@@ -4,7 +4,7 @@ import {
   RequestError,
 } from '@homebridge/plugin-ui-utils'
 
-import { RingRestClient } from 'ring-client-api/lib/rest-client'
+import { RingRestClient } from 'ring-client-api/rest-client'
 
 interface LoginRequest {
   email: string

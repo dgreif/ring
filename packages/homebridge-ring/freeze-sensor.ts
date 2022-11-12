@@ -4,7 +4,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { distinctUntilChanged, filter, map } from 'rxjs/operators'
 import { PlatformAccessory } from 'homebridge'
-import { logInfo } from 'ring-client-api/lib/util'
+import { logInfo } from 'ring-client-api/util'
 
 export class FreezeSensor extends BaseDeviceAccessory {
   constructor(

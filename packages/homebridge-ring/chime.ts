@@ -3,7 +3,7 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
-import { logInfo } from 'ring-client-api/lib/util'
+import { logInfo } from 'ring-client-api/util'
 
 const minutesFor24Hours = 24 * 60
 

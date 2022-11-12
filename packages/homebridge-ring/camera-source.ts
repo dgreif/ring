@@ -22,12 +22,12 @@ import {
   StreamingRequest,
   StreamRequestCallback,
 } from 'homebridge'
-import { logDebug, logError, logInfo } from 'ring-client-api/lib/util'
+import { logDebug, logError, logInfo } from 'ring-client-api/util'
 import { debounceTime, delay, take } from 'rxjs/operators'
 import { interval, merge, of, Subject } from 'rxjs'
 import { readFile } from 'fs'
 import { promisify } from 'util'
-import { getFfmpegPath } from 'ring-client-api/lib/ffmpeg'
+import { getFfmpegPath } from 'ring-client-api/ffmpeg'
 import {
   RtcpSenderInfo,
   RtcpSrPacket,

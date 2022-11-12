@@ -4,7 +4,7 @@
   "commit": false,
   "fixed": [["homebridge-ring", "ring-client-api"]],
   "linked": [],
-  "access": "restricted",
+  "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": []

@@ -1,6 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../api'
-import { logError } from '../api/util'
+import { RingApi } from 'ring-client-api'
 
 async function example() {
   const { env } = process,
@@ -63,4 +62,4 @@ async function example() {
   console.log('Recording Untranscoded URL', untranscodedUrl)
 }
 
-example().catch(logError)
+example().catch((e) => console.error(e))

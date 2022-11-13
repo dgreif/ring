@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 11.4.0-beta.2
+
+### Minor Changes
+
+- 8732fb9: Updated the ring repository to a modern monorepo setup. This should not impact consumers of the packages, but please open an issue if you see something odd after this change.
+
+### Patch Changes
+
+- 8732fb9: Updated dependencies
+- Updated dependencies [8732fb9]
+- Updated dependencies [8732fb9]
+  - ring-client-api@11.4.0-beta.2
+
 ## 11.4.0-beta.1
 
 ### Minor Changes

@@ -20,7 +20,7 @@ import {
   UnknownDevice,
   UserLocation,
 } from './ring-types'
-import { RingCamera } from './ring-camera'
+import { AnyCameraData, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
@@ -120,7 +120,12 @@ export class RingApi extends Subscribed {
       chimes,
       authorizedDoorbots,
       stickupCams,
-      allCameras: [...doorbots, ...stickupCams, ...authorizedDoorbots],
+      allCameras: [
+        ...doorbots,
+        ...stickupCams,
+        ...authorizedDoorbots,
+        ...onvifCameras,
+      ] as AnyCameraData[],
       baseStations,
       beamBridges,
       onvifCameras,
@@ -297,8 +302,8 @@ export class RingApi extends Subscribed {
         (data) =>
           new RingCamera(
             data,
-            doorbots.includes(data) ||
-              authorizedDoorbots.includes(data) ||
+            doorbots.includes(data as CameraData) ||
+              authorizedDoorbots.includes(data as CameraData) ||
               data.kind.startsWith('doorbell'),
             this.restClient,
             this.options.avoidSnapshotBatteryDrain || false

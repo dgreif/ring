@@ -12,6 +12,8 @@ import {
   PushNotification,
   RingCameraModel,
   VideoSearchResponse,
+  OnvifCameraData,
+  RingCameraKind,
 } from './ring-types'
 import { clientApi, deviceApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs'
@@ -31,6 +33,8 @@ import { RingEdgeConnection } from './streaming/ring-edge-connection'
 import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
 import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
 import { SimpleWebRtcSession } from './streaming/simple-webrtc-session'
+
+export type AnyCameraData = CameraData | OnvifCameraData
 
 const maxSnapshotRefreshSeconds = 15,
   fullDayMs = 24 * 60 * 60 * 1000
@@ -138,7 +142,7 @@ export class RingCamera extends Subscribed {
   onInHomeDoorbellStatus
 
   constructor(
-    private initialData: CameraData,
+    private initialData: AnyCameraData,
     public isDoorbot: boolean,
     private restClient: RingRestClient,
     private avoidSnapshotBatteryDrain: boolean
@@ -147,17 +151,24 @@ export class RingCamera extends Subscribed {
 
     this.id = this.initialData.id
     this.deviceType = this.initialData.kind
-    this.model = RingCameraModel[this.initialData.kind] || 'Unknown Model'
-    this.onData = new BehaviorSubject<CameraData>(this.initialData)
+    this.model =
+      RingCameraModel[this.initialData.kind as RingCameraKind] ||
+      'Unknown Model'
+    this.onData = new BehaviorSubject<AnyCameraData>(this.initialData)
     this.hasLight = this.initialData.led_status !== undefined
     this.hasSiren = this.initialData.siren_status !== undefined
 
     this.onBatteryLevel = this.onData.pipe(
-      map(getBatteryLevel),
+      map((data) => {
+        if (!('battery_level' in data)) {
+          return null
+        }
+        return getBatteryLevel(data)
+      }),
       distinctUntilChanged()
     )
     this.onInHomeDoorbellStatus = this.onData.pipe(
-      map(({ settings: { chime_settings } }: CameraData) => {
+      map(({ settings: { chime_settings } }: AnyCameraData) => {
         return Boolean(chime_settings?.enable)
       }),
       distinctUntilChanged()
@@ -182,7 +193,7 @@ export class RingCamera extends Subscribed {
     }
   }
 
-  updateData(update: CameraData) {
+  updateData(update: AnyCameraData) {
     this.onData.next(update)
   }
 
@@ -208,6 +219,9 @@ export class RingCamera extends Subscribed {
   }
 
   get batteryLevel() {
+    if (!('battery_level' in this.data)) {
+      return null
+    }
     return getBatteryLevel(this.data)
   }
 
@@ -220,7 +234,10 @@ export class RingCamera extends Subscribed {
   }
 
   get isCharging() {
-    return this.initialData.external_connection
+    if (!('external_connection' in this.data)) {
+      return false
+    }
+    return this.data.external_connection
   }
 
   get operatingOnBattery() {

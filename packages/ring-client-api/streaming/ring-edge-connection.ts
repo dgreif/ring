@@ -187,6 +187,15 @@ export class RingEdgeConnection extends StreamingConnectionBase {
         return
       case 'pong':
         return
+      case 'notification':
+        const { text } = message.body
+        if (
+          text === 'PeerConnectionState::kConnecting' ||
+          text === 'PeerConnectionState::kConnected'
+        ) {
+          return
+        }
+        break
       case 'close':
         logError('Video stream closed')
         logError(message.body)

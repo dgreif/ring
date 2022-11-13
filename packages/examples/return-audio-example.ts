@@ -14,7 +14,7 @@ async function example() {
       debug: true,
     }),
     cameras = await ringApi.getCameras(),
-    camera = cameras.find((c) => c.name === 'Desk')
+    camera = cameras[0]
 
   if (!camera) {
     console.log('No cameras found')

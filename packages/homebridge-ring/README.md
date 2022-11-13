@@ -102,9 +102,11 @@ Only include an optional parameter if you actually need it. Default behavior wit
 
 ### Cameras
 
+The plugin supports all Ring camera models, as well as ONVIF cameras connected via Ring Edge
+
 - Camera Feed
   - Shows a snapshot from the camera while viewing the room in Home. There are limitations on when battery cameras can take snapshots. See [the Snapshot Limitations Wiki](https://github.com/dgreif/ring/wiki/Snapshot-Limitations) for details.
-  - Shows a live feed from the camera if you click on it. The feed supports video and 2-way audio, but requires that you have `ffmpeg` with `libfdk_aac` installed. A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`. See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg) for details.
+  - Shows a live feed from the camera if you click on it. The feed supports video and 2-way audio, but requires that you have `ffmpeg` with `libfdk_aac` installed. A pre-built `ffmpeg` will be automatically installed on most platforms using `ffmpeg-for-homebridge`. See the [FFmpeg wiki](https://github.com/dgreif/ring/wiki/FFmpeg) for details. 2-way audio may not work for ONVIF cameras.
 - Motion Sensor
   - Can be hidden with `hideCameraMotionSensor`
 - Light (if camera is equipped)

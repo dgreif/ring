@@ -152,12 +152,22 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     this.registerCharacteristic({
       characteristicType: Characteristic.Manufacturer,
       serviceType: Service.AccessoryInformation,
-      getValue: () => 'Ring',
+      getValue: (data) => {
+        if ('metadata' in data && 'third_party_manufacturer' in data.metadata) {
+          return data.metadata.third_party_manufacturer
+        }
+        return 'Ring'
+      },
     })
     this.registerCharacteristic({
       characteristicType: Characteristic.Model,
       serviceType: Service.AccessoryInformation,
-      getValue: (data) => `${device.model} (${data.kind})`,
+      getValue: (data) => {
+        if ('metadata' in data && 'third_party_model' in data.metadata) {
+          return data.metadata.third_party_model
+        }
+        return `${device.model} (${data.kind})`
+      },
     })
     this.registerCharacteristic({
       characteristicType: Characteristic.SerialNumber,

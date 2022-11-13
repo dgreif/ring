@@ -3,7 +3,6 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "build-quick": "turbo run build-quick",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "lint": "turbo run lint",
@@ -16,8 +15,8 @@
     "return-audio-example": "DEBUG=ring node -r @swc-node/register ./packages/examples/return-audio-example.ts",
     "stream-example": "DEBUG=ring node -r @swc-node/register ./packages/examples/stream-example.ts",
     "browser-example": "DEBUG=ring node -r @swc-node/register ./packages/examples/browser-example.ts",
-    "auth-cli": "npm run build-quick && ./ring-auth-cli.js",
-    "device-data-cli": "npm run build-quick && ./ring-device-data-cli.js",
+    "auth-cli": "npm run build && ./ring-auth-cli.js",
+    "device-data-cli": "npm run build && ./ring-device-data-cli.js",
     "hb": "npm run build && RING_DEBUG=true homebridge -P ./packages/homebridge-ring -U ./.homebridge",
     "push-with-tags": "git push --follow-tags",
     "predeploy": "git pull -r && npm run build && npm run lint && npm run test",

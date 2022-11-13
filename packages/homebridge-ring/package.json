@@ -4,8 +4,11 @@
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && swc $PWD -d lib && swc homebridge-ui -d lib/homebridge-ui && mv ../homebridge-ui/build ./lib/homebridge-ui/public",
-    "lint": "eslint . --ext .ts && tsc --noEmit"
+    "build": "rm -rf lib && swc **/*.ts *.ts -d lib && swc homebridge-ui -d lib/homebridge-ui && cp -r ../homebridge-ui/build ./lib/homebridge-ui/public",
+    "lint": "eslint . --ext .ts && tsc --noEmit",
+    "dev": "concurrently -c yellow,blue --kill-others \"npm:dev:build\" \"npm:dev:run\" ",
+    "dev:build": "swc **/*.ts *.ts -d lib -w --ignore",
+    "dev:run": "nodemon --watch . --watch ../ring-client-api/lib --exec 'RING_DEBUG=true homebridge -P ./ -U ../../.homebridge'"
   },
   "dependencies": {
     "@homebridge/camera-utils": "^2.2.0",
@@ -15,9 +18,11 @@
   "devDependencies": {
     "@swc/cli": "^0.1.57",
     "@swc/core": "^1.3.16",
+    "concurrently": "^7.5.0",
     "eslint-config-shared": "0.0.0",
     "homebridge": "1.5.1",
     "homebridge-ui": "0.0.0",
+    "nodemon": "^2.0.20",
     "tsconfig": "0.0.0",
     "typescript": "4.8.4"
   },

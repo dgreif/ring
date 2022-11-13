@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
+    "dev": "tsc --declaration --watch --preserveWatchOutput",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "test:watch": "jest --watch"

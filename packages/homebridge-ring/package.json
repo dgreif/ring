@@ -4,7 +4,7 @@
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration && rm -rf ./homebridge-ui/public && mv ../homebridge-ui/build ./homebridge-ui/public && cp ./lib/homebridge-ui/server.js ./homebridge-ui",
+    "build": "rm -rf lib && tsc --declaration && mv ../homebridge-ui/build ./lib/homebridge-ui/public",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
@@ -46,7 +46,6 @@
   "files": [
     "branding",
     "config.schema.json",
-    "homebridge-ui",
     "lib",
     "media"
   ],

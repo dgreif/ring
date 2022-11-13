@@ -1,5 +1,12 @@
 # ring-client-api
 
+## 11.5.0
+
+### Minor Changes
+
+- 8cb9617: Add support for ONVIF cameras
+- de3e1ba: Add basic types for new devices including onvif cameras, intercom handsets and third party garage door openers
+
 ## 11.4.0
 
 ### Minor Changes

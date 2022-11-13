@@ -1,5 +1,17 @@
 # homebridge-ring
 
+## 11.5.0
+
+### Minor Changes
+
+- 8cb9617: Add support for ONVIF cameras
+
+### Patch Changes
+
+- Updated dependencies [8cb9617]
+- Updated dependencies [de3e1ba]
+  - ring-client-api@11.5.0
+
 ## 11.4.0
 
 ### Minor Changes

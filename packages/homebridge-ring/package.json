@@ -1,6 +1,6 @@
 {
   "name": "homebridge-ring",
-  "version": "11.3.1",
+  "version": "11.4.0",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "@homebridge/camera-utils": "^2.2.0",
     "@homebridge/plugin-ui-utils": "^0.0.19",
-    "ring-client-api": "11.3.1"
+    "ring-client-api": "11.4.0"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.57",

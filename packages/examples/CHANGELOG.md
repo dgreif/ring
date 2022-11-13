@@ -1,5 +1,11 @@
 # examples
 
+## 0.0.1-beta.4
+
+### Patch Changes
+
+- ring-client-api@11.4.0-beta.4
+
 ## 0.0.1-beta.3
 
 ### Patch Changes

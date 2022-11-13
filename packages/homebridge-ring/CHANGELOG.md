@@ -1,5 +1,12 @@
 # homebridge-ring
 
+## 11.4.0-beta.4
+
+### Patch Changes
+
+- b9101de: Fix homebridge-ring custom ui
+  - ring-client-api@11.4.0-beta.4
+
 ## 11.4.0-beta.3
 
 ### Minor Changes

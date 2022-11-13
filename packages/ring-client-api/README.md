@@ -9,7 +9,7 @@ This is an unofficial TypeScript api for [Ring Doorbells](https://shop.ring.com/
 the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
-Built to support the [homebridge-ring Plugin](./homebridge)
+Built to support the [homebridge-ring Plugin](../homebridge-ring)
 
 ## Installation
 

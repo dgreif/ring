@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && swc $PWD -d lib && swc homebridge-ui -d lib/homebridge-ui && mv ../homebridge-ui/build ./lib/homebridge-ui/public",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts && tsc --noEmit"
   },
   "dependencies": {
     "@homebridge/camera-utils": "^2.2.0",

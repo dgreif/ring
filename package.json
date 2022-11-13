@@ -23,9 +23,8 @@
     "predeploy": "git pull -r && npm run build && npm run lint && npm run test",
     "postdeploy": "npm run push-with-tags",
     "deploy": "changeset version && git commit -am 'Bump versions for release' && changeset publish",
-    "predeploy-beta": "npm run predeploy",
-    "posteploy-beta": "npm run postdeploy",
-    "deploy-beta": "git pull -r && changeset pre enter beta && changeset version && git commit -am 'Bump versions for beta release' && changeset publish && rm .changeset/pre.json && npm run push-with-tags"
+    "prepare-beta": "changeset pre enter beta && git add .changeset/pre.json && commit -am 'Prepare for beta release'",
+    "exit-beta": "changeset pre exit && commit -am 'Exit beta release'"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.2",

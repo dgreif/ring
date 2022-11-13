@@ -25,7 +25,7 @@
     "deploy": "changeset version && git commit -am 'Bump versions for release' && changeset publish",
     "predeploy-beta": "npm run predeploy",
     "posteploy-beta": "npm run postdeploy",
-    "deploy-beta": "git pull -r && changeset pre enter beta && changeset version && git add .changeset/pre.json && git commit -am 'Bump versions for beta release' && changeset publish && npm run push-with-tags"
+    "deploy-beta": "git pull -r && changeset pre enter beta && changeset version && rm .changeset/pre.json && git commit -am 'Bump versions for beta release' && changeset publish && npm run push-with-tags"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.2",

@@ -4,7 +4,7 @@
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration && mv ../homebridge-ui/build ./lib/homebridge-ui/public",
+    "build": "rm -rf lib && swc $PWD -d lib && swc homebridge-ui -d lib/homebridge-ui && mv ../homebridge-ui/build ./lib/homebridge-ui/public",
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
@@ -13,6 +13,8 @@
     "ring-client-api": "11.4.0-beta.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.3.16",
     "eslint-config-shared": "0.0.0",
     "homebridge": "1.5.1",
     "homebridge-ui": "0.0.0",

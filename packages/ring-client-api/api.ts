@@ -11,8 +11,13 @@ import {
   BeamBridge,
   CameraData,
   ChimeData,
+  IntercomHandsetAudioData,
+  OnvifCameraData,
   ProfileResponse,
   PushNotification,
+  RingDeviceType,
+  ThirdPartyGarageDoorOpener,
+  UnknownDevice,
   UserLocation,
 } from './ring-types'
 import { RingCamera } from './ring-camera'
@@ -67,29 +72,61 @@ export class RingApi extends Subscribed {
 
   async fetchRingDevices() {
     const {
-      doorbots,
-      chimes,
-      authorized_doorbots: authorizedDoorbots,
-      stickup_cams: stickupCams,
-      base_stations: baseStations,
-      beams_bridges: beamBridges,
-    } = await this.restClient.request<{
-      doorbots: CameraData[]
-      chimes: ChimeData[]
-      authorized_doorbots: CameraData[]
-      stickup_cams: CameraData[]
-      base_stations: BaseStation[]
-      beams_bridges: BeamBridge[]
-    }>({ url: clientApi('ring_devices') })
+        doorbots,
+        chimes,
+        authorized_doorbots: authorizedDoorbots,
+        stickup_cams: stickupCams,
+        base_stations: baseStations,
+        beams_bridges: beamBridges,
+        other: otherDevices,
+      } = await this.restClient.request<{
+        doorbots: CameraData[]
+        chimes: ChimeData[]
+        authorized_doorbots: CameraData[]
+        stickup_cams: CameraData[]
+        base_stations: BaseStation[]
+        beams_bridges: BeamBridge[]
+        other: (
+          | IntercomHandsetAudioData
+          | OnvifCameraData
+          | ThirdPartyGarageDoorOpener
+          | UnknownDevice
+        )[]
+      }>({ url: clientApi('ring_devices') }),
+      onvifCameras = [] as OnvifCameraData[],
+      intercomHandsets = [] as IntercomHandsetAudioData[],
+      thirdPartyGarageDoorOpeners = [] as ThirdPartyGarageDoorOpener[],
+      unknownDevices = [] as UnknownDevice[]
+
+    otherDevices.forEach((device) => {
+      switch (device.kind) {
+        case RingDeviceType.OnvifCamera:
+          onvifCameras.push(device as OnvifCameraData)
+          break
+        case RingDeviceType.IntercomHandsetAudio:
+          intercomHandsets.push(device as IntercomHandsetAudioData)
+          break
+        case RingDeviceType.ThirdPartyGarageDoorOpener:
+          thirdPartyGarageDoorOpeners.push(device as ThirdPartyGarageDoorOpener)
+          break
+        default:
+          unknownDevices.push(device)
+          break
+      }
+    })
 
     return {
       doorbots,
       chimes,
       authorizedDoorbots,
       stickupCams,
-      allCameras: doorbots.concat(stickupCams, authorizedDoorbots),
+      allCameras: [...doorbots, ...stickupCams, ...authorizedDoorbots],
       baseStations,
       beamBridges,
+      onvifCameras,
+      thirdPartyGarageDoorOpeners,
+      intercomHandsets,
+      unknownDevices,
     }
   }
 

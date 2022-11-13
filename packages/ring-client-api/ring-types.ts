@@ -42,6 +42,9 @@ export enum RingDeviceType {
   ZWaveExtender = 'range-extender.zwave',
   PanicButton = 'security-panic',
   UnknownZWave = 'unknown.zwave',
+  OnvifCamera = 'onvif_camera',
+  ThirdPartyGarageDoorOpener = 'third_party_gdo',
+  IntercomHandsetAudio = 'intercom_handset_audio',
 }
 
 // eslint-disable-next-line no-shadow
@@ -95,6 +98,7 @@ export enum RingCameraKind {
   cocoa_doorbell = 'cocoa_doorbell',
   cocoa_floodlight = 'cocoa_floodlight',
   stickup_cam_mini = 'stickup_cam_mini',
+  onvif_camera = 'onvif_camera',
 }
 
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
@@ -126,6 +130,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   cocoa_doorbell: 'Doorbell Gen 2',
   cocoa_floodlight: 'Floodlight Cam Plus',
   stickup_cam_mini: 'Indoor Cam',
+  onvif_camera: 'ONVIF Camera',
 }
 
 export type AlarmMode = 'all' | 'some' | 'none'
@@ -415,23 +420,33 @@ export enum DoorbellType {
   None = 2,
 }
 
-export interface CameraData {
-  id: number
+export interface BaseCameraData {
+  alerts: {
+    connection: 'online' | 'offline' | string
+    battery?: 'low' | string
+    ota_status?: 'timeout' | string
+  }
+  created_at: string
+  deactivated_at: null | string
   description: string
   device_id: string
-  time_zone: string
-  subscribed: boolean
-  subscribed_motions: boolean
-  battery_life: number | string | null // 4003 or 100 or "100" or "71"
-  battery_life_2?: number | string | null
-  battery_voltage?: number
-  battery_voltage_2?: number
-  external_connection: boolean
-  firmware_version: Firmware
-  kind: RingCameraKind
-  latitude: number
-  longitude: number
-  address: string
+  features: {
+    motions_enabled: boolean
+    show_recordings: boolean
+    advanced_motion_enabled: boolean
+    people_only_enabled: boolean
+    shadow_correction_enabled: boolean
+    motion_message_enabled: boolean
+    night_vision_enabled: boolean
+  }
+  id: number
+  is_sidewalk_gateway: boolean
+  location_id: string
+  motion_snooze: null | { scheduled: boolean }
+  night_mode_status: 'unknown' | 'true' | 'false'
+  owned: boolean
+  ring_net_id: null
+
   settings: {
     enable_vod: boolean | 1
     motion_zones: {
@@ -483,26 +498,9 @@ export interface CameraData {
       ring_media_server_enabled: boolean
     }
   }
-  features: {
-    motions_enabled: boolean
-    show_recordings: boolean
-    advanced_motion_enabled: boolean
-    people_only_enabled: boolean
-    shadow_correction_enabled: boolean
-    motion_message_enabled: boolean
-    night_vision_enabled: boolean
-  }
-  owned: boolean
-  alerts: {
-    connection: 'online' | 'offline' | string
-    battery?: 'low' | string
-  }
-  motion_snooze: {
-    scheduled: boolean
-  }
-  stolen: boolean
-  location_id: string
-  ring_id: null
+  subscribed: boolean
+  subscribed_motions: boolean
+  time_zone: string
   motion_detection_enabled?: boolean
   camera_location_indoor?: boolean
   facing_window?: boolean
@@ -514,7 +512,6 @@ export interface CameraData {
     last_name: string
   }
   led_status?: 'on' | 'off'
-  night_mode_status: 'true' | 'false'
   ring_cam_light_installed?: 'true' | 'false'
   ring_cam_setup_flow?: 'floodlight'
   siren_status?: {
@@ -561,6 +558,151 @@ export interface CameraData {
     tx_rate: number
     ptz_connected?: 'penguin'
   }
+}
+
+export interface CameraData extends BaseCameraData {
+  kind: Omit<RingCameraKind, RingCameraKind.onvif_camera>
+
+  address: string
+  battery_life: number | string | null // 4003 or 100 or "100" or "71"
+  battery_life_2?: number | string | null
+  battery_voltage?: number
+  battery_voltage_2?: number
+  external_connection: boolean
+  firmware_version: Firmware
+  latitude: number
+  longitude: number
+  ring_id: null
+  stolen: boolean
+}
+
+export interface OnvifCameraData extends BaseCameraData {
+  kind: RingCameraKind.onvif_camera
+
+  metadata: {
+    legacy_fw_migrated: boolean
+    imported_from_amazon: boolean
+    is_sidewalk_gateway: boolean
+    third_party_manufacturer: string
+    third_party_model: string
+    third_party_dsn: string
+    third_party_properties: {
+      amzn_dsn: string
+      uuid: string
+    }
+  }
+  owner_id: number
+  updated_at: string
+}
+
+export interface ThirdPartyGarageDoorOpener {
+  id: number
+  kind: RingDeviceType.ThirdPartyGarageDoorOpener
+  description: string
+  location_id: string
+  owner_id: number
+  hardware_id: string
+  created_at: string
+  updated_at: string
+  role: 'owner' | string
+  metadata: {
+    is_sidewalk_gateway: boolean
+    third_party_manufacturer: string
+    third_party_model: string
+    third_party_properties: {
+      key_access_point_associated: 'true' | 'false'
+    }
+    integration_type: 'Key by Amazon' | string
+  }
+  ring_net_id: null
+  is_sidewalk_gateway: boolean
+}
+
+export interface IntercomHandsetAudioData {
+  id: number
+  description: string
+  device_id: string
+  kind: RingDeviceType.IntercomHandsetAudio
+  function: {
+    name: null
+  }
+  settings: {
+    show_recordings: boolean
+    recording_ttl: number
+    recording_enabled: boolean
+    keep_alive: null
+    chime_settings: {
+      type: number
+      enable: boolean
+      duration: number
+    }
+    intercom_settings: {
+      predecessor: string
+      config: string
+      ring_to_open: boolean
+      intercom_type: 'DF' | string
+      unlock_mode: number
+      replication: number
+    }
+    keep_alive_auto: number
+    doorbell_volume: number
+    enable_chime: number
+    theft_alarm_enable: number
+    use_cached_domain: number
+    use_server_ip: number
+    server_domain: 'fw.ring.com' | string
+    server_ip: null
+    enable_log: number
+    forced_keep_alive: null
+    mic_volume: number
+    voice_volume: number
+  }
+  features: {
+    motion_zone_recommendation: boolean
+    motions_enabled: boolean
+    show_recordings: boolean
+    show_vod_settings: boolean
+    rich_notifications_eligible: boolean
+    show_24x7_lite: boolean
+    show_offline_motion_events: boolean
+    cfes_eligible: boolean
+    sheila_camera_eligible: null | boolean
+    sheila_camera_processing_eligible: null | boolean
+    chime_auto_detect_capable: boolean
+  }
+  owned: boolean
+  owner: {
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+  }
+  alerts: {
+    connection: 'online' | 'offline' | string
+    ota_status?: 'no_ota' | string
+  }
+  firmware_version: 'Up to Date' | string
+  location_id: string
+  time_zone: string
+  created_at: string
+  ring_net_id: null
+  is_sidewalk_gateway: boolean
+  subscribed: boolean
+  deactivated_at: null | string
+  battery_life: string
+  metadata: {
+    ethernet: boolean
+    legacy_fw_migrated: boolean
+    imported_from_amazon: boolean
+    is_sidewalk_gateway: boolean
+    key_access_point_associated: boolean
+  }
+}
+
+export interface UnknownDevice {
+  id: number
+  kind: unknown
+  description: string
 }
 
 export interface CvDetectionType {

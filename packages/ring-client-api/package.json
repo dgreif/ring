@@ -21,7 +21,7 @@
     "@homebridge/camera-utils": "^2.2.0",
     "werift": "0.17.0",
     "@types/socket.io-client": "1.4.36",
-    "colors": "^1.4.0",
+    "colors": "1.4.0",
     "debug": "^4.3.4",
     "got": "^11.8.5",
     "rxjs": "^7.5.7",

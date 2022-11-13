@@ -10,7 +10,7 @@
     "./rest-client": "./lib/rest-client.js"
   },
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration --excludeDirectories test",
+    "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "test:watch": "jest --watch"

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from 'ring-client-api'
+import { RingApi } from '../ring-client-api'
 import { cleanOutputDirectory } from './util'
 import * as path from 'path'
 

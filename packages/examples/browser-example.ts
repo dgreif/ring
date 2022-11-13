@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from 'ring-client-api'
+import { RingApi } from '../ring-client-api'
 import { promisify } from 'util'
 const fs = require('fs'),
   path = require('path'),

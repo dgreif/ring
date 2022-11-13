@@ -1,7 +1,7 @@
 {
   "name": "examples",
   "private": true,
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.3",
   "scripts": {
     "lint": "eslint . --ext .ts"
   },
@@ -10,7 +10,7 @@
     "eslint-config-shared": "0.0.0",
     "express": "4.18.2",
     "rimraf": "^3.0.2",
-    "ring-client-api": "11.4.0-beta.2",
+    "ring-client-api": "11.4.0-beta.3",
     "tsconfig": "0.0.0"
   }
 }

@@ -1,5 +1,7 @@
 # ring-client-api
 
+## 11.5.1
+
 ## 11.5.0
 
 ### Minor Changes

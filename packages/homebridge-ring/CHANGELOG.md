@@ -1,5 +1,12 @@
 # homebridge-ring
 
+## 11.5.1
+
+### Patch Changes
+
+- 4150162: Remove references to homebridge dependency, which was causing plugin to fail to load on HOOBS and some homebridge environments
+  - ring-client-api@11.5.1
+
 ## 11.5.0
 
 ### Minor Changes

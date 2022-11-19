@@ -25,6 +25,7 @@
     "exit-beta": "changeset pre exit && commit -am 'Exit beta release'"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.4.7",
     "@changesets/cli": "^2.25.2",
     "@swc-node/register": "^1.5.4",
     "turbo": "^1.6.3"

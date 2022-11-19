@@ -34,6 +34,7 @@ jobs:
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:
+          version: npm run version
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CHANGESETS }}

@@ -6,6 +6,7 @@
     "dev": "npm run build && turbo run dev --parallel",
     "test": "turbo run test",
     "lint": "turbo run lint",
+    "version": "changeset version && npm i",
     "test:watch": "npm run test:watch -w ring-client-api",
     "example": "DEBUG=ring node -r @swc-node/register ./packages/examples/example.ts",
     "api-example": "DEBUG=ring node -r @swc-node/register ./packages/examples/api-example.ts",

@@ -1,5 +1,17 @@
 # homebridge-ring
 
+## 11.6.0
+
+### Minor Changes
+
+- c9c40ba: Add Spotlight Cam Pro device type
+
+### Patch Changes
+
+- 30cf112: Include changelog in homebridge releases
+- Updated dependencies [c9c40ba]
+  - ring-client-api@11.6.0
+
 ## 11.5.2
 
 ### Patch Changes

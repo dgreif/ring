@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.5.2
+
+### Patch Changes
+
+- daa5c31: Configure GitHub Releases with changesets action
+
 ## 11.5.1
 
 ## 11.5.0

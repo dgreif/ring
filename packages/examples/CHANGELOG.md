@@ -1,5 +1,12 @@
 # examples
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [daa5c31]
+  - ring-client-api@11.5.2
+
 ## 0.0.3
 
 ### Patch Changes

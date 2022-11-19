@@ -1,5 +1,13 @@
 # homebridge-ring
 
+## 11.5.2
+
+### Patch Changes
+
+- daa5c31: Configure GitHub Releases with changesets action
+- Updated dependencies [daa5c31]
+  - ring-client-api@11.5.2
+
 ## 11.5.1
 
 ### Patch Changes

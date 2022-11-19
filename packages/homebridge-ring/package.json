@@ -50,6 +50,7 @@
   ],
   "files": [
     "branding",
+    "CHANGELOG.md",
     "config.schema.json",
     "lib",
     "media"

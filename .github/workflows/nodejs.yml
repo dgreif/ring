@@ -6,6 +6,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      # Enable turbo remote caching
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_REMOTE_ONLY: true
+
     strategy:
       matrix:
         node-version: [16, 18]

@@ -17,10 +17,10 @@
     "auth-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-auth-cli.js",
     "device-data-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-device-data-cli.js",
     "push-with-tags": "git push --follow-tags",
-    "predeploy": "git pull -r && npm run build && npm run lint && npm run test",
+    "predeploy": "git pull -r && turbo run build test lint",
     "postdeploy": "npm run push-with-tags",
     "deploy": "changeset version && git commit -am 'Bump versions for release' && changeset publish",
-    "release": "npm run build && npm run lint && npm run test && changeset publish",
+    "release": "turbo run build test lint && changeset publish",
     "prepare-beta": "changeset pre enter beta && git add .changeset/pre.json && git commit -am 'Prepare for beta release'",
     "exit-beta": "changeset pre exit && commit -am 'Exit beta release'"
   },

@@ -115,7 +115,9 @@ camera.getSnapshot() // returns a Promise<Buffer> of the latest snapshot from th
 
 Camera also includes the following observables:
 
-- `onNewDing`: this will include the sip info and ding information every time a new ding is created
+- `onNewNotification`: this is triggered any time a new push notification is received
+- `onActiveNotifications`: notifications received within the last minute
+- `onDoorbellPressed`: this will include the sip info and ding information every time a new ding is created
 - `onActiveDings`: dings created within the last 65 seconds
 - `onDoorbellPressed`: emits a ding every time the doorbell is pressed
 - `onMotionDetected`: `true` or `false` based on `onActiveDings` containing a motion ding

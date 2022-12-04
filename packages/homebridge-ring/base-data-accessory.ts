@@ -4,7 +4,12 @@ import {
   ServiceType,
 } from './base-accessory'
 import { Observable, Subject } from 'rxjs'
-import type { RingCamera, RingChime, RingDevice } from 'ring-client-api'
+import type {
+  RingCamera,
+  RingChime,
+  RingDevice,
+  RingIntercom,
+} from 'ring-client-api'
 import { RingPlatformConfig } from './config'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import {
@@ -17,7 +22,7 @@ import {
 import { logError } from 'ring-client-api/util'
 
 export abstract class BaseDataAccessory<
-  T extends RingDevice | RingCamera | RingChime
+  T extends RingDevice | RingCamera | RingChime | RingIntercom
 > extends BaseAccessory<T> {
   abstract readonly device: T
   abstract readonly accessory: PlatformAccessory

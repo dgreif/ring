@@ -211,6 +211,12 @@ Note: Although homebridge has support for HomeKit Secure Video (HKSV), I will no
 - Play "Motion" sound
 - Adjust speaker volume (Not supported in Home app)
 
+### Intercoms
+
+Intercom support is still experimental. See [this issue](https://github.com/dgreif/ring/issues/1083) for more details
+
+- Unlock door
+
 ### Alarm/Location Modes
 
 | HomeKit Mode | Ring Mode                                                 |

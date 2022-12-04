@@ -28,6 +28,7 @@ import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
+import { RingIntercom } from './ring-intercom'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -94,7 +95,7 @@ export class RingApi extends Subscribed {
         )[]
       }>({ url: clientApi('ring_devices') }),
       onvifCameras = [] as OnvifCameraData[],
-      intercomHandsets = [] as IntercomHandsetAudioData[],
+      intercoms = [] as IntercomHandsetAudioData[],
       thirdPartyGarageDoorOpeners = [] as ThirdPartyGarageDoorOpener[],
       unknownDevices = [] as UnknownDevice[]
 
@@ -104,7 +105,7 @@ export class RingApi extends Subscribed {
           onvifCameras.push(device as OnvifCameraData)
           break
         case RingDeviceType.IntercomHandsetAudio:
-          intercomHandsets.push(device as IntercomHandsetAudioData)
+          intercoms.push(device as IntercomHandsetAudioData)
           break
         case RingDeviceType.ThirdPartyGarageDoorOpener:
           thirdPartyGarageDoorOpeners.push(device as ThirdPartyGarageDoorOpener)
@@ -130,21 +131,23 @@ export class RingApi extends Subscribed {
       beamBridges,
       onvifCameras,
       thirdPartyGarageDoorOpeners,
-      intercomHandsets,
+      intercoms,
       unknownDevices,
     }
   }
 
-  private listenForDeviceUpdates(cameras: RingCamera[], chimes: RingChime[]) {
+  private listenForDeviceUpdates(
+    cameras: RingCamera[],
+    chimes: RingChime[],
+    intercoms: RingIntercom[]
+  ) {
     const { cameraStatusPollingSeconds } = this.options
     if (!cameraStatusPollingSeconds) {
       return
     }
-    const onCamerasRequestUpdate = merge(
-        ...cameras.map((camera) => camera.onRequestUpdate)
-      ),
-      onChimesRequestUpdate = merge(
-        ...chimes.map((chime) => chime.onRequestUpdate)
+    const devices = [...cameras, ...chimes, ...intercoms],
+      onDeviceRequestUpdate = merge(
+        ...devices.map((device) => device.onRequestUpdate)
       ),
       onUpdateReceived = new Subject(),
       onPollForStatusUpdate = cameraStatusPollingSeconds
@@ -157,18 +160,18 @@ export class RingApi extends Subscribed {
       chimesById = chimes.reduce((byId, chime) => {
         byId[chime.id] = chime
         return byId
-      }, {} as { [id: number]: RingChime })
+      }, {} as { [id: number]: RingChime }),
+      intercomsById = intercoms.reduce((byId, intercom) => {
+        byId[intercom.id] = intercom
+        return byId
+      }, {} as { [id: number]: RingIntercom })
 
     if (!cameras.length && !chimes.length) {
       return
     }
 
     this.addSubscriptions(
-      merge(
-        onCamerasRequestUpdate,
-        onChimesRequestUpdate,
-        onPollForStatusUpdate
-      )
+      merge(onDeviceRequestUpdate, onPollForStatusUpdate)
         .pipe(
           throttleTime(500),
           switchMap(() => this.fetchRingDevices().catch(() => null))
@@ -191,6 +194,13 @@ export class RingApi extends Subscribed {
             const chime = chimesById[data.id]
             if (chime) {
               chime.updateData(data)
+            }
+          })
+
+          response.intercoms.forEach((data) => {
+            const intercom = intercomsById[data.id]
+            if (intercom) {
+              intercom.updateData(data)
             }
           })
         })
@@ -294,6 +304,7 @@ export class RingApi extends Subscribed {
         allCameras,
         baseStations,
         beamBridges,
+        intercoms,
       } = await this.fetchRingDevices(),
       locationIdsWithHubs = [...baseStations, ...beamBridges].map(
         (x) => x.location_id
@@ -310,6 +321,9 @@ export class RingApi extends Subscribed {
           )
       ),
       ringChimes = chimes.map((data) => new RingChime(data, this.restClient)),
+      ringIntercoms = intercoms.map(
+        (data) => new RingIntercom(data, this.restClient)
+      ),
       locations = rawLocations
         .filter((location) => {
           return (
@@ -327,6 +341,9 @@ export class RingApi extends Subscribed {
               ringChimes.filter(
                 (x) => x.data.location_id === location.location_id
               ),
+              ringIntercoms.filter(
+                (x) => x.data.location_id === location.location_id
+              ),
               {
                 hasHubs: locationIdsWithHubs.includes(location.location_id),
                 hasAlarmBaseStation: baseStations.some(
@@ -339,7 +356,7 @@ export class RingApi extends Subscribed {
             )
         )
 
-    this.listenForDeviceUpdates(cameras, ringChimes)
+    this.listenForDeviceUpdates(cameras, ringChimes, ringIntercoms)
     this.registerPushReceiver(cameras).catch((e) => {
       logError(e)
     })

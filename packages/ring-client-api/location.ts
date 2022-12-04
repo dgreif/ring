@@ -50,6 +50,7 @@ import { appApi, clientApi, RingRestClient } from './rest-client'
 import { getSearchQueryString, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { RingDevice } from './ring-device'
+import { RingIntercom } from './ring-intercom'
 import { Subscribed } from './subscribed'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
@@ -131,6 +132,7 @@ export class Location extends Subscribed {
     public readonly locationDetails: UserLocation,
     public readonly cameras: RingCamera[],
     public readonly chimes: RingChime[],
+    public readonly intercoms: RingIntercom[],
     public readonly options: {
       hasHubs: boolean
       hasAlarmBaseStation: boolean

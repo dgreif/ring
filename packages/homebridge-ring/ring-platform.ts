@@ -5,6 +5,7 @@ import {
   RingDevice,
   RingDeviceCategory,
   RingDeviceType,
+  RingIntercom,
 } from 'ring-client-api'
 import { hap } from './hap'
 import {
@@ -47,6 +48,7 @@ import { LocationModeSwitch } from './location-mode-switch'
 import { Thermostat } from './thermostat'
 import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch'
 import { generateMacAddress } from './util'
+import { Intercom } from './intercom'
 
 const ignoreHiddenDeviceTypes: string[] = [
   RingDeviceType.RingNetAdapter,
@@ -215,9 +217,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
     await Promise.all(
       locations.map(async (location) => {
         const devices = await location.getDevices(),
-          cameras = location.cameras,
-          chimes = location.chimes,
-          allDevices = [...devices, ...cameras, ...chimes],
+          { cameras, chimes, intercoms } = location,
+          allDevices = [...devices, ...cameras, ...chimes, ...intercoms],
           securityPanel = devices.find(
             (x) => x.deviceType === RingDeviceType.SecurityPanel
           ),
@@ -230,6 +231,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
                   ? Camera
                   : device instanceof RingChime
                   ? Chime
+                  : device instanceof RingIntercom
+                  ? Intercom
                   : getAccessoryClass(device)
               ) as (new (...args: any[]) => BaseAccessory<any>) | null
 

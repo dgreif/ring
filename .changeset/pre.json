@@ -3,10 +3,10 @@
   "tag": "beta",
   "initialVersions": {
     "eslint-config-shared": "0.0.0",
-    "examples": "0.0.5",
-    "homebridge-ring": "11.6.0",
+    "examples": "0.0.6-beta.0",
+    "homebridge-ring": "11.7.0-beta.0",
     "homebridge-ui": "0.0.0",
-    "ring-client-api": "11.6.0",
+    "ring-client-api": "11.7.0-beta.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [

@@ -24,7 +24,7 @@ import { AnyCameraData, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
-import { enableDebug, logError } from './util'
+import { enableDebug, logError, logInfo } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
@@ -250,6 +250,8 @@ export class RingApi extends Subscribed {
 
     pushReceiver.onNotification(({ message }) => {
       const dataJson = message.data?.gcmData as string
+
+      logInfo(`Received push notification: ${dataJson}`)
 
       try {
         const notification = JSON.parse(dataJson) as PushNotification

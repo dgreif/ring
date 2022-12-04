@@ -9,5 +9,7 @@
     "ring-client-api": "11.6.0",
     "tsconfig": "0.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "forty-carrots-nail"
+  ]
 }

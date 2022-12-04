@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.0-beta.0
+
+### Minor Changes
+
+- [`4fe3fed`](https://github.com/dgreif/ring/commit/4fe3fed87b6fac5f4f4661f80693be44c35f75f4) Thanks [@dgreif](https://github.com/dgreif)! - Add support of Intercoms. Currently the only supported features are unlocking and checking the battery level.
+
+### Patch Changes
+
+- Updated dependencies [[`4fe3fed`](https://github.com/dgreif/ring/commit/4fe3fed87b6fac5f4f4661f80693be44c35f75f4)]:
+  - ring-client-api@11.7.0-beta.0
+
 ## 11.6.0
 
 ### Minor Changes

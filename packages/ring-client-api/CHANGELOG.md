@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.7.0-beta.1
+
+### Patch Changes
+
+- [`f28de89`](https://github.com/dgreif/ring/commit/f28de891df284d56c39c73322ea72f972ce19270) Thanks [@dgreif](https://github.com/dgreif)! - Temporarily log push notification content to debug intercom notifications
+
 ## 11.7.0-beta.0
 
 ### Minor Changes

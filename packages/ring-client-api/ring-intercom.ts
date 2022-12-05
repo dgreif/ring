@@ -61,7 +61,7 @@ export class RingIntercom {
           jsonrpc: '2.0',
           method: 'unlock_door',
           params: {
-            door_id: this.id,
+            door_id: 0,
             user_id: 0,
           },
         },

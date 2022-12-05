@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 11.7.0-beta.2
+
+### Patch Changes
+
+- [`581080a`](https://github.com/dgreif/ring/commit/581080aca6c94b6e36090c39e2ad1850d6a85677) Thanks [@dgreif](https://github.com/dgreif)! - Fix payload sent for unlocking doors via Ring Intercom
+
+- Updated dependencies [[`581080a`](https://github.com/dgreif/ring/commit/581080aca6c94b6e36090c39e2ad1850d6a85677)]:
+  - ring-client-api@11.7.0-beta.2
+
 ## 11.7.0-beta.1
 
 ### Patch Changes

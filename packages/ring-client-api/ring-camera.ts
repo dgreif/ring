@@ -160,7 +160,7 @@ export class RingCamera extends Subscribed {
 
     this.onBatteryLevel = this.onData.pipe(
       map((data) => {
-        if (!('battery_level' in data)) {
+        if (!('battery_life' in data)) {
           return null
         }
         return getBatteryLevel(data)
@@ -219,7 +219,7 @@ export class RingCamera extends Subscribed {
   }
 
   get batteryLevel() {
-    if (!('battery_level' in this.data)) {
+    if (!('battery_life' in this.data)) {
       return null
     }
     return getBatteryLevel(this.data)

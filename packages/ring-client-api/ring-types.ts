@@ -1005,7 +1005,7 @@ export enum PushNotificationAction {
   IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
 }
 
-export interface PushNotification {
+export interface PushNotificationDing {
   ding: {
     streaming_protocol: 'ring_media_server'
     location_id: string
@@ -1032,6 +1032,36 @@ export interface PushNotification {
   subtype: 'motion' | 'ding' | 'human' | string
   action: PushNotificationAction | string
 }
+
+export interface PushNotificationAlarm {
+  aps: {
+    alert: string
+  }
+  action: PushNotificationAction | string
+  alarm_meta: {
+    device_zid: number
+    location_id: string
+  }
+}
+
+export interface PushNotificationLowBattery {
+  data: {
+    device_name: string
+    doorbot_id: number
+    battery_level: number // 29
+    device_kind: RingDeviceType
+    timestamp_epoch_ms: number
+  }
+  aps: {
+    title: string // 'Battery at 29% - ABC needs charging.'
+  }
+  action: PushNotificationAction.LowBattery
+}
+
+export type PushNotification =
+  | PushNotificationDing
+  | PushNotificationAlarm
+  | PushNotificationLowBattery
 
 export interface LiveCallResponse {
   ding_id: string

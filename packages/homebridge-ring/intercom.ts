@@ -26,7 +26,34 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       onDoorbellPressed = device.onDing.pipe(
         throttleTime(15000),
         map(() => ProgrammableSwitchEvent.SINGLE_PRESS)
-      )
+      ),
+      syncLockState = () => {
+        const state = this.getLockState()
+        lockService
+          .getCharacteristic(Characteristic.LockCurrentState)
+          .updateValue(state)
+        lockService
+          .getCharacteristic(Characteristic.LockTargetState)
+          .updateValue(state)
+      },
+      markAsUnlocked = () => {
+        // Mark the lock as unlocked, wait 5 seconds, then mark it as locked again
+        clearTimeout(this.unlockTimeout)
+        this.unlocking = true
+
+        // Update current state to reflect that the lock is unlocked
+        syncLockState()
+
+        // Leave the door in an "unlocked" state for 5 seconds
+        // After that, set the lock back to "locked" for both current and target state
+        this.unlockTimeout = setTimeout(() => {
+          this.unlocking = false
+          syncLockState()
+        }, 5000)
+      }
+
+    // Subscribe to unlock events coming from push notifications, which will catch an unlock from the Ring app
+    device.onUnlocked.subscribe(markAsUnlocked)
 
     // Lock Service
     this.registerCharacteristic({
@@ -51,22 +78,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
           })
           logInfo(`Unlock response: ${JSON.stringify(response)}`)
 
-          // Update current state to reflect that the lock is unlocked
-          lockService
-            .getCharacteristic(Characteristic.LockCurrentState)
-            .updateValue(this.getLockState())
-
-          // Leave the door in an "unlocked" state for 5 seconds
-          // After that, set the lock back to "locked" for both current and target state
-          this.unlockTimeout = setTimeout(() => {
-            this.unlocking = false
-            lockService
-              .getCharacteristic(Characteristic.LockCurrentState)
-              .updateValue(this.getLockState())
-            lockService
-              .getCharacteristic(Characteristic.LockTargetState)
-              .updateValue(this.getLockState())
-          }, 5000)
+          markAsUnlocked()
         } else {
           // If the user locks the door from the home app, we can't do anything but set the states back to "locked"
           this.unlocking = false

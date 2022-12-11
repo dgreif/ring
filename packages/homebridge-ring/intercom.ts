@@ -79,7 +79,13 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
     lockService.setPrimaryService(true)
 
     // Doorbell Service
-    // Note, the real DoorbellService doesn't work without a camera, so we just expose a single press programmable switch
+    this.registerObservableCharacteristic({
+      characteristicType: ProgrammableSwitchEvent,
+      serviceType: Service.Doorbell,
+      onValue: onDoorbellPressed,
+    })
+
+    // Programmable Switch Service
     this.registerObservableCharacteristic({
       characteristicType: ProgrammableSwitchEvent,
       serviceType: programableSwitchService,

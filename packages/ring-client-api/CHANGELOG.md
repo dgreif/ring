@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.7.0-beta.6
+
+### Minor Changes
+
+- [`d49548f`](https://github.com/dgreif/ring/commit/d49548f9d563d2faf094899f9d120689ac4083f3) Thanks [@dgreif](https://github.com/dgreif)! - Detect unlock notification from intercom
+
 ## 11.7.0-beta.5
 
 ## 11.7.0-beta.4

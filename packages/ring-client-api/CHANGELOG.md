@@ -1,5 +1,13 @@
 # ring-client-api
 
+## 11.7.0-beta.4
+
+### Minor Changes
+
+- [`3ebefaf`](https://github.com/dgreif/ring/commit/3ebefaf24d6e6afa4c25096f8181be63b9e0dbe4) Thanks [@dgreif](https://github.com/dgreif)! - Add onDing observable to intercoms, which will be triggered by ding push notifications
+
+- [`e845b44`](https://github.com/dgreif/ring/commit/e845b44cf870fa8e5d83f3f3116cdc6d1b4f9576) Thanks [@dgreif](https://github.com/dgreif)! - Automatically subscribe for ding events on intercoms
+
 ## 11.7.0-beta.3
 
 ### Patch Changes

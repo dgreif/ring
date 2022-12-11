@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 11.7.0-beta.4
+
+### Minor Changes
+
+- [`24987d8`](https://github.com/dgreif/ring/commit/24987d885ea7d61daad7dc5029bea11a869ab893) Thanks [@dgreif](https://github.com/dgreif)! - Add programmable switch for intercom doorbell press
+
+- [`e845b44`](https://github.com/dgreif/ring/commit/e845b44cf870fa8e5d83f3f3116cdc6d1b4f9576) Thanks [@dgreif](https://github.com/dgreif)! - Automatically subscribe for ding events on intercoms
+
+### Patch Changes
+
+- Updated dependencies [[`3ebefaf`](https://github.com/dgreif/ring/commit/3ebefaf24d6e6afa4c25096f8181be63b9e0dbe4), [`e845b44`](https://github.com/dgreif/ring/commit/e845b44cf870fa8e5d83f3f3116cdc6d1b4f9576)]:
+  - ring-client-api@11.7.0-beta.4
+
 ## 11.7.0-beta.3
 
 ### Patch Changes

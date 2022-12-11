@@ -216,6 +216,7 @@ Note: Although homebridge has support for HomeKit Secure Video (HKSV), I will no
 Intercom support is still experimental. See [this issue](https://github.com/dgreif/ring/issues/1083) for more details
 
 - Unlock door
+- Programmable switch which is trigged when the intercom doorbell is pressed
 
 ### Alarm/Location Modes
 

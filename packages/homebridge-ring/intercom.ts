@@ -4,7 +4,7 @@ import { RingPlatformConfig } from './config'
 import { PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory'
 import { logError, logInfo } from 'ring-client-api/util'
-import { map } from 'rxjs/operators'
+import { map, throttleTime } from 'rxjs/operators'
 
 export class Intercom extends BaseDataAccessory<RingIntercom> {
   private unlocking = false
@@ -18,7 +18,15 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
     super()
     const { Characteristic, Service } = hap,
       lockService = this.getService(Service.LockMechanism),
-      { LockCurrentState, LockTargetState } = Characteristic
+      { LockCurrentState, LockTargetState, ProgrammableSwitchEvent } =
+        Characteristic,
+      programableSwitchService = this.getService(
+        Service.StatelessProgrammableSwitch
+      ),
+      onDoorbellPressed = device.onDing.pipe(
+        throttleTime(15000),
+        map(() => ProgrammableSwitchEvent.SINGLE_PRESS)
+      )
 
     // Lock Service
     this.registerCharacteristic({
@@ -69,6 +77,21 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       },
     })
     lockService.setPrimaryService(true)
+
+    // Doorbell Service
+    // Note, the real DoorbellService doesn't work without a camera, so we just expose a single press programmable switch
+    this.registerObservableCharacteristic({
+      characteristicType: ProgrammableSwitchEvent,
+      serviceType: programableSwitchService,
+      onValue: onDoorbellPressed,
+    })
+
+    // Hide long and double press events by setting max value
+    programableSwitchService
+      .getCharacteristic(ProgrammableSwitchEvent)
+      .setProps({
+        maxValue: ProgrammableSwitchEvent.SINGLE_PRESS,
+      })
 
     // Battery Service
     if (device.batteryLevel !== null) {

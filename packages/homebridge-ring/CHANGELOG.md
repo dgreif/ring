@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.0-beta.5
+
+### Minor Changes
+
+- [`f59e357`](https://github.com/dgreif/ring/commit/f59e35713fb82595a4f25f4226c660fb635896ed) Thanks [@dgreif](https://github.com/dgreif)! - Add true doorbell service for intercoms. This can trigger Homepods to chime when the intercom doorbell is pressed
+
+### Patch Changes
+
+- Updated dependencies []:
+  - ring-client-api@11.7.0-beta.5
+
 ## 11.7.0-beta.4
 
 ### Minor Changes

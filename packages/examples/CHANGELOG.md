@@ -1,5 +1,12 @@
 # examples
 
+## 0.0.6-beta.5
+
+### Patch Changes
+
+- Updated dependencies []:
+  - ring-client-api@11.7.0-beta.5
+
 ## 0.0.6-beta.4
 
 ### Patch Changes

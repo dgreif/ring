@@ -1,5 +1,7 @@
 # ring-client-api
 
+## 11.7.0-beta.5
+
 ## 11.7.0-beta.4
 
 ### Minor Changes

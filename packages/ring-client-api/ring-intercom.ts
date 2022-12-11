@@ -1,4 +1,8 @@
-import { IntercomHandsetAudioData } from './ring-types'
+import {
+  IntercomHandsetAudioData,
+  PushNotification,
+  PushNotificationAction,
+} from './ring-types'
 import { clientApi, commandsApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
@@ -11,6 +15,7 @@ export class RingIntercom {
   onData
   onRequestUpdate = new Subject()
   onBatteryLevel
+  onDing = new Subject<void>()
 
   constructor(
     private initialData: IntercomHandsetAudioData,
@@ -95,5 +100,11 @@ export class RingIntercom {
       method: 'POST',
       url: this.doorbotUrl('unsubscribe'),
     })
+  }
+
+  processPushNotification(notification: PushNotification) {
+    if (notification.action === PushNotificationAction.Ding) {
+      this.onDing.next()
+    }
   }
 }

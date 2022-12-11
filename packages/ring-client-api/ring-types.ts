@@ -1001,6 +1001,8 @@ export enum NotificationDetectionType {
 export enum PushNotificationAction {
   Ding = 'com.ring.push.HANDLE_NEW_DING',
   Motion = 'com.ring.push.HANDLE_NEW_motion',
+  LowBattery = 'com.ring.push.LOW_BATTERY_ALERT',
+  IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
 }
 
 export interface PushNotification {

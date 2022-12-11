@@ -211,15 +211,22 @@ export class RingApi extends Subscribed {
     }
   }
 
-  async registerPushReceiver(cameras: RingCamera[]) {
+  private async registerPushReceiver(
+    cameras: RingCamera[],
+    intercoms: RingIntercom[]
+  ) {
     const pushReceiver = new PushReceiver({
         logLevel: 'NONE',
         senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
       }),
-      camerasById = cameras.reduce((byId, camera) => {
-        byId[camera.id] = camera
-        return byId
-      }, {} as { [id: number]: RingCamera })
+      devicesById: { [id: number]: RingCamera | RingIntercom } = {}
+
+    for (const camera of cameras) {
+      devicesById[camera.id] = camera
+    }
+    for (const intercom of intercoms) {
+      devicesById[intercom.id] = intercom
+    }
 
     pushReceiver.onCredentialsChanged(
       async ({
@@ -259,7 +266,7 @@ export class RingApi extends Subscribed {
           return
         }
 
-        camerasById[notification.ding.doorbot_id]?.processPushNotification(
+        devicesById[notification.ding.doorbot_id]?.processPushNotification(
           notification
         )
       } catch (e) {
@@ -357,7 +364,7 @@ export class RingApi extends Subscribed {
         )
 
     this.listenForDeviceUpdates(cameras, ringChimes, ringIntercoms)
-    this.registerPushReceiver(cameras).catch((e) => {
+    this.registerPushReceiver(cameras, ringIntercoms).catch((e) => {
       logError(e)
     })
 

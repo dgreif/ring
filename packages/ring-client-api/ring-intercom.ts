@@ -16,6 +16,7 @@ export class RingIntercom {
   onRequestUpdate = new Subject()
   onBatteryLevel
   onDing = new Subject<void>()
+  onUnlocked = new Subject<void>()
 
   constructor(
     private initialData: IntercomHandsetAudioData,
@@ -105,6 +106,8 @@ export class RingIntercom {
   processPushNotification(notification: PushNotification) {
     if (notification.action === PushNotificationAction.Ding) {
       this.onDing.next()
+    } else if (notification.action === PushNotificationAction.IntercomUnlock) {
+      this.onUnlocked.next()
     }
   }
 }

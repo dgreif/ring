@@ -219,7 +219,10 @@ export class RingApi extends Subscribed {
         logLevel: 'NONE',
         senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
       }),
-      devicesById: { [id: number]: RingCamera | RingIntercom } = {}
+      devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
+      sendToDevice = (id: number, notification: PushNotification) => {
+        devicesById[id]?.processPushNotification(notification)
+      }
 
     for (const camera of cameras) {
       devicesById[camera.id] = camera
@@ -261,14 +264,12 @@ export class RingApi extends Subscribed {
       try {
         const notification = JSON.parse(dataJson) as PushNotification
 
-        if (!notification.ding) {
-          // We may get notification that are not for a ding/motion, which can be ignored
-          return
+        if ('ding' in notification) {
+          sendToDevice(notification.ding.doorbot_id, notification)
+        } else if ('alarm_meta' in notification) {
+          // Alarm notification, such as intercom unlocked
+          sendToDevice(notification.alarm_meta.device_zid, notification)
         }
-
-        devicesById[notification.ding.doorbot_id]?.processPushNotification(
-          notification
-        )
       } catch (e) {
         logError(e)
       }

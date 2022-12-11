@@ -1,8 +1,9 @@
 import { IntercomHandsetAudioData } from './ring-types'
-import { commandsApi, RingRestClient } from './rest-client'
+import { clientApi, commandsApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
 import { getBatteryLevel } from './ring-camera'
+import { logError } from './util'
 
 export class RingIntercom {
   id
@@ -25,6 +26,15 @@ export class RingIntercom {
       map((data) => getBatteryLevel(data)),
       distinctUntilChanged()
     )
+
+    if (!initialData.subscribed) {
+      this.subscribeToDingEvents().catch((e) => {
+        logError(
+          'Failed to subscribe ' + initialData.description + ' to ding events'
+        )
+        logError(e)
+      })
+    }
   }
 
   updateData(update: IntercomHandsetAudioData) {
@@ -66,6 +76,24 @@ export class RingIntercom {
           },
         },
       },
+    })
+  }
+
+  private doorbotUrl(path = '') {
+    return clientApi(`doorbots/${this.id}/${path}`)
+  }
+
+  subscribeToDingEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('subscribe'),
+    })
+  }
+
+  unsubscribeFromDingEvents() {
+    return this.restClient.request({
+      method: 'POST',
+      url: this.doorbotUrl('unsubscribe'),
     })
   }
 }

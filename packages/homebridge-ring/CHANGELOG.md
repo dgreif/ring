@@ -1,5 +1,28 @@
 # homebridge-ring
 
+## 11.7.0
+
+### Minor Changes
+
+- [`4fe3fed`](https://github.com/dgreif/ring/commit/4fe3fed87b6fac5f4f4661f80693be44c35f75f4) Thanks [@dgreif](https://github.com/dgreif)! - Add support of Intercoms. Currently the only supported features are unlocking and checking the battery level.
+
+- [`9847506`](https://github.com/dgreif/ring/commit/98475068c9e568d3400a2e88d7de0fdb34b102c9) Thanks [@dgreif](https://github.com/dgreif)! - Add programmable switch for intercom doorbell press
+
+- [`a862bd2`](https://github.com/dgreif/ring/commit/a862bd28d52c9c85709ba2f0fc2c912b7886e836) Thanks [@dgreif](https://github.com/dgreif)! - Add true doorbell service for intercoms. This can trigger Homepods to chime when the intercom doorbell is pressed
+
+- [`836c580`](https://github.com/dgreif/ring/commit/836c580c4247324e18c92674f11840385c989c5f) Thanks [@dgreif](https://github.com/dgreif)! - Automatically subscribe for ding events on intercoms
+
+- [`56a7894`](https://github.com/dgreif/ring/commit/56a7894c3e5515b7d8678cb3902b593078449446) Thanks [@dgreif](https://github.com/dgreif)! - Detect unlock notification from intercom
+
+### Patch Changes
+
+- [`503e34f`](https://github.com/dgreif/ring/commit/503e34fb92d59304b0d33d7ab12216f4c38bddba) Thanks [@dgreif](https://github.com/dgreif)! - Fixed a typo which caused all cameras to be recognized as wired cameras. This lead to slower notifications for battery cameras and removed the battery level in HomeKit. Big thanks to @satrik for pointing me in the right direction to track down these issues!
+
+- [`321c983`](https://github.com/dgreif/ring/commit/321c9831ed4208c14f09b943543c6f05f7f170f7) Thanks [@dgreif](https://github.com/dgreif)! - Fix payload sent for unlocking doors via Ring Intercom
+
+- Updated dependencies [[`503e34f`](https://github.com/dgreif/ring/commit/503e34fb92d59304b0d33d7ab12216f4c38bddba), [`4fe3fed`](https://github.com/dgreif/ring/commit/4fe3fed87b6fac5f4f4661f80693be44c35f75f4), [`321c983`](https://github.com/dgreif/ring/commit/321c9831ed4208c14f09b943543c6f05f7f170f7), [`c084848`](https://github.com/dgreif/ring/commit/c0848484388ade6308387e2047186325d4880f52), [`836c580`](https://github.com/dgreif/ring/commit/836c580c4247324e18c92674f11840385c989c5f), [`56a7894`](https://github.com/dgreif/ring/commit/56a7894c3e5515b7d8678cb3902b593078449446)]:
+  - ring-client-api@11.7.0
+
 ## 11.6.0
 
 ### Minor Changes

@@ -5,6 +5,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "allowJs": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   }
 }

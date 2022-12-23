@@ -17,30 +17,30 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@eneris/push-receiver": "^3.1.2",
+    "@eneris/push-receiver": "^3.1.4",
     "@homebridge/camera-utils": "^2.2.0",
-    "werift": "0.17.0",
+    "werift": "0.17.5",
     "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "^4.3.4",
     "got": "^11.8.5",
-    "rxjs": "^7.5.7",
+    "rxjs": "^7.8.0",
     "socket.io-client": "^2.5.0",
-    "systeminformation": "^5.12.14",
+    "systeminformation": "^5.16.9",
     "uuid": "^9.0.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
     "@types/debug": "4.1.7",
-    "@types/jest": "29.2.2",
-    "@types/node": "18.11.9",
-    "@types/uuid": "8.3.4",
+    "@types/jest": "29.2.4",
+    "@types/node": "18.11.17",
+    "@types/uuid": "9.0.0",
     "@types/ws": "^8.5.3",
     "eslint-config-shared": "0.0.0",
     "jest": "29.3.1",
     "ts-jest": "29.0.3",
     "tsconfig": "0.0.0",
-    "typescript": "4.8.4"
+    "typescript": "4.9.4"
   },
   "engines": {
     "node": "^16 || ^18"

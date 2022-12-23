@@ -50,7 +50,8 @@ export abstract class BaseAccessory<T extends { name: string }> {
         ? this.accessory.getServiceById(serviceType, subType)
         : this.accessory.getService(serviceType),
       service =
-        existingService || this.accessory.addService(serviceType, name, subType)
+        existingService ||
+        this.accessory.addService(serviceType, name, subType!)
 
     if (
       debug &&

@@ -8,16 +8,16 @@
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "13.4.0",
     "@testing-library/user-event": "14.4.3",
-    "@types/jest": "29.2.2",
-    "@types/node": "18.11.9",
-    "@types/react": "18.0.25",
-    "@types/react-dom": "18.0.8",
+    "@types/jest": "29.2.4",
+    "@types/node": "18.11.17",
+    "@types/react": "18.0.26",
+    "@types/react-dom": "18.0.10",
     "eslint-config-shared": "0.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "tsconfig": "0.0.0",
-    "typescript": "4.8.4"
+    "typescript": "4.9.4"
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",

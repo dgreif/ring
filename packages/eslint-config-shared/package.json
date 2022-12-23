@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "main": "eslint-config-shared.js",
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "5.42.1",
-    "@typescript-eslint/parser": "5.42.1",
-    "eslint": "8.27.0",
+    "@typescript-eslint/eslint-plugin": "5.47.0",
+    "@typescript-eslint/parser": "5.47.0",
+    "eslint": "8.30.0",
     "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-jest": "27.1.5",
+    "eslint-plugin-jest": "27.1.7",
     "eslint-plugin-prettier": "4.2.1",
     "tsconfig": "0.0.0"
   }

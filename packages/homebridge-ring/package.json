@@ -16,13 +16,13 @@
     "ring-client-api": "11.7.0"
   },
   "devDependencies": {
-    "concurrently": "^7.5.0",
+    "concurrently": "^7.6.0",
     "eslint-config-shared": "0.0.0",
-    "homebridge": "1.5.1",
+    "homebridge": "1.6.0",
     "homebridge-ui": "0.0.0",
     "nodemon": "^2.0.20",
     "tsconfig": "0.0.0",
-    "typescript": "4.8.4"
+    "typescript": "4.9.4"
   },
   "engines": {
     "node": "^16 || ^18",

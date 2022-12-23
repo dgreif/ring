@@ -60,6 +60,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       characteristicType: LockCurrentState,
       serviceType: lockService,
       getValue: () => this.getLockState(),
+      requestUpdate: () => device.requestUpdate(),
     })
     this.registerCharacteristic({
       characteristicType: LockTargetState,
@@ -121,6 +122,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
             return batteryLevel === null ? 100 : batteryLevel
           })
         ),
+        requestUpdate: () => device.requestUpdate(),
       })
     }
 

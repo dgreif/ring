@@ -1,5 +1,12 @@
 # examples
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`4d86e1d`](https://github.com/dgreif/ring/commit/4d86e1d8bbf7839becb127ebbeed37944ca27d3a)]:
+  - ring-client-api@11.7.1
+
 ## 0.0.6
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.1
+
+### Patch Changes
+
+- [`40559b8`](https://github.com/dgreif/ring/commit/40559b874740858cbb8bfd85125b7bf07680be2d) Thanks [@dgreif](https://github.com/dgreif)! - Update info (eg battery level) for intercom when viewed in Home app
+
+- [`4d86e1d`](https://github.com/dgreif/ring/commit/4d86e1d8bbf7839becb127ebbeed37944ca27d3a) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- Updated dependencies [[`4d86e1d`](https://github.com/dgreif/ring/commit/4d86e1d8bbf7839becb127ebbeed37944ca27d3a)]:
+  - ring-client-api@11.7.1
+
 ## 11.7.0
 
 ### Minor Changes

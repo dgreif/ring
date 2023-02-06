@@ -82,6 +82,10 @@ export class WeriftPeerConnection
               parameters:
                 'packetization-mode=1;profile-level-id=640029;level-asymmetry-allowed=1',
             }),
+            new RTCRtpCodecParameters({
+              mimeType: "video/rtx",
+              clockRate: 90000,
+            }),
           ],
         },
         iceServers: ringIceServers.map((server) => ({ urls: server })),

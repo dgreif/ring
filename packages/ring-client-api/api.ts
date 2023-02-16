@@ -166,7 +166,7 @@ export class RingApi extends Subscribed {
         return byId
       }, {} as { [id: number]: RingIntercom })
 
-    if (!cameras.length && !chimes.length) {
+    if (!cameras.length && !chimes.length && !intercoms.length) {
       return
     }
 

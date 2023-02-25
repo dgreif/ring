@@ -616,7 +616,15 @@ export class CameraSource implements CameraStreamingDelegate {
           session.start
         )}s)`
       )
-      await session.activate(request)
+      try {
+        await session.activate(request)
+      } catch (e) {
+        logError('Failed to activate stream')
+        logError(e)
+        callback(new Error('Failed to activate stream'))
+
+        return
+      }
       logInfo(
         `Streaming active for ${this.ringCamera.name} (${getDurationSeconds(
           session.start

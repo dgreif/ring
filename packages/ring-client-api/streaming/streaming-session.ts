@@ -10,7 +10,7 @@ import { WebrtcConnection } from './webrtc-connection'
 import { getFfmpegPath } from '../ffmpeg'
 import { logDebug, logError } from '../util'
 import { RingCamera } from '../ring-camera'
-import { concatMap, take } from 'rxjs/operators'
+import { concatMap, map, mergeWith, take } from 'rxjs/operators'
 import { Subscribed } from '../subscribed'
 
 type SpawnInput = string | number
@@ -83,7 +83,17 @@ export class StreamingSession extends Subscribed {
   }
 
   get isUsingOpus() {
-    return firstValueFrom(this.onUsingOpus)
+    return firstValueFrom(
+      this.onUsingOpus.pipe(
+        mergeWith(
+          this.connection.onError.pipe(
+            map((e) => {
+              throw e
+            })
+          )
+        )
+      )
+    )
   }
 
   async startTranscoding(ffmpegOptions: FfmpegOptions) {

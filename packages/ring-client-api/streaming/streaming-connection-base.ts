@@ -13,6 +13,7 @@ export interface StreamingConnectionOptions {
 export abstract class StreamingConnectionBase extends Subscribed {
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
+  readonly onError = new ReplaySubject<void>(1)
   readonly onMessage = new ReplaySubject<{ method: string }>()
   readonly onWsOpen
   protected readonly pc
@@ -52,7 +53,18 @@ export abstract class StreamingConnectionBase extends Subscribed {
           concatMap((event) => {
             const message = JSON.parse((event as MessageEvent).data)
             this.onMessage.next(message)
-            return this.handleMessage(message)
+            return this.handleMessage(message).catch((e) => {
+              if (
+                e instanceof Error &&
+                e.message.includes('negotiate codecs failed')
+              ) {
+                e = new Error(
+                  `Failed to negotiate codecs.  This is a known issue with Ring cameras.  Please see https://github.com/dgreif/ring/wiki/Streaming-Legacy-Mode`
+                )
+              }
+              this.onError.next(e)
+              throw e
+            })
           })
         )
         .subscribe(),
@@ -76,6 +88,11 @@ export abstract class StreamingConnectionBase extends Subscribed {
           logDebug('Stream connection closed')
           this.callEnded()
         }
+      }),
+
+      this.onError.subscribe((e) => {
+        logError(e)
+        this.callEnded()
       })
     )
   }

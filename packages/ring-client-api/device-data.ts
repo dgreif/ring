@@ -73,6 +73,7 @@ export async function logDeviceData() {
         name: location.name,
         cameras: location.cameras.map((camera) => camera.data),
         chimes: location.chimes.map((chime) => chime.data),
+        intercoms: location.intercoms.map((intercom) => intercom.data),
         devices: devices.map((device) => device.data),
       }
     }),

@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.2
+
+### Patch Changes
+
+- [`0fa5a87`](https://github.com/dgreif/ring/commit/0fa5a8786fe3f4dd8dd1ebaaf5e930555419e998) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [`d2b867c`](https://github.com/dgreif/ring/commit/d2b867cf7b518689fff413e1828bc77c467dcb67) Thanks [@dgreif](https://github.com/dgreif)! - Handle codec negotiation failure errors
+
+- Updated dependencies [[`85e2901`](https://github.com/dgreif/ring/commit/85e2901268a1d21b1ebb76790336b30ccb181041), [`0fa5a87`](https://github.com/dgreif/ring/commit/0fa5a8786fe3f4dd8dd1ebaaf5e930555419e998), [`d2b867c`](https://github.com/dgreif/ring/commit/d2b867cf7b518689fff413e1828bc77c467dcb67)]:
+  - ring-client-api@11.7.2
+
 ## 11.7.1
 
 ### Patch Changes

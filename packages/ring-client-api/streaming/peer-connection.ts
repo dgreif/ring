@@ -83,7 +83,7 @@ export class WeriftPeerConnection
                 'packetization-mode=1;profile-level-id=640029;level-asymmetry-allowed=1',
             }),
             new RTCRtpCodecParameters({
-              mimeType: "video/rtx",
+              mimeType: 'video/rtx',
               clockRate: 90000,
             }),
           ],

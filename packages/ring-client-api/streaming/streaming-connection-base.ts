@@ -59,7 +59,7 @@ export abstract class StreamingConnectionBase extends Subscribed {
                 e.message.includes('negotiate codecs failed')
               ) {
                 e = new Error(
-                  `Failed to negotiate codecs.  This is a known issue with Ring cameras.  Please see https://github.com/dgreif/ring/wiki/Streaming-Legacy-Mode`
+                  'Failed to negotiate codecs.  This is a known issue with Ring cameras.  Please see https://github.com/dgreif/ring/wiki/Streaming-Legacy-Mode'
                 )
               }
               this.onError.next(e)

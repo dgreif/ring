@@ -1,7 +1,6 @@
 {
   "name": "homebridge-ui",
   "private": true,
-  "version": "0.0.0",
   "homepage": "./",
   "devDependencies": {
     "@homebridge/plugin-ui-utils": "0.0.19",
@@ -9,11 +8,11 @@
     "@types/node": "18.14.1",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
-    "eslint-config-shared": "0.0.0",
+    "eslint-config-shared": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "tsconfig": "0.0.0",
+    "tsconfig": "*",
     "typescript": "4.9.5"
   },
   "scripts": {

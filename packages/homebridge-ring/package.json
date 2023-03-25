@@ -20,9 +20,9 @@
     "eslint-config-shared": "*",
     "homebridge": "1.6.0",
     "homebridge-ui": "*",
-    "nodemon": "^2.0.20",
+    "nodemon": "^2.0.22",
     "tsconfig": "*",
-    "typescript": "4.9.5"
+    "typescript": "5.0.2"
   },
   "engines": {
     "node": "^16 || ^18",

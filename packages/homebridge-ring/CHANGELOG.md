@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 11.7.3
+
+### Patch Changes
+
+- [`ede65a3`](https://github.com/dgreif/ring/commit/ede65a3dbe92b3562a0cf973cb6225999560c2e7) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- Updated dependencies [[`ede65a3`](https://github.com/dgreif/ring/commit/ede65a3dbe92b3562a0cf973cb6225999560c2e7)]:
+  - ring-client-api@11.7.3
+
 ## 11.7.2
 
 ### Patch Changes

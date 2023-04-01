@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.4
+
+### Patch Changes
+
+- [`8d19bdc`](https://github.com/dgreif/ring/commit/8d19bdc4b1fc609561788c47c2eaffda6e48b0ef) Thanks [@dgreif](https://github.com/dgreif)! - For battery cameras, wait up to 2 seconds for snapshot to be avaliable after a montion/ding event. These events often trigger an immediate notification without the snapshot uuid, quickly followed by a similar notification including the uuid. This new wait period should more consisitently provide a snapshot image for montion/ding notifications in HomeKit
+
+- [`28b68cb`](https://github.com/dgreif/ring/commit/28b68cb20fb03c9b1f468aab0602cbf462eeb299) Thanks [@dgreif](https://github.com/dgreif)! - Clean snapshot uuid before requesting image
+
+- Updated dependencies [[`28b68cb`](https://github.com/dgreif/ring/commit/28b68cb20fb03c9b1f468aab0602cbf462eeb299)]:
+  - ring-client-api@11.7.4
+
 ## 11.7.3
 
 ### Patch Changes

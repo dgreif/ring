@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.7.4
+
+### Patch Changes
+
+- [`28b68cb`](https://github.com/dgreif/ring/commit/28b68cb20fb03c9b1f468aab0602cbf462eeb299) Thanks [@dgreif](https://github.com/dgreif)! - Clean snapshot uuid before requesting image
+
 ## 11.7.3
 
 ### Patch Changes

@@ -2,11 +2,12 @@ import { hap } from './hap'
 import { RingPlatformConfig } from './config'
 import type { RingCamera } from 'ring-client-api'
 import { BaseDataAccessory } from './base-data-accessory'
-import { map, mapTo, switchMap, throttleTime } from 'rxjs/operators'
+import { filter, map, mapTo, switchMap, throttleTime } from 'rxjs/operators'
 import { CameraSource } from './camera-source'
 import { PlatformAccessory } from 'homebridge'
 import { TargetValueTimer } from './target-value-timer'
-import { logError, logInfo } from 'ring-client-api/util'
+import { delay, logError, logInfo } from 'ring-client-api/util'
+import { firstValueFrom } from 'rxjs'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
@@ -212,8 +213,25 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     eventDescription: string,
     characteristicValue: T
   ) {
-    const latestNotification = this.device.latestNotification,
-      imageUuid = latestNotification?.ding.image_uuid
+    let imageUuid = this.device.latestNotificationSnapshotUuid
+
+    /**
+     * Battery cameras may recieve an initial notification with no image uuid,
+     * followed shortly by a second notification with the image uuid. We need to
+     * wait for the second notification before we can load the snapshot.
+     */
+    if (this.device.operatingOnBattery && !imageUuid) {
+      await Promise.race([
+        firstValueFrom(
+          this.device.onNewNotification.pipe(
+            filter((notification) => Boolean(notification.ding.image_uuid))
+          )
+        ),
+        // wait up to 2 seconds for the second notification
+        delay(2000),
+      ])
+      imageUuid = this.device.latestNotificationSnapshotUuid
+    }
 
     if (this.device.operatingOnBattery && !imageUuid) {
       // battery cameras cannot fetch a new snapshot while recording is in progress

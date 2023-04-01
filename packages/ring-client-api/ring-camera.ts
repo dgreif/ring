@@ -227,6 +227,11 @@ export class RingCamera extends Subscribed {
     return notifications[notifications.length - 1]
   }
 
+  get latestNotificationSnapshotUuid() {
+    const notification = this.latestNotification
+    return notification?.ding.image_uuid
+  }
+
   get batteryLevel() {
     if (!('battery_life' in this.data)) {
       return null

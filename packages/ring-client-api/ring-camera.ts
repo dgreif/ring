@@ -107,6 +107,14 @@ export function getSearchQueryString(
   return queryString.length ? `?${queryString}` : ''
 }
 
+export function cleanSnapshotUuid(uuid?: string | null) {
+  if (!uuid) {
+    return uuid
+  }
+
+  return uuid.replace(/:.*$/, '')
+}
+
 export class RingCamera extends Subscribed {
   id
   deviceType
@@ -571,7 +579,7 @@ export class RingCamera extends Subscribed {
           'after-ms': afterMs,
           'max-wait-ms': maxWaitMs,
           extras: force ? 'force' : undefined,
-          uuid,
+          uuid: cleanSnapshotUuid(uuid),
         },
         headers: {
           accept: 'image/jpeg',
@@ -588,7 +596,7 @@ export class RingCamera extends Subscribed {
 
   getSnapshotByUuid(uuid: string) {
     return this.restClient.request<Buffer>({
-      url: clientApi('snapshots/uuid?uuid=' + uuid),
+      url: clientApi('snapshots/uuid?uuid=' + cleanSnapshotUuid(uuid)),
       responseType: 'buffer',
       headers: {
         accept: 'image/jpeg',

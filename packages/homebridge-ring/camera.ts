@@ -216,7 +216,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     let imageUuid = this.device.latestNotificationSnapshotUuid
 
     /**
-     * Battery cameras may recieve an initial notification with no image uuid,
+     * Battery cameras may receive an initial notification with no image uuid,
      * followed shortly by a second notification with the image uuid. We need to
      * wait for the second notification before we can load the snapshot.
      */

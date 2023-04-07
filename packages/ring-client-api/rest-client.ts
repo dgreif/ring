@@ -203,6 +203,7 @@ export class RingRestClient {
           '2fa-support': 'true',
           '2fa-code': twoFactorAuthCode || '',
           hardware_id: await this.hardwareIdPromise,
+          'User-Agent': 'android:com.ringapp',
         },
       })
 

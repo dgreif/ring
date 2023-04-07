@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.7.5
+
+### Patch Changes
+
+- [`5a69b5d`](https://github.com/dgreif/ring/commit/5a69b5df155a906f0ae8b62104177f591d7e7814) Thanks [@dgreif](https://github.com/dgreif)! - Add user agent to auth request headers, which should fix 406 auth errors
+
 ## 11.7.4
 
 ### Patch Changes

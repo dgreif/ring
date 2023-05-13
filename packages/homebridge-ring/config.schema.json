@@ -207,7 +207,7 @@
               "items": [
                 {
                   "key": "locationIds[]",
-                  "placeholder": "Location ID"
+                  "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx or xxxxx-xxxxx-x"
                 }
               ]
             }

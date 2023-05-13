@@ -1,6 +1,5 @@
 name: Live Streaming Issue
 description: Having trouble with Live Streaming
-title: "[Streaming]: "
 labels: [live-streaming]
 body:
   - type: markdown

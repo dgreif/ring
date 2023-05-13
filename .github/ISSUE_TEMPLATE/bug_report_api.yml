@@ -1,27 +1,31 @@
 name: Bug Report (ring-client-api)
 description: Report a bug in ring-client-api
-title: 'Bug: '
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        Please DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
-        Before opening an issue, search for open and closed GitHub issues that match your situation.
         If this is a Live Stream issue please go back and use the Live Streaming issue template.
-  - type: input
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
     attributes:
       label: Describe The Bug
       placeholder: A clear and concise description of the problem...
     validations:
       required: true
-  - type: input
+  - type: textarea
     attributes:
       label: To Reproduce
-      placeholder: Steps to reproduce the behavior.  - Create an `ApiClient` - Attempt to ...  - See error
+      placeholder: Steps to reproduce the behavior. - Create an `ApiClient` - Attempt to ...  - See error
     validations:
-      required: true
-  - type: input
+      required: false
+  - type: textarea
     attributes:
       label: Expected behavior
       placeholder: A clear and concise description of what you expected to happen.
@@ -34,7 +38,7 @@ body:
       placeholder: If applicable, add log output to help explain your problem.
       render: shell
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: Screenshots
@@ -42,12 +46,12 @@ body:
       placeholder: You can attach images by clicking this area to highlight it and then dragging files in.
     validations:
       required: false
-  - type: input
+  - type: textarea
     attributes:
       label: Additional context
       placeholder: Add any other context about the problem here.
     validations:
-      required: true
+      required: false
   - type: markdown
     attributes:
       value: |

@@ -1,38 +1,29 @@
 name: Feature Request
 description: Suggest an idea for this project
-title: 'Feature Request: '
 labels: [enhancement]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        You must use the issue template below when submitting a feature request.
-  - type: markdown
-    attributes:
-      value: |
-        Is your feature request related to a problem? Please describe.
-  - type: input
+  - type: textarea
     attributes:
       label: Description
       placeholder: A clear and concise description of the problem or missing capability...
     validations:
-      required: false
-  - type: input
-    attributes:
-      label: Describe the solution you would like
-      placeholder: If you have a solution in mind, please describe it.
-    validations:
       required: true
-  - type: input
+  - type: textarea
     attributes:
-      label: Describe alternatives you have considered
-      placeholder: Have you considered any alternative solutions or workarounds?
+      label: Proposed solution
+      description: Describe the solution you'd like to see implmented
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: Have you considered any alternative solutions or workarounds?
     validations:
       required: false
   - type: textarea
     attributes:
       label: Device data
-      description: Please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
-      placeholder: If you are requesting a new device be added to homebridge-ring
+      description: If you are requesting a new device or feature that uses data from a device, please follow the instructions in https://github.com/dgreif/ring/wiki/Data-Discovery and include the output here
+      placeholder: Place device data output here
     validations:
       required: false

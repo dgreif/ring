@@ -1,0 +1,98 @@
+name: Bug Report (homebridge-ring)
+description: Report a bug in homebridge-ring
+title: 'Bug: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        lease DO NOT DELETE THIS TEMPLATE or your issue may be closed immediately.
+        Before opening an issue, search for open and closed GitHub issues that match your situation.
+        If this is a Live Stream issue please go back and use the Live Streaming issue template.
+  - type: input
+    attributes:
+      label: Describe The Bug
+      placeholder: A clear and concise description of the problem...
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: To Reproduce
+      placeholder: Steps to reproduce the behavior.  - Start Homebridge - Attempt to ...  - See error
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Expected behavior
+      placeholder: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: Logs
+    attributes:
+      label: Relevant log output
+      placeholder: If applicable, add log output to help explain your problem.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+      placeholder: You can attach images by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false
+  - type: textarea
+    id: Config
+    attributes:
+      label: Homebridge Ring Config
+      placeholder: Post homebridge-ring platform config  _without sensitive information_
+      render: shell
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Additional context
+      placeholder: Add any other context about the problem here.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Environment
+  - type: input
+    attributes:
+      label: OS
+      placeholder: Rasbian, macOS, Windows, Linux
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Node.js Version
+      placeholder: v14.17.6
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: NPM Version
+      placeholder: v7.22.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Homebridge/HOOBs Version
+      placeholder: v1.4.0/v4.0.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Homebridge Ring Plugin Version
+      placeholder: v9.24.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Operating System
+      placeholder: Raspbian / Ubuntu / Debian / Windows / macOS / Docker
+    validations:
+      required: true

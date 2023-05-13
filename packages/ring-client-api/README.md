@@ -11,6 +11,10 @@ the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 and third party devices that connect to the Ring Alarm System.
 Built to support the [homebridge-ring Plugin](../homebridge-ring)
 
+## Troubleshooting Issues
+
+If you are having issues, please look for related articles in the [wiki](https://github.com/dgreif/ring/wiki) and search existing [Issues](https://github.com/dgreif/ring/issues) before opening a new Issue/Discussion
+
 ## Installation
 
 `npm i ring-client-api`

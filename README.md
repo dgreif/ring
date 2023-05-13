@@ -2,6 +2,10 @@
 
 This repo contains unofficial packages to enable interaction and automation with the majority of [Ring](https://ring.com/) products
 
+## Troubleshooting Issues
+
+If you are having issues, please look for related articles in the [wiki](https://github.com/dgreif/ring/wiki) and search existing [Issues](https://github.com/dgreif/ring/issues) before opening a new Issue/Discussion
+
 ## `ring-client-api`
 
 The [ring-client-api](./packages/ring-client-api/) is a TypeScript package designed to be used by developers to create your own apps/programs which interact with Rings api

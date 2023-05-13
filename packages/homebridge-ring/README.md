@@ -18,6 +18,10 @@ the [Ring Alarm System](https://shop.ring.com/pages/security-system),
 [Ring Smart Lighting](https://shop.ring.com/pages/smart-lighting),
 and third party devices that connect to the Ring Alarm System.
 
+## Troubleshooting Issues
+
+If you are having issues, please look for related articles in the [wiki](https://github.com/dgreif/ring/wiki) and search existing [Issues](https://github.com/dgreif/ring/issues) before opening a new Issue/Discussion
+
 ## Installation
 
 Assuming a global installation of `homebridge`:
@@ -123,6 +127,8 @@ If you turn on notifications for the motion sensors, or for any doorbell camera,
 HomeKit with a snapshot from the camera
 
 If you are having issues with your cameras in the Home app, please see the [Camera Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Camera-Troubleshooting)
+
+If you are having issues with Notifications, please see the [Notification Troubleshooting Wiki](https://github.com/dgreif/ring/wiki/Notification-Troubleshooting)
 
 Note: Although homebridge has support for HomeKit Secure Video (HKSV), I will not be adding it to this plugin. Please see [this issue](https://github.com/dgreif/ring/issues/860#issuecomment-1021584211) for more details.
 

@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 11.7.6
+
+### Patch Changes
+
+- [`8ef4c15`](https://github.com/dgreif/ring/commit/8ef4c15cda4501e60a5ba4a104495ef5013ee92f) Thanks [@dgreif](https://github.com/dgreif)! - Recreate the session every 12 hours. This is intended to fix an ongoing issue with Push Notifications for users outside the US. We believe Ring is deleting session data after ~24 hours for Data Residency reasons, and that recreating the session periodically should allow notifications to work indefinitely. Note, this has not been verified to fix the issue yet. See https://github.com/dgreif/ring/issues/1218 for more details.
+
 ## 11.7.5
 
 ### Patch Changes

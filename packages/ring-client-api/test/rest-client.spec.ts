@@ -2,6 +2,7 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { RingRestClient } from '../rest-client'
 import { getHardwareId } from '../util'
+import { firstValueFrom } from 'rxjs'
 
 const email = 'some@one.com',
   password = 'abc123!',
@@ -9,7 +10,10 @@ const email = 'some@one.com',
   twoFactorAuthCode = '123456',
   hardwareIdPromise = getHardwareId(),
   accessToken = 'ey__accees_token',
+  secondAccessToken = 'ey__second_accees_token',
   refreshToken = 'ey__refresh_token',
+  secondRefreshToken = 'ey__second_refresh_token',
+  thirdRefreshToken = 'ey__third_refresh_token',
   server = setupServer(
     rest.post('https://oauth.ring.com/oauth/token', async (req, res, ctx) => {
       const body = await req.json()
@@ -26,6 +30,45 @@ const email = 'some@one.com',
             error:
               'Invalid auth headers: ' +
               JSON.stringify(req.headers.raw(), null, 2),
+          })
+        )
+      }
+
+      if (body.grant_type === 'refresh_token') {
+        if (body.refresh_token === refreshToken) {
+          // Valid refresh token
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: accessToken,
+              expires_in: 3600,
+              refresh_token: secondRefreshToken,
+              scope: 'client',
+              token_type: 'Bearer',
+            })
+          )
+        }
+
+        if (body.refresh_token === secondRefreshToken) {
+          // Valid refresh token
+          return res(
+            ctx.status(200),
+            ctx.json({
+              access_token: secondAccessToken,
+              expires_in: 3600,
+              refresh_token: thirdRefreshToken,
+              scope: 'client',
+              token_type: 'Bearer',
+            })
+          )
+        }
+
+        // Invalid refresh token
+        return res(
+          ctx.status(401),
+          ctx.json({
+            error: 'invalid_grant',
+            error_description: 'token is invalid or does not exists',
           })
         )
       }
@@ -151,6 +194,7 @@ describe('getAuth', () => {
       'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: access_denied)'
     )
   })
+
   test('it should handle invalid 2fa code', async () => {
     const client = new RingRestClient({
       password,
@@ -167,5 +211,87 @@ describe('getAuth', () => {
     expect(client.promptFor2fa).toEqual(
       'Invalid 2fa code entered.  Please try again.'
     )
+  })
+
+  test('it should establish a valid auth token with a valid refresh token', async () => {
+    const client = new RingRestClient({
+      refreshToken,
+    })
+
+    expect(await client.getCurrentAuth()).toMatchObject({
+      access_token: accessToken,
+      refresh_token: secondRefreshToken,
+    })
+    expect(client.refreshToken).toEqual(secondRefreshToken)
+  })
+
+  test('it should emit an event when a new refresh token is created', async () => {
+    const client = new RingRestClient({
+        refreshToken,
+      }),
+      refreshedPromise = firstValueFrom(client.onRefreshTokenUpdated),
+      auth = await client.getAuth()
+    expect(auth).toMatchObject({
+      access_token: accessToken,
+      refresh_token: secondRefreshToken,
+    })
+    expect(await refreshedPromise).toEqual({
+      oldRefreshToken: refreshToken,
+      newRefreshToken: secondRefreshToken,
+    })
+  })
+})
+
+describe('fetch', () => {
+  let invalidateFirstAccessToken = false
+
+  beforeEach(() => {
+    invalidateFirstAccessToken = false
+    server.use(
+      rest.get('https://api.ring.com/devices/v1/locations', (req, res, ctx) => {
+        const authHeader = req.headers.get('Authorization')
+        if (
+          invalidateFirstAccessToken &&
+          authHeader === `Bearer ${accessToken}`
+        ) {
+          // Original access token used, but no longer valid
+          return res(ctx.status(401))
+        }
+
+        if (
+          authHeader !== `Bearer ${accessToken}` &&
+          authHeader !== `Bearer ${secondAccessToken}`
+        ) {
+          // Invalid access token used
+          return res(ctx.status(401))
+        }
+
+        return res(ctx.json([]))
+      })
+    )
+  })
+
+  it('should include the auth token as a header', async () => {
+    const client = new RingRestClient({
+        refreshToken,
+      }),
+      response = await client.request({
+        url: 'https://api.ring.com/devices/v1/locations',
+      })
+
+    expect(response).toEqual([])
+  })
+
+  it('should fetch a new auth token if the first is no longer valid', async () => {
+    const client = new RingRestClient({
+      refreshToken,
+    })
+
+    invalidateFirstAccessToken = true
+    const response = await client.request({
+      url: 'https://api.ring.com/devices/v1/locations',
+    })
+
+    expect(response).toEqual([])
   })
 })

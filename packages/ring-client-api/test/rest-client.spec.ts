@@ -4,6 +4,7 @@ import { RingRestClient } from '../rest-client'
 import { getHardwareId } from '../util'
 import { firstValueFrom } from 'rxjs'
 
+let sessionCreatedCount = 0
 const email = 'some@one.com',
   password = 'abc123!',
   phone = '+1xxxxxxxx89',
@@ -135,8 +136,49 @@ const email = 'some@one.com',
           tsv_state: 'sms',
         })
       )
-    })
+    }),
+    rest.post(
+      'https://api.ring.com/clients_api/session',
+      async (req, res, ctx) => {
+        const authHeader = req.headers.get('Authorization')
+
+        if (
+          authHeader !== `Bearer ${accessToken}` &&
+          authHeader !== `Bearer ${secondAccessToken}`
+        ) {
+          // Invalid access token used
+          return res(ctx.status(401))
+        }
+
+        const body = await req.json()
+        if (
+          body.device.hardware_id !== (await getHardwareId()) ||
+          body.device.metadata.api_version !== 11 ||
+          body.device.metadata.device_model !== 'ring-client-api' ||
+          body.device.os !== 'android'
+        ) {
+          return res(
+            ctx.status(400),
+            ctx.body('Bad session request: ' + JSON.stringify(body, null, 2))
+          )
+        }
+
+        // Fake a response from the session endpoint, incrementing the sessionCreatedCount
+        sessionCreatedCount++
+        return res(
+          ctx.json({
+            profile: {
+              id: 1234,
+            },
+          })
+        )
+      }
+    )
   )
+
+beforeEach(() => {
+  sessionCreatedCount = 0
+})
 
 beforeAll(() => {
   // Establish requests interception layer before all tests.
@@ -264,6 +306,13 @@ describe('fetch', () => {
         ) {
           // Invalid access token used
           return res(ctx.status(401))
+        }
+
+        if (sessionCreatedCount === 0) {
+          // eslint-disable-next-line no-console
+          console.error('Request received before session was created')
+          // Session not created yet
+          return res(ctx.status(404), ctx.text('Session not created yet'))
         }
 
         return res(ctx.json([]))

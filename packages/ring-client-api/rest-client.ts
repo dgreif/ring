@@ -336,6 +336,10 @@ export class RingRestClient {
   async request<T = void>(
     options: RequestOptions & { url: string; allowNoResponse?: boolean }
   ): Promise<T & ExtendedResponse> {
+    if (!this.sessionPromise) {
+      this.refreshSession()
+    }
+
     const hardwareId = await this.hardwareIdPromise,
       url = options.url! as string,
       initialSessionPromise = this.sessionPromise

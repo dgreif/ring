@@ -236,6 +236,11 @@ export class RingRestClient {
       ) {
         this.using2fa = true
 
+        if (response.statusCode === 400) {
+          this.promptFor2fa = 'Invalid 2fa code entered.  Please try again.'
+          throw new Error(responseError)
+        }
+
         if ('tsv_state' in responseData) {
           const { tsv_state, phone } = responseData,
             prompt =

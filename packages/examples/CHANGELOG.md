@@ -4,6 +4,13 @@
 
 ### Patch Changes
 
+- Updated dependencies [[`8ef4c15`](https://github.com/dgreif/ring/commit/8ef4c15cda4501e60a5ba4a104495ef5013ee92f)]:
+  - ring-client-api@11.7.6
+
+## null
+
+### Patch Changes
+
 - Updated dependencies [[`5a69b5d`](https://github.com/dgreif/ring/commit/5a69b5df155a906f0ae8b62104177f591d7e7814)]:
   - ring-client-api@11.7.5
 

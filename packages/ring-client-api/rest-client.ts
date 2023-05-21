@@ -149,6 +149,7 @@ export class RingRestClient {
     oldRefreshToken?: string
     newRefreshToken: string
   }>(1)
+  public onSession = new ReplaySubject<SessionResponse>(1)
   public readonly baseSessionMetadata = {
     api_version: apiVersion,
     device_model:
@@ -296,7 +297,9 @@ export class RingRestClient {
   getSession(): Promise<SessionResponse> {
     return this.authPromise.then(async (authToken) => {
       try {
-        return await this.fetchNewSession(authToken)
+        const session = await this.fetchNewSession(authToken)
+        this.onSession.next(session)
+        return session
       } catch (e: any) {
         const response = e.response || {}
 
@@ -331,6 +334,16 @@ export class RingRestClient {
 
   private refreshSession() {
     this.sessionPromise = this.getSession()
+
+    this.sessionPromise.finally(() => {
+      // Refresh the session every 12 hours
+      // This is needed to keep the session alive for users outside the US, due to Data Residency laws
+      // We believe Ring is clearing the session info after ~24 hours, which breaks Push Notifications
+      const timeout = setTimeout(() => {
+        this.refreshSession()
+      }, 12 * 60 * 60 * 1000) // 12 hours
+      this.timeouts.push(timeout)
+    })
   }
 
   async request<T = void>(

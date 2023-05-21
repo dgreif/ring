@@ -22,7 +22,7 @@ import {
 } from './ring-types'
 import { AnyCameraData, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
-import { EMPTY, merge, Subject } from 'rxjs'
+import { combineLatest, EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
 import { enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
@@ -222,7 +222,8 @@ export class RingApi extends Subscribed {
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
       sendToDevice = (id: number, notification: PushNotification) => {
         devicesById[id]?.processPushNotification(notification)
-      }
+      },
+      onPushNotificationToken = new Subject<string>()
 
     for (const camera of cameras) {
       devicesById[camera.id] = camera
@@ -232,11 +233,18 @@ export class RingApi extends Subscribed {
     }
 
     pushReceiver.onCredentialsChanged(
-      async ({
+      ({
         newCredentials: {
           fcm: { token },
         },
-      }) => {
+      }) => onPushNotificationToken.next(token)
+    )
+
+    this.addSubscriptions(
+      combineLatest([
+        onPushNotificationToken,
+        this.restClient.onSession, // combined but not used here, just to trigger another request when session is updated
+      ]).subscribe(async ([token]) => {
         try {
           await this.restClient.request({
             url: clientApi('device'),
@@ -255,7 +263,7 @@ export class RingApi extends Subscribed {
         } catch (e) {
           logError(e)
         }
-      }
+      })
     )
 
     pushReceiver.onNotification(({ message }) => {

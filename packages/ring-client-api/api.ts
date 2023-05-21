@@ -24,7 +24,7 @@ import { AnyCameraData, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { combineLatest, EMPTY, merge, Subject } from 'rxjs'
 import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
-import { enableDebug, logError } from './util'
+import { clearTimeouts, enableDebug, logError } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
@@ -418,5 +418,6 @@ export class RingApi extends Subscribed {
       })
 
     this.restClient.clearTimeouts()
+    clearTimeouts()
   }
 }

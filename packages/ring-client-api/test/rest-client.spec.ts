@@ -1,10 +1,11 @@
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { RingRestClient } from '../rest-client'
-import { getHardwareId } from '../util'
+import { clearTimeouts, getHardwareId } from '../util'
 import { firstValueFrom } from 'rxjs'
 
-let sessionCreatedCount = 0
+let sessionCreatedCount = 0,
+  client: RingRestClient
 const email = 'some@one.com',
   password = 'abc123!',
   phone = '+1xxxxxxxx89',
@@ -191,9 +192,14 @@ afterAll(() => {
   server.close()
 })
 
+afterEach(() => {
+  client.clearTimeouts()
+  clearTimeouts()
+})
+
 describe('getAuth', () => {
   test('It should throw and set the 2fa prompt', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       password,
       email,
     })
@@ -209,7 +215,7 @@ describe('getAuth', () => {
   })
 
   test('It should accept a 2fa code', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       password,
       email,
     })
@@ -227,7 +233,7 @@ describe('getAuth', () => {
   })
 
   test('it should handle invalid credentials', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       password: 'incorrect password',
       email,
     })
@@ -238,7 +244,7 @@ describe('getAuth', () => {
   })
 
   test('it should handle invalid 2fa code', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       password,
       email,
     })
@@ -256,7 +262,7 @@ describe('getAuth', () => {
   })
 
   test('it should establish a valid auth token with a valid refresh token', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       refreshToken,
     })
 
@@ -268,10 +274,10 @@ describe('getAuth', () => {
   })
 
   test('it should emit an event when a new refresh token is created', async () => {
-    const client = new RingRestClient({
-        refreshToken,
-      }),
-      refreshedPromise = firstValueFrom(client.onRefreshTokenUpdated),
+    client = new RingRestClient({
+      refreshToken,
+    })
+    const refreshedPromise = firstValueFrom(client.onRefreshTokenUpdated),
       auth = await client.getAuth()
     expect(auth).toMatchObject({
       access_token: accessToken,
@@ -321,18 +327,18 @@ describe('fetch', () => {
   })
 
   it('should include the auth token as a header', async () => {
-    const client = new RingRestClient({
-        refreshToken,
-      }),
-      response = await client.request({
-        url: 'https://api.ring.com/devices/v1/locations',
-      })
+    client = new RingRestClient({
+      refreshToken,
+    })
+    const response = await client.request({
+      url: 'https://api.ring.com/devices/v1/locations',
+    })
 
     expect(response).toEqual([])
   })
 
   it('should fetch a new auth token if the first is no longer valid', async () => {
-    const client = new RingRestClient({
+    client = new RingRestClient({
       refreshToken,
     })
 

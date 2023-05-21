@@ -23,9 +23,20 @@ let logger: Logger = {
   },
   debugEnabled = false
 
+const timeouts = new Set<ReturnType<typeof setTimeout>>()
+export function clearTimeouts() {
+  timeouts.forEach((timeout) => {
+    clearTimeout(timeout)
+  })
+}
+
 export function delay(milliseconds: number) {
   return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds)
+    const timeout = setTimeout(() => {
+      timeouts.delete(timeout)
+      resolve(undefined)
+    }, milliseconds)
+    timeouts.add(timeout)
   })
 }
 

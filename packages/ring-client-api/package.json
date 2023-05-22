@@ -38,6 +38,7 @@
   "devDependencies": {
     "@types/debug": "4.1.7",
     "@types/jest": "29.5.0",
+    "@types/json-bigint": "^1.0.1",
     "@types/node": "18.15.9",
     "@types/uuid": "9.0.1",
     "@types/ws": "^8.5.4",

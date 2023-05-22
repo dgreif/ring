@@ -29,6 +29,7 @@ import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
 import { RingIntercom } from './ring-intercom'
+import JSONbig = require('json-bigint')
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]
@@ -270,7 +271,7 @@ export class RingApi extends Subscribed {
       const dataJson = message.data?.gcmData as string
 
       try {
-        const notification = JSON.parse(dataJson) as PushNotification
+        const notification = JSONbig({ storeAsString: true }).parse(dataJson) as PushNotification
 
         if ('ding' in notification) {
           sendToDevice(notification.ding.doorbot_id, notification)

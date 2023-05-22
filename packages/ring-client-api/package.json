@@ -25,6 +25,7 @@
     "colors": "1.4.0",
     "debug": "^4.3.4",
     "got": "^11.8.5",
+    "json-bigint": "^1.0.0",
     "msw": "^1.2.1",
     "rxjs": "^7.8.0",
     "socket.io-client": "^2.5.0",

@@ -271,7 +271,9 @@ export class RingApi extends Subscribed {
       const dataJson = message.data?.gcmData as string
 
       try {
-        const notification = JSONbig({ storeAsString: true }).parse(dataJson) as PushNotification
+        const notification = JSONbig({ storeAsString: true }).parse(
+          dataJson
+        ) as PushNotification
 
         if ('ding' in notification) {
           sendToDevice(notification.ding.doorbot_id, notification)

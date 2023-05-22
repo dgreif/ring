@@ -65,25 +65,26 @@ function getEndOfToday() {
   return getStartOfToday() + fullDayMs - 1
 }
 
+interface BatteryLevel {
+  primary: number | null,
+  secondary: number | null
+}
+
 export function getBatteryLevel(
   data: Pick<CameraData, 'battery_life' | 'battery_life_2'> & {
     health?: Partial<CameraData['health']>
   }
-) {
-  const levels = [
-      parseBatteryLife(data.battery_life),
-      parseBatteryLife(data.battery_life_2),
-    ].filter((level): level is number => level !== null),
-    { health } = data
+): BatteryLevel | null {
+  const { health } = data
 
-  if (
-    !levels.length ||
-    (health && !health.battery_percentage && !health.battery_present)
-  ) {
+  if (health && !health.battery_percentage && !health.battery_present) {
     return null
   }
 
-  return Math.min(...levels)
+  return {
+    primary: parseBatteryLife(data.battery_life),
+    secondary: parseBatteryLife(data.battery_life_2)
+  }
 }
 
 export function getSearchQueryString(

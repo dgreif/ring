@@ -6,33 +6,42 @@ describe('Ring Camera', () => {
       expect(
         getBatteryLevel({
           battery_life: '49',
+          battery_life_2: '50'
         })
-      ).toEqual(49)
+      ).toEqual({ primary: 49, secondary: 50 })
+    })
+
+    it('should handle string battery life (no secondary)', () => {
+      expect(
+        getBatteryLevel({
+          battery_life: '49'
+        })
+      ).toEqual({ primary: 49, secondary: null })
     })
 
     it('should handle null battery life', () => {
-      expect(getBatteryLevel({ battery_life: null })).toEqual(null)
+      expect(getBatteryLevel({ battery_life: null })).toEqual({ primary: null, secondary: null })
     })
 
     it('should handle right battery only', () => {
       expect(
         getBatteryLevel({ battery_life: null, battery_life_2: 24 })
-      ).toEqual(24)
+      ).toEqual({ primary: null, secondary: 24 })
     })
 
     it('should handle left battery only', () => {
       expect(
         getBatteryLevel({ battery_life: 76, battery_life_2: null })
-      ).toEqual(76)
+      ).toEqual({ primary: 76, secondary: null })
     })
 
     it('should handle dual batteries', () => {
       expect(
         getBatteryLevel({ battery_life: '92', battery_life_2: 84 })
-      ).toEqual(84)
+      ).toEqual({ primary: 92, secondary: 84 })
       expect(
         getBatteryLevel({ battery_life: '92', battery_life_2: 100 })
-      ).toEqual(92)
+      ).toEqual({ primary: 92, secondary: 100 })
     })
   })
 

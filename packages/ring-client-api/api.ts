@@ -29,7 +29,7 @@ import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
 import { RingIntercom } from './ring-intercom'
-import JSONbig = require('json-bigint')
+import JSONbig from 'json-bigint'
 
 export interface RingApiOptions extends SessionOptions {
   locationIds?: string[]

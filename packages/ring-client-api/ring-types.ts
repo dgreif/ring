@@ -1016,7 +1016,7 @@ export interface PushNotificationDing {
     device_kind: RingCameraKind
     detection_type: NotificationDetectionType
     human_detected?: boolean
-    id: number
+    id: string
     pod_id: number
     request_id: string
     image_uuid: string

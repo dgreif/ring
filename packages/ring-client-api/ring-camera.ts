@@ -398,7 +398,7 @@ export class RingCamera extends Subscribed {
     return new StreamingSession(this, connection)
   }
 
-  private removeDingById(idToRemove: number) {
+  private removeDingById(idToRemove: string) {
     const allActiveDings = this.activeNotifications,
       otherDings = allActiveDings.filter(({ ding }) => ding.id !== idToRemove)
 

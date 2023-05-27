@@ -25,6 +25,7 @@ import { SmokeAlarm } from './smoke-alarm'
 import { CoAlarm } from './co-alarm'
 import { SmokeCoListener } from './smoke-co-listener'
 import {
+  controlCenterDisplayName,
   debug,
   getSystemId,
   RingPlatformConfig,
@@ -196,9 +197,9 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
   async connectToApi() {
     const { api, config } = this,
-      systemId = getSystemId(api),
+      systemId = getSystemId(api.user.storagePath()),
       ringApi = new RingApi({
-        controlCenterDisplayName: 'homebridge-ring',
+        controlCenterDisplayName,
         ...config,
         systemId,
       }),

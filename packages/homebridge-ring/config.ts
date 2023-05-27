@@ -5,6 +5,7 @@ import { createHash, randomBytes } from 'crypto'
 import { join } from 'path'
 
 const systemIdFileName = '.ring.json'
+export const controlCenterDisplayName = 'homebridge-ring'
 
 export interface RingPlatformConfig extends RingApiOptions {
   alarmOnEntryDelay?: boolean
@@ -49,9 +50,8 @@ interface RingContext {
   systemId: string
 }
 
-export function getSystemId(homebridge: API) {
-  const storagePath = homebridge.user.storagePath(),
-    filePath = join(storagePath, systemIdFileName)
+export function getSystemId(homebridgeStoragePath: string) {
+  const filePath = join(homebridgeStoragePath, systemIdFileName)
 
   try {
     const ringContext: RingContext = JSON.parse(

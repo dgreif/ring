@@ -183,23 +183,25 @@ export class RingCamera extends Subscribed {
       distinctUntilChanged()
     )
 
-    if (!initialData.subscribed) {
-      this.subscribeToDingEvents().catch((e) => {
-        logError(
-          'Failed to subscribe ' + initialData.description + ' to ding events'
-        )
-        logError(e)
-      })
-    }
+    this.addSubscriptions(
+      this.restClient.onSession.subscribe(() => {
+        this.subscribeToDingEvents().catch((e) => {
+          logError(
+            'Failed to subscribe ' + initialData.description + ' to ding events'
+          )
+          logError(e)
+        })
 
-    if (!initialData.subscribed_motions) {
-      this.subscribeToMotionEvents().catch((e) => {
-        logError(
-          'Failed to subscribe ' + initialData.description + ' to motion events'
-        )
-        logError(e)
+        this.subscribeToMotionEvents().catch((e) => {
+          logError(
+            'Failed to subscribe ' +
+              initialData.description +
+              ' to motion events'
+          )
+          logError(e)
+        })
       })
-    }
+    )
   }
 
   updateData(update: AnyCameraData) {

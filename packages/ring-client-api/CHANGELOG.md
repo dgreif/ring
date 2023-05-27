@@ -1,5 +1,13 @@
 # ring-client-api
 
+## 11.7.7
+
+### Patch Changes
+
+- [`f3e66fd`](https://github.com/dgreif/ring/commit/f3e66fdbeb960a9ba35ff26289a054c537bac890) Thanks [@dgreif](https://github.com/dgreif)! - Subscribe to ding/motion events every time the user session is refreshed. This currently happens every 12 hours. This is an attempt to fix motion/ding notifications after restarting, but I am unable to reproduce the issue and verify this change fixes it.
+
+- [#1222](https://github.com/dgreif/ring/pull/1222) [`af7f44e`](https://github.com/dgreif/ring/commit/af7f44e5f1f97274a8902063b621bde1e94bd08f) Thanks [@djm181](https://github.com/djm181)! - Update push notifications to include a full and accurate ding `id`. Note, this is technically a breaking change because the `id` was previously a `number` instead of a `string`, but the last few digits were truncated due to number rounding. We are releasing this as a patch because the `number` version was unusable for fetching additional information about the ding.
+
 ## 11.7.6
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.7.7
+
+### Patch Changes
+
+- [`f3e66fd`](https://github.com/dgreif/ring/commit/f3e66fdbeb960a9ba35ff26289a054c537bac890) Thanks [@dgreif](https://github.com/dgreif)! - Subscribe to ding/motion events every time the user session is refreshed. This currently happens every 12 hours. This is an attempt to fix motion/ding notifications after restarting, but I am unable to reproduce the issue and verify this change fixes it.
+
+- [`b9881a7`](https://github.com/dgreif/ring/commit/b9881a7b5ed6684bf6dc0464354af7acf1cc77ea) Thanks [@dgreif](https://github.com/dgreif)! - Prevent a duplicate device named "Device name not found" from being created when logging into homebridge with the homebridge ui.
+
+- Updated dependencies [[`f3e66fd`](https://github.com/dgreif/ring/commit/f3e66fdbeb960a9ba35ff26289a054c537bac890), [`af7f44e`](https://github.com/dgreif/ring/commit/af7f44e5f1f97274a8902063b621bde1e94bd08f)]:
+  - ring-client-api@11.7.7
+
 ## 11.7.6
 
 ### Patch Changes

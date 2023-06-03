@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 11.8.0
+
+### Minor Changes
+
+- [`96bbf54`](https://github.com/dgreif/ring/commit/96bbf54a7c03a8a14c794a7756af4d270efa30f5) Thanks [@dgreif](https://github.com/dgreif)! - Allow Node.js 20
+
+### Patch Changes
+
+- Updated dependencies [[`96bbf54`](https://github.com/dgreif/ring/commit/96bbf54a7c03a8a14c794a7756af4d270efa30f5)]:
+  - ring-client-api@11.8.0
+
 ## 11.7.7
 
 ### Patch Changes

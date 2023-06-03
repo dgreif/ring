@@ -263,6 +263,7 @@ export class RingRestClient {
       if (grantData.refresh_token) {
         // failed request with refresh token
         this.refreshToken = undefined
+        this.authConfig = undefined
         logError(requestError)
         return this.getAuth()
       }

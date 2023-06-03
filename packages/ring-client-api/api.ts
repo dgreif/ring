@@ -29,7 +29,7 @@ import {
   switchMap,
   throttleTime,
 } from 'rxjs/operators'
-import { clearTimeouts, enableDebug, logError } from './util'
+import { clearTimeouts, enableDebug, logError, logInfo } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
@@ -275,7 +275,24 @@ export class RingApi extends Subscribed {
       })
     )
 
+    try {
+      await pushReceiver.connect()
+    } catch (e) {
+      logError('Failed to connect push notification receiver')
+      logError(e)
+    }
+
+    const startTime = Date.now()
     pushReceiver.onNotification(({ message }) => {
+      // Ignore messages received in the first two seconds after connecting
+      // These are likely duplicates, and we aren't currently storying persistent ids anywhere to avoid re-processing them
+      if (Date.now() - startTime < 2000) {
+        logInfo(
+          'Ignoring push notification received in first two seconds after starting up'
+        )
+        return
+      }
+
       const dataJson = message.data?.gcmData as string
 
       try {
@@ -293,13 +310,6 @@ export class RingApi extends Subscribed {
         logError(e)
       }
     })
-
-    try {
-      await pushReceiver.connect()
-    } catch (e) {
-      logError('Failed to connect push notification receiver')
-      logError(e)
-    }
 
     // If we already have credentials, use them immediately
     if (credentials) {

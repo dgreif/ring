@@ -6,5 +6,10 @@
     "homebridge-ring": "11.7.7",
     "ring-client-api": "11.7.7"
   },
-  "changesets": []
+  "changesets": [
+    "few-jeans-marry",
+    "neat-falcons-sip",
+    "sweet-snakes-kneel",
+    "two-tools-sit"
+  ]
 }

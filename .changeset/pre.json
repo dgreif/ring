@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "examples": null,
+    "homebridge-ring": "11.7.7",
+    "ring-client-api": "11.7.7"
+  },
+  "changesets": []
+}

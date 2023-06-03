@@ -16,6 +16,7 @@ import {
 } from './ring-types'
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
+import type { Credentials } from '@eneris/push-receiver/dist/types'
 
 const defaultRequestOptions: RequestOptions = {
     responseType: 'json',
@@ -122,6 +123,7 @@ export interface SessionOptions {
 interface AuthConfig {
   rt: string // Refresh Token for Auth
   hid?: string // Hardware ID, to stay consistent after initial token creation
+  pnc?: Credentials // Push Notification Credentials
 }
 
 function parseAuthConfig(rawRefreshToken?: string): AuthConfig | undefined {
@@ -484,5 +486,39 @@ export class RingRestClient {
 
   clearTimeouts() {
     this.timeouts.forEach(clearTimeout)
+  }
+
+  get _internalOnly_pushNotificationCredentials() {
+    return this.authConfig?.pnc
+  }
+
+  set _internalOnly_pushNotificationCredentials(
+    credentials: Credentials | undefined
+  ) {
+    if (!this.refreshToken || !this.authConfig) {
+      throw new Error(
+        'Cannot set push notification credentials without a refresh token'
+      )
+    }
+
+    const oldRefreshToken = this.refreshToken
+    this.authConfig = {
+      ...this.authConfig,
+      pnc: credentials,
+    }
+
+    // SOMEDAY: refactor the conversion from auth config to refresh token - DRY from above
+    const newRefreshToken = toBase64(JSON.stringify(this.authConfig))
+    if (newRefreshToken === oldRefreshToken) {
+      // No change, so we don't need to emit an updated refresh token
+      return
+    }
+
+    // Save and emit the updated refresh token
+    this.refreshToken = newRefreshToken
+    this.onRefreshTokenUpdated.next({
+      oldRefreshToken,
+      newRefreshToken,
+    })
   }
 }

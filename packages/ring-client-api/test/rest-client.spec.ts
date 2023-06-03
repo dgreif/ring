@@ -177,10 +177,10 @@ const email = 'some@one.com',
     )
   )
 
-async function wrapRefreshToken(refreshToken: string) {
+async function wrapRefreshToken(rt: string) {
   return toBase64(
     JSON.stringify({
-      rt: refreshToken,
+      rt,
       hid: await hardwareIdPromise,
     })
   )

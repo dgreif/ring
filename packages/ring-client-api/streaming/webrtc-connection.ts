@@ -6,7 +6,7 @@ import {
   StreamingConnectionBase,
   StreamingConnectionOptions,
 } from './streaming-connection-base'
-import { logDebug } from '../util'
+import { fromBase64, logDebug } from '../util'
 
 interface InitializationMessage {
   method: 'initialization'
@@ -50,8 +50,7 @@ interface LiveCallSession {
 
 function parseLiveCallSession(sessionId: string) {
   const encodedSession = sessionId.split('.')[1],
-    buff = Buffer.from(encodedSession, 'base64'),
-    text = buff.toString('ascii')
+    text = fromBase64(encodedSession)
   return JSON.parse(text) as LiveCallSession
 }
 

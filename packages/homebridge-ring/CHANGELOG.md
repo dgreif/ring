@@ -1,5 +1,33 @@
 # homebridge-ring
 
+## 11.8.0-beta.0
+
+### Minor Changes
+
+- [`906225c`](https://github.com/dgreif/ring/commit/906225c4b6e4aecab76fb0d4782b502fee7aca29) Thanks [@dgreif](https://github.com/dgreif)! - Embed hardware id in the refresh token string. This should prevent a second device from being created in Ring Control Center. For this to take effect, please follow the instructions in https://github.com/dgreif/ring/wiki/Notification-Troubleshooting
+
+- [`36cdb0b`](https://github.com/dgreif/ring/commit/36cdb0bc21fab6bf24a2772ff9fcbe3d1315bfe2) Thanks [@dgreif](https://github.com/dgreif)! - Embed push notification credentials in the refresh token. This should allow push notifications to work across restarts and continue working past 24 hours in regions with data residency restrictions.
+
+- [`96bbf54`](https://github.com/dgreif/ring/commit/96bbf54a7c03a8a14c794a7756af4d270efa30f5) Thanks [@dgreif](https://github.com/dgreif)! - Allow Node.js 20
+
+### Patch Changes
+
+- [`da963fd`](https://github.com/dgreif/ring/commit/da963fd69dd294d69da9764869ae4e9886dcccd0) Thanks [@dgreif](https://github.com/dgreif)! - Remove forced session creation on startup. This should fix issues where notifications stop working immediately after a restart.
+
+- Updated dependencies [[`da963fd`](https://github.com/dgreif/ring/commit/da963fd69dd294d69da9764869ae4e9886dcccd0), [`906225c`](https://github.com/dgreif/ring/commit/906225c4b6e4aecab76fb0d4782b502fee7aca29), [`36cdb0b`](https://github.com/dgreif/ring/commit/36cdb0bc21fab6bf24a2772ff9fcbe3d1315bfe2), [`96bbf54`](https://github.com/dgreif/ring/commit/96bbf54a7c03a8a14c794a7756af4d270efa30f5)]:
+  - ring-client-api@11.8.0-beta.0
+
+## 11.7.7
+
+### Patch Changes
+
+- [`f3e66fd`](https://github.com/dgreif/ring/commit/f3e66fdbeb960a9ba35ff26289a054c537bac890) Thanks [@dgreif](https://github.com/dgreif)! - Subscribe to ding/motion events every time the user session is refreshed. This currently happens every 12 hours. This is an attempt to fix motion/ding notifications after restarting, but I am unable to reproduce the issue and verify this change fixes it.
+
+- [`b9881a7`](https://github.com/dgreif/ring/commit/b9881a7b5ed6684bf6dc0464354af7acf1cc77ea) Thanks [@dgreif](https://github.com/dgreif)! - Prevent a duplicate device named "Device name not found" from being created when logging into homebridge with the homebridge ui.
+
+- Updated dependencies [[`f3e66fd`](https://github.com/dgreif/ring/commit/f3e66fdbeb960a9ba35ff26289a054c537bac890), [`af7f44e`](https://github.com/dgreif/ring/commit/af7f44e5f1f97274a8902063b621bde1e94bd08f)]:
+  - ring-client-api@11.7.7
+
 ## 11.7.6
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { RingRestClient } from '../rest-client'
-import { clearTimeouts, getHardwareId } from '../util'
+import { clearTimeouts, getHardwareId, toBase64 } from '../util'
 import { firstValueFrom } from 'rxjs'
 
 let sessionCreatedCount = 0,
@@ -177,6 +177,15 @@ const email = 'some@one.com',
     )
   )
 
+async function wrapRefreshToken(rt: string) {
+  return toBase64(
+    JSON.stringify({
+      rt,
+      hid: await hardwareIdPromise,
+    })
+  )
+}
+
 beforeEach(() => {
   sessionCreatedCount = 0
 })
@@ -227,9 +236,9 @@ describe('getAuth', () => {
     const auth = await client.getAuth(twoFactorAuthCode)
     expect(auth).toMatchObject({
       access_token: accessToken,
-      refresh_token: refreshToken,
+      refresh_token: await wrapRefreshToken(refreshToken),
     })
-    expect(client.refreshToken).toEqual(refreshToken)
+    expect(client.refreshToken).toEqual(await wrapRefreshToken(refreshToken))
   })
 
   test('it should handle invalid credentials', async () => {
@@ -268,9 +277,11 @@ describe('getAuth', () => {
 
     expect(await client.getCurrentAuth()).toMatchObject({
       access_token: accessToken,
-      refresh_token: secondRefreshToken,
+      refresh_token: await wrapRefreshToken(secondRefreshToken),
     })
-    expect(client.refreshToken).toEqual(secondRefreshToken)
+    expect(client.refreshToken).toEqual(
+      await wrapRefreshToken(secondRefreshToken)
+    )
   })
 
   test('it should emit an event when a new refresh token is created', async () => {
@@ -281,11 +292,11 @@ describe('getAuth', () => {
       auth = await client.getAuth()
     expect(auth).toMatchObject({
       access_token: accessToken,
-      refresh_token: secondRefreshToken,
+      refresh_token: await wrapRefreshToken(secondRefreshToken),
     })
     expect(await refreshedPromise).toEqual({
       oldRefreshToken: refreshToken,
-      newRefreshToken: secondRefreshToken,
+      newRefreshToken: await wrapRefreshToken(secondRefreshToken),
     })
   })
 })
@@ -296,33 +307,40 @@ describe('fetch', () => {
   beforeEach(() => {
     invalidateFirstAccessToken = false
     server.use(
-      rest.get('https://api.ring.com/devices/v1/locations', (req, res, ctx) => {
-        const authHeader = req.headers.get('Authorization')
-        if (
-          invalidateFirstAccessToken &&
-          authHeader === `Bearer ${accessToken}`
-        ) {
-          // Original access token used, but no longer valid
-          return res(ctx.status(401))
-        }
+      rest.get(
+        'https://api.ring.com/clients_api/some_endpoint',
+        (req, res, ctx) => {
+          const authHeader = req.headers.get('Authorization')
+          if (
+            invalidateFirstAccessToken &&
+            authHeader === `Bearer ${accessToken}`
+          ) {
+            // Original access token used, but no longer valid
+            return res(ctx.status(401))
+          }
 
-        if (
-          authHeader !== `Bearer ${accessToken}` &&
-          authHeader !== `Bearer ${secondAccessToken}`
-        ) {
-          // Invalid access token used
-          return res(ctx.status(401))
-        }
+          if (
+            authHeader !== `Bearer ${accessToken}` &&
+            authHeader !== `Bearer ${secondAccessToken}`
+          ) {
+            // Invalid access token used
+            return res(ctx.status(401))
+          }
 
-        if (sessionCreatedCount === 0) {
-          // eslint-disable-next-line no-console
-          console.error('Request received before session was created')
-          // Session not created yet
-          return res(ctx.status(404), ctx.text('Session not created yet'))
-        }
+          if (sessionCreatedCount === 0) {
+            // Session not created yet
+            return res(
+              ctx.status(404),
+              ctx.json({
+                error:
+                  'Session not found for ' + req.headers.get('hardware_id'),
+              })
+            )
+          }
 
-        return res(ctx.json([]))
-      })
+          return res(ctx.json([]))
+        }
+      )
     )
   })
 
@@ -331,7 +349,7 @@ describe('fetch', () => {
       refreshToken,
     })
     const response = await client.request({
-      url: 'https://api.ring.com/devices/v1/locations',
+      url: 'https://api.ring.com/clients_api/some_endpoint',
     })
 
     expect(response).toEqual([])
@@ -344,7 +362,7 @@ describe('fetch', () => {
 
     invalidateFirstAccessToken = true
     const response = await client.request({
-      url: 'https://api.ring.com/devices/v1/locations',
+      url: 'https://api.ring.com/clients_api/some_endpoint',
     })
 
     expect(response).toEqual([])

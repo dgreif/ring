@@ -5,6 +5,7 @@ import {
 } from '@homebridge/plugin-ui-utils'
 
 import { RingRestClient } from 'ring-client-api/rest-client'
+import { controlCenterDisplayName, getSystemId } from '../config'
 
 interface LoginRequest {
   email: string
@@ -31,7 +32,13 @@ class PluginUiServer extends HomebridgePluginUiServer {
 
   generateCode = async ({ email, password }: LoginRequest) => {
     console.log(`Logging in with email '${email}'`)
-    this.restClient = new RingRestClient({ email, password })
+    const storagePath = this.homebridgeStoragePath
+    this.restClient = new RingRestClient({
+      email,
+      password,
+      controlCenterDisplayName,
+      systemId: storagePath ? getSystemId(storagePath) : undefined,
+    })
 
     try {
       const { refresh_token } = await this.restClient.getCurrentAuth()

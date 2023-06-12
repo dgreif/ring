@@ -1,11 +1,13 @@
 import got, { Options as RequestOptions, Headers } from 'got'
 import {
   delay,
+  fromBase64,
   getHardwareId,
   logDebug,
   logError,
   logInfo,
   stringify,
+  toBase64,
 } from './util'
 import {
   Auth2faResponse,
@@ -13,6 +15,8 @@ import {
   SessionResponse,
 } from './ring-types'
 import { ReplaySubject } from 'rxjs'
+import assert from 'assert'
+import type { Credentials } from '@eneris/push-receiver/dist/types'
 
 const defaultRequestOptions: RequestOptions = {
     responseType: 'json',
@@ -111,10 +115,42 @@ export interface SessionOptions {
   controlCenterDisplayName?: string
 }
 
+/**
+ * When a "refreshToken" string is created by this client, it contains not only the refresh token needed to auth with
+ * Ring servers, but also the hardware id and other information that needs to be stored across usages of the client
+ * The Ring refresh token (rt field) will change over time, but the other fields can be carried over between restarts.
+ */
+interface AuthConfig {
+  rt: string // Refresh Token for Auth
+  hid?: string // Hardware ID, to stay consistent after initial token creation
+  pnc?: Credentials // Push Notification Credentials
+}
+
+function parseAuthConfig(rawRefreshToken?: string): AuthConfig | undefined {
+  if (!rawRefreshToken) {
+    return
+  }
+
+  try {
+    const config = JSON.parse(fromBase64(rawRefreshToken))
+    assert(config)
+    assert(config.rt)
+    return config
+  } catch (_) {
+    return {
+      rt: rawRefreshToken,
+    }
+  }
+}
+
 export class RingRestClient {
-  // prettier-ignore
-  public refreshToken
-  private hardwareIdPromise
+  public refreshToken =
+    'refreshToken' in this.authOptions
+      ? this.authOptions.refreshToken
+      : undefined
+  private authConfig = parseAuthConfig(this.refreshToken)
+  private hardwareIdPromise =
+    this.authConfig?.hid || getHardwareId(this.authOptions.systemId)
   private _authPromise: Promise<AuthTokenResponse> | undefined
   private timeouts: ReturnType<typeof setTimeout>[] = []
   private clearPreviousAuth() {
@@ -158,19 +194,13 @@ export class RingRestClient {
 
   constructor(
     private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions
-  ) {
-    this.refreshToken =
-      'refreshToken' in this.authOptions
-        ? this.authOptions.refreshToken
-        : undefined
-    this.hardwareIdPromise = getHardwareId(this.authOptions.systemId)
-  }
+  ) {}
 
   private getGrantData(twoFactorAuthCode?: string) {
-    if (this.refreshToken && !twoFactorAuthCode) {
+    if (this.authConfig?.rt && !twoFactorAuthCode) {
       return {
         grant_type: 'refresh_token',
-        refresh_token: this.refreshToken,
+        refresh_token: this.authConfig.rt,
       }
     }
 
@@ -192,33 +222,48 @@ export class RingRestClient {
     const grantData = this.getGrantData(twoFactorAuthCode)
 
     try {
-      const response = await requestWithRetry<AuthTokenResponse>({
-        url: 'https://oauth.ring.com/oauth/token',
-        json: {
-          client_id: 'ring_official_android',
-          scope: 'client',
-          ...grantData,
-        },
-        method: 'POST',
-        headers: {
-          '2fa-support': 'true',
-          '2fa-code': twoFactorAuthCode || '',
-          hardware_id: await this.hardwareIdPromise,
-          'User-Agent': 'android:com.ringapp',
-        },
-      })
+      const hardwareId = await this.hardwareIdPromise,
+        response = await requestWithRetry<AuthTokenResponse>({
+          url: 'https://oauth.ring.com/oauth/token',
+          json: {
+            client_id: 'ring_official_android',
+            scope: 'client',
+            ...grantData,
+          },
+          method: 'POST',
+          headers: {
+            '2fa-support': 'true',
+            '2fa-code': twoFactorAuthCode || '',
+            hardware_id: hardwareId,
+            'User-Agent': 'android:com.ringapp',
+          },
+        }),
+        oldRefreshToken = this.refreshToken
 
+      // Store the new refresh token and auth config
+      this.authConfig = {
+        ...this.authConfig,
+        rt: response.refresh_token,
+        hid: hardwareId,
+      }
+      this.refreshToken = toBase64(JSON.stringify(this.authConfig))
+
+      // Emit an event with the new token
       this.onRefreshTokenUpdated.next({
-        oldRefreshToken: this.refreshToken,
-        newRefreshToken: response.refresh_token,
+        oldRefreshToken,
+        newRefreshToken: this.refreshToken,
       })
-      this.refreshToken = response.refresh_token
 
-      return response
+      return {
+        ...response,
+        // Override the refresh token in the response so that consumers of this data get the wrapped version
+        refresh_token: this.refreshToken,
+      }
     } catch (requestError: any) {
       if (grantData.refresh_token) {
         // failed request with refresh token
         this.refreshToken = undefined
+        this.authConfig = undefined
         logError(requestError)
         return this.getAuth()
       }
@@ -349,10 +394,6 @@ export class RingRestClient {
   async request<T = void>(
     options: RequestOptions & { url: string; allowNoResponse?: boolean }
   ): Promise<T & ExtendedResponse> {
-    if (!this.sessionPromise) {
-      this.refreshSession()
-    }
-
     const hardwareId = await this.hardwareIdPromise,
       url = options.url! as string,
       initialSessionPromise = this.sessionPromise
@@ -446,5 +487,39 @@ export class RingRestClient {
 
   clearTimeouts() {
     this.timeouts.forEach(clearTimeout)
+  }
+
+  get _internalOnly_pushNotificationCredentials() {
+    return this.authConfig?.pnc
+  }
+
+  set _internalOnly_pushNotificationCredentials(
+    credentials: Credentials | undefined
+  ) {
+    if (!this.refreshToken || !this.authConfig) {
+      throw new Error(
+        'Cannot set push notification credentials without a refresh token'
+      )
+    }
+
+    const oldRefreshToken = this.refreshToken
+    this.authConfig = {
+      ...this.authConfig,
+      pnc: credentials,
+    }
+
+    // SOMEDAY: refactor the conversion from auth config to refresh token - DRY from above
+    const newRefreshToken = toBase64(JSON.stringify(this.authConfig))
+    if (newRefreshToken === oldRefreshToken) {
+      // No change, so we don't need to emit an updated refresh token
+      return
+    }
+
+    // Save and emit the updated refresh token
+    this.refreshToken = newRefreshToken
+    this.onRefreshTokenUpdated.next({
+      oldRefreshToken,
+      newRefreshToken,
+    })
   }
 }

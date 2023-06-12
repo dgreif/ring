@@ -23,8 +23,13 @@ import {
 import { AnyCameraData, RingCamera } from './ring-camera'
 import { RingChime } from './ring-chime'
 import { combineLatest, EMPTY, merge, Subject } from 'rxjs'
-import { debounceTime, switchMap, throttleTime } from 'rxjs/operators'
-import { clearTimeouts, enableDebug, logError } from './util'
+import {
+  debounceTime,
+  startWith,
+  switchMap,
+  throttleTime,
+} from 'rxjs/operators'
+import { clearTimeouts, enableDebug, logError, logInfo } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
@@ -244,25 +249,28 @@ export class RingApi extends Subscribed {
       return
     }
 
-    const pushReceiver = new PushReceiver({
-      logLevel: 'NONE',
-      senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
-    })
+    const credentials =
+        this.restClient._internalOnly_pushNotificationCredentials,
+      pushReceiver = new PushReceiver({
+        credentials,
+        logLevel: 'NONE',
+        senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+      })
 
     this.pushReceiver = pushReceiver
 
-    pushReceiver.onCredentialsChanged(
-      ({
-        newCredentials: {
-          fcm: { token },
-        },
-      }) => onPushNotificationToken.next(token)
-    )
+    pushReceiver.onCredentialsChanged(({ newCredentials }) => {
+      // Store the new credentials in the rest client so that it can be used for subsequent restarts
+      this.restClient._internalOnly_pushNotificationCredentials = newCredentials
+
+      // Send the new credentials to the server
+      onPushNotificationToken.next(newCredentials.fcm.token)
+    })
 
     this.addSubscriptions(
       combineLatest([
         onPushNotificationToken,
-        this.restClient.onSession, // combined but not used here, just to trigger another request when session is updated
+        this.restClient.onSession.pipe(startWith(undefined)), // combined but not used here, just to trigger another request when session is updated
       ]).subscribe(async ([token]) => {
         try {
           await this.restClient.request({
@@ -285,7 +293,24 @@ export class RingApi extends Subscribed {
       })
     )
 
+    try {
+      await pushReceiver.connect()
+    } catch (e) {
+      logError('Failed to connect push notification receiver')
+      logError(e)
+    }
+
+    const startTime = Date.now()
     pushReceiver.onNotification(({ message }) => {
+      // Ignore messages received in the first two seconds after connecting
+      // These are likely duplicates, and we aren't currently storying persistent ids anywhere to avoid re-processing them
+      if (Date.now() - startTime < 2000) {
+        logInfo(
+          'Ignoring push notification received in first two seconds after starting up'
+        )
+        return
+      }
+
       const dataJson = message.data?.gcmData as string
 
       try {
@@ -304,11 +329,9 @@ export class RingApi extends Subscribed {
       }
     })
 
-    try {
-      await pushReceiver.connect()
-    } catch (e) {
-      logError('Failed to connect push notification receiver')
-      logError(e)
+    // If we already have credentials, use them immediately
+    if (credentials) {
+      onPushNotificationToken.next(credentials.fcm.token)
     }
   }
 

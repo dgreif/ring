@@ -26,6 +26,8 @@ import {
   publishReplay,
   refCount,
   share,
+  startWith,
+  throttleTime,
 } from 'rxjs/operators'
 import { DeepPartial, delay, logDebug, logError } from './util'
 import { Subscribed } from './subscribed'
@@ -183,23 +185,29 @@ export class RingCamera extends Subscribed {
       distinctUntilChanged()
     )
 
-    if (!initialData.subscribed) {
-      this.subscribeToDingEvents().catch((e) => {
-        logError(
-          'Failed to subscribe ' + initialData.description + ' to ding events'
-        )
-        logError(e)
-      })
-    }
+    this.addSubscriptions(
+      this.restClient.onSession
+        .pipe(startWith(undefined), throttleTime(1000)) // Force this to run immediately, but don't double run if a session is created due to these api calls
+        .subscribe(() => {
+          this.subscribeToDingEvents().catch((e) => {
+            logError(
+              'Failed to subscribe ' +
+                initialData.description +
+                ' to ding events'
+            )
+            logError(e)
+          })
 
-    if (!initialData.subscribed_motions) {
-      this.subscribeToMotionEvents().catch((e) => {
-        logError(
-          'Failed to subscribe ' + initialData.description + ' to motion events'
-        )
-        logError(e)
-      })
-    }
+          this.subscribeToMotionEvents().catch((e) => {
+            logError(
+              'Failed to subscribe ' +
+                initialData.description +
+                ' to motion events'
+            )
+            logError(e)
+          })
+        })
+    )
   }
 
   updateData(update: AnyCameraData) {

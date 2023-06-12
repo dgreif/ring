@@ -162,3 +162,13 @@ function logPushReceiver(...args: any) {
   logDebug(args[0])
 }
 pushReceiverLogger.error = logPushReceiver
+
+export function fromBase64(encodedInput: string) {
+  const buff = Buffer.from(encodedInput, 'base64')
+  return buff.toString('ascii')
+}
+
+export function toBase64(input: string) {
+  const buff = Buffer.from(input)
+  return buff.toString('base64')
+}

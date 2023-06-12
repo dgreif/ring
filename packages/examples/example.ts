@@ -20,8 +20,6 @@ async function example() {
 
   ringApi.onRefreshTokenUpdated.subscribe(
     async ({ newRefreshToken, oldRefreshToken }) => {
-      console.log('Refresh Token Updated: ', newRefreshToken)
-
       // If you are implementing a project that use `ring-client-api`, you should subscribe to onRefreshTokenUpdated and update your config each time it fires an event
       // Here is an example using a .env file for configuration
       if (!oldRefreshToken) {

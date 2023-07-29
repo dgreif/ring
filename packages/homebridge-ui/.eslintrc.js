@@ -3,5 +3,5 @@ module.exports = {
   env: {
     browser: true,
   },
-  extends: ['shared', 'react-app', 'react-app/jest'],
+  extends: ['shared'],
 }

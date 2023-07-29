@@ -4,16 +4,16 @@
   "homepage": "./",
   "devDependencies": {
     "@homebridge/plugin-ui-utils": "0.0.19",
-    "@types/jest": "29.5.2",
-    "@types/node": "20.2.5",
-    "@types/react": "18.2.9",
-    "@types/react-dom": "18.2.4",
+    "@types/jest": "29.5.3",
+    "@types/node": "20.4.5",
+    "@types/react": "18.2.17",
+    "@types/react-dom": "18.2.7",
     "eslint-config-shared": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "tsconfig": "*",
-    "typescript": "5.1.3"
+    "typescript": "5.1.6"
   },
   "scripts": {
     "start": "BROWSER=none react-scripts start",

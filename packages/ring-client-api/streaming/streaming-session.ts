@@ -5,7 +5,6 @@ import {
   RtpSplitter,
 } from '@homebridge/camera-utils'
 import { firstValueFrom, ReplaySubject, Subject } from 'rxjs'
-import { RingEdgeConnection } from './ring-edge-connection'
 import { WebrtcConnection } from './webrtc-connection'
 import { getFfmpegPath } from '../ffmpeg'
 import { logDebug, logError } from '../util'
@@ -42,14 +41,14 @@ export class StreamingSession extends Subscribed {
 
   constructor(
     private readonly camera: RingCamera,
-    private connection: RingEdgeConnection | WebrtcConnection
+    private connection: WebrtcConnection
   ) {
     super()
 
     this.bindToConnection(connection)
   }
 
-  private bindToConnection(connection: RingEdgeConnection | WebrtcConnection) {
+  private bindToConnection(connection: WebrtcConnection) {
     this.addSubscriptions(
       connection.onAudioRtp.subscribe(this.onAudioRtp),
       connection.onVideoRtp.subscribe(this.onVideoRtp),

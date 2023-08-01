@@ -6,7 +6,7 @@ import {
   CameraHealth,
   DoorbellType,
   HistoryOptions,
-  LiveCallResponse,
+  SocketTicketResponse,
   PeriodicFootageResponse,
   PushNotificationAction,
   PushNotification,
@@ -32,7 +32,6 @@ import {
 import { DeepPartial, delay, logDebug, logError } from './util'
 import { Subscribed } from './subscribed'
 import { WebrtcConnection } from './streaming/webrtc-connection'
-import { RingEdgeConnection } from './streaming/ring-edge-connection'
 import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
 import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
 import { SimpleWebRtcSession } from './streaming/simple-webrtc-session'
@@ -378,27 +377,16 @@ export class RingCamera extends Subscribed {
   }
 
   private async createStreamingConnection(options: StreamingConnectionOptions) {
-    if (this.isRingEdgeEnabled) {
-      const auth = await this.restClient.getCurrentAuth()
-      return new RingEdgeConnection(auth.access_token, this, options)
-    }
-
-    const liveCall = await this.restClient
-      .request<LiveCallResponse>({
+    const response = await this.restClient
+      .request<SocketTicketResponse>({
         method: 'POST',
-        url: this.doorbotUrl('live_call'),
+        url: 'https://app.ring.com/api/v1/clap/ticket/request/signalsocket',
       })
       .catch((e) => {
-        if (e.response?.statusCode === 403) {
-          const errorMessage = `Camera ${this.name} returned 403 when starting a live stream.  This usually indicates that live streaming is blocked by Modes settings.  Check your Ring app and verify that you are able to stream from this camera with the current Modes settings.`
-          logError(errorMessage)
-          throw new Error(errorMessage)
-        }
-
         throw e
       })
 
-    return new WebrtcConnection(liveCall.data.session_id, this, options)
+    return new WebrtcConnection(response.ticket, this, options)
   }
 
   async startLiveCall(options: StreamingConnectionOptions = {}) {

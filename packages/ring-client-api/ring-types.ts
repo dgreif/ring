@@ -1063,20 +1063,9 @@ export type PushNotification =
   | PushNotificationAlarm
   | PushNotificationLowBattery
 
-export interface LiveCallResponse {
-  ding_id: string
-  ding_kind: DingKind
-  device_id: number
-  device_kind: RingCameraKind
-  device_description: string
-  state: DingState
-  protocol: 'ring_media_server' | unknown
-  now: number
-  video_jitter_buffer_ms: number
-  audio_jitter_buffer_ms: number
-  data: {
-    session_id: string
-  }
+export interface SocketTicketResponse {
+  ticket: string
+  responseTimestampe: number
 }
 
 export interface AuthTokenResponse {

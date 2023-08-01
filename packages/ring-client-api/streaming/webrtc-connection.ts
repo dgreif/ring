@@ -1,112 +1,231 @@
 import { WebSocket } from 'ws'
+import { firstValueFrom, interval, ReplaySubject } from 'rxjs'
+import { logDebug, logError } from '../util'
 import { RingCamera } from '../ring-camera'
-
-import { DingKind } from '../ring-types'
 import {
   StreamingConnectionBase,
   StreamingConnectionOptions,
 } from './streaming-connection-base'
-import { fromBase64, logDebug } from '../util'
+import crypto from 'crypto'
 
-interface InitializationMessage {
-  method: 'initialization'
-  text: 'Done'
+interface SessionBody {
+  doorbot_id: number
+  session_id: string
 }
 
-interface OfferMessage {
+interface AnswerMessage {
   method: 'sdp'
-  sdp: string
-  type: 'offer'
+  body: {
+    sdp: string
+    type: 'answer'
+  } & SessionBody
 }
 
 interface IceCandidateMessage {
   method: 'ice'
-  ice: string
-  mlineindex: number
+  body: {
+    ice: string
+    mlineindex: number
+  } & SessionBody
 }
 
-interface LiveCallSession {
-  alexa_port: number
-  app_session_token: string
-  availability_zone: 'availability-zone'
-  custom_timer: { max_sec: number }
-  ding_id: string
-  ding_kind: DingKind
-  doorbot_id: number
-  exp: number
-  ip: string
-  port: number
-  private_ip: string
-  rms_fqdn: string
-  rms_version: string
-  rsp_port: number
-  rtsp_port: number
-  session_id: string
-  sip_port: number
-  webrtc_port: number
-  webrtc_url: string
-  wwr_port: number
+interface SessionCreatedMessage {
+  method: 'session_created'
+  body: SessionBody
 }
 
-function parseLiveCallSession(sessionId: string) {
-  const encodedSession = sessionId.split('.')[1],
-    text = fromBase64(encodedSession)
-  return JSON.parse(text) as LiveCallSession
+interface SessionStartedMessage {
+  method: 'session_started'
+  body: SessionBody
 }
+
+interface PongMessage {
+  method: 'pong'
+  body: SessionBody
+}
+
+interface NotificationMessage {
+  method: 'notification'
+  body: {
+    is_ok: boolean
+    text: string
+  } & SessionBody
+}
+
+// eslint-disable-next-line no-shadow
+enum CloseReasonCode {
+  NormalClose = 0,
+  // reason: { code: 5, text: '[rsl-apps/webrtc-liveview-server/Session.cpp:429] [Auth] [0xd540]: [rsl-apps/session-manager/Manager.cpp:227] [AppAuth] Unauthorized: invalid or expired token' }
+  // reason: { code: 5, text: 'Authentication failed: -1' }
+  // reason: { code: 5, text: 'Sessions with the provided ID not found' }
+  AuthenticationFailed = 5,
+  // reason: { code: 6, text: 'Timeout waiting for ping' }
+  Timeout = 6,
+}
+
+interface CloseMessage {
+  method: 'close'
+  body: {
+    reason: { code: CloseReasonCode; text: string }
+  } & SessionBody
+}
+
+type IncomingMessage =
+  | AnswerMessage
+  | IceCandidateMessage
+  | SessionCreatedMessage
+  | SessionStartedMessage
+  | PongMessage
+  | CloseMessage
+  | NotificationMessage
 
 export class WebrtcConnection extends StreamingConnectionBase {
+  private readonly onSessionId = new ReplaySubject<string>(1)
+  private readonly onOfferSent = new ReplaySubject<void>(1)
+  private readonly dialogId = crypto.randomUUID()
+
   constructor(
-    private sessionId: string,
-    camera: RingCamera,
+    ticket: string,
+    private camera: RingCamera,
     options: StreamingConnectionOptions
   ) {
-    const liveCallSession = parseLiveCallSession(sessionId)
     super(
-      new WebSocket(
-        `wss://${liveCallSession.rms_fqdn}:${liveCallSession.webrtc_port}/`,
-        {
-          headers: {
-            API_VERSION: '3.1',
-            API_TOKEN: sessionId,
-            CLIENT_INFO:
-              'Ring/3.49.0;Platform/Android;OS/7.0;Density/2.0;Device/samsung-SM-T710;Locale/en-US;TimeZone/GMT-07:00',
-          },
-        }
-      ),
+      new WebSocket(`wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${crypto.randomUUID()}&token=${ticket}`, {
+        headers: {
+          // This must exist or the socket will close immediately but content does not seem to matter
+          'User-Agent': 'android:com.ringapp'
+        },
+      }),
       options
     )
 
     this.addSubscriptions(
       this.onWsOpen.subscribe(() => {
-        logDebug(`WebSocket connected for ${camera.name}`)
+        logDebug(`WebSocket connected for ${camera.name} (Ring Edge)`)
+        this.initiateCall().catch((e) => {
+          logError(e)
+          this.callEnded()
+        })
+      }),
+
+      // The ring-edge session needs a ping every 5 seconds to keep the connection alive
+      interval(5000).subscribe(() => {
+        this.sendSessionMessage('ping')
+      }),
+
+      this.pc.onIceCandidate.subscribe(async (iceCandidate) => {
+        await firstValueFrom(this.onOfferSent)
+        this.sendMessage({
+          method: 'ice',
+          dialog_id: this.dialogId,
+          body: {
+            doorbot_id: camera.id,
+            ice: iceCandidate.candidate,
+            mlineindex: iceCandidate.sdpMLineIndex,
+          },
+        })
       })
     )
   }
 
-  protected async handleMessage(
-    message: InitializationMessage | OfferMessage | IceCandidateMessage
-  ) {
+  private async initiateCall() {
+    const { sdp } = await this.pc.createOffer()
+
+    this.sendMessage({
+      method: 'live_view',
+      dialog_id: this.dialogId,
+      body: {
+        doorbot_id: this.camera.id,
+        stream_options: { audio_enabled: true, video_enabled: true },
+        sdp,
+      },
+    })
+
+    this.onOfferSent.next()
+  }
+
+  private sessionId: string | null = null
+  protected async handleMessage(message: IncomingMessage) {
+    if (message.body.doorbot_id !== this.camera.id) {
+      // ignore messages for other cameras
+      return
+    }
+
+    if (
+      ['session_created', 'session_started'].includes(message.method) &&
+      'session_id' in message.body &&
+      !this.sessionId
+    ) {
+      this.sessionId = message.body.session_id
+      this.onSessionId.next(this.sessionId)
+    }
+
+    if (message.body.session_id && message.body.session_id !== this.sessionId) {
+      // ignore messages for other sessions
+      return
+    }
+
     switch (message.method) {
+      case 'session_created':
+      case 'session_started':
+        // session already stored above
+        return
       case 'sdp':
-        const answer = await this.pc.createAnswer(message)
-        this.sendSessionMessage('sdp', answer)
-        this.onCallAnswered.next(message.sdp)
+        await this.pc.acceptAnswer(message.body)
+        this.onCallAnswered.next(message.body.sdp)
 
         this.activate()
         return
       case 'ice':
         await this.pc.addIceCandidate({
-          candidate: message.ice,
-          sdpMLineIndex: message.mlineindex,
+          candidate: message.body.ice,
+          sdpMLineIndex: message.body.mlineindex,
         })
         return
+      case 'pong':
+        return
+      case 'notification':
+        const { text } = message.body
+        if (
+          text === 'PeerConnectionState::kConnecting' ||
+          text === 'PeerConnectionState::kConnected'
+        ) {
+          return
+        }
+        break
+      case 'close':
+        logError('Video stream closed')
+        logError(message.body)
+        this.callEnded()
+        return
     }
+
+    logError('UNKNOWN MESSAGE')
+    logError(message)
   }
 
   protected sendSessionMessage(method: string, body: Record<any, any> = {}) {
-    this.sendMessage({
-      ...body,
-      method,
-    })
+    const sendSessionMessage = () => {
+      const message = {
+        method,
+        dialog_id: this.dialogId,
+        body: {
+          ...body,
+          doorbot_id: this.camera.id,
+          session_id: this.sessionId,
+        },
+      }
+      this.sendMessage(message)
+    }
+
+    if (this.sessionId) {
+      // Send immediately if we already have a session id
+      // This is needed to send `close` before closing the websocket
+      sendSessionMessage()
+    } else {
+      firstValueFrom(this.onSessionId)
+        .then(sendSessionMessage)
+        .catch((e) => logError(e))
+    }
   }
 }

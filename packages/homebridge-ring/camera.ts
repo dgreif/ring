@@ -216,6 +216,19 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     let imageUuid = this.device.latestNotificationSnapshotUuid
 
     /**
+     * The low cost wired doorbell is effectively a battery camera and
+     * cannot fetch a new snapshot while recording is in progress
+     * See: https://github.com/dgreif/ring/issues/933
+     */
+    if (this.device.deviceType === 'doorbell_graham_cracker' && !imageUuid) {
+      logInfo(
+        this.device.name +
+          ` ${eventDescription}. Bypassing snapshot load before sending event to HomeKit`
+      )
+      return characteristicValue
+    }
+
+    /**
      * Battery cameras may receive an initial notification with no image uuid,
      * followed shortly by a second notification with the image uuid. We need to
      * wait for the second notification before we can load the snapshot.

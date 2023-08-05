@@ -16,7 +16,7 @@ import {
   OnvifCameraData,
   RingCameraKind,
 } from './ring-types'
-import { clientApi, deviceApi, RingRestClient } from './rest-client'
+import { appApi, clientApi, deviceApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
@@ -382,7 +382,7 @@ export class RingCamera extends Subscribed {
     const response = await this.restClient
       .request<SocketTicketResponse>({
         method: 'POST',
-        url: 'https://app.ring.com/api/v1/clap/ticket/request/signalsocket',
+        url: appApi('clap/ticket/request/signalsocket'),
       })
       .catch((e) => {
         throw e

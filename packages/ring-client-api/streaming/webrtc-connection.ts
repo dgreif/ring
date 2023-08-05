@@ -117,7 +117,8 @@ export class WebrtcConnection extends Subscribed {
       }),
 
       this.onWsOpen.subscribe(() => {
-        logDebug(`WebSocket connected for ${camera.name}`)
+        const connectionType = camera.isRingEdgeEnabled ? 'Ring Edge' : 'Cloud'
+        logDebug(`WebSocket connected for ${camera.name} (${connectionType})`)
         this.initiateCall().catch((e) => {
           logError(e)
           this.callEnded()

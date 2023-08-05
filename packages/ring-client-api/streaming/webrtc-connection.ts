@@ -90,12 +90,15 @@ export class WebrtcConnection extends StreamingConnectionBase {
     options: StreamingConnectionOptions
   ) {
     super(
-      new WebSocket(`wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${crypto.randomUUID()}&token=${ticket}`, {
-        headers: {
-          // This must exist or the socket will close immediately but content does not seem to matter
-          'User-Agent': 'android:com.ringapp'
-        },
-      }),
+      new WebSocket(
+        `wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${crypto.randomUUID()}&token=${ticket}`,
+        {
+          headers: {
+            // This must exist or the socket will close immediately but content does not seem to matter
+            'User-Agent': 'android:com.ringapp',
+          },
+        }
+      ),
       options
     )
 

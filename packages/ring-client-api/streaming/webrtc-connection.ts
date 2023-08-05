@@ -7,9 +7,8 @@ import {
   Subject,
 } from 'rxjs'
 import { concatMap } from 'rxjs/operators'
-import { logDebug, logError, logInfo } from '../util'
+import { generateUuid, logDebug, logError, logInfo } from '../util'
 import { RingCamera } from '../ring-camera'
-import crypto from 'crypto'
 import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection'
 import { Subscribed } from '../subscribed'
 import { RtpPacket } from 'werift'
@@ -22,7 +21,7 @@ export interface StreamingConnectionOptions {
 export class WebrtcConnection extends Subscribed {
   private readonly onSessionId = new ReplaySubject<string>(1)
   private readonly onOfferSent = new ReplaySubject<void>(1)
-  private readonly dialogId = crypto.randomUUID()
+  private readonly dialogId = generateUuid()
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
   readonly onError = new ReplaySubject<void>(1)
@@ -40,7 +39,7 @@ export class WebrtcConnection extends Subscribed {
   ) {
     super()
     this.ws = new WebSocket(
-      `wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${crypto.randomUUID()}&token=${ticket}`,
+      `wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${generateUuid()}&token=${ticket}`,
       {
         headers: {
           // This must exist or the socket will close immediately but content does not seem to matter

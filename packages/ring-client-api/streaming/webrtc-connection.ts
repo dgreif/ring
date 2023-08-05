@@ -205,7 +205,8 @@ export class WebrtcConnection extends Subscribed {
         const { text } = message.body
         if (
           text === 'PeerConnectionState::kConnecting' ||
-          text === 'PeerConnectionState::kConnected'
+          text === 'PeerConnectionState::kConnected' ||
+          text === 'camera_connected'
         ) {
           return
         }

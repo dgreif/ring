@@ -6,7 +6,7 @@ import {
   ReplaySubject,
   Subject,
 } from 'rxjs'
-import { concatMap } from 'rxjs/operators'
+import { concatMap, take } from 'rxjs/operators'
 import { generateUuid, logDebug, logError, logInfo } from '../util'
 import { RingCamera } from '../ring-camera'
 import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection'
@@ -223,14 +223,14 @@ export class WebrtcConnection extends Subscribed {
   }
 
   private sendSessionMessage(method: string, body: Record<any, any> = {}) {
-    const sendSessionMessage = () => {
+    const sendSessionMessage = (sessionId: string) => {
       const message = {
         method,
         dialog_id: this.dialogId,
         body: {
           ...body,
           doorbot_id: this.camera.id,
-          session_id: this.sessionId,
+          session_id: sessionId,
         },
       }
       this.sendMessage(message)
@@ -239,11 +239,12 @@ export class WebrtcConnection extends Subscribed {
     if (this.sessionId) {
       // Send immediately if we already have a session id
       // This is needed to send `close` before closing the websocket
-      sendSessionMessage()
+      sendSessionMessage(this.sessionId)
     } else {
-      firstValueFrom(this.onSessionId)
-        .then(sendSessionMessage)
-        .catch((e) => logError(e))
+      // Otherwise wait for the session id to be set and then send the message
+      this.addSubscriptions(
+        this.onSessionId.pipe(take(1)).subscribe(sendSessionMessage)
+      )
     }
   }
 
@@ -280,15 +281,13 @@ export class WebrtcConnection extends Subscribed {
 
   activateCameraSpeaker() {
     // Fire and forget this call so that callers don't get hung up waiting for answer (which might not happen)
-    firstValueFrom(this.onCallAnswered)
-      .then(() => {
+    this.addSubscriptions(
+      this.onCallAnswered.pipe(take(1)).subscribe(() => {
         this.sendSessionMessage('camera_options', {
           stealth_mode: false,
         })
       })
-      .catch((e) => {
-        logError(e)
-      })
+    )
   }
 
   private hasEnded = false

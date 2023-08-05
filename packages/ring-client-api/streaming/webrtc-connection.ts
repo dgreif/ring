@@ -104,7 +104,7 @@ export class WebrtcConnection extends StreamingConnectionBase {
 
     this.addSubscriptions(
       this.onWsOpen.subscribe(() => {
-        logDebug(`WebSocket connected for ${camera.name} (Ring Edge)`)
+        logDebug(`WebSocket connected for ${camera.name}`)
         this.initiateCall().catch((e) => {
           logError(e)
           this.callEnded()

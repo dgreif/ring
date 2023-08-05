@@ -25,10 +25,6 @@ const ringIceServers = [
 
 export interface BasicPeerConnection {
   createOffer(): Promise<{ sdp: string }>
-  createAnswer(offer: {
-    type: 'offer'
-    sdp: string
-  }): Promise<RTCSessionDescriptionInit>
   acceptAnswer(answer: { type: 'answer'; sdp: string }): Promise<void>
   addIceCandidate(candidate: Partial<RTCIceCandidate>): Promise<void>
   onIceCandidate: Observable<RTCIceCandidate>
@@ -156,14 +152,6 @@ export class WeriftPeerConnection
     await this.pc.setLocalDescription(offer)
 
     return offer
-  }
-
-  async createAnswer(offer: { type: 'offer'; sdp: string }) {
-    await this.pc.setRemoteDescription(offer)
-    const answer = await this.pc.createAnswer()
-    await this.pc.setLocalDescription(answer)
-
-    return answer
   }
 
   async acceptAnswer(answer: { type: 'answer'; sdp: string }) {

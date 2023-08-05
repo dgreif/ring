@@ -31,9 +31,11 @@ import {
 } from 'rxjs/operators'
 import { DeepPartial, delay, logDebug, logError } from './util'
 import { Subscribed } from './subscribed'
-import { WebrtcConnection } from './streaming/webrtc-connection'
+import {
+  StreamingConnectionOptions,
+  WebrtcConnection,
+} from './streaming/webrtc-connection'
 import { FfmpegOptions, StreamingSession } from './streaming/streaming-session'
-import { StreamingConnectionOptions } from './streaming/streaming-connection-base'
 import { SimpleWebRtcSession } from './streaming/simple-webrtc-session'
 
 export type AnyCameraData = CameraData | OnvifCameraData

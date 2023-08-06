@@ -25,7 +25,7 @@
     "typescript": "5.1.6"
   },
   "engines": {
-    "node": "^16 || ^18 || ^20",
+    "node": "^18 || ^20",
     "homebridge": ">=1.4.0"
   },
   "repository": {

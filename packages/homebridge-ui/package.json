@@ -1,5 +1,6 @@
 {
   "name": "homebridge-ui",
+  "version": "0.0.0-dev",
   "private": true,
   "homepage": "./",
   "devDependencies": {

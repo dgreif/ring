@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "eslint-config-shared": "0.0.0-dev",
+    "examples": "0.0.0-dev",
+    "homebridge-ring": "11.8.1",
+    "homebridge-ui": "0.0.0-dev",
+    "ring-client-api": "11.8.1",
+    "tsconfig": "0.0.0-dev"
+  },
+  "changesets": [
+    "large-donuts-nail",
+    "moody-apples-collect"
+  ]
+}

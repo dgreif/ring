@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 12.0.0-beta.0
+
+### Major Changes
+
+- [`9e4f04a`](https://github.com/dgreif/ring/commit/9e4f04ae88b6fa53700bf75bc670e78553f78419) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node 16 support. Node 18 is the current LTS, so please upgrade to Node 18 or Node 20. Note, Node 16 may still work after this update, but will likely break without warning in future updates.
+
+### Patch Changes
+
+- Updated dependencies [[`fa6d3b9`](https://github.com/dgreif/ring/commit/fa6d3b996592f2b22219fb9f5610c957bbce1423), [`9e4f04a`](https://github.com/dgreif/ring/commit/9e4f04ae88b6fa53700bf75bc670e78553f78419)]:
+  - ring-client-api@12.0.0-beta.0
+
 ## 11.8.1
 
 ### Patch Changes

@@ -9,7 +9,7 @@
     "dotenv": "16.3.1",
     "eslint-config-shared": "*",
     "express": "4.18.2",
-    "ring-client-api": "11.8.1",
+    "ring-client-api": "12.0.0-beta.0",
     "tsconfig": "*"
   }
 }

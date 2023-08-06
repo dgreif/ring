@@ -6,7 +6,7 @@ Video streaming has been condensed to use a single API, rather than a separate s
 
 Huge shoutout to @tsightler for figuring out this new API and getting the client updated!
 
-### Breaking Changes
+**Breaking Changes:**
 
 * The `StreamingConnectionBase` class has been removed, with all of the methods and properties moved to the `WebrtcConnection`` class.
 * Implementations of the `BasicPeerConnection` class no longer need to implement the `createAnswer` method.

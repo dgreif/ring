@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 12.0.0-beta.2
+
+### Patch Changes
+
+- [`02304ba`](https://github.com/dgreif/ring/commit/02304ba6f41e2e8311d152c104c9256bacf87b8c) Thanks [@dgreif](https://github.com/dgreif)! - Another attempt at fixing pvtsutils version
+
+- Updated dependencies [[`02304ba`](https://github.com/dgreif/ring/commit/02304ba6f41e2e8311d152c104c9256bacf87b8c)]:
+  - ring-client-api@12.0.0-beta.2
+
 ## 12.0.0-beta.1
 
 ### Patch Changes

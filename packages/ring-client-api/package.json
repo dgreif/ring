@@ -27,16 +27,14 @@
     "got": "^11.8.5",
     "json-bigint": "^1.0.0",
     "msw": "^1.2.3",
+    "pvtsutils": "1.3.2",
     "rxjs": "^7.8.1",
     "socket.io-client": "^2.5.0",
     "systeminformation": "^5.18.10",
     "uuid": "^9.0.0",
+    "webcrypto-core": "^1.7.7",
     "werift": "0.18.5",
     "ws": "^8.13.0"
-  },
-  "overrides": {
-    "webcrypto-core": "^1.7.7",
-    "pvtsutils": "1.3.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.8",

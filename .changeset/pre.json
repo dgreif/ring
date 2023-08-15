@@ -10,6 +10,7 @@
     "tsconfig": "0.0.0-dev"
   },
   "changesets": [
+    "happy-seals-yawn",
     "large-donuts-nail",
     "moody-apples-collect"
   ]

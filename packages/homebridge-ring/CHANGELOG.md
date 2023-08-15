@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 12.0.0-beta.1
+
+### Patch Changes
+
+- [`2c8ce6f`](https://github.com/dgreif/ring/commit/2c8ce6f31e53aaf797e4b49e1c11dda82837560d) Thanks [@dgreif](https://github.com/dgreif)! - Pin pvtsutils to 1.3.2 to fix `RangeError: offset is out of bounds` error
+
+- Updated dependencies [[`2c8ce6f`](https://github.com/dgreif/ring/commit/2c8ce6f31e53aaf797e4b49e1c11dda82837560d)]:
+  - ring-client-api@12.0.0-beta.1
+
 ## 12.0.0-beta.0
 
 ### Major Changes

@@ -1,0 +1,22 @@
+<button id="ring-new-token" class="btn btn-link m-0 p-0" style="display: none;">
+  <i class="fa fa-redo mr-2"></i>
+  Generate New Refresh Token
+</button>
+
+<h4 id="ring-link-account-header" class="text-center primary-text mb-3" style="display: none;">
+  Link Ring Account
+</h4>
+
+<script>
+  // Show the spinner while the JS is loading
+  homebridge.showSpinner()
+
+  // Create a script tag to load the JS onto the page
+  const script = document.createElement('script')
+
+  // Use the installed version of homebridge to bust the cache for the script
+  script.src = `homebridge-ring-ui.js?v=${homebridge.plugin.installedVersion}`
+
+  // Append the script to the head of the page to load it
+  document.head.appendChild(script)
+</script>

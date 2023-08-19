@@ -109,8 +109,8 @@ export class Camera extends BaseDataAccessory<RingCamera> {
           return value
         },
         setValue: (value: boolean) => {
-          // Allow 5 seconds for the light value to update in our status updates from Ring
-          lightTargetTimer.setTarget(value, 5000)
+          // Allow 30 seconds for the light value to update in our status updates from Ring
+          lightTargetTimer.setTarget(value, 30000)
           return device.setLight(value)
         },
         requestUpdate: () => device.requestUpdate(),

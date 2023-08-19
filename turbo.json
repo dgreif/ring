@@ -2,12 +2,7 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "lib/**",
-        "build/**",
-        "homebridge-ui/public/**",
-        "homebridge-ui/server.js"
-      ]
+      "outputs": ["lib/**"]
     },
     "lint": {
       "dependsOn": ["^build"],

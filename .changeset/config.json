@@ -7,5 +7,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["eslint-config-shared", "examples", "homebridge-ui", "tsconfig"]
+  "ignore": ["eslint-config-shared", "examples", "tsconfig"]
 }

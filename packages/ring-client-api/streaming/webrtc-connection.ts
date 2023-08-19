@@ -22,6 +22,7 @@ export class WebrtcConnection extends Subscribed {
   private readonly onSessionId = new ReplaySubject<string>(1)
   private readonly onOfferSent = new ReplaySubject<void>(1)
   private readonly dialogId = generateUuid()
+  readonly onCameraConnected = new ReplaySubject<void>(1)
   readonly onCallAnswered = new ReplaySubject<string>(1)
   readonly onCallEnded = new ReplaySubject<void>(1)
   readonly onError = new ReplaySubject<void>(1)
@@ -203,10 +204,12 @@ export class WebrtcConnection extends Subscribed {
         return
       case 'notification':
         const { text } = message.body
-        if (
+        if (text === 'camera_connected') {
+          this.onCameraConnected.next()
+          return
+        } else if (
           text === 'PeerConnectionState::kConnecting' ||
-          text === 'PeerConnectionState::kConnected' ||
-          text === 'camera_connected'
+          text === 'PeerConnectionState::kConnected'
         ) {
           return
         }
@@ -282,7 +285,7 @@ export class WebrtcConnection extends Subscribed {
   activateCameraSpeaker() {
     // Fire and forget this call so that callers don't get hung up waiting for answer (which might not happen)
     this.addSubscriptions(
-      this.onCallAnswered.pipe(take(1)).subscribe(() => {
+      this.onCameraConnected.pipe(take(1)).subscribe(() => {
         this.sendSessionMessage('camera_options', {
           stealth_mode: false,
         })

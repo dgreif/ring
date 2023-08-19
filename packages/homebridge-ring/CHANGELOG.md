@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 12.0.0-beta.3
+
+### Patch Changes
+
+- [`bac6b96`](https://github.com/dgreif/ring/commit/bac6b96e1d6b5f115d6c1f67735fd122e32e7311) Thanks [@dgreif](https://github.com/dgreif)! - Wait 30 seconds (instead of 5 seconds) before fetching remote camera status after light is toggled in HomeKit. This may help with issues where camera lights appear to toggle back to old state shortly after turning them on/off.
+
+- [`7d198b8`](https://github.com/dgreif/ring/commit/7d198b87ce03531fb75276eac2d89e2af2be4c23) Thanks [@dgreif](https://github.com/dgreif)! - Temporary fix for 2-way audio. This pins werift to an older version while we look into bug fixes. Thanks to @tsightler for debugging and pursuing a real fix!
+
+- [`7b9fbec`](https://github.com/dgreif/ring/commit/7b9fbec0950b72f310cecd93a052800e6b7efe36) Thanks [@dgreif](https://github.com/dgreif)! - Switched from a React-based UI to a simple JS UI for the homebridge-ring plugin UI. This should reduce the package size and simplify development. No visual changes should be noticiable in the UI.
+
+- Updated dependencies [[`d54168d`](https://github.com/dgreif/ring/commit/d54168dac5f0aa06b50ef805eca98785cb513f83)]:
+  - ring-client-api@12.0.0-beta.3
+
 ## 12.0.0-beta.2
 
 ### Patch Changes

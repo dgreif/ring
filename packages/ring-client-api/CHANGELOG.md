@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 12.0.0-beta.3
+
+### Patch Changes
+
+- [`d54168d`](https://github.com/dgreif/ring/commit/d54168dac5f0aa06b50ef805eca98785cb513f83) Thanks [@dgreif](https://github.com/dgreif)! - Wait to activate camera speaker until camera is connected to call. This prevents race conditions in two-way audio. Thanks to @tsightler for tracking this down!
+
 ## 12.0.0-beta.2
 
 ### Patch Changes

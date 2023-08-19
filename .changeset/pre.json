@@ -9,9 +9,13 @@
     "tsconfig": "0.0.0-dev"
   },
   "changesets": [
+    "cuddly-eggs-attend",
     "happy-seals-yawn",
     "kind-eagles-doubt",
     "large-donuts-nail",
-    "moody-apples-collect"
+    "light-pillows-try",
+    "moody-apples-collect",
+    "ninety-squids-warn",
+    "weak-falcons-hear"
   ]
 }

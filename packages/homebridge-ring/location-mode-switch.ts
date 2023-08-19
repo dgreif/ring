@@ -37,7 +37,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
   constructor(
     private readonly location: Location,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
     const {
@@ -47,10 +47,10 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       accessoryName = location.name + ' Mode',
       service = this.getService(SecuritySystem, accessoryName),
       currentState = service.getCharacteristic(
-        Characteristic.SecuritySystemCurrentState
+        Characteristic.SecuritySystemCurrentState,
       ),
       targetState = service.getCharacteristic(
-        Characteristic.SecuritySystemTargetState
+        Characteristic.SecuritySystemTargetState,
       ),
       getCurrentMode = () => {
         return firstValueFrom(location.onLocationMode)
@@ -85,7 +85,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         }
 
         callback(null, state)
-      }
+      },
     )
 
     targetState.on(
@@ -95,16 +95,16 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
           null,
           this.targetState !== undefined
             ? this.targetState
-            : await getCurrentState()
+            : await getCurrentState(),
         )
-      }
+      },
     )
 
     targetState.on(
       CharacteristicEventTypes.SET,
       async (
         state: CharacteristicValue,
-        callback: CharacteristicSetCallback
+        callback: CharacteristicSetCallback,
       ) => {
         const {
           Characteristic: { SecuritySystemTargetState: State },
@@ -134,7 +134,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         }
         logInfo(`Setting ${this.location.name} Mode to home`)
         return this.location.setLocationMode('home')
-      }
+      },
     )
 
     targetState.setProps({

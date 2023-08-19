@@ -126,7 +126,7 @@ export class WeriftPeerConnection
             videoTransceiver.receiver
               .sendRtcpPLI(track.ssrc!)
               .catch((e) => logError(e))
-          })
+          }),
         )
         this.requestKeyFrame()
       })

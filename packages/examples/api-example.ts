@@ -46,16 +46,16 @@ async function example() {
   })
   console.log('Got events', eventsResponse.events[0])
   const eventsWithRecordings = eventsResponse.events.filter(
-      (event) => event.recording_status === 'ready'
+      (event) => event.recording_status === 'ready',
     ),
     transcodedUrl = await camera.getRecordingUrl(
       eventsWithRecordings[0].ding_id_str, // MUST use the ding_id_str, not ding_id
       {
         transcoded: true, // get transcoded version of the video.  false by default.  transcoded has ring log and timestamp
-      }
+      },
     ),
     untranscodedUrl = await camera.getRecordingUrl(
-      eventsWithRecordings[0].ding_id_str
+      eventsWithRecordings[0].ding_id_str,
     )
 
   console.log('Recording Transcoded URL', transcodedUrl)

@@ -16,7 +16,7 @@ export class RingDevice extends Subscribed {
   constructor(
     private initialData: RingDeviceData,
     public location: Location,
-    public assetId: string
+    public assetId: string,
   ) {
     super()
 
@@ -26,13 +26,15 @@ export class RingDevice extends Subscribed {
     this.deviceType = this.initialData.deviceType
     this.categoryId = this.initialData.categoryId
     this.onComponentDevices = this.location.onDevices.pipe(
-      map((devices) => devices.filter(({ data }) => data.parentZid === this.id))
+      map((devices) =>
+        devices.filter(({ data }) => data.parentZid === this.id),
+      ),
     )
 
     this.addSubscriptions(
       location.onDeviceDataUpdate
         .pipe(filter((update) => update.zid === this.zid))
-        .subscribe((update) => this.updateData(update))
+        .subscribe((update) => this.updateData(update)),
     )
   }
 
@@ -62,7 +64,7 @@ export class RingDevice extends Subscribed {
 
     if (!this.supportsVolume) {
       throw new Error(
-        `Volume can only be set on ${deviceTypesWithVolume.join(', ')}`
+        `Volume can only be set on ${deviceTypesWithVolume.join(', ')}`,
       )
     }
 
@@ -106,7 +108,7 @@ export class RingDevice extends Subscribed {
         data: this.data,
       },
       null,
-      2
+      2,
     )
   }
 

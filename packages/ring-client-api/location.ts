@@ -59,7 +59,7 @@ function flattenDeviceData(data: any): RingDeviceData {
   return Object.assign(
     {},
     data.general && data.general.v2,
-    data.device && data.device.v1
+    data.device && data.device.v1,
   )
 }
 
@@ -73,10 +73,10 @@ export class Location extends Subscribed {
       return message.datatype === 'DeviceInfoDocType' && Boolean(message.body)
     }),
     concatMap((message) => message.body),
-    map(flattenDeviceData)
+    map(flattenDeviceData),
   )
   onDeviceList = this.onMessage.pipe(
-    filter((m) => m.msg === deviceListMessageType)
+    filter((m) => m.msg === deviceListMessageType),
   )
   onDevices: Observable<RingDevice[]> = this.onDeviceList.pipe(
     scan((devices, { body: deviceList, src }) => {
@@ -105,15 +105,15 @@ export class Location extends Subscribed {
       return Boolean(
         this.assets &&
           this.assets.every((asset) =>
-            this.receivedAssetDeviceLists.includes(asset.uuid)
-          )
+            this.receivedAssetDeviceLists.includes(asset.uuid),
+          ),
       )
     }),
-    shareReplay(1)
+    shareReplay(1),
   )
   onSessionInfo = this.onDataUpdate.pipe(
     filter((m) => m.msg === 'SessionInfo'),
-    map((m) => m.body as AssetSession[])
+    map((m) => m.body as AssetSession[]),
   )
   onConnected = new BehaviorSubject(false)
   onLocationMode = new ReplaySubject<LocationMode>(1)
@@ -138,7 +138,7 @@ export class Location extends Subscribed {
       hasAlarmBaseStation: boolean
       locationModePollingSeconds?: number
     },
-    private restClient: RingRestClient
+    private restClient: RingRestClient,
   ) {
     super()
 
@@ -165,25 +165,25 @@ export class Location extends Subscribed {
               // eslint-disable-next-line @typescript-eslint/no-empty-function
               this.requestList(deviceListMessageType, assetUuid).catch(() => {})
               this.offlineAssets = this.offlineAssets.filter(
-                (id) => id !== assetUuid
+                (id) => id !== assetUuid,
               )
               logInfo(`Ring ${asset.kind} ${assetUuid} has come back online`)
             }
           } else if (!assetWasOffline) {
             logError(
-              `Ring ${asset.kind} ${assetUuid} is offline or on cellular backup.  Waiting for status to change`
+              `Ring ${asset.kind} ${assetUuid} is offline or on cellular backup.  Waiting for status to change`,
             )
             this.offlineAssets.push(assetUuid)
           }
         })
-      })
+      }),
     )
 
     if (!options.hasAlarmBaseStation && options.locationModePollingSeconds) {
       this.addSubscriptions(
         merge(this.onLocationModeRequested, this.onLocationMode)
           .pipe(debounceTime(options.locationModePollingSeconds * 1000))
-          .subscribe(() => this.getLocationMode())
+          .subscribe(() => this.getLocationMode()),
       )
 
       this.getLocationMode().catch(logError)
@@ -211,7 +211,7 @@ export class Location extends Subscribed {
 
     if (process.version.startsWith('v15.')) {
       logError(
-        'Node 15 is not currently supported by the Ring client. Please install the latest Node 14 instead. May not be able to fetch devices from Ring Alarm and Smart Lighting Hubs on this version of node.'
+        'Node 15 is not currently supported by the Ring client. Please install the latest Node 14 instead. May not be able to fetch devices from Ring Alarm and Smart Lighting Hubs on this version of node.',
       )
     }
 
@@ -236,7 +236,7 @@ export class Location extends Subscribed {
 
     const connection = connectSocketIo(
         `wss://${host}/?authcode=${ticket}&ack=false&EIO=3`,
-        { transports: ['websocket'] }
+        { transports: ['websocket'] },
       ),
       reconnect = () => {
         if (this.reconnecting && this.connectionPromise) {
@@ -266,7 +266,7 @@ export class Location extends Subscribed {
       this.onDataUpdate.next(message)
     })
     connection.on('message', (message: SocketIoMessage) =>
-      this.onMessage.next(message)
+      this.onMessage.next(message),
     )
     connection.on('error', reconnect)
     connection.on('disconnect', reconnect)
@@ -276,7 +276,7 @@ export class Location extends Subscribed {
         this.onConnected.next(true)
         logInfo('Ring connected to socket.io server')
         assets.forEach((asset) =>
-          this.requestList(deviceListMessageType, asset.uuid)
+          this.requestList(deviceListMessageType, asset.uuid),
         )
       })
       connection.once('error', reject)
@@ -286,7 +286,7 @@ export class Location extends Subscribed {
   getConnection() {
     if (!this.hasHubs) {
       return Promise.reject(
-        new Error(`Location ${this.name} does not have any hubs`)
+        new Error(`Location ${this.name} does not have any hubs`),
       )
     }
 
@@ -311,7 +311,7 @@ export class Location extends Subscribed {
 
   async sendCommandToSecurityPanel(
     commandType: string,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ) {
     const securityPanel = await this.getSecurityPanel()
     securityPanel.sendCommand(commandType, data)
@@ -330,7 +330,7 @@ export class Location extends Subscribed {
 
     if (updatedData.mode !== alarmMode) {
       throw new Error(
-        `Failed to set alarm mode to "${alarmMode}".  Sensors may require bypass, which can only be done in the Ring app.`
+        `Failed to set alarm mode to "${alarmMode}".  Sensors may require bypass, which can only be done in the Ring app.`,
       )
     }
   }
@@ -365,8 +365,8 @@ export class Location extends Subscribed {
     return firstValueFrom(
       this.onMessage.pipe(
         filter((m) => m.msg === type && m.src === src),
-        map((m) => m.body)
-      )
+        map((m) => m.body),
+      ),
     )
   }
 
@@ -407,7 +407,7 @@ export class Location extends Subscribed {
 
     if (!securityPanel) {
       throw new Error(
-        `Could not find a security panel for location ${this.name} - ${this.id}`
+        `Could not find a security panel for location ${this.name} - ${this.id}`,
       )
     }
 
@@ -434,7 +434,7 @@ export class Location extends Subscribed {
         `rs/history${getSearchQueryString({
           accountId: this.id,
           ...options,
-        })}`
+        })}`,
       ),
     })
   }
@@ -442,7 +442,7 @@ export class Location extends Subscribed {
   getCameraEvents(options: CameraEventOptions = {}) {
     return this.restClient.request<CameraEventResponse>({
       url: clientApi(
-        `locations/${this.id}/events${getSearchQueryString(options)}`
+        `locations/${this.id}/events${getSearchQueryString(options)}`,
       ),
     })
   }
@@ -461,14 +461,14 @@ export class Location extends Subscribed {
 
     if (!baseStationAsset) {
       throw new Error(
-        'Cannot dispatch panic events without an alarm base station'
+        'Cannot dispatch panic events without an alarm base station',
       )
     }
 
     return this.restClient.request<AccountMonitoringStatus>({
       method: 'POST',
       url: appApi(
-        `rs/monitoring/accounts/${this.id}/assets/${baseStationAsset.uuid}/userAlarm`
+        `rs/monitoring/accounts/${this.id}/assets/${baseStationAsset.uuid}/userAlarm`,
       ),
       json: {
         alarmSessionUuid,

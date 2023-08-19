@@ -66,7 +66,7 @@ export const platformName = 'Ring'
 export const pluginName = 'homebridge-ring'
 
 function getAccessoryClass(
-  device: RingDevice
+  device: RingDevice,
 ): (new (...args: any[]) => BaseAccessory<RingDevice>) | null {
   const { deviceType } = device
 
@@ -149,7 +149,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
   constructor(
     public log: Logging,
     public config: PlatformConfig & RingPlatformConfig & RefreshTokenAuth,
-    public api: API
+    public api: API,
   ) {
     if (!config.disableLogs) {
       useLogger({
@@ -179,7 +179,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         })
       } else {
         this.log.warn(
-          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/main/packages/homebridge-ring#homebridge-configuration for more information.'
+          'Plugin is not configured. Visit https://github.com/dgreif/ring/tree/main/packages/homebridge-ring#homebridge-configuration for more information.',
         )
       }
     })
@@ -189,7 +189,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
   configureAccessory(accessory: PlatformAccessory) {
     logInfo(
-      `Configuring cached accessory ${accessory.UUID} ${accessory.displayName}`
+      `Configuring cached accessory ${accessory.UUID} ${accessory.displayName}`,
     )
     this.log.debug('%j', accessory)
     this.homebridgeAccessories[accessory.UUID] = accessory
@@ -221,7 +221,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
           { cameras, chimes, intercoms } = location,
           allDevices = [...devices, ...cameras, ...chimes, ...intercoms],
           securityPanel = devices.find(
-            (x) => x.deviceType === RingDeviceType.SecurityPanel
+            (x) => x.deviceType === RingDeviceType.SecurityPanel,
           ),
           debugPrefix = debug ? 'TEST ' : '',
           hapDevices = allDevices.map((device) => {
@@ -277,7 +277,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         }
 
         logInfo(
-          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`
+          `Configuring ${cameras.length} cameras and ${hapDevices.length} devices for location "${location.name}" - locationId: ${location.id}`,
         )
         hapDevices.forEach(
           ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
@@ -301,7 +301,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
             if (isExternalCamera && this.homebridgeAccessories[uuid]) {
               // Camera was previously bridged.  Remove it from the platform so that it can be added as an external accessory
               this.log.warn(
-                `Camera ${displayName} was previously bridged. You will need to manually pair it as a new accessory.`
+                `Camera ${displayName} was previously bridged. You will need to manually pair it as a new accessory.`,
               )
               this.api.unregisterPlatformAccessories(pluginName, platformName, [
                 this.homebridgeAccessories[uuid],
@@ -315,17 +315,17 @@ export class RingPlatform implements DynamicPlatformPlugin {
                   uuid,
                   isCamera
                     ? hap.Categories.CAMERA
-                    : hap.Categories.SECURITY_SYSTEM
+                    : hap.Categories.SECURITY_SYSTEM,
                 )
 
                 if (isExternalCamera) {
                   logInfo(
-                    `Configured camera ${uuid} ${deviceType} ${displayName}`
+                    `Configured camera ${uuid} ${deviceType} ${displayName}`,
                   )
                   externalAccessories.push(accessory)
                 } else {
                   logInfo(
-                    `Adding new accessory ${uuid} ${deviceType} ${displayName}`
+                    `Adding new accessory ${uuid} ${deviceType} ${displayName}`,
                   )
                   platformAccessories.push(accessory)
                 }
@@ -337,7 +337,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 ) {
                   // This is a one-time cleanup that will remove persist files for old external accessories from unbridged cameras
                   hap.Accessory.cleanupAccessoryData(
-                    generateMacAddress(accessory.UUID)
+                    generateMacAddress(accessory.UUID),
                   )
                 }
 
@@ -348,22 +348,22 @@ export class RingPlatform implements DynamicPlatformPlugin {
               accessory = new AccessoryClass(
                 device as any,
                 homebridgeAccessory,
-                config
+                config,
               )
             accessory.initBase()
 
             this.homebridgeAccessories[uuid] = homebridgeAccessory
             activeAccessoryIds.push(uuid)
-          }
+          },
         )
-      })
+      }),
     )
 
     if (platformAccessories.length) {
       api.registerPlatformAccessories(
         pluginName,
         platformName,
-        platformAccessories
+        platformAccessories,
       )
     }
 
@@ -377,7 +377,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
     staleAccessories.forEach((staleAccessory) => {
       logInfo(
-        `Removing stale cached accessory ${staleAccessory.UUID} ${staleAccessory.displayName}`
+        `Removing stale cached accessory ${staleAccessory.UUID} ${staleAccessory.displayName}`,
       )
     })
 
@@ -385,7 +385,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       this.api.unregisterPlatformAccessories(
         pluginName,
         platformName,
-        staleAccessories
+        staleAccessories,
       )
     }
 
@@ -398,7 +398,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         updateHomebridgeConfig(this.api, (configContents) => {
           return configContents.replace(oldRefreshToken, newRefreshToken)
         })
-      }
+      },
     )
   }
 }

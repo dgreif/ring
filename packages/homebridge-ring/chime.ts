@@ -11,24 +11,24 @@ export class Chime extends BaseDataAccessory<RingChime> {
   constructor(
     public readonly device: RingChime,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
     const { Characteristic, Service } = hap,
       snoozeService = this.getService(
         Service.Switch,
         device.name + ' Snooze',
-        'snooze'
+        'snooze',
       ),
       playDingService = this.getService(
         Service.Switch,
         device.name + ' Play Ding',
-        'play-ding'
+        'play-ding',
       ),
       playMotionService = this.getService(
         Service.Switch,
         device.name + ' Play Motion',
-        'play-motion'
+        'play-motion',
       )
 
     // Snooze Switch

@@ -29,7 +29,7 @@ async function example() {
   app.use('/', express.static(path.join(__dirname, 'public')))
   app.listen(3000, () => {
     console.log(
-      'Listening on port 3000.  Go to http://localhost:3000 in your browser'
+      'Listening on port 3000.  Go to http://localhost:3000 in your browser',
     )
   })
 
@@ -62,10 +62,13 @@ async function example() {
     process.exit()
   })
 
-  setTimeout(function () {
-    console.log('Stopping call...')
-    call.stop()
-  }, 5 * 60 * 1000) // Stop after 5 minutes.
+  setTimeout(
+    function () {
+      console.log('Stopping call...')
+      call.stop()
+    },
+    5 * 60 * 1000,
+  ) // Stop after 5 minutes.
 }
 
 example().catch((e) => {

@@ -28,7 +28,7 @@ export interface RingPlatformConfig extends RingApiOptions {
 
 export function updateHomebridgeConfig(
   homebridge: API,
-  update: (config: string) => string
+  update: (config: string) => string,
 ) {
   const configPath = homebridge.user.configPath(),
     config = readFileSync(configPath).toString(),
@@ -55,7 +55,7 @@ export function getSystemId(homebridgeStoragePath: string) {
 
   try {
     const ringContext: RingContext = JSON.parse(
-      readFileSync(filePath).toString()
+      readFileSync(filePath).toString(),
     )
     if (ringContext.systemId) {
       return ringContext.systemId

@@ -22,7 +22,7 @@ import {
 import { logError } from 'ring-client-api/util'
 
 export abstract class BaseDataAccessory<
-  T extends RingDevice | RingCamera | RingChime | RingIntercom
+  T extends RingDevice | RingCamera | RingChime | RingIntercom,
 > extends BaseAccessory<T> {
   abstract readonly device: T
   abstract readonly accessory: PlatformAccessory
@@ -63,7 +63,7 @@ export abstract class BaseDataAccessory<
           } catch (e: any) {
             callback(e)
           }
-        }
+        },
       )
     }
 
@@ -74,11 +74,11 @@ export abstract class BaseDataAccessory<
         CharacteristicEventTypes.SET,
         (
           newValue: CharacteristicValue,
-          callback: CharacteristicSetCallback
+          callback: CharacteristicSetCallback,
         ) => {
           onValueToSet.next(newValue)
           callback()
-        }
+        },
       )
 
       onValueToSet.pipe(debounceTime(setValueDebounceTime)).subscribe(setValue)
@@ -87,11 +87,11 @@ export abstract class BaseDataAccessory<
         CharacteristicEventTypes.SET,
         (
           newValue: CharacteristicValue,
-          callback: CharacteristicSetCallback
+          callback: CharacteristicSetCallback,
         ) => {
           Promise.resolve(setValue(newValue)).catch(logError)
           callback()
-        }
+        },
       )
     }
 

@@ -10,7 +10,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 
@@ -21,7 +21,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
       leakService = this.getService(LeakSensor, `${device.name} Flood Sensor`),
       freezeService = this.getService(
         OccupancySensor,
-        `${device.name} Freeze Sensor`
+        `${device.name} Freeze Sensor`,
       ),
       onFloodDetected = device.onData.pipe(
         map((data) => {
@@ -29,7 +29,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
             ? LeakDetected.LEAK_DETECTED
             : LeakDetected.LEAK_NOT_DETECTED
         }),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       ),
       onFreezeDetected = device.onData.pipe(
         map((data) => {
@@ -37,7 +37,7 @@ export class FloodFreezeSensor extends BaseDeviceAccessory {
             ? OccupancyDetected.OCCUPANCY_DETECTED
             : OccupancyDetected.OCCUPANCY_NOT_DETECTED
         }),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       )
 
     this.initSensorService(leakService)

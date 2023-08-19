@@ -31,13 +31,13 @@ export async function acquireRefreshToken() {
 
 export async function logRefreshToken() {
   console.log(
-    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.'
+    'This CLI will provide you with a refresh token which you can use to configure ring-client-api and homebridge-ring.',
   )
 
   const refreshToken = await acquireRefreshToken()
 
   console.log(
-    '\nSuccessfully logged in to Ring. Please add the following to your config:\n'
+    '\nSuccessfully logged in to Ring. Please add the following to your config:\n',
   )
   console.log(`"refreshToken": "${refreshToken}"`)
 }

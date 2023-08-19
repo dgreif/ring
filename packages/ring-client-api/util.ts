@@ -83,7 +83,7 @@ export async function getHardwareId(systemId?: string) {
 
   if (id === timeoutValue) {
     logError(
-      'Request for system uuid timed out.  Falling back to random session id'
+      'Request for system uuid timed out.  Falling back to random session id',
     )
     return generateRandomUuid()
   }
@@ -125,7 +125,7 @@ export function stringify(data: any) {
 
 export function mapAsync<T, U>(
   records: T[],
-  asyncMapper: (record: T) => Promise<U>
+  asyncMapper: (record: T) => Promise<U>,
 ): Promise<U[]> {
   return Promise.all(records.map((record) => asyncMapper(record)))
 }

@@ -15,7 +15,7 @@ async function example() {
     allCameras = await ringApi.getCameras()
 
   console.log(
-    `Found ${locations.length} location(s) with ${allCameras.length} camera(s).`
+    `Found ${locations.length} location(s) with ${allCameras.length} camera(s).`,
   )
 
   ringApi.onRefreshTokenUpdated.subscribe(
@@ -32,7 +32,7 @@ async function example() {
           .replace(oldRefreshToken, newRefreshToken)
 
       await promisify(writeFile)('.env', updatedConfig)
-    }
+    },
   )
 
   for (const location of locations) {
@@ -47,7 +47,7 @@ async function example() {
       devices = await location.getDevices()
 
     console.log(
-      `\nLocation ${location.name} (${location.id}) has the following ${cameras.length} camera(s):`
+      `\nLocation ${location.name} (${location.id}) has the following ${cameras.length} camera(s):`,
     )
 
     for (const camera of cameras) {
@@ -55,7 +55,7 @@ async function example() {
     }
 
     console.log(
-      `\nLocation ${location.name} (${location.id}) has the following ${devices.length} device(s):`
+      `\nLocation ${location.name} (${location.id}) has the following ${devices.length} device(s):`,
     )
 
     for (const device of devices) {
@@ -76,7 +76,7 @@ async function example() {
         console.log(
           `${event} on ${camera.name} camera. Ding id ${
             notification.ding.id
-          }.  Received at ${new Date()}`
+          }.  Received at ${new Date()}`,
         )
       })
     })

@@ -32,7 +32,7 @@ const email = 'some@one.com',
             error:
               'Invalid auth headers: ' +
               JSON.stringify(req.headers.raw(), null, 2),
-          })
+          }),
         )
       }
 
@@ -47,7 +47,7 @@ const email = 'some@one.com',
               refresh_token: secondRefreshToken,
               scope: 'client',
               token_type: 'Bearer',
-            })
+            }),
           )
         }
 
@@ -61,7 +61,7 @@ const email = 'some@one.com',
               refresh_token: thirdRefreshToken,
               scope: 'client',
               token_type: 'Bearer',
-            })
+            }),
           )
         }
 
@@ -71,7 +71,7 @@ const email = 'some@one.com',
           ctx.json({
             error: 'invalid_grant',
             error_description: 'token is invalid or does not exists',
-          })
+          }),
         )
       }
 
@@ -85,7 +85,7 @@ const email = 'some@one.com',
           ctx.json({
             code: 1,
             error: 'Invalid auth request: ' + JSON.stringify(body),
-          })
+          }),
         )
       }
 
@@ -96,7 +96,7 @@ const email = 'some@one.com',
           ctx.json({
             error: 'access_denied',
             error_description: 'invalid user credentials',
-          })
+          }),
         )
       }
 
@@ -110,7 +110,7 @@ const email = 'some@one.com',
           ctx.json({
             err_msg: 'bad request response from dependency service',
             error: 'Verification Code is invalid or expired',
-          })
+          }),
         )
       }
 
@@ -124,7 +124,7 @@ const email = 'some@one.com',
             scope: 'client',
             token_type: 'Bearer',
             responseTimestamp: Date.now(),
-          })
+          }),
         )
       }
 
@@ -135,7 +135,7 @@ const email = 'some@one.com',
           next_time_in_secs: 60,
           phone,
           tsv_state: 'sms',
-        })
+        }),
       )
     }),
     rest.post(
@@ -160,7 +160,7 @@ const email = 'some@one.com',
         ) {
           return res(
             ctx.status(400),
-            ctx.body('Bad session request: ' + JSON.stringify(body, null, 2))
+            ctx.body('Bad session request: ' + JSON.stringify(body, null, 2)),
           )
         }
 
@@ -171,10 +171,10 @@ const email = 'some@one.com',
             profile: {
               id: 1234,
             },
-          })
+          }),
         )
-      }
-    )
+      },
+    ),
   )
 
 async function wrapRefreshToken(rt: string) {
@@ -182,7 +182,7 @@ async function wrapRefreshToken(rt: string) {
     JSON.stringify({
       rt,
       hid: await hardwareIdPromise,
-    })
+    }),
   )
 }
 
@@ -214,11 +214,11 @@ describe('getAuth', () => {
     })
 
     await expect(() => client.getAuth()).rejects.toThrow(
-      'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.'
+      'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.',
     )
 
     expect(client.promptFor2fa).toEqual(
-      `Please enter the code sent to ${phone} via sms`
+      `Please enter the code sent to ${phone} via sms`,
     )
     expect(client.using2fa).toEqual(true)
   })
@@ -248,7 +248,7 @@ describe('getAuth', () => {
     })
 
     await expect(() => client.getAuth()).rejects.toThrow(
-      'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: access_denied)'
+      'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: access_denied)',
     )
   })
 
@@ -263,10 +263,10 @@ describe('getAuth', () => {
 
     // call getAuth again with an invalid 2fa code, which should fail
     await expect(() => client.getAuth('invalid 2fa code')).rejects.toThrow(
-      'Verification Code is invalid or expired'
+      'Verification Code is invalid or expired',
     )
     expect(client.promptFor2fa).toEqual(
-      'Invalid 2fa code entered.  Please try again.'
+      'Invalid 2fa code entered.  Please try again.',
     )
   })
 
@@ -280,7 +280,7 @@ describe('getAuth', () => {
       refresh_token: await wrapRefreshToken(secondRefreshToken),
     })
     expect(client.refreshToken).toEqual(
-      await wrapRefreshToken(secondRefreshToken)
+      await wrapRefreshToken(secondRefreshToken),
     )
   })
 
@@ -334,13 +334,13 @@ describe('fetch', () => {
               ctx.json({
                 error:
                   'Session not found for ' + req.headers.get('hardware_id'),
-              })
+              }),
             )
           }
 
           return res(ctx.json([]))
-        }
-      )
+        },
+      ),
     )
   })
 

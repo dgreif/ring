@@ -14,7 +14,7 @@ export class Thermostat extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 
@@ -25,24 +25,24 @@ export class Thermostat extends BaseDeviceAccessory {
     this.onTemperature = this.device.onComponentDevices.pipe(
       switchMap((devices) => {
         const temperatureSensor = devices.find(
-          ({ deviceType }) => deviceType === RingDeviceType.TemperatureSensor
+          ({ deviceType }) => deviceType === RingDeviceType.TemperatureSensor,
         )
         if (!temperatureSensor) {
           return []
         }
         logDebug(
-          `Discovered a component temperature sensor for ${this.device.name}`
+          `Discovered a component temperature sensor for ${this.device.name}`,
         )
         return temperatureSensor.onData.pipe(
           map(({ celsius: temperature }) => {
             logDebug(
-              `Component temperature sensor for ${this.device.name} reported ${temperature} degrees`
+              `Component temperature sensor for ${this.device.name} reported ${temperature} degrees`,
             )
             return temperature
           }),
-          distinctUntilChanged()
+          distinctUntilChanged(),
         )
-      })
+      }),
     )
 
     // Required Characteristics
@@ -59,7 +59,7 @@ export class Thermostat extends BaseDeviceAccessory {
 
           if (!temperature || !setPoint) {
             logError(
-              `Could not determine 'CurrentHeatingCoolingState' for ${this.device.name} given temperature: ${temperature}, set point: ${setPoint} and mode: ${mode}. Reporting 'off' state as a fallback.`
+              `Could not determine 'CurrentHeatingCoolingState' for ${this.device.name} given temperature: ${temperature}, set point: ${setPoint} and mode: ${mode}. Reporting 'off' state as a fallback.`,
             )
             return Characteristic.CurrentHeatingCoolingState.OFF
           }
@@ -91,7 +91,7 @@ export class Thermostat extends BaseDeviceAccessory {
           // but the current thermostat mode would only increase the difference,
           // so the thermostat is neither heating nor cooling
           return Characteristic.CurrentHeatingCoolingState.OFF
-        })
+        }),
       ),
     })
 
@@ -126,7 +126,7 @@ export class Thermostat extends BaseDeviceAccessory {
         })()
         if (!mode) {
           logError(
-            `Couldn’t match ${targetHeatingCoolingState} to a recognized mode string.`
+            `Couldn’t match ${targetHeatingCoolingState} to a recognized mode string.`,
           )
           return
         }
@@ -154,14 +154,14 @@ export class Thermostat extends BaseDeviceAccessory {
         map((temperature) => {
           if (!temperature) {
             logError(
-              `Could not determine 'CurrentTemperature' for ${this.device.name} given temperature: ${temperature}. Returning 22 degrees celsius as a fallback.`
+              `Could not determine 'CurrentTemperature' for ${this.device.name} given temperature: ${temperature}. Returning 22 degrees celsius as a fallback.`,
             )
             return 22
           }
           // Documentation: https://developers.homebridge.io/#/characteristic/CurrentTemperature
           // 'Characteristic.CurrentTemperature' supports 0.1 increments
           return Number(Number(temperature).toFixed(1))
-        })
+        }),
       ),
     })
 
@@ -182,7 +182,7 @@ export class Thermostat extends BaseDeviceAccessory {
 
         if (setPoint < setPointMin || setPoint > setPointMax) {
           logError(
-            `Ignoring request to set ${this.device.name} target temperature to ${setPoint}. Target temperature must be between ${setPointMin} and ${setPointMax}.`
+            `Ignoring request to set ${this.device.name} target temperature to ${setPoint}. Target temperature must be between ${setPointMin} and ${setPointMax}.`,
           )
           return
         }
@@ -197,7 +197,7 @@ export class Thermostat extends BaseDeviceAccessory {
       const setPointMin = Math.max(this.device.data.setPointMin || 10, 10),
         setPointMax = Math.min(this.device.data.setPointMax || 38, 38)
       logDebug(
-        `Setting ${this.device.name} target temperature range to ${setPointMin}–${setPointMax}`
+        `Setting ${this.device.name} target temperature range to ${setPointMin}–${setPointMax}`,
       )
       this.getService(Service.Thermostat)
         .getCharacteristic(Characteristic.TargetTemperature)

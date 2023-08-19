@@ -69,19 +69,19 @@ class StreamingSessionWrapper {
 
   libfdkAacInstalledPromise = doesFfmpegSupportCodec(
     'libfdk_aac',
-    getFfmpegPath()
+    getFfmpegPath(),
   )
     .then((supported) => {
       if (!supported) {
         logError(
-          'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
+          'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.',
         )
       }
       return supported
     })
     .catch(() => {
       logError(
-        'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.'
+        'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.',
       )
       return false
     })
@@ -90,7 +90,7 @@ class StreamingSessionWrapper {
     public streamingSession: StreamingSession,
     public prepareStreamRequest: PrepareStreamRequest,
     public ringCamera: RingCamera,
-    public start: number
+    public start: number,
   ) {
     const {
         targetAddress,
@@ -119,10 +119,10 @@ class StreamingSessionWrapper {
           logInfo(
             `Live stream for ${
               this.ringCamera.name
-            } appears to be inactive. (${getDurationSeconds(start)}s)`
+            } appears to be inactive. (${getDurationSeconds(start)}s)`,
           )
           streamingSession.stop()
-        })
+        }),
     )
 
     // Periodically send a blank RTCP packet to the HomeKit video port
@@ -147,7 +147,7 @@ class StreamingSessionWrapper {
             address: targetAddress,
           })
           .catch(logError)
-      })
+      }),
     )
   }
 
@@ -241,7 +241,7 @@ class StreamingSessionWrapper {
           logInfo(
             `Received stream data from ${
               this.ringCamera.name
-            } (${getDurationSeconds(this.start)}s)`
+            } (${getDurationSeconds(this.start)}s)`,
           )
         }
 
@@ -251,7 +251,7 @@ class StreamingSessionWrapper {
             address: targetAddress,
           })
           .catch(logError)
-      })
+      }),
     )
 
     const shouldTranscodeAudio = await this.libfdkAacInstalledPromise
@@ -314,7 +314,7 @@ class StreamingSessionWrapper {
         srtpSalt: remoteAudioSrtpSalt,
       },
       audioSrtpSession = new SrtpSession(
-        getSessionConfig(remoteAudioSrtpOptions)
+        getSessionConfig(remoteAudioSrtpOptions),
       ),
       returnAudioTranscodedSplitter = new RtpSplitter(({ message }) => {
         if (!cameraSpeakerActive) {
@@ -433,7 +433,10 @@ export class CameraSource implements CameraStreamingDelegate {
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
 
-  constructor(private ringCamera: RingCamera, private useOpus = false) {}
+  constructor(
+    private ringCamera: RingCamera,
+    private useOpus = false,
+  ) {}
 
   private previousLoadSnapshotPromise?: Promise<any>
   async loadSnapshot(imageUuid?: string) {
@@ -461,7 +464,7 @@ export class CameraSource implements CameraStreamingDelegate {
     logDebug(
       `Loading new snapshot into cache for ${this.ringCamera.name}${
         imageUuid ? ' by uuid' : ''
-      }`
+      }`,
     )
 
     try {
@@ -472,17 +475,20 @@ export class CameraSource implements CameraStreamingDelegate {
       if (previousSnapshot !== newSnapshot) {
         // Keep the snapshots in cache 2 minutes longer than their lifetime
         // This allows users on LTE with wired camera to get snapshots each 60 second pull even though the cached snapshot is out of date
-        setTimeout(() => {
-          if (this.cachedSnapshot === newSnapshot) {
-            this.cachedSnapshot = undefined
-          }
-        }, this.ringCamera.snapshotLifeTime + 2 * 60 * 1000)
+        setTimeout(
+          () => {
+            if (this.cachedSnapshot === newSnapshot) {
+              this.cachedSnapshot = undefined
+            }
+          },
+          this.ringCamera.snapshotLifeTime + 2 * 60 * 1000,
+        )
       }
 
       logDebug(
         `Snapshot cached for ${this.ringCamera.name}${
           imageUuid ? ' by uuid' : ''
-        } (${getDurationSeconds(start)}s)`
+        } (${getDurationSeconds(start)}s)`,
       )
     } catch (e: any) {
       this.cachedSnapshot = undefined
@@ -490,10 +496,10 @@ export class CameraSource implements CameraStreamingDelegate {
         `Failed to cache snapshot for ${
           this.ringCamera.name
         } (${getDurationSeconds(
-          start
+          start,
         )}s), The camera currently reports that it is ${
           this.ringCamera.isOffline ? 'offline' : 'online'
-        }`
+        }`,
       )
 
       // log additioanl snapshot error message if one is present
@@ -515,7 +521,7 @@ export class CameraSource implements CameraStreamingDelegate {
     logDebug(
       `${
         this.cachedSnapshot ? 'Used cached snapshot' : 'No snapshot cached'
-      } for ${this.ringCamera.name}`
+      } for ${this.ringCamera.name}`,
     )
 
     if (!this.ringCamera.hasSnapshotWithinLifetime) {
@@ -528,7 +534,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
   async handleSnapshotRequest(
     request: SnapshotRequest,
-    callback: SnapshotRequestCallback
+    callback: SnapshotRequestCallback,
   ) {
     try {
       const snapshot = await this.getCurrentSnapshot()
@@ -550,7 +556,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
   async prepareStream(
     request: PrepareStreamRequest,
-    callback: PrepareStreamCallback
+    callback: PrepareStreamCallback,
   ) {
     const start = Date.now()
     logInfo(`Preparing Live Stream for ${this.ringCamera.name}`)
@@ -561,15 +567,15 @@ export class CameraSource implements CameraStreamingDelegate {
           liveCall,
           request,
           this.ringCamera,
-          start
+          start,
         )
 
       this.sessions[request.sessionID] = session
 
       logInfo(
         `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(
-          start
-        )}s)`
+          start,
+        )}s)`,
       )
 
       callback(undefined, {
@@ -590,7 +596,7 @@ export class CameraSource implements CameraStreamingDelegate {
       logError(
         `Failed to prepare stream for ${
           this.ringCamera.name
-        } (${getDurationSeconds(start)}s)`
+        } (${getDurationSeconds(start)}s)`,
       )
       logError(e)
       callback(e)
@@ -599,7 +605,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
   async handleStreamRequest(
     request: StreamingRequest,
-    callback: StreamRequestCallback
+    callback: StreamRequestCallback,
   ) {
     const sessionID = request.sessionID,
       session = this.sessions[sessionID],
@@ -613,8 +619,8 @@ export class CameraSource implements CameraStreamingDelegate {
     if (requestType === 'start') {
       logInfo(
         `Activating stream for ${this.ringCamera.name} (${getDurationSeconds(
-          session.start
-        )}s)`
+          session.start,
+        )}s)`,
       )
       try {
         await session.activate(request)
@@ -627,8 +633,8 @@ export class CameraSource implements CameraStreamingDelegate {
       }
       logInfo(
         `Streaming active for ${this.ringCamera.name} (${getDurationSeconds(
-          session.start
-        )}s)`
+          session.start,
+        )}s)`,
       )
     } else if (requestType === 'stop') {
       logInfo(`Stopped Live Stream for ${this.ringCamera.name}`)

@@ -15,7 +15,7 @@ import {
 import { logError, logInfo } from 'ring-client-api/util'
 
 function isServiceInstance(
-  serviceType: WithUUID<typeof Service> | Service
+  serviceType: WithUUID<typeof Service> | Service,
 ): serviceType is Service {
   return typeof (serviceType as any) === 'object'
 }
@@ -36,7 +36,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
   getService(
     serviceType: ServiceType,
     name = this.device.name,
-    subType?: string
+    subType?: string,
   ) {
     if (isServiceInstance(serviceType)) {
       return serviceType
@@ -60,7 +60,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
       name !== existingService.displayName
     ) {
       throw new Error(
-        `Overlapping services for device ${this.device.name} - ${name} != ${existingService.displayName} - ${serviceType}`
+        `Overlapping services for device ${this.device.name} - ${name} != ${existingService.displayName} - ${serviceType}`,
       )
     }
 
@@ -110,7 +110,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
             } catch (e: any) {
               callback(e)
             }
-          }
+          },
         )
       })
     }
@@ -120,13 +120,13 @@ export abstract class BaseAccessory<T extends { name: string }> {
         CharacteristicEventTypes.SET,
         (
           newValue: CharacteristicValue,
-          callback: CharacteristicSetCallback
+          callback: CharacteristicSetCallback,
         ) => {
           Promise.resolve(setValue(newValue as U)).catch((e) => {
             logError(e)
           })
           callback()
-        }
+        },
       )
     }
   }
@@ -147,7 +147,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
           service.UUID,
           service.displayName || service.name,
           'from',
-          this.device.name
+          this.device.name,
         )
 
         this.accessory.removeService(service)

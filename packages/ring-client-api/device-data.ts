@@ -55,10 +55,10 @@ function stripSensitiveFields(input: any) {
 
 export async function logDeviceData() {
   console.log(
-    'This CLI will log data from you Ring Account to help debug issues and discovering new device types.'
+    'This CLI will log data from you Ring Account to help debug issues and discovering new device types.',
   )
   console.log(
-    'The logged data is anonymized and should not compromise your account in any way.'
+    'The logged data is anonymized and should not compromise your account in any way.',
   )
 
   const refreshToken = await acquireRefreshToken(),

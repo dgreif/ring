@@ -25,7 +25,7 @@ export class RingChime {
 
   constructor(
     private initialData: ChimeData,
-    private restClient: RingRestClient
+    private restClient: RingRestClient,
   ) {
     this.id = this.initialData.id
     this.deviceType = this.initialData.kind
@@ -69,7 +69,7 @@ export class RingChime {
         (audio) =>
           audio.available &&
           audio.description === description &&
-          audio.kind === kind
+          audio.kind === kind,
       )
 
     if (!requestedRingtone) {
@@ -122,14 +122,14 @@ export class RingChime {
 
     // inform caller if this change requires a reboot
     return Object.keys(update.settings || {}).some((key) =>
-      settingsWhichRequireReboot.includes(key)
+      settingsWhichRequireReboot.includes(key),
     )
   }
 
   setVolume(volume: number) {
     if (volume < 0 || volume > 11) {
       throw new Error(
-        `Volume for ${this.name} must be between 0 and 11, got ${volume}`
+        `Volume for ${this.name} must be between 0 and 11, got ${volume}`,
       )
     }
 

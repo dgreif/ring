@@ -18,7 +18,7 @@ const burglarStates: AlarmState[] = [
 
 function matchesAnyAlarmState(
   { alarmInfo }: RingDeviceData,
-  targetStates: AlarmState[]
+  targetStates: AlarmState[],
 ) {
   return Boolean(alarmInfo && targetStates.includes(alarmInfo.state))
 }
@@ -27,7 +27,7 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 

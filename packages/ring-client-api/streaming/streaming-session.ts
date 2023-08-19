@@ -41,7 +41,7 @@ export class StreamingSession extends Subscribed {
 
   constructor(
     private readonly camera: RingCamera,
-    private connection: WebrtcConnection
+    private connection: WebrtcConnection,
   ) {
     super()
 
@@ -55,7 +55,7 @@ export class StreamingSession extends Subscribed {
       connection.onCallAnswered.subscribe((sdp) => {
         this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
       }),
-      connection.onCallEnded.subscribe(() => this.callEnded())
+      connection.onCallEnded.subscribe(() => this.callEnded()),
     )
   }
 
@@ -88,10 +88,10 @@ export class StreamingSession extends Subscribed {
           this.connection.onError.pipe(
             map((e) => {
               throw e
-            })
-          )
-        )
-      )
+            }),
+          ),
+        ),
+      ),
     )
   }
 
@@ -135,7 +135,7 @@ export class StreamingSession extends Subscribed {
           ...(transcodeVideoStream
             ? ffmpegOptions.video || ['-vcodec', 'copy']
             : []),
-          ...(ffmpegOptions.output || [])
+          ...(ffmpegOptions.output || []),
         ),
         ffmpegPath: getFfmpegPath(),
         exitCallback: () => this.callEnded(),
@@ -153,9 +153,9 @@ export class StreamingSession extends Subscribed {
             return this.audioSplitter.send(rtp.serialize(), {
               port: audioPort,
             })
-          })
+          }),
         )
-        .subscribe()
+        .subscribe(),
     )
 
     if (transcodeVideoStream) {
@@ -166,9 +166,9 @@ export class StreamingSession extends Subscribed {
               return this.videoSplitter.send(rtp.serialize(), {
                 port: videoPort,
               })
-            })
+            }),
           )
-          .subscribe()
+          .subscribe(),
       )
     }
 

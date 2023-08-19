@@ -9,7 +9,7 @@ export class TemperatureSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 
@@ -25,7 +25,7 @@ export class TemperatureSensor extends BaseDeviceAccessory {
         map((data) => {
           return data.celsius!
         }),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       ),
     })
 

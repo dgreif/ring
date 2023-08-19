@@ -13,7 +13,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
   constructor(
     public readonly device: RingIntercom,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
     const { Characteristic, Service } = hap,
@@ -21,11 +21,11 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       { LockCurrentState, LockTargetState, ProgrammableSwitchEvent } =
         Characteristic,
       programableSwitchService = this.getService(
-        Service.StatelessProgrammableSwitch
+        Service.StatelessProgrammableSwitch,
       ),
       onDoorbellPressed = device.onDing.pipe(
         throttleTime(15000),
-        map(() => ProgrammableSwitchEvent.SINGLE_PRESS)
+        map(() => ProgrammableSwitchEvent.SINGLE_PRESS),
       ),
       syncLockState = () => {
         const state = this.getLockState()
@@ -120,7 +120,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
         onValue: device.onBatteryLevel.pipe(
           map((batteryLevel) => {
             return batteryLevel === null ? 100 : batteryLevel
-          })
+          }),
         ),
         requestUpdate: () => device.requestUpdate(),
       })

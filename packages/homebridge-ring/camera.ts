@@ -13,13 +13,13 @@ export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
   private cameraSource = new CameraSource(
     this.device,
-    this.config.unbridgeCameras
+    this.config.unbridgeCameras,
   )
 
   constructor(
     public readonly device: RingCamera,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 
@@ -58,7 +58,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
             }
 
             return this.loadSnapshotForEvent('Detected Motion', true)
-          })
+          }),
         ),
       })
     }
@@ -72,9 +72,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
           switchMap(() => {
             return this.loadSnapshotForEvent(
               'Doorbell Pressed',
-              Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+              Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
             )
-          })
+          }),
         ),
       })
 
@@ -83,7 +83,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
           characteristicType: Characteristic.ProgrammableSwitchEvent,
           serviceType: Service.StatelessProgrammableSwitch,
           onValue: device.onDoorbellPressed.pipe(
-            mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS)
+            mapTo(Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS),
           ),
         })
 
@@ -125,7 +125,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         name: device.name + ' Siren',
         getValue: (data) => {
           return Boolean(
-            data.siren_status && data.siren_status.seconds_remaining
+            data.siren_status && data.siren_status.seconds_remaining,
           )
         },
         setValue: (value) => device.setSiren(value),
@@ -137,7 +137,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       this.device.onInHomeDoorbellStatus.subscribe(
         (data: boolean | undefined) => {
           this.inHomeDoorbellStatus = data
-        }
+        },
       )
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.On,
@@ -203,7 +203,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         onValue: device.onBatteryLevel.pipe(
           map((batteryLevel) => {
             return batteryLevel === null ? 100 : batteryLevel
-          })
+          }),
         ),
       })
     }
@@ -211,7 +211,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
   private async loadSnapshotForEvent<T>(
     eventDescription: string,
-    characteristicValue: T
+    characteristicValue: T,
   ) {
     let imageUuid = this.device.latestNotificationSnapshotUuid
 
@@ -224,8 +224,8 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       await Promise.race([
         firstValueFrom(
           this.device.onNewNotification.pipe(
-            filter((notification) => Boolean(notification.ding.image_uuid))
-          )
+            filter((notification) => Boolean(notification.ding.image_uuid)),
+          ),
         ),
         // wait up to 2 seconds for the second notification
         delay(2000),
@@ -241,7 +241,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
     logInfo(
       this.device.name +
-        ` ${eventDescription}. Loading snapshot before sending event to HomeKit`
+        ` ${eventDescription}. Loading snapshot before sending event to HomeKit`,
     )
 
     try {
@@ -249,7 +249,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     } catch (e) {
       logInfo(
         this.device.name +
-          ' Failed to load snapshot.  Sending event to HomeKit without new snapshot'
+          ' Failed to load snapshot.  Sending event to HomeKit without new snapshot',
       )
     }
 

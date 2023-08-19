@@ -11,7 +11,7 @@ export class SimpleWebRtcSession {
 
   constructor(
     private readonly camera: RingCamera,
-    private restClient: RingRestClient
+    private restClient: RingRestClient,
   ) {}
 
   async start(sdp: string): Promise<string> {

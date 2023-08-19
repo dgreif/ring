@@ -10,7 +10,7 @@ export class WaterSensor extends BaseDeviceAccessory {
   constructor(
     public readonly device: RingDevice,
     public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig
+    public readonly config: RingPlatformConfig,
   ) {
     super()
 
@@ -24,7 +24,7 @@ export class WaterSensor extends BaseDeviceAccessory {
             ? LeakDetected.LEAK_DETECTED
             : LeakDetected.LEAK_NOT_DETECTED
         }),
-        distinctUntilChanged()
+        distinctUntilChanged(),
       )
 
     this.initSensorService(leakService)

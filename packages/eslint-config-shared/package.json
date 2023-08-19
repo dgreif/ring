@@ -4,12 +4,12 @@
   "private": true,
   "main": "eslint-config-shared.js",
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "5.59.9",
-    "@typescript-eslint/parser": "5.59.9",
-    "eslint": "8.42.0",
-    "eslint-config-prettier": "8.8.0",
-    "eslint-plugin-jest": "27.2.1",
-    "eslint-plugin-prettier": "4.2.1",
+    "@typescript-eslint/eslint-plugin": "6.4.0",
+    "@typescript-eslint/parser": "6.4.0",
+    "eslint": "8.47.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-jest": "27.2.3",
+    "eslint-plugin-prettier": "5.0.0",
     "tsconfig": "*"
   }
 }

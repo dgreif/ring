@@ -27,7 +27,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
-    "@swc-node/register": "^1.6.6",
+    "@swc-node/register": "^1.6.7",
     "turbo": "^1.10.12"
   },
   "workspaces": [

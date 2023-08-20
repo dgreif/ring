@@ -348,7 +348,19 @@ class StreamingSessionWrapper {
         outputArgs: [
           '-acodec',
           ...(isRingUsingOpus
-            ? ['libopus', '-ac', 1, '-ar', '24k', '-vbr', 'off', '-b:a', '24k', '-application', 'voip']
+            ? [
+                'libopus',
+                '-ac',
+                1,
+                '-ar',
+                '24k',
+                '-vbr',
+                'off',
+                '-b:a',
+                '24k',
+                '-application',
+                'voip',
+              ]
             : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
           '-flags',
           '+global_header',

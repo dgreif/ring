@@ -1,5 +1,7 @@
 # ring-client-api
 
+## 12.0.0-beta.4
+
 ## 12.0.0-beta.3
 
 ### Patch Changes

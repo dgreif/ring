@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 12.0.0-beta.4
+
+### Patch Changes
+
+- [#1299](https://github.com/dgreif/ring/pull/1299) [`d6a5414`](https://github.com/dgreif/ring/commit/d6a54146370450240d4efcb3f0343227f899c719) Thanks [@tsightler](https://github.com/tsightler)! - Improve 2-way audio quality in homebridge
+
+- Updated dependencies []:
+  - ring-client-api@12.0.0-beta.4
+
 ## 12.0.0-beta.3
 
 ### Patch Changes

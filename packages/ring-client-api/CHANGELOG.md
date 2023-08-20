@@ -1,5 +1,22 @@
 # ring-client-api
 
+## 12.0.0
+
+### Breaking Changes
+
+- Dropped Node 16 support. Node 18 is the current LTS, so please upgrade to Node 18 or Node 20. Note, Node 16 may still work after this update, but will likely break without warning in future updates.
+- Video streaming has been condensed to use a single API, rather than a separate setup between Ring Cloud and Ring Edge streaming. This should allow all cameras to stream, including those using HEVC which were unable to be put into Legacy Mode.
+- The `StreamingConnectionBase` class has been removed, with all of the methods and properties moved to the `WebrtcConnection`` class.
+- Implementations of the `BasicPeerConnection` class no longer need to implement the `createAnswer` method.
+
+### Patch Changes
+
+- Fix streaming for all camera models by switching to a new streaming API from Ring
+- Fix 2-way audio
+- Updated dependencies
+
+A huge thank you to @tsightler who did all the discovery and refactor work for streaming and 2-way audio!
+
 ## 12.0.0-beta.4
 
 ## 12.0.0-beta.3

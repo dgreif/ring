@@ -303,7 +303,7 @@ class StreamingSessionWrapper {
         '-f',
         'rtp',
         `rtp://127.0.0.1:${await this.repacketizeAudioSplitter
-          .portPromise}?pkt_size=188`,
+          .portPromise}?pkt_size=276`,
       ],
       video: false,
       output: [],

@@ -71,7 +71,7 @@ function getEndOfToday() {
 export function getBatteryLevel(
   data: Pick<CameraData, 'battery_life' | 'battery_life_2'> & {
     health?: Partial<CameraData['health']>
-  }
+  },
 ) {
   const levels = [
       parseBatteryLife(data.battery_life),
@@ -90,7 +90,7 @@ export function getBatteryLevel(
 }
 
 export function getSearchQueryString(
-  options: CameraEventOptions | (HistoryOptions & { accountId: string })
+  options: CameraEventOptions | (HistoryOptions & { accountId: string }),
 ) {
   const queryString = Object.entries(options)
     .map(([key, value]) => {
@@ -131,24 +131,24 @@ export class RingCamera extends Subscribed {
   onActiveNotifications = new BehaviorSubject<PushNotificationDing[]>([])
   onDoorbellPressed = this.onNewNotification.pipe(
     filter(
-      (notification) => notification.action === PushNotificationAction.Ding
+      (notification) => notification.action === PushNotificationAction.Ding,
     ),
-    share()
+    share(),
   )
   onMotionDetected = this.onActiveNotifications.pipe(
     map((notifications) =>
       notifications.some(
-        (notification) => notification.action === PushNotificationAction.Motion
-      )
+        (notification) => notification.action === PushNotificationAction.Motion,
+      ),
     ),
     distinctUntilChanged(),
     publishReplay(1),
-    refCount()
+    refCount(),
   )
   onMotionStarted = this.onMotionDetected.pipe(
     filter((currentlyDetected) => currentlyDetected),
     mapTo(null), // no value needed, event is what matters
-    share()
+    share(),
   )
   onBatteryLevel
   onInHomeDoorbellStatus
@@ -157,7 +157,7 @@ export class RingCamera extends Subscribed {
     private initialData: AnyCameraData,
     public isDoorbot: boolean,
     private restClient: RingRestClient,
-    private avoidSnapshotBatteryDrain: boolean
+    private avoidSnapshotBatteryDrain: boolean,
   ) {
     super()
 
@@ -177,13 +177,13 @@ export class RingCamera extends Subscribed {
         }
         return getBatteryLevel(data)
       }),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     )
     this.onInHomeDoorbellStatus = this.onData.pipe(
       map(({ settings: { chime_settings } }: AnyCameraData) => {
         return Boolean(chime_settings?.enable)
       }),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     )
 
     this.addSubscriptions(
@@ -194,7 +194,7 @@ export class RingCamera extends Subscribed {
             logError(
               'Failed to subscribe ' +
                 initialData.description +
-                ' to ding events'
+                ' to ding events',
             )
             logError(e)
           })
@@ -203,11 +203,11 @@ export class RingCamera extends Subscribed {
             logError(
               'Failed to subscribe ' +
                 initialData.description +
-                ' to motion events'
+                ' to motion events',
             )
             logError(e)
           })
-        })
+        }),
     )
   }
 
@@ -283,8 +283,8 @@ export class RingCamera extends Subscribed {
       Boolean(
         chime_settings &&
           [DoorbellType.Mechanical, DoorbellType.Digital].includes(
-            chime_settings.type
-          )
+            chime_settings.type,
+          ),
       )
     )
   }
@@ -418,7 +418,7 @@ export class RingCamera extends Subscribed {
       dingId = notification.ding.id
 
     this.onActiveNotifications.next(
-      activeDings.filter((d) => d.ding.id !== dingId).concat([notification])
+      activeDings.filter((d) => d.ding.id !== dingId).concat([notification]),
     )
     this.onNewNotification.next(notification)
 
@@ -432,7 +432,7 @@ export class RingCamera extends Subscribed {
       url: clientApi(
         `locations/${this.data.location_id}/devices/${
           this.id
-        }/events${getSearchQueryString(options)}`
+        }/events${getSearchQueryString(options)}`,
       ),
     })
   }
@@ -441,11 +441,11 @@ export class RingCamera extends Subscribed {
     { dateFrom, dateTo, order = 'asc' } = {
       dateFrom: getStartOfToday(),
       dateTo: getEndOfToday(),
-    }
+    },
   ) {
     return this.restClient.request<VideoSearchResponse>({
       url: clientApi(
-        `video_search/history?doorbot_id=${this.id}&date_from=${dateFrom}&date_to=${dateTo}&order=${order}&api_version=11&includes%5B%5D=pva`
+        `video_search/history?doorbot_id=${this.id}&date_from=${dateFrom}&date_to=${dateTo}&order=${order}&api_version=11&includes%5B%5D=pva`,
       ),
     })
   }
@@ -454,7 +454,7 @@ export class RingCamera extends Subscribed {
     { startAtMs, endAtMs } = {
       startAtMs: getStartOfToday(),
       endAtMs: getEndOfToday(),
-    }
+    },
   ) {
     // These will be mp4 clips that are created using periodic snapshots
     return this.restClient.request<PeriodicFootageResponse>({
@@ -498,13 +498,13 @@ export class RingCamera extends Subscribed {
   private checkIfSnapshotsAreBlocked() {
     if (this.snapshotsAreBlocked) {
       throw new Error(
-        `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`
+        `Motion detection is disabled for ${this.name}, which prevents snapshots from this camera.  This can be caused by Modes settings or by turning off the Record Motion setting.`,
       )
     }
 
     if (this.isOffline) {
       throw new Error(
-        `Cannot fetch snapshot for ${this.name} because it is offline`
+        `Cannot fetch snapshot for ${this.name} because it is offline`,
       )
     }
   }
@@ -518,7 +518,7 @@ export class RingCamera extends Subscribed {
       logDebug(
         `Snapshot for ${this.name} is still within its life time (${
           this.currentTimestampAge / 1000
-        }s old)`
+        }s old)`,
       )
       return true
     }
@@ -545,14 +545,14 @@ export class RingCamera extends Subscribed {
           : {
               afterMs: this.lastSnapshotTimestamp,
               force: true,
-            }
+            },
       ),
       delay(maxSnapshotRefreshSeconds * 1000).then(() => {
         const extraMessageForBatteryCam = this.operatingOnBattery
           ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
           : ''
         throw new Error(
-          `Snapshot for ${this.name} (${this.deviceType} - ${this.model}) failed to refresh after ${maxSnapshotRefreshSeconds} seconds${extraMessageForBatteryCam}`
+          `Snapshot for ${this.name} (${this.deviceType} - ${this.model}) failed to refresh after ${maxSnapshotRefreshSeconds} seconds${extraMessageForBatteryCam}`,
         )
       }),
     ])

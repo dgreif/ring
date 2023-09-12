@@ -157,11 +157,15 @@ class StreamingSessionWrapper {
         audio: { port: audioPort },
       } = this.prepareStreamRequest,
       {
-        audio: { codec: audioCodec, sample_rate: audioSampleRate, packet_time: audioPacketTime },
+        audio: {
+          codec: audioCodec,
+          sample_rate: audioSampleRate,
+          packet_time: audioPacketTime,
+        },
       } = startStreamRequest,
       // Repacketize the audio stream after it's been transcoded
       opusRepacketizer = new OpusRepacketizer(audioPacketTime / 20),
-      audioIntervalScale = (audioSampleRate / 8) * audioPacketTime / 20,
+      audioIntervalScale = ((audioSampleRate / 8) * audioPacketTime) / 20,
       audioSrtpSession = new SrtpSession(getSessionConfig(this.audioSrtp))
 
     let firstTimestamp: number,
@@ -283,7 +287,7 @@ class StreamingSessionWrapper {
               '-eld_sbr:a',
               '1',
               '-eld_v2',
-              '1'
+              '1',
             ]),
 
         // Shared options
@@ -320,7 +324,7 @@ class StreamingSessionWrapper {
 
         // deserialize and send to Ring - werift will handle encryption and other header params
         try {
-          let rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
+          const rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
           this.streamingSession.sendAudioPacket(rtp)
         } catch (_) {
           // deSerialize will sometimes fail, but the errors can be ignored

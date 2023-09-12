@@ -157,11 +157,11 @@ class StreamingSessionWrapper {
         audio: { port: audioPort },
       } = this.prepareStreamRequest,
       {
-        audio: { codec: audioCodec, sample_rate: audioSampleRate },
+        audio: { codec: audioCodec, sample_rate: audioSampleRate, packet_time: audioPacketTime },
       } = startStreamRequest,
       // Repacketize the audio stream after it's been transcoded
-      opusRepacketizer = new OpusRepacketizer(1),
-      audioIntervalScale = audioSampleRate / 8,
+      opusRepacketizer = new OpusRepacketizer(audioPacketTime / 20),
+      audioIntervalScale = (audioSampleRate / 8) * audioPacketTime / 20,
       audioSrtpSession = new SrtpSession(getSessionConfig(this.audioSrtp))
 
     let firstTimestamp: number,
@@ -173,7 +173,7 @@ class StreamingSessionWrapper {
       if (audioCodec === AudioStreamingCodecType.OPUS) {
         // borrowed from scrypted
         // Original source: https://github.com/koush/scrypted/blob/c13ba09889c3e0d9d3724cb7d49253c9d787fb97/plugins/homekit/src/types/camera/camera-streaming-srtp-sender.ts#L124-L143
-        rtp = opusRepacketizer.repacketize(RtpPacket.deSerialize(message))
+        rtp = opusRepacketizer.repacketize(rtp)
 
         if (!rtp) {
           return null
@@ -198,7 +198,7 @@ class StreamingSessionWrapper {
         // HAP requests, and the packet time is respected,
         // opus 48khz will work just fine.
         rtp.header.timestamp =
-          (firstTimestamp + audioPacketCount * 180 * audioIntervalScale) %
+          (firstTimestamp + audioPacketCount * 160 * audioIntervalScale) %
           0xffffffff
         audioPacketCount++
       }
@@ -222,7 +222,6 @@ class StreamingSessionWrapper {
     let sentVideo = false
     const {
         targetAddress,
-        audio: { srtp_key: remoteAudioSrtpKey, srtp_salt: remoteAudioSrtpSalt },
         video: { port: videoPort },
       } = this.prepareStreamRequest,
       // use to encrypt Ring video to HomeKit
@@ -273,9 +272,7 @@ class StreamingSessionWrapper {
               '-frame_duration',
               request.audio.packet_time,
               '-application',
-              'voip',
-              '-vbr',
-              'off',
+              'lowdelay',
             ]
           : [
               // AAC-eld specific
@@ -283,6 +280,10 @@ class StreamingSessionWrapper {
               'libfdk_aac',
               '-profile:a',
               'aac_eld',
+              '-eld_sbr:a',
+              '1',
+              '-eld_v2',
+              '1'
             ]),
 
         // Shared options
@@ -303,33 +304,23 @@ class StreamingSessionWrapper {
         '-f',
         'rtp',
         `rtp://127.0.0.1:${await this.repacketizeAudioSplitter
-          .portPromise}`,
+          .portPromise}?pkt_size=376`,
       ],
       video: false,
       output: [],
     })
 
     let cameraSpeakerActive = false
-    // used to decrypt return audio from HomeKit to Ring
-    const remoteAudioSrtpOptions: SrtpOptions = {
-        srtpKey: remoteAudioSrtpKey,
-        srtpSalt: remoteAudioSrtpSalt,
-      },
-      audioSrtpSession = new SrtpSession(
-        getSessionConfig(remoteAudioSrtpOptions),
-      ),
-      returnAudioTranscodedSplitter = new RtpSplitter(({ message }) => {
+    // used to send return audio from HomeKit to Ring
+    const returnAudioTranscodedSplitter = new RtpSplitter(({ message }) => {
         if (!cameraSpeakerActive) {
           cameraSpeakerActive = true
           this.streamingSession.activateCameraSpeaker()
         }
 
-        // decrypt the message
+        // deserialize and send to Ring - werift will handle encryption and other header params
         try {
-          const rtp = RtpPacket.deSerialize(message)
-          rtp.payload = audioSrtpSession.decrypt(rtp.payload)
-
-          // send to Ring - werift will handle encryption and other header params
+          let rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
           this.streamingSession.sendAudioPacket(rtp)
         } catch (_) {
           // deSerialize will sometimes fail, but the errors can be ignored
@@ -351,15 +342,13 @@ class StreamingSessionWrapper {
             ? [
                 'libopus',
                 '-ac',
-                1,
+                '1',
                 '-ar',
                 '24k',
-                '-vbr',
-                'off',
                 '-b:a',
                 '24k',
                 '-application',
-                'voip',
+                'lowdelay',
               ]
             : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
           '-flags',

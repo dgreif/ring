@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 12.0.1
+
+### Patch Changes
+
+- [`3604f30`](https://github.com/dgreif/ring/commit/3604f30b272f97968fd0f73368de720e33991555) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [#1307](https://github.com/dgreif/ring/pull/1307) [`c197ad1`](https://github.com/dgreif/ring/commit/c197ad14b106bbfaf9080112296a0ffd9136ec84) Thanks [@tsightler](https://github.com/tsightler)! - Update Opus processing to handle all possible bitrates and packet lengths which should fix audio issues over LTE/5G
+  Minor tweaks to AAC-ELD processing for slightly improved audio
+- Updated dependencies [[`3604f30`](https://github.com/dgreif/ring/commit/3604f30b272f97968fd0f73368de720e33991555)]:
+  - ring-client-api@12.0.1
+
 ## 12.0.0
 
 ### Breaking Changes

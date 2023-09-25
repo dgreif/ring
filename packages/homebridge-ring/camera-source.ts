@@ -275,8 +275,8 @@ class StreamingSessionWrapper {
               'libopus',
               '-frame_duration',
               request.audio.packet_time,
-              '-application',
-              'lowdelay',
+              //'-application', //commented to work in mobile context. 
+              //'lowdelay',
             ]
           : [
               // AAC-eld specific

@@ -79,6 +79,7 @@ export enum RingCameraKind {
   doorbell_v3 = 'doorbell_v3',
   doorbell_v4 = 'doorbell_v4',
   doorbell_v5 = 'doorbell_v5',
+  doorbell_oyster = 'doorbell_oyster', // used for the Ring Video Doorbell 4
   doorbell_portal = 'doorbell_portal',
   doorbell_scallop = 'doorbell_scallop',
   doorbell_scallop_lite = 'doorbell_scallop_lite',
@@ -102,6 +103,7 @@ export enum RingCameraKind {
   cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
   cocoa_doorbell = 'cocoa_doorbell',
   cocoa_floodlight = 'cocoa_floodlight',
+  cocoa_spotlight = 'cocoa_spotlight', // used for the Spotlight Cam Plus (potentially other Spotlight models)
   stickup_cam_mini = 'stickup_cam_mini',
   onvif_camera = 'onvif_camera',
 }
@@ -112,6 +114,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbell_v3: 'Doorbell',
   doorbell_v4: 'Doorbell 2',
   doorbell_v5: 'Doorbell 2',
+  doorbell_oyster: 'Doorbell 4',
   doorbell_portal: 'Door View Cam',
   doorbell_scallop: 'Doorbell 3 Plus',
   doorbell_scallop_lite: 'Doorbell 3',
@@ -135,6 +138,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   cocoa_camera: 'Stick Up Cam',
   cocoa_doorbell: 'Doorbell Gen 2',
   cocoa_floodlight: 'Floodlight Cam Plus',
+  cocoa_spotlight: 'Spotlight Cam Plus',
   stickup_cam_mini: 'Indoor Cam',
   onvif_camera: 'ONVIF Camera',
 }

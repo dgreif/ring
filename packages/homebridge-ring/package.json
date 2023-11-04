@@ -11,7 +11,7 @@
     "dev:run": "nodemon --watch . --watch ../ring-client-api/lib --exec 'RING_DEBUG=true homebridge -P ./ -U ../../.homebridge'"
   },
   "dependencies": {
-    "@homebridge/camera-utils": "^2.2.0",
+    "@homebridge/camera-utils": "^2.2.1",
     "@homebridge/plugin-ui-utils": "^0.1.0",
     "ring-client-api": "12.0.1",
     "werift": "0.18.6"

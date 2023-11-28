@@ -1,5 +1,6 @@
 {
   "name": "homebridge-ring",
+  "displayName": "Ring",
   "version": "12.0.1",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",

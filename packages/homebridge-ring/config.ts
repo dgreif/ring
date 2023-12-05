@@ -15,6 +15,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   hideDoorbellSwitch?: boolean
   hideCameraLight?: boolean
   hideCameraMotionSensor?: boolean
+  hideCameraMotionDetectionSwitch?: boolean
   hideCameraSirenSwitch?: boolean
   hideInHomeDoorbellSwitch?: boolean
   hideAlarmSirenSwitch?: boolean

@@ -44,6 +44,10 @@
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
       },
+      "hideCameraMotionDetectionSwitch": {
+        "title": "Hide Camera Motion Detection Switch",
+        "type": "boolean"
+      },      
       "hideCameraSirenSwitch": {
         "title": "Hide Camera Siren Switch",
         "type": "boolean"
@@ -163,6 +167,7 @@
         "hideDoorbellSwitch",
         "hideCameraLight",
         "hideCameraMotionSensor",
+        "hideCameraMotionDetectionSwitch",
         "hideCameraSirenSwitch",
         "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",

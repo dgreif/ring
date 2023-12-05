@@ -117,6 +117,19 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       })
     }
 
+    if (device.hasMotionDetection && !config.hideCameraMotionDetectionSwitch) {
+      this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: Service.Switch,
+        name: device.name + ' Motion Detection Enabled',
+        getValue: (data) => {
+          return Boolean(data.settings.motion_detection_enabled)
+        },
+        setValue: (value) => device.setMotionDetectionEnabled(value),
+        requestUpdate: () => device.requestUpdate(),
+      })
+    }
+
     if (device.hasSiren && !config.hideCameraSirenSwitch) {
       this.registerCharacteristic({
         characteristicType: Characteristic.On,

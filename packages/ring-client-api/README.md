@@ -108,6 +108,7 @@ camera.onData.subscribe((data) => {
   // called every time new data is fetched for this camera
 })
 camera.setLight(true) // turn light on/off
+camera.setMotionDetectionEnabled(true) // turn motion detection on/off
 camera.setSiren(true) // turn siren on/off
 camera.getHealth() // fetch health info like wifi status
 camera.startVideoOnDemand() // ask the camera to start a new video stream

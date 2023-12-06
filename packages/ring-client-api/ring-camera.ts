@@ -322,12 +322,12 @@ export class RingCamera extends Subscribed {
       return false
     }
 
-    const motionReq = {
+    const motionEnabledRequest = {
       motion_settings: {
         motion_detection_enabled: enabled,
       },
     }
-    await this.setDeviceSettings(motionReq)
+    await this.setDeviceSettings(motionEnabledRequest)
 
     const settings = {
       ...this.data.settings,

@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 12.1.0
+
+### Minor Changes
+
+- [`7354a21`](https://github.com/dgreif/ring/commit/7354a21e23a75ba7b7f2e67098bf0816c75c3c42) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 12.0.1
 
 ### Patch Changes

@@ -17,6 +17,7 @@ export interface FfmpegOptions {
   input?: SpawnInput[]
   video?: SpawnInput[] | false
   audio?: SpawnInput[]
+  stdoutCallback?: (data: Buffer) => void
   output: SpawnInput[]
 }
 
@@ -138,6 +139,7 @@ export class StreamingSession extends Subscribed {
           ...(ffmpegOptions.output || []),
         ),
         ffmpegPath: getFfmpegPath(),
+        stdoutCallback: ffmpegOptions.stdoutCallback,
         exitCallback: () => this.callEnded(),
         logLabel: `From Ring (${this.camera.name})`,
         logger: {

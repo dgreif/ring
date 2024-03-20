@@ -52,6 +52,10 @@ export interface RingApiOptions extends SessionOptions {
 export class RingApi extends Subscribed {
   public readonly restClient
   public readonly onRefreshTokenUpdated
+  onNewNotification = new Subject<{
+    device: RingCamera | RingIntercom
+    notification: PushNotification
+  }>()
 
   constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
     super()
@@ -226,29 +230,43 @@ export class RingApi extends Subscribed {
     }
   }
 
+  pushReceiver: PushReceiver | undefined
+  devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {}
+
   private async registerPushReceiver(
     cameras: RingCamera[],
     intercoms: RingIntercom[],
   ) {
+    const sendToDevice = (id: number, notification: PushNotification) => {
+        const device = this.devicesById[id]
+        if (device) {
+          this.onNewNotification.next({ device, notification })
+          device.processPushNotification(notification)
+        }
+      },
+      onPushNotificationToken = new Subject<string>()
+
+    this.devicesById = {}
+    for (const camera of cameras) {
+      this.devicesById[camera.id] = camera
+    }
+    for (const intercom of intercoms) {
+      this.devicesById[intercom.id] = intercom
+    }
+
+    if (this.pushReceiver) {
+      return
+    }
+
     const credentials =
         this.restClient._internalOnly_pushNotificationCredentials,
       pushReceiver = new PushReceiver({
         credentials,
         logLevel: 'NONE',
         senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
-      }),
-      devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
-      sendToDevice = (id: number, notification: PushNotification) => {
-        devicesById[id]?.processPushNotification(notification)
-      },
-      onPushNotificationToken = new Subject<string>()
+      })
 
-    for (const camera of cameras) {
-      devicesById[camera.id] = camera
-    }
-    for (const intercom of intercoms) {
-      devicesById[intercom.id] = intercom
-    }
+    this.pushReceiver = pushReceiver
 
     pushReceiver.onCredentialsChanged(({ newCredentials }) => {
       // Store the new credentials in the rest client so that it can be used for subsequent restarts
@@ -454,5 +472,12 @@ export class RingApi extends Subscribed {
 
     this.restClient.clearTimeouts()
     clearTimeouts()
+  }
+
+  refresh() {
+    this.disconnect()
+    if (this.locationsPromise) {
+      this.locationsPromise = this.fetchAndBuildLocations()
+    }
   }
 }

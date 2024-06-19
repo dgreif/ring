@@ -34,7 +34,7 @@ const defaultRequestOptions: RequestOptions = {
   clientApiBaseUrl = 'https://api.ring.com/clients_api/',
   deviceApiBaseUrl = 'https://api.ring.com/devices/v1/',
   commandsApiBaseUrl = 'https://api.ring.com/commands/v1/',
-  appApiBaseUrl = 'https://app.ring.com/api/v1/',
+  appApiBaseUrl = 'https://prd-api-us.prd.rings.solutions/api/v1/',
   apiVersion = 11
 
 export function clientApi(path: string) {

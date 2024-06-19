@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 12.1.1
+
+### Patch Changes
+
+- [#1433](https://github.com/dgreif/ring/pull/1433) [`d3fe3de`](https://github.com/dgreif/ring/commit/d3fe3dea334dd271ef8862ef8e1e0130f68cf38a) Thanks [@tsightler](https://github.com/tsightler)! - Update app API endpoint to fix socket connection issues
+
+- Updated dependencies [[`d3fe3de`](https://github.com/dgreif/ring/commit/d3fe3dea334dd271ef8862ef8e1e0130f68cf38a)]:
+  - ring-client-api@12.1.1
+
 ## 12.1.0
 
 ### Minor Changes

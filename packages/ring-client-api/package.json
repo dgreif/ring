@@ -33,7 +33,7 @@
     "systeminformation": "^5.21.20",
     "uuid": "^9.0.1",
     "webcrypto-core": "^1.7.7",
-    "werift": "0.18.3",
+    "werift": "0.18.17",
     "ws": "^8.15.1"
   },
   "devDependencies": {

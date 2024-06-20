@@ -106,7 +106,10 @@ export class RingIntercom {
   processPushNotification(notification: PushNotification) {
     if (notification.android_config.category === PushNotificationAction.Ding) {
       this.onDing.next()
-    } else if (notification.android_config.category === PushNotificationAction.IntercomUnlock) {
+    } else if (
+      notification.android_config.category ===
+      PushNotificationAction.IntercomUnlock
+    ) {
       this.onUnlocked.next()
     }
   }

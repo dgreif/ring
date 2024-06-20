@@ -234,10 +234,10 @@ export class RingApi extends Subscribed {
         this.restClient._internalOnly_pushNotificationCredentials,
       pushReceiver = new PushReceiver({
         firebase: {
-          apiKey: "AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8",
-          projectId: "ring-17770",
-          messagingSenderId: "876313859327", // for Ring android app.  703521446232 for ring-site
-          appId: "1:876313859327:android:e10ec6ddb3c81f39"
+          apiKey: 'AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8',
+          projectId: 'ring-17770',
+          messagingSenderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+          appId: '1:876313859327:android:e10ec6ddb3c81f39',
         },
         credentials,
         debug: false,
@@ -276,7 +276,7 @@ export class RingApi extends Subscribed {
               device: {
                 metadata: {
                   ...this.restClient.baseSessionMetadata,
-                  pn_dict_version: "2.0.0",
+                  pn_dict_version: '2.0.0',
                   pn_service: 'fcm',
                 },
                 os: 'android',
@@ -311,14 +311,15 @@ export class RingApi extends Subscribed {
       try {
         const messageData = {} as any
         for (const p in message.data) {
-            try {
-                // If it's a JSON string, parse it into an object
-                messageData[p] = JSONbig({ storeAsString: true }).parse(message.data[p] as string);
-            }
-            catch {
-                // Otherwise just assign the value directly
-                messageData[p] = message.data[p];
-            }
+          try {
+            // If it's a JSON string, parse it into an object
+            messageData[p] = JSONbig({ storeAsString: true }).parse(
+              message.data[p] as string,
+            )
+          } catch {
+            // Otherwise just assign the value directly
+            messageData[p] = message.data[p]
+          }
         }
 
         const notification = messageData as PushNotification

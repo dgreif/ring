@@ -1018,49 +1018,49 @@ export interface PushNotificationDing {
   android_config: {
     category: PushNotificationAction | string
     body: string
-  },
+  }
   analytics: {
     server_correlation_id: string
-		server_id: "com.ring.pns" | string
-		subcategory: string
-		triggered_at: number
-		sent_at: number
-		referring_item_type: string
-		referring_item_id: string
+    server_id: 'com.ring.pns' | string
+    subcategory: string
+    triggered_at: number
+    sent_at: number
+    referring_item_type: string
+    referring_item_id: string
   }
   data: {
     device: {
-			e2ee_enabled: boolean
-			id: number
-			kind: RingCameraKind
-			name: string
+      e2ee_enabled: boolean
+      id: number
+      kind: RingCameraKind
+      name: string
     }
     event: {
       ding: {
-				id: string
-				created_at: string
-				subtype: 'motion' | 'ding' | 'human' | string
-				detection_type: NotificationDetectionType
-			}
-			eventito: {
-				type: string
-				timestamp: number
-			},
-			riid: string
-			is_sidewalk: boolean
-			live_session: {
-				active_streaming_profile: "rms" | string
-				default_audio_route: string
-				max_duration: number
-			}
+        id: string
+        created_at: string
+        subtype: 'motion' | 'ding' | 'human' | string
+        detection_type: NotificationDetectionType
+      }
+      eventito: {
+        type: string
+        timestamp: number
+      }
+      riid: string
+      is_sidewalk: boolean
+      live_session: {
+        active_streaming_profile: 'rms' | string
+        default_audio_route: string
+        max_duration: number
+      }
     }
     location: {
       id: string
     }
   }
   img: {
-		snapshot_uuid: string
-	}
+    snapshot_uuid: string
+  }
 }
 
 export interface PushNotificationAlarm {
@@ -1088,9 +1088,7 @@ export interface PushNotificationLowBattery {
   action: PushNotificationAction.LowBattery
 }
 
-export type PushNotification =
-  | PushNotificationDing
-
+export type PushNotification = PushNotificationDing
 
 export interface SocketTicketResponse {
   ticket: string

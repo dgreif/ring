@@ -131,14 +131,17 @@ export class RingCamera extends Subscribed {
   onActiveNotifications = new BehaviorSubject<PushNotificationDing[]>([])
   onDoorbellPressed = this.onNewNotification.pipe(
     filter(
-      (notification) => notification.android_config.category === PushNotificationAction.Ding,
+      (notification) =>
+        notification.android_config.category === PushNotificationAction.Ding,
     ),
     share(),
   )
   onMotionDetected = this.onActiveNotifications.pipe(
     map((notifications) =>
       notifications.some(
-        (notification) => notification.android_config.category === PushNotificationAction.Motion,
+        (notification) =>
+          notification.android_config.category ===
+          PushNotificationAction.Motion,
       ),
     ),
     distinctUntilChanged(),
@@ -403,7 +406,9 @@ export class RingCamera extends Subscribed {
 
   private removeDingById(idToRemove: string) {
     const allActiveDings = this.activeNotifications,
-      otherDings = allActiveDings.filter(({ data }) => data.event.ding.id !== idToRemove)
+      otherDings = allActiveDings.filter(
+        ({ data }) => data.event.ding.id !== idToRemove,
+      )
 
     this.onActiveNotifications.next(otherDings)
   }
@@ -418,7 +423,9 @@ export class RingCamera extends Subscribed {
       dingId = notification.data.event.ding.id
 
     this.onActiveNotifications.next(
-      activeDings.filter((d) => d.data.event.ding.id !== dingId).concat([notification]),
+      activeDings
+        .filter((d) => d.data.event.ding.id !== dingId)
+        .concat([notification]),
     )
     this.onNewNotification.next(notification)
 

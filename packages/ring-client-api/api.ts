@@ -276,14 +276,6 @@ export class RingApi extends Subscribed {
               device: {
                 metadata: {
                   ...this.restClient.baseSessionMetadata,
-                  /*
-                  api_version: '11',
-                  app_brand: 'ring',
-                  app_build: '70477131',
-                  app_version: "3.73.1",
-                  is_tablet: false,
-                  os_version: "13 (33)",
-                  */
                   pn_dict_version: "2.0.0",
                   pn_service: 'fcm',
                 },
@@ -316,12 +308,20 @@ export class RingApi extends Subscribed {
         return
       }
 
-      const dataJson = message.data as unknown as string
-
       try {
-        const notification = JSONbig({ storeAsString: true }).parse(
-          dataJson,
-        ) as PushNotification
+        const messageData = {} as any
+        for (const p in message.data) {
+            try {
+                // If it's a JSON string, parse it into an object
+                messageData[p] = JSONbig({ storeAsString: true }).parse(message.data[p] as string);
+            }
+            catch {
+                // Otherwise just assign the value directly
+                messageData[p] = message.data[p];
+            }
+        }
+
+        const notification = messageData as PushNotification
 
         if ('ding' in notification.data?.event) {
           sendToDevice(notification.data?.device?.id, notification)

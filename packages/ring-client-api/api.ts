@@ -239,7 +239,7 @@ export class RingApi extends Subscribed {
           messagingSenderId: '876313859327', // for Ring android app.  703521446232 for ring-site
           appId: '1:876313859327:android:e10ec6ddb3c81f39',
         },
-        credentials,
+        credentials: credentials?.config ? credentials : undefined,
         debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},

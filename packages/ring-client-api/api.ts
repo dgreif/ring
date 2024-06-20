@@ -233,9 +233,14 @@ export class RingApi extends Subscribed {
     const credentials =
         this.restClient._internalOnly_pushNotificationCredentials,
       pushReceiver = new PushReceiver({
+        firebase: {
+          apiKey: "AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8",
+          projectId: "ring-17770",
+          messagingSenderId: "876313859327", // for Ring android app.  703521446232 for ring-site
+          appId: "1:876313859327:android:e10ec6ddb3c81f39"
+        },
         credentials,
-        logLevel: 'NONE',
-        senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+        debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
       sendToDevice = (id: number, notification: PushNotification) => {
@@ -271,6 +276,15 @@ export class RingApi extends Subscribed {
               device: {
                 metadata: {
                   ...this.restClient.baseSessionMetadata,
+                  /*
+                  api_version: '11',
+                  app_brand: 'ring',
+                  app_build: '70477131',
+                  app_version: "3.73.1",
+                  is_tablet: false,
+                  os_version: "13 (33)",
+                  */
+                  pn_dict_version: "2.0.0",
                   pn_service: 'fcm',
                 },
                 os: 'android',
@@ -302,18 +316,15 @@ export class RingApi extends Subscribed {
         return
       }
 
-      const dataJson = message.data?.gcmData as string
+      const dataJson = message.data as unknown as string
 
       try {
         const notification = JSONbig({ storeAsString: true }).parse(
           dataJson,
         ) as PushNotification
 
-        if ('ding' in notification) {
-          sendToDevice(notification.ding.doorbot_id, notification)
-        } else if ('alarm_meta' in notification) {
-          // Alarm notification, such as intercom unlocked
-          sendToDevice(notification.alarm_meta.device_zid, notification)
+        if ('ding' in notification.data?.event) {
+          sendToDevice(notification.data?.device?.id, notification)
         }
       } catch (e) {
         logError(e)

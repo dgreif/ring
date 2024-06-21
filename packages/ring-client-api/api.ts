@@ -15,6 +15,7 @@ import {
   OnvifCameraData,
   ProfileResponse,
   PushNotification,
+  PushNotificationAction,
   RingDeviceType,
   ThirdPartyGarageDoorOpener,
   UnknownDevice,
@@ -328,6 +329,19 @@ export class RingApi extends Subscribed {
 
         if (deviceId) {
           sendToDevice(deviceId, notification)
+        }
+
+        const eventCategory = notification.android_config.category
+
+        if (
+          eventCategory !== PushNotificationAction.Ding &&
+          eventCategory !== PushNotificationAction.Motion
+        ) {
+          logInfo(
+            'Received push notification with unknown category: ' +
+              eventCategory,
+          )
+          logInfo(JSON.stringify(message))
         }
       } catch (e) {
         logError(e)

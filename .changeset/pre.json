@@ -8,5 +8,8 @@
     "ring-client-api": "12.1.1",
     "tsconfig": "0.0.0-dev"
   },
-  "changesets": []
+  "changesets": [
+    "green-cheetahs-deliver",
+    "silent-carrots-perform"
+  ]
 }

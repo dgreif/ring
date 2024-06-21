@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 13.0.0-beta.0
+
+### Major Changes
+
+- [#1435](https://github.com/dgreif/ring/pull/1435) [`614621c`](https://github.com/dgreif/ring/commit/614621ca8957beb7f46a3f26347059ad5772dd48) Thanks [@tsightler](https://github.com/tsightler)! - Updated to new push notification interface. This will change the shape of push notifications for projects which manually consume push notifications, but should not impact homebridge-ring users. If your push notifications for cameras (motion events, dings, etc) do not work after updating, please reboot and try again, then see https://github.com/dgreif/ring/wiki/Notification-Troubleshooting if issues continue.
+
+### Patch Changes
+
+- [`dcdd90f`](https://github.com/dgreif/ring/commit/dcdd90f2ebbdd0596d4df6d31c1b6f52dca9d0df) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- Updated dependencies [[`dcdd90f`](https://github.com/dgreif/ring/commit/dcdd90f2ebbdd0596d4df6d31c1b6f52dca9d0df), [`614621c`](https://github.com/dgreif/ring/commit/614621ca8957beb7f46a3f26347059ad5772dd48)]:
+  - ring-client-api@13.0.0-beta.0
+
 ## 12.1.1
 
 ### Patch Changes

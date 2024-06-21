@@ -15,6 +15,7 @@ import {
   OnvifCameraData,
   ProfileResponse,
   PushNotification,
+  PushNotificationAction,
   RingDeviceType,
   ThirdPartyGarageDoorOpener,
   UnknownDevice,
@@ -233,9 +234,14 @@ export class RingApi extends Subscribed {
     const credentials =
         this.restClient._internalOnly_pushNotificationCredentials,
       pushReceiver = new PushReceiver({
-        credentials,
-        logLevel: 'NONE',
-        senderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+        firebase: {
+          apiKey: 'AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8',
+          projectId: 'ring-17770',
+          messagingSenderId: '876313859327', // for Ring android app.  703521446232 for ring-site
+          appId: '1:876313859327:android:e10ec6ddb3c81f39',
+        },
+        credentials: credentials?.config ? credentials : undefined,
+        debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
       sendToDevice = (id: number, notification: PushNotification) => {
@@ -271,6 +277,7 @@ export class RingApi extends Subscribed {
               device: {
                 metadata: {
                   ...this.restClient.baseSessionMetadata,
+                  pn_dict_version: '2.0.0',
                   pn_service: 'fcm',
                 },
                 os: 'android',
@@ -302,18 +309,39 @@ export class RingApi extends Subscribed {
         return
       }
 
-      const dataJson = message.data?.gcmData as string
-
       try {
-        const notification = JSONbig({ storeAsString: true }).parse(
-          dataJson,
-        ) as PushNotification
+        const messageData = {} as any
+        // Each message field is a JSON string, so we need to parse them each individually
+        for (const p in message.data) {
+          try {
+            // If it's a JSON string, parse it into an object
+            messageData[p] = JSONbig({ storeAsString: true }).parse(
+              message.data[p] as string,
+            )
+          } catch {
+            // Otherwise just assign the value directly
+            messageData[p] = message.data[p]
+          }
+        }
 
-        if ('ding' in notification) {
-          sendToDevice(notification.ding.doorbot_id, notification)
-        } else if ('alarm_meta' in notification) {
-          // Alarm notification, such as intercom unlocked
-          sendToDevice(notification.alarm_meta.device_zid, notification)
+        const notification = messageData as PushNotification,
+          deviceId = notification.data?.device?.id
+
+        if (deviceId) {
+          sendToDevice(deviceId, notification)
+        }
+
+        const eventCategory = notification.android_config.category
+
+        if (
+          eventCategory !== PushNotificationAction.Ding &&
+          eventCategory !== PushNotificationAction.Motion
+        ) {
+          logInfo(
+            'Received push notification with unknown category: ' +
+              eventCategory,
+          )
+          logInfo(JSON.stringify(message))
         }
       } catch (e) {
         logError(e)

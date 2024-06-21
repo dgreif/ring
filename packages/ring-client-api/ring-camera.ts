@@ -10,7 +10,7 @@ import {
   PeriodicFootageResponse,
   PushNotificationAction,
   PushNotification,
-  PushNotificationDing,
+  PushNotificationDingV2,
   RingCameraModel,
   VideoSearchResponse,
   OnvifCameraData,
@@ -127,18 +127,21 @@ export class RingCamera extends Subscribed {
   hasSiren
 
   onRequestUpdate = new Subject()
-  onNewNotification = new Subject<PushNotificationDing>()
-  onActiveNotifications = new BehaviorSubject<PushNotificationDing[]>([])
+  onNewNotification = new Subject<PushNotificationDingV2>()
+  onActiveNotifications = new BehaviorSubject<PushNotificationDingV2[]>([])
   onDoorbellPressed = this.onNewNotification.pipe(
     filter(
-      (notification) => notification.action === PushNotificationAction.Ding,
+      (notification) =>
+        notification.android_config.category === PushNotificationAction.Ding,
     ),
     share(),
   )
   onMotionDetected = this.onActiveNotifications.pipe(
     map((notifications) =>
       notifications.some(
-        (notification) => notification.action === PushNotificationAction.Motion,
+        (notification) =>
+          notification.android_config.category ===
+          PushNotificationAction.Motion,
       ),
     ),
     distinctUntilChanged(),
@@ -231,14 +234,14 @@ export class RingCamera extends Subscribed {
     return this.onActiveNotifications.getValue()
   }
 
-  get latestNotification(): PushNotificationDing | undefined {
+  get latestNotification(): PushNotificationDingV2 | undefined {
     const notifications = this.activeNotifications
     return notifications[notifications.length - 1]
   }
 
   get latestNotificationSnapshotUuid() {
     const notification = this.latestNotification
-    return notification?.ding.image_uuid
+    return notification?.img?.snapshot_uuid
   }
 
   get batteryLevel() {
@@ -403,22 +406,26 @@ export class RingCamera extends Subscribed {
 
   private removeDingById(idToRemove: string) {
     const allActiveDings = this.activeNotifications,
-      otherDings = allActiveDings.filter(({ ding }) => ding.id !== idToRemove)
+      otherDings = allActiveDings.filter(
+        ({ data }) => data.event.ding.id !== idToRemove,
+      )
 
     this.onActiveNotifications.next(otherDings)
   }
 
   processPushNotification(notification: PushNotification) {
-    if (!('ding' in notification)) {
+    if (!('ding' in notification.data?.event)) {
       // only process ding/motion notifications
       return
     }
 
     const activeDings = this.activeNotifications,
-      dingId = notification.ding.id
+      dingId = notification.data.event.ding.id
 
     this.onActiveNotifications.next(
-      activeDings.filter((d) => d.ding.id !== dingId).concat([notification]),
+      activeDings
+        .filter((d) => d.data.event.ding.id !== dingId)
+        .concat([notification]),
     )
     this.onNewNotification.next(notification)
 

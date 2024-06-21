@@ -323,10 +323,11 @@ export class RingApi extends Subscribed {
           }
         }
 
-        const notification = messageData as PushNotification
+        const notification = messageData as PushNotification,
+          deviceId = notification.data?.device?.id
 
-        if ('ding' in notification.data?.event) {
-          sendToDevice(notification.data?.device?.id, notification)
+        if (deviceId) {
+          sendToDevice(deviceId, notification)
         }
       } catch (e) {
         logError(e)

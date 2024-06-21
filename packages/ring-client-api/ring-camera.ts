@@ -241,7 +241,7 @@ export class RingCamera extends Subscribed {
 
   get latestNotificationSnapshotUuid() {
     const notification = this.latestNotification
-    return notification?.img.snapshot_uuid
+    return notification?.img?.snapshot_uuid
   }
 
   get batteryLevel() {

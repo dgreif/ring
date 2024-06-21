@@ -1059,7 +1059,7 @@ export interface PushNotificationDingV2 {
       id: string
     }
   }
-  img: {
+  img?: {
     snapshot_uuid: string
   }
 }

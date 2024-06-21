@@ -224,7 +224,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       await Promise.race([
         firstValueFrom(
           this.device.onNewNotification.pipe(
-            filter((notification) => Boolean(notification.img.snapshot_uuid)),
+            filter((notification) => Boolean(notification.img?.snapshot_uuid)),
           ),
         ),
         // wait up to 2 seconds for the second notification

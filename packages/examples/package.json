@@ -6,7 +6,7 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "dotenv": "16.3.1",
+    "dotenv": "16.4.5",
     "eslint-config-shared": "*",
     "express": "4.19.2",
     "ring-client-api": "12.1.1",

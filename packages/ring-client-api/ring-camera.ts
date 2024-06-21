@@ -10,7 +10,7 @@ import {
   PeriodicFootageResponse,
   PushNotificationAction,
   PushNotification,
-  PushNotificationDing,
+  PushNotificationDingV2,
   RingCameraModel,
   VideoSearchResponse,
   OnvifCameraData,
@@ -127,8 +127,8 @@ export class RingCamera extends Subscribed {
   hasSiren
 
   onRequestUpdate = new Subject()
-  onNewNotification = new Subject<PushNotificationDing>()
-  onActiveNotifications = new BehaviorSubject<PushNotificationDing[]>([])
+  onNewNotification = new Subject<PushNotificationDingV2>()
+  onActiveNotifications = new BehaviorSubject<PushNotificationDingV2[]>([])
   onDoorbellPressed = this.onNewNotification.pipe(
     filter(
       (notification) =>
@@ -234,7 +234,7 @@ export class RingCamera extends Subscribed {
     return this.onActiveNotifications.getValue()
   }
 
-  get latestNotification(): PushNotificationDing | undefined {
+  get latestNotification(): PushNotificationDingV2 | undefined {
     const notifications = this.activeNotifications
     return notifications[notifications.length - 1]
   }

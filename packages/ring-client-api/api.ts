@@ -310,6 +310,7 @@ export class RingApi extends Subscribed {
 
       try {
         const messageData = {} as any
+        // Each message field is a JSON string, so we need to parse them each individually
         for (const p in message.data) {
           try {
             // If it's a JSON string, parse it into an object

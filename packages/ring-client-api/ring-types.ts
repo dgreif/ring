@@ -1013,7 +1013,7 @@ export enum PushNotificationAction {
   LowBattery = 'com.ring.push.LOW_BATTERY_ALERT',
 }
 
-export interface PushNotificationDing {
+export interface PushNotificationDingV2 {
   version: '2.0.0' | string
   android_config: {
     category: PushNotificationAction | string
@@ -1039,16 +1039,17 @@ export interface PushNotificationDing {
       ding: {
         id: string
         created_at: string
-        subtype: 'motion' | 'ding' | 'human' | string
+        subtype: 'other_motion' | 'motion' | 'ding' | 'human' | string
         detection_type: NotificationDetectionType
       }
       eventito: {
-        type: string
+        type: NotificationDetectionType
         timestamp: number
       }
       riid: string
       is_sidewalk: boolean
       live_session: {
+        streaming_data_hash: string
         active_streaming_profile: 'rms' | string
         default_audio_route: string
         max_duration: number
@@ -1088,7 +1089,7 @@ export interface PushNotificationLowBattery {
   action: PushNotificationAction.LowBattery
 }
 
-export type PushNotification = PushNotificationDing
+export type PushNotification = PushNotificationDingV2
 
 export interface SocketTicketResponse {
   ticket: string

@@ -1009,8 +1009,7 @@ export enum NotificationDetectionType {
 export enum PushNotificationAction {
   Ding = 'com.ring.pn.live-event.ding',
   Motion = 'com.ring.pn.live-event.motion',
-  IntercomUnlock = 'com.ring.pn.live-event.intercom',
-  LowBattery = 'com.ring.push.LOW_BATTERY_ALERT',
+  IntercomUnlock = 'com.ring.pn.intercom.virtual.unlock',
 }
 
 export interface PushNotificationDingV2 {
@@ -1073,20 +1072,6 @@ export interface PushNotificationAlarm {
     device_zid: number
     location_id: string
   }
-}
-
-export interface PushNotificationLowBattery {
-  data: {
-    device_name: string
-    doorbot_id: number
-    battery_level: number // 29
-    device_kind: RingDeviceType
-    timestamp_epoch_ms: number
-  }
-  aps: {
-    title: string // 'Battery at 29% - ABC needs charging.'
-  }
-  action: PushNotificationAction.LowBattery
 }
 
 export type PushNotification = PushNotificationDingV2

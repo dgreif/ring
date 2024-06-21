@@ -1007,38 +1007,61 @@ export enum NotificationDetectionType {
 
 // eslint-disable-next-line no-shadow
 export enum PushNotificationAction {
-  Ding = 'com.ring.push.HANDLE_NEW_DING',
-  Motion = 'com.ring.push.HANDLE_NEW_motion',
+  Ding = 'com.ring.pn.live-event.ding',
+  Motion = 'com.ring.pn.live-event.motion',
+  IntercomUnlock = 'com.ring.pn.live-event.intercom',
   LowBattery = 'com.ring.push.LOW_BATTERY_ALERT',
-  IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
 }
 
-export interface PushNotificationDing {
-  ding: {
-    streaming_protocol: 'ring_media_server'
-    location_id: string
-    device_name: string
-    doorbot_id: number
-    e2ee_enabled: boolean
-    streaming_data_hash: string
-    device_kind: RingCameraKind
-    detection_type: NotificationDetectionType
-    human_detected?: boolean
-    id: string
-    pod_id: number
-    request_id: string
-    image_uuid: string
-    properties: {
-      active_streaming_profile: 'rms'
+export interface PushNotificationDingV2 {
+  version: '2.0.0' | string
+  android_config: {
+    category: PushNotificationAction | string
+    body: string
+  }
+  analytics: {
+    server_correlation_id: string
+    server_id: 'com.ring.pns' | string
+    subcategory: string
+    triggered_at: number
+    sent_at: number
+    referring_item_type: string
+    referring_item_id: string
+  }
+  data: {
+    device: {
+      e2ee_enabled: boolean
+      id: number
+      kind: RingCameraKind
+      name: string
+    }
+    event: {
+      ding: {
+        id: string
+        created_at: string
+        subtype: 'other_motion' | 'motion' | 'ding' | 'human' | string
+        detection_type: NotificationDetectionType
+      }
+      eventito: {
+        type: NotificationDetectionType
+        timestamp: number
+      }
+      riid: string
       is_sidewalk: boolean
+      live_session: {
+        streaming_data_hash: string
+        active_streaming_profile: 'rms' | string
+        default_audio_route: string
+        max_duration: number
+      }
+    }
+    location: {
+      id: string
     }
   }
-  aps: {
-    alert: string
-    sound: string
+  img?: {
+    snapshot_uuid: string
   }
-  subtype: 'motion' | 'ding' | 'human' | string
-  action: PushNotificationAction | string
 }
 
 export interface PushNotificationAlarm {
@@ -1066,10 +1089,7 @@ export interface PushNotificationLowBattery {
   action: PushNotificationAction.LowBattery
 }
 
-export type PushNotification =
-  | PushNotificationDing
-  | PushNotificationAlarm
-  | PushNotificationLowBattery
+export type PushNotification = PushNotificationDingV2
 
 export interface SocketTicketResponse {
   ticket: string

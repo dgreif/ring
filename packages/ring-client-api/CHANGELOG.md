@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 13.0.0-beta.1
+
+### Patch Changes
+
+- [`f83011d`](https://github.com/dgreif/ring/commit/f83011dc25c21b48c88b6219a7cae26ce1437da6) Thanks [@dgreif](https://github.com/dgreif)! - Use new category type for intercom unlock notifications
+
 ## 13.0.0-beta.0
 
 ### Major Changes

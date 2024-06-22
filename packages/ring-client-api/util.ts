@@ -172,3 +172,13 @@ export function toBase64(input: string) {
   const buff = Buffer.from(input)
   return buff.toString('base64')
 }
+
+export function buildSearchString(search: Record<string, any>) {
+  return (
+    '?' +
+    Object.entries(search)
+      .filter(([, value]) => value !== undefined && value !== null)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&')
+  )
+}

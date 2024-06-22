@@ -19,19 +19,14 @@
   "dependencies": {
     "@eneris/push-receiver": "^4.1.2",
     "@homebridge/camera-utils": "^2.2.6",
-    "@peculiar/asn1-schema": "^2.3.8",
     "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "^4.3.5",
-    "got": "^11.8.5",
     "json-bigint": "^1.0.0",
-    "msw": "^1.3.3",
-    "pvtsutils": "^1.3.5",
     "rxjs": "^7.8.1",
     "socket.io-client": "^2.5.0",
     "systeminformation": "^5.22.11",
     "uuid": "^10.0.0",
-    "webcrypto-core": "^1.8.0",
     "werift": "0.19.3",
     "ws": "^8.17.1"
   },
@@ -44,6 +39,7 @@
     "@types/ws": "^8.5.10",
     "eslint-config-shared": "*",
     "jest": "29.7.0",
+    "msw": "^1.3.3",
     "ts-jest": "29.1.5",
     "tsconfig": "*",
     "typescript": "5.5.2"

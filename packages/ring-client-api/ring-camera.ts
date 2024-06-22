@@ -29,7 +29,13 @@ import {
   startWith,
   throttleTime,
 } from 'rxjs/operators'
-import { DeepPartial, delay, logDebug, logError } from './util'
+import {
+  buildSearchString,
+  DeepPartial,
+  delay,
+  logDebug,
+  logError,
+} from './util'
 import { Subscribed } from './subscribed'
 import {
   StreamingConnectionOptions,
@@ -588,14 +594,15 @@ export class RingCamera extends Subscribed {
     uuid?: string
   }) {
     const response = await this.restClient.request<Buffer>({
-        url: `https://app-snaps.ring.com/snapshots/next/${this.id}`,
-        responseType: 'buffer',
-        searchParams: {
+        url: `https://app-snaps.ring.com/snapshots/next/${
+          this.id
+        }${buildSearchString({
           'after-ms': afterMs,
           'max-wait-ms': maxWaitMs,
           extras: force ? 'force' : undefined,
           uuid: cleanSnapshotUuid(uuid),
-        },
+        })}`,
+        responseType: 'buffer',
         headers: {
           accept: 'image/jpeg',
         },

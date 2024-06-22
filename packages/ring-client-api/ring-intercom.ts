@@ -1,7 +1,7 @@
 import {
   IntercomHandsetAudioData,
-  PushNotification,
   PushNotificationAction,
+  PushNotificationDingV2,
 } from './ring-types'
 import { clientApi, commandsApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -103,7 +103,7 @@ export class RingIntercom {
     })
   }
 
-  processPushNotification(notification: PushNotification) {
+  processPushNotification(notification: PushNotificationDingV2) {
     if (notification.android_config.category === PushNotificationAction.Ding) {
       this.onDing.next()
     } else if (

@@ -9,7 +9,6 @@ import {
   SocketTicketResponse,
   PeriodicFootageResponse,
   PushNotificationAction,
-  PushNotification,
   PushNotificationDingV2,
   RingCameraModel,
   VideoSearchResponse,
@@ -419,7 +418,7 @@ export class RingCamera extends Subscribed {
     this.onActiveNotifications.next(otherDings)
   }
 
-  processPushNotification(notification: PushNotification) {
+  processPushNotification(notification: PushNotificationDingV2) {
     if (!('ding' in notification.data?.event)) {
       // only process ding/motion notifications
       return

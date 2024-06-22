@@ -16,6 +16,7 @@ import {
   ProfileResponse,
   PushNotification,
   PushNotificationAction,
+  PushNotificationDingV2,
   RingDeviceType,
   ThirdPartyGarageDoorOpener,
   UnknownDevice,
@@ -244,7 +245,7 @@ export class RingApi extends Subscribed {
         debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
-      sendToDevice = (id: number, notification: PushNotification) => {
+      sendToDevice = (id: number, notification: PushNotificationDingV2) => {
         devicesById[id]?.processPushNotification(notification)
       },
       onPushNotificationToken = new Subject<string>()
@@ -324,8 +325,16 @@ export class RingApi extends Subscribed {
           }
         }
 
-        const notification = messageData as PushNotification,
-          deviceId = notification.data?.device?.id
+        const notification = messageData as PushNotification
+
+        if (!('android_config' in notification)) {
+          // This is not a v2 ding style notification, so we can't process it
+          logInfo('Received push notification in unknown format')
+          logInfo(JSON.stringify(message))
+          return
+        }
+
+        const deviceId = notification.data?.device?.id
 
         if (deviceId) {
           sendToDevice(deviceId, notification)

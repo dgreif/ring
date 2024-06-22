@@ -1010,6 +1010,10 @@ export enum PushNotificationAction {
   Ding = 'com.ring.pn.live-event.ding',
   Motion = 'com.ring.pn.live-event.motion',
   IntercomUnlock = 'com.ring.pn.intercom.virtual.unlock',
+  AlarmModeNone = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_NONE_NOTICE',
+  AlarmModeSome = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_SOME_NOTICE',
+  AlarmSoundSiren = 'com.ring.push.HANDLE_NEW_USER_SOUND_SIREN',
+  AlarmSilenceSiren = 'com.ring.push.HANDLE_NEW_NON_ALARM_SIREN_SILENCED',
 }
 
 export interface PushNotificationDingV2 {
@@ -1074,7 +1078,13 @@ export interface PushNotificationAlarm {
   }
 }
 
-export type PushNotification = PushNotificationDingV2
+export interface PushNotificationAlarmV2 {
+  data: {
+    gcmData: PushNotificationAlarm
+  }
+}
+
+export type PushNotification = PushNotificationDingV2 | PushNotificationAlarmV2
 
 export interface SocketTicketResponse {
   ticket: string

@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 13.0.0-beta.2
+
+### Patch Changes
+
+- [`6bb8df2`](https://github.com/dgreif/ring/commit/6bb8df29789b9d2dfee3654d60c4a8f41c36f3cb) Thanks [@dgreif](https://github.com/dgreif)! - Switched to using the native version of `fetch` from Node.js. This allows us to remove `got` as a dependency. This will break any users on Node 16 or older, though those versions have not been officially supported for some time.
+
+- Updated dependencies [[`6bb8df2`](https://github.com/dgreif/ring/commit/6bb8df29789b9d2dfee3654d60c4a8f41c36f3cb)]:
+  - ring-client-api@13.0.0-beta.2
+
 ## 13.0.0-beta.1
 
 ### Patch Changes

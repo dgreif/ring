@@ -1,4 +1,3 @@
-import got, { Options as RequestOptions, Headers } from 'got'
 import {
   delay,
   fromBase64,
@@ -18,10 +17,15 @@ import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types'
 
+interface RequestOptions extends RequestInit {
+  responseType?: 'json' | 'buffer'
+  timeout?: number
+  json?: object
+}
+
 const defaultRequestOptions: RequestOptions = {
     responseType: 'json',
     method: 'GET',
-    retry: 0,
     timeout: 20000,
   },
   ringErrorCodes: { [code: number]: string } = {
@@ -58,26 +62,92 @@ export interface ExtendedResponse {
   timeMillis: number
 }
 
+interface ResponseError extends Error {
+  response: Pick<Response, 'headers' | 'status'> & { body: any }
+}
+
+async function responseToError(response: Response) {
+  const error = new Error() as ResponseError
+  error.response = {
+    headers: response.headers,
+    status: response.status,
+    body: null,
+  }
+
+  try {
+    const bodyText = await response.text()
+
+    try {
+      error.response.body = JSON.parse(bodyText)
+    } catch (_) {
+      error.response.body = bodyText
+    }
+  } catch (_) {
+    // ignore
+  }
+
+  return error
+}
+
 async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean },
 ): Promise<T & ExtendedResponse> {
   try {
-    const options = {
-        ...defaultRequestOptions,
-        ...requestOptions,
-      },
-      { headers, body } = (await got(options)) as {
-        headers: Headers
-        body: any
-      },
-      data = body as T & ExtendedResponse
-    if (data !== null && typeof data === 'object') {
-      if (headers.date) {
-        data.responseTimestamp = new Date(headers.date as string).getTime()
+    if (requestOptions.json || requestOptions.responseType === 'json') {
+      requestOptions.headers = {
+        ...requestOptions.headers,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       }
 
-      if (headers['x-time-millis']) {
-        data.timeMillis = Number(headers['x-time-millis'])
+      if (requestOptions.json) {
+        requestOptions.body = JSON.stringify(requestOptions.json)
+      }
+      delete requestOptions.json
+    }
+
+    const options = {
+      ...defaultRequestOptions,
+      ...requestOptions,
+    }
+
+    // If a timeout is provided, create an AbortSignal for it
+    if (options.timeout && !options.signal) {
+      options.signal = AbortSignal.timeout(options.timeout)
+    }
+
+    // make the fetch request
+    const response = await fetch(options.url, options),
+      headers = response.headers
+
+    if (!response.ok) {
+      const error = await responseToError(response)
+      throw error
+    }
+
+    let data: T & ExtendedResponse
+
+    if (options.responseType === 'buffer') {
+      const arrayBuffer = await response.arrayBuffer()
+      data = Buffer.from(arrayBuffer) as any
+    } else {
+      const text = await response.text()
+      try {
+        data = JSON.parse(text)
+      } catch (_) {
+        data = text as any
+      }
+    }
+
+    if (data !== null && typeof data === 'object') {
+      const date = headers.get('date')
+      if (date) {
+        data.responseTimestamp = new Date(date).getTime()
+      }
+
+      const xTime = headers.get('x-time-millis')
+      if (xTime) {
+        data.timeMillis = Number(xTime)
       }
     }
     return data
@@ -279,13 +349,13 @@ export class RingRestClient {
             : ''
 
       if (
-        response.statusCode === 412 || // need 2fa code
-        (response.statusCode === 400 &&
+        response.status === 412 || // need 2fa code
+        (response.status === 400 &&
           responseError.startsWith('Verification Code')) // invalid 2fa code entered
       ) {
         this.using2fa = true
 
-        if (response.statusCode === 400) {
+        if (response.status === 400) {
           this.promptFor2fa = 'Invalid 2fa code entered.  Please try again.'
           throw new Error(responseError)
         }
@@ -349,15 +419,15 @@ export class RingRestClient {
         this.onSession.next(session)
         return session
       } catch (e: any) {
-        const response = e.response || {}
+        const response = (e as ResponseError).response || {}
 
-        if (response.statusCode === 401) {
+        if (response.status === 401) {
           await this.refreshAuth()
           return this.getSession()
         }
 
-        if (response.statusCode === 429) {
-          const retryAfter = e.response.headers['retry-after'],
+        if (response.status === 429) {
+          const retryAfter = e.response.headers.get('retry-after'),
             waitSeconds = isNaN(retryAfter)
               ? 200
               : Number.parseInt(retryAfter, 10)
@@ -420,21 +490,21 @@ export class RingRestClient {
         },
       })
     } catch (e: any) {
-      const response = e.response || {}
+      const response = (e as ResponseError).response || {}
 
-      if (response.statusCode === 401) {
+      if (response.status === 401) {
         await this.refreshAuth()
         return this.request(options)
       }
 
-      if (response.statusCode === 504) {
+      if (response.status === 504) {
         // Gateway Timeout.  These should be recoverable, but wait a few seconds just to be on the safe side
         await delay(5000)
         return this.request(options)
       }
 
       if (
-        response.statusCode === 404 &&
+        response.status === 404 &&
         response.body &&
         Array.isArray(response.body.errors)
       ) {
@@ -459,7 +529,7 @@ export class RingRestClient {
         )
       }
 
-      if (response.statusCode === 404 && url.startsWith(clientApiBaseUrl)) {
+      if (response.status === 404 && url.startsWith(clientApiBaseUrl)) {
         logError('404 from endpoint ' + url)
         if (response.body?.error?.includes(hardwareId)) {
           logError(
@@ -474,10 +544,10 @@ export class RingRestClient {
         throw new Error('Not found with response: ' + stringify(response.body))
       }
 
-      if (response.statusCode) {
+      if (response.status) {
         logError(
           `Request to ${url} failed with status ${
-            response.statusCode
+            response.status
           }. Response body: ${stringify(response.body)}`,
         )
       } else if (!options.allowNoResponse) {

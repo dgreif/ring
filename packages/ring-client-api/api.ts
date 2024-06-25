@@ -233,7 +233,8 @@ export class RingApi extends Subscribed {
     intercoms: RingIntercom[],
   ) {
     const credentials =
-        this.restClient._internalOnly_pushNotificationCredentials?.config && this.restClient._internalOnly_pushNotificationCredentials,
+        this.restClient._internalOnly_pushNotificationCredentials?.config &&
+        this.restClient._internalOnly_pushNotificationCredentials,
       pushReceiver = new PushReceiver({
         firebase: {
           apiKey: 'AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8',

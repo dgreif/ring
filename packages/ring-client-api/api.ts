@@ -358,8 +358,11 @@ export class RingApi extends Subscribed {
       }
     })
 
-    // If we already have credentials, use them immediately
-    if (credentials) {
+    // If we already have credentials and they haven't been changed during registration, use them immediately
+    if (
+      credentials?.fcm?.token ===
+      this.restClient._internalOnly_pushNotificationCredentials?.fcm?.token
+    ) {
       onPushNotificationToken.next(credentials.fcm.token)
     }
   }

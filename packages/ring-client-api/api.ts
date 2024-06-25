@@ -232,16 +232,17 @@ export class RingApi extends Subscribed {
     cameras: RingCamera[],
     intercoms: RingIntercom[],
   ) {
-    const pushReceiver = new PushReceiver({
+    const credentials =
+        this.restClient._internalOnly_pushNotificationCredentials?.config &&
+        this.restClient._internalOnly_pushNotificationCredentials,
+      pushReceiver = new PushReceiver({
         firebase: {
           apiKey: 'AIzaSyCv-hdFBmmdBBJadNy-TFwB-xN_H5m3Bk8',
           projectId: 'ring-17770',
           messagingSenderId: '876313859327', // for Ring android app.  703521446232 for ring-site
           appId: '1:876313859327:android:e10ec6ddb3c81f39',
         },
-        credentials:
-          this.restClient._internalOnly_pushNotificationCredentials?.config &&
-          this.restClient._internalOnly_pushNotificationCredentials,
+        credentials,
         debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
@@ -358,11 +359,8 @@ export class RingApi extends Subscribed {
     })
 
     // If we already have credentials, use them immediately
-    if (this.restClient._internalOnly_pushNotificationCredentials?.fcm?.token) {
-      // Use the source in case credentials were updated prior to
-      onPushNotificationToken.next(
-        this.restClient._internalOnly_pushNotificationCredentials.fcm.token,
-      )
+    if (credentials) {
+      onPushNotificationToken.next(credentials.fcm.token)
     }
   }
 

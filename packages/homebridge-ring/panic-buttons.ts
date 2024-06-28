@@ -87,6 +87,16 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
       serviceType: Service.AccessoryInformation,
       getValue: () => 'None',
     })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => device.name || 'Unknown',
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => device.name || 'Unknown',
+    })
 
     super.initBase()
   }

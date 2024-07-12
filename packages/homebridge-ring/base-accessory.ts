@@ -132,10 +132,7 @@ export abstract class BaseAccessory<T extends { name: string }> {
   }
 
   pruneUnusedServices() {
-    const safeServiceUUIDs = [
-      hap.Service.CameraRTPStreamManagement.UUID,
-      hap.Service.CameraControl.UUID,
-    ]
+    const safeServiceUUIDs = [hap.Service.CameraRTPStreamManagement.UUID]
 
     this.accessory.services.forEach((service) => {
       if (

@@ -100,17 +100,17 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<RingDevice> 
     if (hasBatteryStatus(initialData)) {
       this.registerCharacteristic({
         characteristicType: Characteristic.BatteryLevel,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         getValue: getBatteryLevel,
       })
       this.registerCharacteristic({
         characteristicType: Characteristic.StatusLowBattery,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         getValue: getStatusLowBattery,
       })
       this.registerCharacteristic({
         characteristicType: Characteristic.ChargingState,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         getValue: getBatteryChargingState,
       })
     }

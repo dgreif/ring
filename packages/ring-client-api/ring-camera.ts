@@ -86,7 +86,10 @@ export function getBatteryLevel(
 
   if (
     !levels.length ||
-    (health && !health.battery_percentage && !health.battery_present)
+    (health &&
+      !health.battery_percentage &&
+      !health.battery_present &&
+      !health.second_battery_percentage)
   ) {
     return null
   }

@@ -116,7 +116,7 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
     if (device.batteryLevel !== null) {
       this.registerObservableCharacteristic({
         characteristicType: Characteristic.BatteryLevel,
-        serviceType: Service.BatteryService,
+        serviceType: Service.Battery,
         onValue: device.onBatteryLevel.pipe(
           map((batteryLevel) => {
             return batteryLevel === null ? 100 : batteryLevel

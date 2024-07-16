@@ -1007,7 +1007,7 @@ export enum NotificationDetectionType {
 
 // eslint-disable-next-line no-shadow
 export enum PushNotificationAction {
-  Ding = 'com.ring.push.HANDLE_NEW_DING',
+  Ding = 'com.ring.pn.live-event.intercom',
   Motion = 'com.ring.push.HANDLE_NEW_motion',
   LowBattery = 'com.ring.push.LOW_BATTERY_ALERT',
   IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',

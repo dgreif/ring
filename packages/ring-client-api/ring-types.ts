@@ -562,6 +562,7 @@ export interface BaseCameraData {
     rssi_category: 'good' | string
     battery_voltage_category: 'very_good' | string
     second_battery_voltage_category: 'unknown' | string
+    second_battery_percentage?: number // 0 - 100
     second_battery_percentage_category: 'unknown' | string
     battery_save: boolean
     firmware_version_status: 'Up to Date'

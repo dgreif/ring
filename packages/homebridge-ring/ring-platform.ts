@@ -50,6 +50,7 @@ import { Thermostat } from './thermostat'
 import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch'
 import { generateMacAddress } from './util'
 import { Intercom } from './intercom'
+import { Valve } from './valve'
 
 const ignoreHiddenDeviceTypes: string[] = [
   RingDeviceType.RingNetAdapter,
@@ -122,6 +123,8 @@ function getAccessoryClass(
       return WaterSensor
     case RingDeviceType.Thermostat:
       return Thermostat
+    case RingDeviceType.WaterValve:
+      return Valve
     case RingDeviceType.UnknownZWave:
       return UnknownZWaveSwitchSwitch
   }

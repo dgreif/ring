@@ -23,8 +23,7 @@ export class Valve extends BaseDeviceAccessory {
     })
   }
 
-  isOpen(status: string): boolean {
-    logInfo(`Checking if valve is ${status}`)
+  isOpen(status: any): boolean {
     if (status === "open") {
       return true;
     }

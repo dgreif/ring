@@ -1010,7 +1010,8 @@ export enum NotificationDetectionType {
 export enum PushNotificationAction {
   Ding = 'com.ring.pn.live-event.ding',
   Motion = 'com.ring.pn.live-event.motion',
-  IntercomUnlock = 'com.ring.pn.intercom.virtual.unlock',
+  IntercomDing = 'com.ring.pn.live-event.intercom',
+  IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
   AlarmModeNone = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_NONE_NOTICE',
   AlarmModeSome = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_SOME_NOTICE',
   AlarmSoundSiren = 'com.ring.push.HANDLE_NEW_USER_SOUND_SIREN',
@@ -1036,7 +1037,7 @@ export interface PushNotificationDingV2 {
     device: {
       e2ee_enabled: boolean
       id: number
-      kind: RingCameraKind
+      kind: RingCameraKind | RingDeviceType.IntercomHandsetAudio
       name: string
     }
     event: {
@@ -1044,7 +1045,7 @@ export interface PushNotificationDingV2 {
         id: string
         created_at: string
         subtype: 'other_motion' | 'motion' | 'ding' | 'human' | string
-        detection_type: NotificationDetectionType
+        detection_type?: NotificationDetectionType
       }
       eventito: {
         type: NotificationDetectionType
@@ -1068,7 +1069,7 @@ export interface PushNotificationDingV2 {
   }
 }
 
-export interface PushNotificationAlarm {
+interface PushNotificationAlarm {
   aps: {
     alert: string
   }
@@ -1085,7 +1086,27 @@ export interface PushNotificationAlarmV2 {
   }
 }
 
-export type PushNotification = PushNotificationDingV2 | PushNotificationAlarmV2
+interface PushNotificationIntercomUnlock {
+  aps: {
+    alert: string
+  }
+  action: PushNotificationAction.IntercomUnlock
+  alarm_meta: {
+    device_zid: number
+    location_id: string
+  }
+}
+
+export interface PushNotificationIntercomUnlockV2 {
+  data: {
+    gcmData: PushNotificationIntercomUnlock
+  }
+}
+
+export type PushNotification =
+  | PushNotificationDingV2
+  | PushNotificationAlarmV2
+  | PushNotificationIntercomUnlockV2
 
 export interface SocketTicketResponse {
   ticket: string

@@ -2,6 +2,7 @@ import {
   IntercomHandsetAudioData,
   PushNotificationAction,
   PushNotificationDingV2,
+  PushNotificationIntercomUnlockV2,
 } from './ring-types'
 import { clientApi, commandsApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -103,12 +104,18 @@ export class RingIntercom {
     })
   }
 
-  processPushNotification(notification: PushNotificationDingV2) {
-    if (notification.android_config.category === PushNotificationAction.Ding) {
+  processPushNotification(
+    notification: PushNotificationDingV2 | PushNotificationIntercomUnlockV2,
+  ) {
+    if (
+      'android_config' in notification &&
+      notification.android_config.category ===
+        PushNotificationAction.IntercomDing
+    ) {
       this.onDing.next()
     } else if (
-      notification.android_config.category ===
-      PushNotificationAction.IntercomUnlock
+      'gcmData' in notification.data &&
+      notification.data.gcmData.action === PushNotificationAction.IntercomUnlock
     ) {
       this.onUnlocked.next()
     }

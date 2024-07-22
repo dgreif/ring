@@ -344,7 +344,8 @@ export class RingApi extends Subscribed {
 
         if (
           eventCategory !== PushNotificationAction.Ding &&
-          eventCategory !== PushNotificationAction.Motion
+          eventCategory !== PushNotificationAction.Motion &&
+          eventCategory !== PushNotificationAction.IntercomDing
         ) {
           logInfo(
             'Received push notification with unknown category: ' +

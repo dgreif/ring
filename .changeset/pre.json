@@ -9,9 +9,12 @@
     "tsconfig": "0.0.0-dev"
   },
   "changesets": [
+    "fast-rivers-hug",
+    "giant-pants-accept",
     "green-cheetahs-deliver",
     "silent-carrots-perform",
     "soft-spiders-travel",
+    "stale-rats-pump",
     "two-shoes-admire"
   ]
 }

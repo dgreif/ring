@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 13.0.0-beta.3
+
+### Patch Changes
+
+- [`4a435e3`](https://github.com/dgreif/ring/commit/4a435e35c0299cc8662bdfe4c5d68e19e147fa1d) Thanks [@dgreif](https://github.com/dgreif)! - Update push-receiver to remove unwanted debug logging
+
+- [`60cb8ff`](https://github.com/dgreif/ring/commit/60cb8ffdfd4c31e61c4cea1b4a486596c6b48872) Thanks [@donavanbecker](https://github.com/donavanbecker)! - Fixes for HAP-NodeJS v1.0.0
+
+- [`2e6e984`](https://github.com/dgreif/ring/commit/2e6e984f449f13f390e4a130df6abfb765e3319b) Thanks [@dgreif](https://github.com/dgreif)! - Properly handle new style of push notifications from Ring Intercom
+
+- Updated dependencies [[`4a435e3`](https://github.com/dgreif/ring/commit/4a435e35c0299cc8662bdfe4c5d68e19e147fa1d), [`2e6e984`](https://github.com/dgreif/ring/commit/2e6e984f449f13f390e4a130df6abfb765e3319b)]:
+  - ring-client-api@13.0.0-beta.3
+
 ## 13.0.0-beta.2
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 13.0.0-beta.4
+
+### Patch Changes
+
+- [`0d93c93`](https://github.com/dgreif/ring/commit/0d93c930da4c7bc2cf6c448a183b8dbd2c2c419f) Thanks [@tsightler](https://github.com/tsightler)! - Handle push-receiver credentials upon first startup after upgrading
+
+- Updated dependencies [[`0d93c93`](https://github.com/dgreif/ring/commit/0d93c930da4c7bc2cf6c448a183b8dbd2c2c419f)]:
+  - ring-client-api@13.0.0-beta.4
+
 ## 13.0.0-beta.3
 
 ### Patch Changes

@@ -9,6 +9,7 @@
     "tsconfig": "0.0.0-dev"
   },
   "changesets": [
+    "beige-pianos-double",
     "fast-rivers-hug",
     "giant-pants-accept",
     "green-cheetahs-deliver",

@@ -39,7 +39,7 @@ import { Switch } from './switch'
 import { Camera } from './camera'
 import { PanicButtons } from './panic-buttons'
 import { RefreshTokenAuth } from 'ring-client-api/rest-client'
-import { logInfo, useLogger } from 'ring-client-api/util'
+import { logError, logInfo, useLogger } from 'ring-client-api/util'
 import { BaseAccessory } from './base-accessory'
 import { FloodFreezeSensor } from './flood-freeze-sensor'
 import { FreezeSensor } from './freeze-sensor'
@@ -208,6 +208,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
       platformAccessories: PlatformAccessory[] = [],
       externalAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
+    let hasBridgedCameras = false
 
     logInfo('Found the following locations:')
 
@@ -354,6 +355,8 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
             this.homebridgeAccessories[uuid] = homebridgeAccessory
             activeAccessoryIds.push(uuid)
+
+            hasBridgedCameras ||= isCamera && !isExternalCamera
           },
         )
       }),
@@ -400,5 +403,11 @@ export class RingPlatform implements DynamicPlatformPlugin {
         })
       },
     )
+
+    if (hasBridgedCameras) {
+      logError(
+        'Bridged camera support will be removed in the next major release of homebridge-ring. Please enable the unbridgeCameras option in your configuration and add the individual cameras to HomeKit to prepare for this change.',
+      )
+    }
   }
 }

@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 13.0.0-beta.5
+
+### Patch Changes
+
+- [`ebb681e`](https://github.com/dgreif/ring/commit/ebb681e3a4d0ecbc2e4acf2422d68d457c8d14db) Thanks [@dgreif](https://github.com/dgreif)! - Add deprecation warning for bridged cameras. Only unbridged cameras will be supported in the next major release.
+
+- Updated dependencies []:
+  - ring-client-api@13.0.0-beta.5
+
 ## 13.0.0-beta.4
 
 ### Patch Changes

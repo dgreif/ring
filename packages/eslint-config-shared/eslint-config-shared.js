@@ -3,6 +3,7 @@ module.exports = {
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
+    'plugin:deprecation/recommended',
   ],
   ignorePatterns: [
     'release-*',

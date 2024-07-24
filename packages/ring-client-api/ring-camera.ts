@@ -16,14 +16,11 @@ import {
   RingCameraKind,
 } from './ring-types'
 import { appApi, clientApi, deviceApi, RingRestClient } from './rest-client'
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs'
+import { BehaviorSubject, firstValueFrom, ReplaySubject, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
   filter,
   map,
-  mapTo,
-  publishReplay,
-  refCount,
   share,
   startWith,
   throttleTime,
@@ -153,12 +150,16 @@ export class RingCamera extends Subscribed {
       ),
     ),
     distinctUntilChanged(),
-    publishReplay(1),
-    refCount(),
+    share({
+      connector: () => new ReplaySubject(1),
+      resetOnError: false,
+      resetOnComplete: false,
+      resetOnRefCountZero: false,
+    }),
   )
   onMotionStarted = this.onMotionDetected.pipe(
     filter((currentlyDetected) => currentlyDetected),
-    mapTo(null), // no value needed, event is what matters
+    map(() => null), // no value needed, event is what matters
     share(),
   )
   onBatteryLevel

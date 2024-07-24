@@ -39,12 +39,12 @@ function stripSensitiveFields(input: any) {
         const data = input[key]
 
         if (key.length === 36) {
-          input[key.substr(0, 13) + '-uuid'] = data
+          input[key.slice(0, 13) + '-uuid'] = data
           delete input[key]
         }
 
         if (typeof data === 'string' && data.length === 36) {
-          input[key] = data.substr(0, 13) + '-uuid'
+          input[key] = data.slice(0, 13) + '-uuid'
         }
 
         stripSensitiveFields(data)

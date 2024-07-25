@@ -16,7 +16,6 @@ import {
   ProfileResponse,
   PushNotification,
   PushNotificationAction,
-  PushNotificationDingV2,
   RingDeviceType,
   ThirdPartyGarageDoorOpener,
   UnknownDevice,
@@ -31,7 +30,7 @@ import {
   switchMap,
   throttleTime,
 } from 'rxjs/operators'
-import { clearTimeouts, enableDebug, logError, logInfo } from './util'
+import { clearTimeouts, enableDebug, logDebug, logError, logInfo } from './util'
 import { setFfmpegPath } from './ffmpeg'
 import { Subscribed } from './subscribed'
 import PushReceiver from '@eneris/push-receiver'
@@ -246,7 +245,7 @@ export class RingApi extends Subscribed {
         debug: false,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
-      sendToDevice = (id: number, notification: PushNotificationDingV2) => {
+      sendToDevice = (id: number, notification: PushNotification) => {
         devicesById[id]?.processPushNotification(notification)
       },
       onPushNotificationToken = new Subject<string>()
@@ -328,31 +327,41 @@ export class RingApi extends Subscribed {
 
         const notification = messageData as PushNotification
 
-        if (!('android_config' in notification)) {
-          // This is not a v2 ding style notification, so we can't process it
-          logInfo('Received push notification in unknown format')
-          logInfo(JSON.stringify(message))
-          return
-        }
+        if ('android_config' in notification) {
+          const deviceId = notification.data?.device?.id
 
-        const deviceId = notification.data?.device?.id
+          if (deviceId) {
+            sendToDevice(deviceId, notification)
+          }
 
-        if (deviceId) {
-          sendToDevice(deviceId, notification)
-        }
+          const eventCategory = notification.android_config.category
 
-        const eventCategory = notification.android_config.category
-
-        if (
-          eventCategory !== PushNotificationAction.Ding &&
-          eventCategory !== PushNotificationAction.Motion &&
-          eventCategory !== PushNotificationAction.IntercomDing
+          if (
+            eventCategory !== PushNotificationAction.Ding &&
+            eventCategory !== PushNotificationAction.Motion &&
+            eventCategory !== PushNotificationAction.IntercomDing
+          ) {
+            logDebug(
+              'Received v2 push notification with unknown category: ' +
+                eventCategory,
+            )
+            logDebug(JSON.stringify(message))
+          }
+        } else if (
+          'data' in notification &&
+          'gcmData' in notification.data &&
+          'alarm_meta' in notification.data.gcmData
         ) {
-          logInfo(
-            'Received push notification with unknown category: ' +
-              eventCategory,
-          )
-          logInfo(JSON.stringify(message))
+          const deviceId = notification.data.gcmData.alarm_meta.device_zid
+
+          if (deviceId) {
+            sendToDevice(deviceId, notification)
+          }
+        } else {
+          // This is not a v1 or v2 style notification, so we can't process it
+          logDebug('Received push notification in unknown format')
+          logDebug(JSON.stringify(message))
+          return
         }
       } catch (e) {
         logError(e)

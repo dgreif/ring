@@ -14,6 +14,7 @@ import {
   VideoSearchResponse,
   OnvifCameraData,
   RingCameraKind,
+  PushNotification,
 } from './ring-types'
 import { appApi, clientApi, deviceApi, RingRestClient } from './rest-client'
 import { BehaviorSubject, firstValueFrom, ReplaySubject, Subject } from 'rxjs'
@@ -422,8 +423,12 @@ export class RingCamera extends Subscribed {
     this.onActiveNotifications.next(otherDings)
   }
 
-  processPushNotification(notification: PushNotificationDingV2) {
-    if (!('ding' in notification.data?.event)) {
+  processPushNotification(notification: PushNotification) {
+    if (
+      !('android_config' in notification) ||
+      !('event' in notification.data) ||
+      !('ding' in notification.data?.event)
+    ) {
       // only process ding/motion notifications
       return
     }

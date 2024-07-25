@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 13.0.0-beta.6
+
+### Patch Changes
+
+- [`466cd93`](https://github.com/dgreif/ring/commit/466cd938cf2210972d9bfd70e46c607b23c18ad5) Thanks [@dgreif](https://github.com/dgreif)! - Better handling of general push notifications. This avoids extraneous logs for events we don't know about or don't care about.
+
+- Updated dependencies [[`466cd93`](https://github.com/dgreif/ring/commit/466cd938cf2210972d9bfd70e46c607b23c18ad5)]:
+  - ring-client-api@13.0.0-beta.6
+
 ## 13.0.0-beta.5
 
 ### Patch Changes

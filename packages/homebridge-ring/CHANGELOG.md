@@ -1,5 +1,26 @@
 # homebridge-ring
 
+## 13.0.0
+
+### Major Changes
+
+- [`cc2f0b7`](https://github.com/dgreif/ring/commit/cc2f0b743a5927e1a9e4c5797ee6bc08bef9ffe7) Thanks [@tsightler](https://github.com/tsightler)! - Updated to new push notification interface. This will change the shape of push notifications for projects which manually consume push notifications, but should not impact homebridge-ring users. If your push notifications for cameras (motion events, dings, etc) do not work after updating, please reboot and try again, then see https://github.com/dgreif/ring/wiki/Notification-Troubleshooting if issues continue.
+
+### Minor Changes
+
+- [`36461a1`](https://github.com/dgreif/ring/commit/36461a10719a044a42284d92ab7ea87623ff8e99) Thanks [@dgreif](https://github.com/dgreif)! - Switched to using the native version of `fetch` from Node.js. This allows us to remove `got` as a dependency. This will break any users on Node 16 or older, though those versions have not been officially supported for some time.
+
+### Patch Changes
+
+- [`f0766c1`](https://github.com/dgreif/ring/commit/f0766c1588eccddf5a0dabe35665e97172cc0ad6) Thanks [@donavanbecker](https://github.com/donavanbecker)! - Fixes for HAP-NodeJS v1.0.0, which should pave the way for the upcoming Homebridge 2.0.0 release.
+
+- [`dd78e50`](https://github.com/dgreif/ring/commit/dd78e503670743d6d836868742a0b724edf75113) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- [`c8aab5a`](https://github.com/dgreif/ring/commit/c8aab5a7753d241de4bde66fd7d353e174b48ca6) Thanks [@dgreif](https://github.com/dgreif)! - Add deprecation warning for bridged cameras. Only unbridged cameras will be supported in the next major release.
+
+- Updated dependencies [[`dd78e50`](https://github.com/dgreif/ring/commit/dd78e503670743d6d836868742a0b724edf75113), [`cc2f0b7`](https://github.com/dgreif/ring/commit/cc2f0b743a5927e1a9e4c5797ee6bc08bef9ffe7), [`36461a1`](https://github.com/dgreif/ring/commit/36461a10719a044a42284d92ab7ea87623ff8e99)]:
+  - ring-client-api@13.0.0
+
 ## 12.1.1
 
 ### Patch Changes

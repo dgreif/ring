@@ -23,6 +23,9 @@ function matchesAnyAlarmState(
   return Boolean(alarmInfo && targetStates.includes(alarmInfo.state))
 }
 
+const burglarAlarmName = 'Burglar Alarm',
+  fireAlarmName = 'Fire Alarm'
+
 export class PanicButtons extends BaseDataAccessory<RingDevice> {
   constructor(
     public readonly device: RingDevice,
@@ -38,7 +41,7 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
       characteristicType: Characteristic.On,
       serviceType: Service.Switch,
       serviceSubType: 'Burglar',
-      name: 'Burglar Alarm',
+      name: burglarAlarmName,
       getValue: (data) => matchesAnyAlarmState(data, burglarStates),
       setValue: (on) => {
         if (on) {
@@ -50,12 +53,26 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
         return this.device.location.setAlarmMode('none')
       },
     })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: Service.Switch,
+      serviceSubType: 'Burglar',
+      name: burglarAlarmName,
+      getValue: () => burglarAlarmName,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: Service.Switch,
+      serviceSubType: 'Burglar',
+      name: burglarAlarmName,
+      getValue: () => burglarAlarmName,
+    })
 
     this.registerCharacteristic({
       characteristicType: Characteristic.On,
       serviceType: Service.Switch,
       serviceSubType: 'Fire',
-      name: 'Fire Alarm',
+      name: fireAlarmName,
       getValue: (data) => matchesAnyAlarmState(data, fireStates),
       setValue: (on) => {
         if (on) {
@@ -66,6 +83,20 @@ export class PanicButtons extends BaseDataAccessory<RingDevice> {
         logInfo(`Fire Alarm turned off for ${locationName}`)
         return this.device.location.setAlarmMode('none')
       },
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: Service.Switch,
+      serviceSubType: 'Fire',
+      name: fireAlarmName,
+      getValue: () => fireAlarmName,
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: Service.Switch,
+      serviceSubType: 'Fire',
+      name: fireAlarmName,
+      getValue: () => fireAlarmName,
     })
   }
 

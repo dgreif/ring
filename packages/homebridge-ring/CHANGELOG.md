@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 13.0.1
+
+### Patch Changes
+
+- [`cf08a3e`](https://github.com/dgreif/ring/commit/cf08a3e07b5e550bcddfc789fbaa72050a4a0311) Thanks [@dgreif](https://github.com/dgreif)! - Update push-receiver, which should lead to more reliable push notification handling
+
+- [`1552181`](https://github.com/dgreif/ring/commit/1552181b47d9f9dba031c3a592591f90369a7970) Thanks [@dgreif](https://github.com/dgreif)! - Set panic button names in such a way that they are properly reflected in the Home app. Note, this only impacts users who have the `showPanicButtons` option enabled. These users will likely see a new warning about "Configured Name" not being a supported characteristic of "Switch", which can be ignored.
+
+- Updated dependencies [[`cf08a3e`](https://github.com/dgreif/ring/commit/cf08a3e07b5e550bcddfc789fbaa72050a4a0311)]:
+  - ring-client-api@13.0.1
+
 ## 13.0.0
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 13.0.1
+
+### Patch Changes
+
+- [`cf08a3e`](https://github.com/dgreif/ring/commit/cf08a3e07b5e550bcddfc789fbaa72050a4a0311) Thanks [@dgreif](https://github.com/dgreif)! - Update push-receiver, which should lead to more reliable push notification handling
+
 ## 13.0.0
 
 ### Major Changes

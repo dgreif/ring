@@ -142,6 +142,16 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       serviceType: Service.AccessoryInformation,
       getValue: (data) => data.device_id || 'Unknown',
     })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => device.name || 'Unknown',
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: Service.AccessoryInformation,
+      getValue: () => device.name || 'Unknown',
+    })
   }
 
   private getLockState() {

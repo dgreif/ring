@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 13.1.0
+
+### Minor Changes
+
+- [`1a1ee4b`](https://github.com/dgreif/ring/commit/1a1ee4b7fe44ead78577ff22d2d13b9133c9737b) Thanks [@dgreif](https://github.com/dgreif)! - Add support for water valves. Note, these have not been tested extensively so please let us know if you run into issues.
+
+### Patch Changes
+
+- [`2f5d646`](https://github.com/dgreif/ring/commit/2f5d646471abcae2e20a3929aab44e292e67d9ab) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- Updated dependencies [[`1a1ee4b`](https://github.com/dgreif/ring/commit/1a1ee4b7fe44ead78577ff22d2d13b9133c9737b), [`2f5d646`](https://github.com/dgreif/ring/commit/2f5d646471abcae2e20a3929aab44e292e67d9ab)]:
+  - ring-client-api@13.1.0
+
 ## 13.0.1
 
 ### Patch Changes

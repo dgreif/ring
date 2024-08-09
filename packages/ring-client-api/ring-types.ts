@@ -110,6 +110,7 @@ export enum RingCameraKind {
   onvif_camera = 'onvif_camera',
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbot: 'Doorbell',
   doorbell: 'Doorbell',
@@ -316,6 +317,7 @@ export interface BeamBridge {
 }
 
 export type ChimeKind = 'chime' | 'chime_pro' | 'chime_v2' | 'chime_pro_v2'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ChimeModel: { readonly [P in ChimeKind]: string } = {
   chime: 'Chime',
   chime_pro: 'Chime Pro',

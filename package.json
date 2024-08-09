@@ -28,7 +28,7 @@
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.7",
     "@swc-node/register": "^1.10.9",
-    "turbo": "^2.0.9"
+    "turbo": "^2.0.12"
   },
   "workspaces": [
     "packages/*"

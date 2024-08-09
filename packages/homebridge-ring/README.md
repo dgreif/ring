@@ -209,6 +209,8 @@ Note: Although homebridge has support for HomeKit Secure Video (HKSV), I will no
   - Set Thermostat mode to heat/cool/off
   - Set target temperature
   - View current temperature and heating/cooling status
+- Water Valves (**untested**)
+  - Open/Close the valve
 
 ### Chimes
 

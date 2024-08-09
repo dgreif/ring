@@ -49,6 +49,7 @@ export enum RingDeviceType {
   OnvifCamera = 'onvif_camera',
   ThirdPartyGarageDoorOpener = 'third_party_gdo',
   IntercomHandsetAudio = 'intercom_handset_audio',
+  WaterValve = 'valve.water',
 }
 
 // eslint-disable-next-line no-shadow
@@ -70,6 +71,7 @@ export enum RingDeviceCategory {
   Keypads = 33,
   Sirens = 34,
   PanicButtons = 35,
+  WaterValves = 37,
 }
 
 // eslint-disable-next-line no-shadow
@@ -267,6 +269,7 @@ export interface RingDeviceData {
   motionSensorEnabled?: boolean
   // security-keypad
   brightness?: number // 0 - 1
+  valveState?: 'open' | 'closed'
 }
 
 export const deviceTypesWithVolume = [

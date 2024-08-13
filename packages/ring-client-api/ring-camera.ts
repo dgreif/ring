@@ -131,6 +131,7 @@ export class RingCamera extends Subscribed {
   onData
   hasLight
   hasSiren
+  hasMotionDetection
 
   onRequestUpdate = new Subject()
   onNewNotification = new Subject<PushNotificationDingV2>()
@@ -182,6 +183,8 @@ export class RingCamera extends Subscribed {
     this.onData = new BehaviorSubject<AnyCameraData>(this.initialData)
     this.hasLight = this.initialData.led_status !== undefined
     this.hasSiren = this.initialData.siren_status !== undefined
+    this.hasMotionDetection =
+      this.initialData.settings.motion_detection_enabled !== undefined
 
     this.onBatteryLevel = this.onData.pipe(
       map((data) => {
@@ -325,6 +328,27 @@ export class RingCamera extends Subscribed {
     this.updateData({ ...this.data, led_status: state })
 
     return true
+  }
+
+  async setMotionDetectionEnabled(enabled: boolean) {
+    if (!this.hasMotionDetection) {
+      return false
+    }
+
+    const motionEnabledRequest = {
+      motion_settings: {
+        motion_detection_enabled: enabled,
+      },
+    }
+    await this.setDeviceSettings(motionEnabledRequest)
+
+    const settings = {
+      ...this.data.settings,
+      motion_detection_enabled: enabled,
+    }
+
+    this.updateData({ ...this.data, settings: settings })
+    return enabled
   }
 
   async setSiren(on: boolean) {

@@ -80,6 +80,16 @@ export abstract class BaseDeviceAccessory extends BaseDataAccessory<RingDevice> 
       serviceType: Service.AccessoryInformation,
       getValue: (data) => data.serialNumber || 'Unknown',
     })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.name || 'Unknown',
+    })
+    this.registerCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: Service.AccessoryInformation,
+      getValue: (data) => data.name || 'Unknown',
+    })
 
     if ('volume' in initialData && 'setVolume' in device) {
       this.registerCharacteristic({

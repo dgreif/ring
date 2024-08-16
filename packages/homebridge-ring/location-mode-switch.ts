@@ -161,5 +161,15 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
       serviceType: AccessoryInformation,
       onValue: of('N/A'),
     })
+    this.registerObservableCharacteristic({
+      characteristicType: Characteristic.Name,
+      serviceType: AccessoryInformation,
+      onValue: of(accessoryName ?? 'Unknown'),
+    })
+    this.registerObservableCharacteristic({
+      characteristicType: Characteristic.ConfiguredName,
+      serviceType: AccessoryInformation,
+      onValue: of(accessoryName ?? 'Unknown'),
+    })
   }
 }

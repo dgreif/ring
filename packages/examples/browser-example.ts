@@ -3,7 +3,7 @@ import { RingApi } from '../ring-client-api'
 import { promisify } from 'util'
 const fs = require('fs'),
   path = require('path'),
-  express = require('express')
+  express = require('express') // note, express is not installed by default so you will need to run `npm i express`
 
 /**
  * This example creates an hls stream which is viewable in a browser

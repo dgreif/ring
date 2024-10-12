@@ -19,7 +19,6 @@
   "dependencies": {
     "@eneris/push-receiver": "4.1.6",
     "@homebridge/camera-utils": "^2.2.6",
-    "@types/socket.io-client": "1.4.36",
     "colors": "1.4.0",
     "debug": "^4.3.6",
     "json-bigint": "^1.0.0",
@@ -32,17 +31,18 @@
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
-    "@types/jest": "29.5.12",
+    "@types/jest": "29.5.13",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "22.1.0",
+    "@types/node": "22.7.5",
+    "@types/socket.io-client": "1.4.36",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.12",
     "eslint-config-shared": "*",
     "jest": "29.7.0",
-    "msw": "^2.3.5",
-    "ts-jest": "29.2.4",
+    "msw": "^2.4.10",
+    "ts-jest": "29.2.5",
     "tsconfig": "*",
-    "typescript": "5.5.4"
+    "typescript": "5.6.3"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

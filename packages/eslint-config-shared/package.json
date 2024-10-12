@@ -3,13 +3,13 @@
   "version": "0.0.0-dev",
   "private": true,
   "main": "eslint-config-shared.js",
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "8.0.1",
-    "@typescript-eslint/parser": "8.0.1",
-    "eslint": "9.8.0",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "8.8.1",
+    "@typescript-eslint/parser": "8.8.1",
+    "eslint": "9.12.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-deprecation": "^3.0.0",
-    "eslint-plugin-jest": "28.8.0",
+    "eslint-plugin-jest": "28.8.3",
     "eslint-plugin-prettier": "5.2.1",
     "tsconfig": "*"
   }

@@ -45,7 +45,7 @@
     "typescript": "5.5.4"
   },
   "engines": {
-    "node": "^18 || ^20"
+    "node": "^18 || ^20 || ^22"
   },
   "repository": {
     "type": "git",

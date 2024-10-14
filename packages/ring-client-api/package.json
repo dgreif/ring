@@ -17,14 +17,14 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@eneris/push-receiver": "4.1.6",
+    "@eneris/push-receiver": "4.2.0",
     "@homebridge/camera-utils": "^2.2.6",
     "colors": "1.4.0",
-    "debug": "^4.3.6",
+    "debug": "^4.3.7",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.1",
     "socket.io-client": "^2.5.0",
-    "systeminformation": "^5.23.4",
+    "systeminformation": "^5.23.5",
     "uuid": "^10.0.0",
     "werift": "0.19.4",
     "ws": "^8.18.0"

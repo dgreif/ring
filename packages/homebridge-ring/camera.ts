@@ -11,10 +11,7 @@ import { firstValueFrom } from 'rxjs'
 
 export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
-  private cameraSource = new CameraSource(
-    this.device,
-    this.config.unbridgeCameras,
-  )
+  private cameraSource
 
   constructor(
     public readonly device: RingCamera,
@@ -22,6 +19,11 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     public readonly config: RingPlatformConfig,
   ) {
     super()
+
+    this.cameraSource = new CameraSource(
+      this.device,
+      this.config.unbridgeCameras,
+    )
 
     if (!hap.CameraController) {
       const error =

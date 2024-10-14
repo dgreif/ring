@@ -35,7 +35,7 @@ import {
   SrtpSession,
   SrtcpSession,
 } from 'werift'
-import type { StreamingSession } from 'ring-client-api/lib/streaming/streaming-session'
+import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
 import { OpusRepacketizer } from './opus-repacketizer'
 
 const readFileAsync = promisify(readFile),
@@ -389,61 +389,63 @@ class StreamingSessionWrapper {
 }
 
 export class CameraSource implements CameraStreamingDelegate {
-  public controller = new hap.CameraController({
-    cameraStreamCount: 10,
-    delegate: this,
-    streamingOptions: {
-      supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
-      video: {
-        resolutions: [
-          [1280, 720, 30],
-          [1024, 768, 30],
-          [640, 480, 30],
-          [640, 360, 30],
-          [480, 360, 30],
-          [480, 270, 30],
-          [320, 240, 30],
-          [320, 240, 15], // Apple Watch requires this configuration
-          [320, 180, 30],
-        ],
-        codec: {
-          profiles: [H264Profile.BASELINE],
-          levels: [H264Level.LEVEL3_1],
-        },
-      },
-      audio: {
-        codecs: this.useOpus
-          ? [
-              {
-                type: AudioStreamingCodecType.OPUS,
-                // required by watch
-                samplerate: AudioStreamingSamplerate.KHZ_8,
-              },
-              {
-                type: AudioStreamingCodecType.OPUS,
-                samplerate: AudioStreamingSamplerate.KHZ_16,
-              },
-              {
-                type: AudioStreamingCodecType.OPUS,
-                samplerate: AudioStreamingSamplerate.KHZ_24,
-              },
-            ]
-          : [
-              {
-                type: AudioStreamingCodecType.AAC_ELD,
-                samplerate: AudioStreamingSamplerate.KHZ_16,
-              },
-            ],
-      },
-    },
-  })
+  public controller
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
 
   constructor(
     private ringCamera: RingCamera,
     private useOpus = false,
-  ) {}
+  ) {
+    this.controller = new hap.CameraController({
+      cameraStreamCount: 10,
+      delegate: this,
+      streamingOptions: {
+        supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
+        video: {
+          resolutions: [
+            [1280, 720, 30],
+            [1024, 768, 30],
+            [640, 480, 30],
+            [640, 360, 30],
+            [480, 360, 30],
+            [480, 270, 30],
+            [320, 240, 30],
+            [320, 240, 15], // Apple Watch requires this configuration
+            [320, 180, 30],
+          ],
+          codec: {
+            profiles: [H264Profile.BASELINE],
+            levels: [H264Level.LEVEL3_1],
+          },
+        },
+        audio: {
+          codecs: this.useOpus
+            ? [
+                {
+                  type: AudioStreamingCodecType.OPUS,
+                  // required by watch
+                  samplerate: AudioStreamingSamplerate.KHZ_8,
+                },
+                {
+                  type: AudioStreamingCodecType.OPUS,
+                  samplerate: AudioStreamingSamplerate.KHZ_16,
+                },
+                {
+                  type: AudioStreamingCodecType.OPUS,
+                  samplerate: AudioStreamingSamplerate.KHZ_24,
+                },
+              ]
+            : [
+                {
+                  type: AudioStreamingCodecType.AAC_ELD,
+                  samplerate: AudioStreamingSamplerate.KHZ_16,
+                },
+              ],
+        },
+      },
+    })
+  }
 
   private previousLoadSnapshotPromise?: Promise<any>
   async loadSnapshot(imageUuid?: string) {

@@ -32,7 +32,7 @@ function getStateFromMode(mode: LocationMode) {
 
 export class LocationModeSwitch extends BaseAccessory<Location> {
   private targetState: any
-  public device = this.location // for use in BaseAccessory
+  public device
 
   constructor(
     private readonly location: Location,
@@ -40,6 +40,8 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
     public readonly config: RingPlatformConfig,
   ) {
     super()
+    this.device = location // for use in BaseAccessory
+
     const {
         Characteristic,
         Service: { SecuritySystem, AccessoryInformation },

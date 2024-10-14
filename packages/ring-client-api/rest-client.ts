@@ -214,13 +214,9 @@ function parseAuthConfig(rawRefreshToken?: string): AuthConfig | undefined {
 }
 
 export class RingRestClient {
-  public refreshToken =
-    'refreshToken' in this.authOptions
-      ? this.authOptions.refreshToken
-      : undefined
-  private authConfig = parseAuthConfig(this.refreshToken)
-  private hardwareIdPromise =
-    this.authConfig?.hid || getHardwareId(this.authOptions.systemId)
+  public refreshToken
+  private authConfig
+  private hardwareIdPromise
   private _authPromise: Promise<AuthTokenResponse> | undefined
   private timeouts: ReturnType<typeof setTimeout>[] = []
   private clearPreviousAuth() {
@@ -259,15 +255,21 @@ export class RingRestClient {
     newRefreshToken: string
   }>(1)
   public onSession = new ReplaySubject<SessionResponse>(1)
-  public readonly baseSessionMetadata = {
-    api_version: apiVersion,
-    device_model:
-      this.authOptions.controlCenterDisplayName ?? 'ring-client-api',
-  }
+  public readonly baseSessionMetadata
 
   constructor(
     private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions,
-  ) {}
+  ) {
+    this.refreshToken =
+      'refreshToken' in authOptions ? authOptions.refreshToken : undefined
+    this.authConfig = parseAuthConfig(this.refreshToken)
+    this.hardwareIdPromise =
+      this.authConfig?.hid || getHardwareId(authOptions.systemId)
+    this.baseSessionMetadata = {
+      api_version: apiVersion,
+      device_model: authOptions.controlCenterDisplayName ?? 'ring-client-api',
+    }
+  }
 
   private getGrantData(twoFactorAuthCode?: string) {
     if (this.authConfig?.rt && !twoFactorAuthCode) {

@@ -17,9 +17,7 @@ function isValidNightModeBypass(mode?: AlarmMode) {
 }
 
 export class SecurityPanel extends BaseDeviceAccessory {
-  private alarmStates: AlarmState[] = this.config.alarmOnEntryDelay
-    ? allAlarmStates
-    : allAlarmStates.filter((x) => x !== 'entry-delay')
+  private alarmStates: AlarmState[]
 
   constructor(
     public readonly device: RingDevice,
@@ -27,6 +25,10 @@ export class SecurityPanel extends BaseDeviceAccessory {
     public readonly config: RingPlatformConfig,
   ) {
     super()
+
+    this.alarmStates = this.config.alarmOnEntryDelay
+      ? allAlarmStates
+      : allAlarmStates.filter((x) => x !== 'entry-delay')
 
     const { Characteristic, Service } = hap,
       validValues = [

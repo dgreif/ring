@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "eslint-config-shared": "0.0.0-dev",
+    "examples": "0.0.0-dev",
+    "homebridge-ring": "13.1.0",
+    "ring-client-api": "13.1.0",
+    "tsconfig": "0.0.0-dev"
+  },
+  "changesets": [
+    "ninety-adults-fry",
+    "silver-ads-wash",
+    "slimy-lizards-divide"
+  ]
+}

@@ -1,5 +1,20 @@
 # homebridge-ring
 
+## 13.2.0-beta.0
+
+### Minor Changes
+
+- [`2df3073`](https://github.com/dgreif/ring/commit/2df307381f020bf494f7e436b3d1cb0bc6748a37) Thanks [@dgreif](https://github.com/dgreif)! - Add support for Node 22
+
+- [`abd5e98`](https://github.com/dgreif/ring/commit/abd5e9880df08bcd2f3ed27b3c1c0b679e74f12a) Thanks [@dgreif](https://github.com/dgreif)! - Updated build target from ES2021 to ES2022. ES2022 is fully supported by Node 18, which is the current minimum supported version.
+
+### Patch Changes
+
+- [`306f76d`](https://github.com/dgreif/ring/commit/306f76d6fd2eef1831330e04792a244a51a2fb86) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- Updated dependencies [[`2df3073`](https://github.com/dgreif/ring/commit/2df307381f020bf494f7e436b3d1cb0bc6748a37), [`306f76d`](https://github.com/dgreif/ring/commit/306f76d6fd2eef1831330e04792a244a51a2fb86), [`abd5e98`](https://github.com/dgreif/ring/commit/abd5e9880df08bcd2f3ed27b3c1c0b679e74f12a)]:
+  - ring-client-api@13.2.0-beta.0
+
 ## 13.1.0
 
 ### Minor Changes

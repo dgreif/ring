@@ -132,16 +132,18 @@ export class WebrtcConnection extends Subscribed {
       }),
 
       this.pc.onIceCandidate.subscribe(async (iceCandidate) => {
-        await firstValueFrom(this.onOfferSent)
-        this.sendMessage({
-          method: 'ice',
-          dialog_id: this.dialogId,
-          body: {
-            doorbot_id: camera.id,
-            ice: iceCandidate.candidate,
-            mlineindex: iceCandidate.sdpMLineIndex,
-          },
-        })
+        if (iceCandidate?.candidate) {
+          await firstValueFrom(this.onOfferSent)
+          this.sendMessage({
+            method: 'ice',
+            dialog_id: this.dialogId,
+            body: {
+              doorbot_id: camera.id,
+              ice: iceCandidate.candidate,
+              mlineindex: iceCandidate.sdpMLineIndex,
+            },
+          })
+        }
       }),
     )
   }

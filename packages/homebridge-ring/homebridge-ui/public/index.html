@@ -7,16 +7,11 @@
   Link Ring Account
 </h4>
 
-<script>
+<script type="module">
   // Show the spinner while the JS is loading
   homebridge.showSpinner()
 
-  // Create a script tag to load the JS onto the page
-  const script = document.createElement('script')
-
+  // import the JS module for the custom UI
   // Use the installed version of homebridge to bust the cache for the script
-  script.src = `homebridge-ring-ui.js?v=${homebridge.plugin.installedVersion}`
-
-  // Append the script to the head of the page to load it
-  document.head.appendChild(script)
+  import(`./homebridge-ring-ui.js?v=${homebridge.plugin.installedVersion}`)
 </script>

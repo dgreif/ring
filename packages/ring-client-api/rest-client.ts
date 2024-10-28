@@ -91,6 +91,7 @@ async function responseToError(response: Response) {
 
 async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean },
+  retryCount = 0,
 ): Promise<T & ExtendedResponse> {
   try {
     if (requestOptions.json || requestOptions.responseType === 'json') {
@@ -153,18 +154,27 @@ async function requestWithRetry<T>(
     return data
   } catch (e: any) {
     if (!e.response && !requestOptions.allowNoResponse) {
-      logError(
-        `Failed to reach Ring server at ${requestOptions.url}.  ${e.message}.  Trying again in 5 seconds...`,
-      )
-      if (e.message.includes('NGHTTP2_ENHANCE_YOUR_CALM')) {
+      if (retryCount > 0) {
+        let detailedError = `Error: ${e.message}`
+        detailedError += e.cause?.message ? `, Cause: ${e.cause.message}` : ''
+        detailedError += e.cause?.code ? `, Code: ${e.cause.code}` : ''
         logError(
-          `There is a known issue with your current NodeJS version (${process.version}).  Please see https://github.com/dgreif/ring/wiki/NGHTTP2_ENHANCE_YOUR_CALM-Error for details`,
+          `Retry #${retryCount} failed to reach Ring server at ${requestOptions.url}.  ${detailedError}.  Trying again in 5 seconds...`,
         )
+        if (e.message.includes('NGHTTP2_ENHANCE_YOUR_CALM')) {
+          logError(
+            `There is a known issue with your current NodeJS version (${process.version}).  Please see https://github.com/dgreif/ring/wiki/NGHTTP2_ENHANCE_YOUR_CALM-Error for details`,
+          )
+        } else if (e.message.includes('fetch is not defined')) {
+          logError(
+            `Your current NodeJS version (${process.version}) is too old to support this plugin.  Please upgrade to the latest LTS version of NodeJS.`,
+          )
+        }
+        logDebug(e)
       }
-      logDebug(e)
 
       await delay(5000)
-      return requestWithRetry(requestOptions)
+      return requestWithRetry(requestOptions, retryCount + 1)
     }
     throw e
   }

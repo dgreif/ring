@@ -16,7 +16,6 @@ import {
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types'
-import { Agent as HttpsAgent } from 'node:https'
 
 interface RequestOptions extends RequestInit {
   responseType?: 'json' | 'buffer'
@@ -40,11 +39,7 @@ const defaultRequestOptions: RequestOptions = {
   deviceApiBaseUrl = 'https://api.ring.com/devices/v1/',
   commandsApiBaseUrl = 'https://api.ring.com/commands/v1/',
   appApiBaseUrl = 'https://prd-api-us.prd.rings.solutions/api/v1/',
-  apiVersion = 11,
-  agent = new HttpsAgent({
-    timeout: 20000,
-    keepAlive: false,
-  })
+  apiVersion = 11
 
 export function clientApi(path: string) {
   return clientApiBaseUrl + path
@@ -115,7 +110,6 @@ async function requestWithRetry<T>(
     const options = {
       ...defaultRequestOptions,
       ...requestOptions,
-      agent,
     }
 
     // If a timeout is provided, create an AbortSignal for it

@@ -219,6 +219,10 @@ export class WebrtcConnection extends Subscribed {
         logError(message.body)
         this.callEnded()
         return
+      case 'camera_started':
+      case 'stream_info':
+        // ignore these messages as we don't use them
+        return
     }
 
     logError('UNKNOWN MESSAGE')

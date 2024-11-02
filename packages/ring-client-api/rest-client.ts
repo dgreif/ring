@@ -93,6 +93,12 @@ async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean },
   retryCount = 0,
 ): Promise<T & ExtendedResponse> {
+  if (typeof fetch !== 'function') {
+    throw new Error(
+      `Your current NodeJS version (${process.version}) is too old to support this plugin.  Please upgrade to the latest LTS version of NodeJS.`,
+    )
+  }
+
   try {
     if (requestOptions.json || requestOptions.responseType === 'json') {
       requestOptions.headers = {
@@ -164,10 +170,6 @@ async function requestWithRetry<T>(
         if (e.message.includes('NGHTTP2_ENHANCE_YOUR_CALM')) {
           logError(
             `There is a known issue with your current NodeJS version (${process.version}).  Please see https://github.com/dgreif/ring/wiki/NGHTTP2_ENHANCE_YOUR_CALM-Error for details`,
-          )
-        } else if (e.message.includes('fetch is not defined')) {
-          logError(
-            `Your current NodeJS version (${process.version}) is too old to support this plugin.  Please upgrade to the latest LTS version of NodeJS.`,
           )
         }
         logDebug(e)

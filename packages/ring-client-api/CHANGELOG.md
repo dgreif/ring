@@ -1,5 +1,19 @@
 # ring-client-api
 
+## 13.2.0-beta.1
+
+### Patch Changes
+
+- [`77cdf78`](https://github.com/dgreif/ring/commit/77cdf7888a76cae6a4d1d1d35b59d9ebecaf140c) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [`7f9a19f`](https://github.com/dgreif/ring/commit/7f9a19fc448d70c1ae4d63febbb567b4aa0905d0) Thanks [@dgreif](https://github.com/dgreif)! - Ignore unused camera messages
+
+- [`f0dba40`](https://github.com/dgreif/ring/commit/f0dba40a35fd3de33dc26c806ccca39fc7fad613) Thanks [@dgreif](https://github.com/dgreif)! - Use `provenance` when publishing to npm
+
+- [#1516](https://github.com/dgreif/ring/pull/1516) [`2eaee45`](https://github.com/dgreif/ring/commit/2eaee4549977970d88337a5ecfc23b23f716e5a6) Thanks [@tsightler](https://github.com/tsightler)! - Improve fetch error messages
+
+- [`bf13ab9`](https://github.com/dgreif/ring/commit/bf13ab9b78916cd28e62a1c3cada044462896093) Thanks [@dgreif](https://github.com/dgreif)! - Use beta version of @homebridge/camera-utils, which includes an updated version of ffmpeg
+
 ## 13.2.0-beta.0
 
 ### Minor Changes

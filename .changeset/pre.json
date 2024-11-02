@@ -9,8 +9,13 @@
     "tsconfig": "0.0.0-dev"
   },
   "changesets": [
+    "friendly-boats-warn",
+    "large-boxes-smile",
+    "nine-jobs-sneeze",
     "ninety-adults-fry",
     "silver-ads-wash",
-    "slimy-lizards-divide"
+    "slimy-lizards-divide",
+    "tidy-socks-divide",
+    "wicked-crabs-sip"
   ]
 }

@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import { RingApi } from '../ring-client-api'
-import { promisify } from 'util'
-const fs = require('fs'),
-  path = require('path'),
-  express = require('express') // note, express is not installed by default so you will need to run `npm i express`
+import fs from 'node:fs/promises'
+import path from 'node:path'
+// @ts-expect-error express is not installed by default so you will need to run `npm i express`
+import express from 'express'
 
 /**
  * This example creates an hls stream which is viewable in a browser
@@ -33,8 +33,8 @@ async function example() {
     )
   })
 
-  if (!(await promisify(fs.exists)(publicOutputDirectory))) {
-    await promisify(fs.mkdir)(publicOutputDirectory)
+  if (!(await fs.stat(publicOutputDirectory))) {
+    await fs.mkdir(publicOutputDirectory)
   }
 
   const call = await camera.streamVideo({

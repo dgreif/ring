@@ -5,7 +5,7 @@
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && tsc && cp ./homebridge-ui/public/index.html ./lib/homebridge-ui/public/",
+    "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
     "lint": "eslint . --ext .ts && tsc --noEmit",
     "dev": "concurrently -c yellow,blue --kill-others \"npm:dev:build\" \"npm:dev:run\" ",
     "dev:build": "tsc --watch --preserveWatchOutput",

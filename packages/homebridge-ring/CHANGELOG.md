@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 13.2.0-beta.2
+
+### Patch Changes
+
+- [`c6a3ff1`](https://github.com/dgreif/ring/commit/c6a3ff1b131abe9ef5df3faef7e4759b31689f30) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [`6f83b8e`](https://github.com/dgreif/ring/commit/6f83b8e2cd48fc8ca6f101c293d38f4a5c6c42ab) Thanks [@dgreif](https://github.com/dgreif)! - Fix homebridge ui
+
+- Updated dependencies [[`c6a3ff1`](https://github.com/dgreif/ring/commit/c6a3ff1b131abe9ef5df3faef7e4759b31689f30)]:
+  - ring-client-api@13.2.0-beta.2
+
 ## 13.2.0-beta.1
 
 ### Patch Changes

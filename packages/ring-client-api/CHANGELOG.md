@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 13.2.0-beta.2
+
+### Patch Changes
+
+- [`c6a3ff1`](https://github.com/dgreif/ring/commit/c6a3ff1b131abe9ef5df3faef7e4759b31689f30) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 13.2.0-beta.1
 
 ### Patch Changes

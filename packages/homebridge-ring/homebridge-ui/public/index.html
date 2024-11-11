@@ -1,17 +1,180 @@
-<button id="ring-new-token" class="btn btn-link m-0 p-0" style="display: none;">
+<button id="ring-new-token" class="btn btn-link m-0 p-0" style="display: none">
   <i class="fa fa-redo mr-2"></i>
   Generate New Refresh Token
 </button>
 
-<h4 id="ring-link-account-header" class="text-center primary-text mb-3" style="display: none;">
+<h4
+  id="ring-link-account-header"
+  class="text-center primary-text mb-3"
+  style="display: none"
+>
   Link Ring Account
 </h4>
 
 <script type="module">
-  // Show the spinner while the JS is loading
-  homebridge.showSpinner()
+  const { homebridge } = window
+  const newTokenButton = document.getElementById('ring-new-token')
+  const linkAccountHeader = document.getElementById('ring-link-account-header')
 
-  // import the JS module for the custom UI
-  // Use the installed version of homebridge to bust the cache for the script
-  import(`./homebridge-ring-ui.js?v=${homebridge.plugin.installedVersion}`)
+  if (!newTokenButton) {
+    homebridge.toast.error('no ring-new-token element found!')
+    throw new Error('no ring-new-token element found!')
+  }
+
+  if (!linkAccountHeader) {
+    homebridge.toast.error('no ring-link-account-header element found!')
+    throw new Error('no ring-link-account-header element found!')
+  }
+
+  newTokenButton.addEventListener('click', () => {
+    showLoginForm()
+  })
+
+  /**
+   * Render the correct form, based on whether we have an existing refresh token
+   */
+  async function renderForm() {
+    const [config] = await homebridge.getPluginConfig()
+    const needToken = !config?.refreshToken
+
+    homebridge.hideSpinner()
+
+    if (needToken) {
+      showLoginForm()
+    } else {
+      showStandardForm()
+    }
+  }
+  renderForm()
+
+  /**
+   * @param {string} refreshToken
+   */
+  async function setRefreshToken(refreshToken) {
+    const [config, ...otherConfigs] = await homebridge.getPluginConfig()
+    await homebridge.updatePluginConfig([
+      { ...config, refreshToken },
+      ...otherConfigs,
+    ])
+    homebridge.toast.success('Refresh Token Updated', 'Ring Login Successful')
+    showStandardForm()
+  }
+
+  function showStandardForm() {
+    newTokenButton?.style.setProperty('display', 'block')
+    linkAccountHeader?.style.setProperty('display', 'none')
+    homebridge.showSchemaForm()
+  }
+
+  function showLoginForm() {
+    // Hide the standard form
+    newTokenButton?.style.setProperty('display', 'none')
+    linkAccountHeader?.style.setProperty('display', 'block')
+    homebridge.hideSchemaForm()
+
+    // Create a new login form
+    const form = homebridge.createForm(
+      {
+        schema: {
+          type: 'object',
+          properties: {
+            email: {
+              title: 'Email',
+              type: 'string',
+              'x-schema-form': {
+                type: 'email',
+              },
+              required: true,
+            },
+            password: {
+              title: 'Password',
+              type: 'string',
+              'x-schema-form': {
+                type: 'password',
+              },
+              required: true,
+            },
+          },
+        },
+      },
+      {},
+      'Log In',
+    )
+
+    form.onSubmit(async ({ email, password }) => {
+      homebridge.showSpinner()
+
+      try {
+        /** @type {{ codePrompt: string } | { refreshToken: string }} */
+        const response = await homebridge.request('/send-code', {
+          email,
+          password,
+        })
+
+        if ('refreshToken' in response) {
+          // didn't need 2fa, return token without asking for code
+          setRefreshToken(response.refreshToken)
+        } else {
+          // Need a token, so show the token form
+          showTokenForm({
+            email,
+            password,
+            codePrompt: response.codePrompt,
+          })
+        }
+      } catch (/** @type {any} */ e) {
+        // eslint-disable-next-line no-console
+        console.error(e)
+        homebridge.toast.error(e.message, 'Ring Login Failed')
+      } finally {
+        homebridge.hideSpinner()
+      }
+    })
+  }
+
+  /**
+   * @param {{ email: string, password: string, codePrompt: string }} loginInfo
+   */
+  function showTokenForm(loginInfo) {
+    const form = homebridge.createForm(
+      {
+        schema: {
+          type: 'object',
+          properties: {
+            code: {
+              title: 'Code',
+              type: 'string',
+              required: true,
+              description: loginInfo.codePrompt,
+            },
+          },
+        },
+      },
+      {},
+      'Link Account',
+      'Change Email',
+    )
+
+    form.onSubmit(async ({ code }) => {
+      homebridge.showSpinner()
+
+      try {
+        const { refreshToken } = await homebridge.request('/token', {
+          email: loginInfo.email,
+          password: loginInfo.password,
+          code,
+        })
+
+        setRefreshToken(refreshToken)
+      } catch (/** @type {any} */ e) {
+        // eslint-disable-next-line no-console
+        console.error(e)
+        homebridge.toast.error(e.message, 'Failed to Link Account')
+      } finally {
+        homebridge.hideSpinner()
+      }
+    })
+
+    form.onCancel(() => showLoginForm())
+  }
 </script>

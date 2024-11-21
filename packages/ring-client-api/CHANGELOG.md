@@ -1,5 +1,29 @@
 # ring-client-api
 
+## 13.2.0
+
+### Minor Changes
+
+- [`2df3073`](https://github.com/dgreif/ring/commit/2df307381f020bf494f7e436b3d1cb0bc6748a37) Thanks [@dgreif](https://github.com/dgreif)! - Add support for Node 22
+
+- [`abd5e98`](https://github.com/dgreif/ring/commit/abd5e9880df08bcd2f3ed27b3c1c0b679e74f12a) Thanks [@dgreif](https://github.com/dgreif)! - Updated build target from ES2021 to ES2022. ES2022 is fully supported by Node 18, which is the current minimum supported version.
+
+### Patch Changes
+
+- [`cef247b`](https://github.com/dgreif/ring/commit/cef247b947a52384a592ff9574340c3c6c2c5616) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [`b73687b`](https://github.com/dgreif/ring/commit/b73687be34260be7bf4cf00ebc9b7f19fb3957bd) Thanks [@dgreif](https://github.com/dgreif)! - Ignore unused camera messages
+
+- [`d0baee3`](https://github.com/dgreif/ring/commit/d0baee3250d5ec1b82c84286688b71c60b7a5639) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
+- [`2afef6f`](https://github.com/dgreif/ring/commit/2afef6f923db39f6392ca460be99d6702c0b1a07) Thanks [@dgreif](https://github.com/dgreif)! - Use `provenance` when publishing to npm
+
+- [`306f76d`](https://github.com/dgreif/ring/commit/306f76d6fd2eef1831330e04792a244a51a2fb86) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- [`1fe3043`](https://github.com/dgreif/ring/commit/1fe30435520c1f0c3aed526e8117da2031ce2760) Thanks [@tsightler](https://github.com/tsightler)! - Improve fetch error messages
+
+- [`f97c496`](https://github.com/dgreif/ring/commit/f97c496f8334475a3db729761609a2d313aaf5e5) Thanks [@dgreif](https://github.com/dgreif)! - Use beta version of @homebridge/camera-utils, which includes an updated version of ffmpeg
+
 ## 13.1.0
 
 ### Minor Changes

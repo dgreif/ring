@@ -8,7 +8,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
-  contents: read
+  contents: write # needed for release PR creation
   id-token: write # needed for provenance
 
 jobs:

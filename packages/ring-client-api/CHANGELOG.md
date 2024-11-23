@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 13.2.1-beta.0
+
+### Patch Changes
+
+- [#1532](https://github.com/dgreif/ring/pull/1532) [`209f13e`](https://github.com/dgreif/ring/commit/209f13ead4707dad6e478578a81d6623b0642776) Thanks [@tsightler](https://github.com/tsightler)! - Increase keepalive and adjust connection pooling, which will hopefully result in more stable fetch requests
+
 ## 13.2.0
 
 ### Minor Changes

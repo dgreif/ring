@@ -427,7 +427,7 @@ export class RingCamera extends Subscribed {
     if (
       !('android_config' in notification) ||
       !('event' in notification.data) ||
-      !('ding' in notification.data?.event)
+      !('ding' in (notification.data?.event ?? {}))
     ) {
       // only process ding/motion notifications
       return

@@ -60,7 +60,7 @@ export function getSystemId(homebridgeStoragePath: string) {
     if (ringContext.systemId) {
       return ringContext.systemId
     }
-  } catch (_) {
+  } catch {
     // expect errors if file doesn't exist or is in a bad format
   }
 

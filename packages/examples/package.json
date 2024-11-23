@@ -3,7 +3,7 @@
   "version": "0.0.0-dev",
   "private": true,
   "scripts": {
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "build": "tsc --noEmit"
   },
   "devDependencies": {

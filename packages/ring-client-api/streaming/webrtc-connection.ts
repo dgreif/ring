@@ -202,7 +202,7 @@ export class WebrtcConnection extends Subscribed {
         return
       case 'pong':
         return
-      case 'notification':
+      case 'notification': {
         const { text } = message.body
         if (text === 'camera_connected') {
           this.onCameraConnected.next()
@@ -214,6 +214,7 @@ export class WebrtcConnection extends Subscribed {
           return
         }
         break
+      }
       case 'close':
         logError('Video stream closed')
         logError(message.body)

@@ -248,7 +248,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
 
     try {
       await this.cameraSource.loadSnapshot(imageUuid)
-    } catch (e) {
+    } catch {
       logInfo(
         this.device.name +
           ' Failed to load snapshot.  Sending event to HomeKit without new snapshot',

@@ -86,10 +86,10 @@ async function responseToError(response: Response) {
 
     try {
       error.response.body = JSON.parse(bodyText)
-    } catch (_) {
+    } catch {
       error.response.body = bodyText
     }
-  } catch (_) {
+  } catch {
     // ignore
   }
 
@@ -149,7 +149,7 @@ async function requestWithRetry<T>(
       const text = await response.text()
       try {
         data = JSON.parse(text)
-      } catch (_) {
+      } catch {
         data = text as any
       }
     }
@@ -226,7 +226,7 @@ function parseAuthConfig(rawRefreshToken?: string): AuthConfig | undefined {
     assert(config)
     assert(config.rt)
     return config
-  } catch (_) {
+  } catch {
     return {
       rt: rawRefreshToken,
     }

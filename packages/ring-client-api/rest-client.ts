@@ -16,14 +16,21 @@ import {
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types'
+import { Agent } from 'undici'
 
 interface RequestOptions extends RequestInit {
   responseType?: 'json' | 'buffer'
   timeout?: number
   json?: object
+  dispatcher?: Agent
 }
 
-const defaultRequestOptions: RequestOptions = {
+const fetchAgent = new Agent({
+    connections: 6,
+    pipelining: 1,
+    keepAliveTimeout: 115000,
+  }),
+  defaultRequestOptions: RequestOptions = {
     responseType: 'json',
     method: 'GET',
     timeout: 20000,
@@ -116,6 +123,7 @@ async function requestWithRetry<T>(
     const options = {
       ...defaultRequestOptions,
       ...requestOptions,
+      dispatcher: fetchAgent,
     }
 
     // If a timeout is provided, create an AbortSignal for it
@@ -501,7 +509,6 @@ export class RingRestClient {
           authorization: `Bearer ${authTokenResponse.access_token}`,
           hardware_id: hardwareId,
           'User-Agent': 'android:com.ringapp',
-          Connection: 'close',
         },
       })
     } catch (e: any) {

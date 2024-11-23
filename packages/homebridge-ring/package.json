@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
-    "lint": "eslint . --ext .ts && tsc --noEmit",
+    "lint": "eslint .",
     "dev": "concurrently -c yellow,blue --kill-others \"npm:dev:build\" \"npm:dev:run\" ",
     "dev:build": "tsc --watch --preserveWatchOutput",
     "dev:run": "RING_DEBUG=true node --watch ../../node_modules/.bin/homebridge -U ../../.homebridge"
@@ -22,7 +22,7 @@
     "eslint-config-shared": "*",
     "homebridge": "1.8.5",
     "tsconfig": "*",
-    "typescript": "5.6.3"
+    "typescript": "5.7.2"
   },
   "engines": {
     "node": "^18 || ^20 || ^22",

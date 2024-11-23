@@ -13,7 +13,7 @@
   "scripts": {
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
     "dev": "tsc --declaration --watch --preserveWatchOutput",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -35,7 +35,7 @@
     "@types/debug": "4.1.12",
     "@types/jest": "29.5.14",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "@types/socket.io-client": "1.4.36",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.13",
@@ -44,7 +44,7 @@
     "msw": "^2.6.4",
     "ts-jest": "29.2.5",
     "tsconfig": "*",
-    "typescript": "5.6.3"
+    "typescript": "5.7.2"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

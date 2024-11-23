@@ -22,7 +22,6 @@ export enum RingDeviceType {
   CoAlarm = 'alarm.co',
   SmokeCoListener = 'listener.smoke-co',
   MultiLevelSwitch = 'switch.multilevel',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Fan = 'switch.multilevel',
   MultiLevelBulb = 'switch.multilevel.bulb',
   Switch = 'switch',
@@ -37,12 +36,9 @@ export enum RingDeviceType {
   Thermostat = 'temperature-control.thermostat',
   Sensor = 'sensor',
   RingNetAdapter = 'adapter.ringnet',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   CodeVault = 'access-code.vault',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   SecurityAccessCode = 'access-code',
   ZWaveAdapter = 'adapter.zwave',
-  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   ZWaveExtender = 'range-extender.zwave',
   PanicButton = 'security-panic',
   UnknownZWave = 'unknown.zwave',
@@ -1163,7 +1159,7 @@ export interface ProfileResponse {
     account_type: 'ring' | string
   }
 }
-export interface SessionResponse extends ProfileResponse {}
+export type SessionResponse = ProfileResponse
 
 export interface AccountMonitoringStatus {
   accountUuid: string

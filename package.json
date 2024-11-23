@@ -6,7 +6,7 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint:fix": "turbo run lint -- --fix",
     "test:watch": "npm run test:watch -w ring-client-api",
     "example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/example.ts",
     "api-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/api-example.ts",

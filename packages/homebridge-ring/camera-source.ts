@@ -326,7 +326,7 @@ class StreamingSessionWrapper {
         try {
           const rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
           this.streamingSession.sendAudioPacket(rtp)
-        } catch (_) {
+        } catch {
           // deSerialize will sometimes fail, but the errors can be ignored
         }
 
@@ -459,7 +459,7 @@ export class CameraSource implements CameraStreamingDelegate {
 
     try {
       await this.previousLoadSnapshotPromise
-    } catch (_) {
+    } catch {
       // ignore errors
     } finally {
       // clear so another request can be made

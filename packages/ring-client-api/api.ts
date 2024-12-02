@@ -292,6 +292,18 @@ export class RingApi extends Subscribed {
       }),
     )
 
+    pushReceiver.on('ON_DISCONNECT', () => {
+      pushReceiver.whenReady.catch((e) => {
+        logError(
+          'Connection to the push notification server has failed unexpectedly',
+        )
+        logError(
+          'If this happens repeatedly, verify connections to TCP/5228 are not blocked by firewall or IDS/IPS policies, and that DNS Adblock rules allow mtalk.google.com',
+        )
+        logError(e.message)
+      })
+    })
+
     try {
       await pushReceiver.connect()
     } catch (e) {

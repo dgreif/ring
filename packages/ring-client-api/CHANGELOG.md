@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 13.2.1-beta.1
+
+### Patch Changes
+
+- [#1540](https://github.com/dgreif/ring/pull/1540) [`06a3bcb`](https://github.com/dgreif/ring/commit/06a3bcb9b20985b806195435625d43f3c93eb551) Thanks [@tsightler](https://github.com/tsightler)! - Handle errors when connecting to push notification service
+
 ## 13.2.1-beta.0
 
 ### Patch Changes

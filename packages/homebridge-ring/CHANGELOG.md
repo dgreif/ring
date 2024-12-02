@@ -1,5 +1,16 @@
 # homebridge-ring
 
+## 13.2.1-beta.1
+
+### Patch Changes
+
+- [#1540](https://github.com/dgreif/ring/pull/1540) [`06a3bcb`](https://github.com/dgreif/ring/commit/06a3bcb9b20985b806195435625d43f3c93eb551) Thanks [@tsightler](https://github.com/tsightler)! - Handle errors when connecting to push notification service
+
+- [`6bb1df3`](https://github.com/dgreif/ring/commit/6bb1df342a7e5f78042140bd0be0b070a769b0e3) Thanks [@dgreif](https://github.com/dgreif)! - Mark homebridge-ring as compatible with Homebridge v2 Beta
+
+- Updated dependencies [[`06a3bcb`](https://github.com/dgreif/ring/commit/06a3bcb9b20985b806195435625d43f3c93eb551)]:
+  - ring-client-api@13.2.1-beta.1
+
 ## 13.2.1-beta.0
 
 ### Patch Changes

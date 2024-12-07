@@ -7,15 +7,15 @@ import {
   logInfo,
   stringify,
   toBase64,
-} from './util'
+} from './util.js'
 import {
   Auth2faResponse,
   AuthTokenResponse,
   SessionResponse,
-} from './ring-types'
+} from './ring-types.js'
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
-import type { Credentials } from '@eneris/push-receiver/dist/types'
+import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'
 import { Agent } from 'undici'
 
 interface RequestOptions extends RequestInit {

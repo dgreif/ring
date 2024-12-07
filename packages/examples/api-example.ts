@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../ring-client-api'
+import { RingApi } from 'ring-client-api'
 
 async function example() {
   const { env } = process,

@@ -1,6 +1,6 @@
-import { RingCamera } from '../ring-camera'
-import { generateUuid } from '../util'
-import { RingRestClient } from '../rest-client'
+import { RingCamera } from '../ring-camera.js'
+import { generateUuid } from '../util.js'
+import { RingRestClient } from '../rest-client.js'
 
 function liveViewUrl(path: string) {
   return `https://api.ring.com/integrations/v1/liveview/${path}`

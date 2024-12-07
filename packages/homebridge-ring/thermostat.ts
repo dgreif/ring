@@ -4,9 +4,9 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 
 import { RingDevice, RingDeviceType, ThermostatMode } from 'ring-client-api'
 import { logDebug, logError, logInfo } from 'ring-client-api/util'
-import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingPlatformConfig } from './config'
-import { hap } from './hap'
+import { BaseDeviceAccessory } from './base-device-accessory.js'
+import { RingPlatformConfig } from './config.js'
+import { hap } from './hap.js'
 
 export class Thermostat extends BaseDeviceAccessory {
   private onTemperature: Observable<number | undefined>

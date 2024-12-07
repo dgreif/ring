@@ -1,7 +1,7 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory.js'
 import { RingDevice } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
+import { hap } from './hap.js'
+import { RingPlatformConfig } from './config.js'
 import { PlatformAccessory } from 'homebridge'
 
 export class SmokeCoListener extends BaseDeviceAccessory {

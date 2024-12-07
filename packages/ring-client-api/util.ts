@@ -3,7 +3,7 @@ import { red } from 'colors'
 import { createInterface } from 'readline'
 import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
 import { uuid as getSystemUuid } from 'systeminformation'
-import pushReceiverLogger from '@eneris/push-receiver/dist/utils/logger'
+import pushReceiverLogger from '@eneris/push-receiver/dist/utils/logger.js'
 
 const debugLogger = debug('ring'),
   uuidNamespace = 'e53ffdc0-e91d-4ce1-bec2-df939d94739d'
@@ -161,7 +161,7 @@ function logPushReceiver(...args: any) {
   logDebug('[Push Receiver]')
   logDebug(args[0])
 }
-pushReceiverLogger.error = logPushReceiver
+pushReceiverLogger.default.error = logPushReceiver
 
 export function fromBase64(encodedInput: string) {
   const buff = Buffer.from(encodedInput, 'base64')

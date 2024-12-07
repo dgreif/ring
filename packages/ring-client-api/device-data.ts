@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { RingApi } from './api'
-import { acquireRefreshToken } from './refresh-token'
-import { mapAsync } from './util'
+import { RingApi } from './api.js'
+import { acquireRefreshToken } from './refresh-token.js'
+import { mapAsync } from './util.js'
 
 const sensitiveFields = [
   'id',

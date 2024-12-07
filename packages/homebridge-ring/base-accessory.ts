@@ -1,7 +1,7 @@
-import { hap } from './hap'
+import { hap } from './hap.js'
 import { shareReplay, take } from 'rxjs/operators'
 import { firstValueFrom, Observable } from 'rxjs'
-import { debug, RingPlatformConfig } from './config'
+import { debug, RingPlatformConfig } from './config.js'
 import {
   Characteristic,
   PlatformAccessory,

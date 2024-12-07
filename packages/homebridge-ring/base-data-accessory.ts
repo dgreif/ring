@@ -2,7 +2,7 @@ import {
   BaseAccessory,
   CharacteristicType,
   ServiceType,
-} from './base-accessory'
+} from './base-accessory.js'
 import { Observable, Subject } from 'rxjs'
 import type {
   RingCamera,
@@ -10,7 +10,7 @@ import type {
   RingDevice,
   RingIntercom,
 } from 'ring-client-api'
-import { RingPlatformConfig } from './config'
+import { RingPlatformConfig } from './config.js'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
 import {
   PlatformAccessory,

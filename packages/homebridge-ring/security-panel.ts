@@ -1,4 +1,4 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory.js'
 import {
   AlarmMode,
   AlarmState,
@@ -7,8 +7,8 @@ import {
   RingDeviceData,
   RingDeviceType,
 } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
+import { hap } from './hap.js'
+import { RingPlatformConfig } from './config.js'
 import { PlatformAccessory } from 'homebridge'
 import { logError, logInfo } from 'ring-client-api/util'
 

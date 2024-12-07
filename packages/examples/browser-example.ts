@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../ring-client-api'
+import { RingApi } from 'ring-client-api'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 // @ts-expect-error express is not installed by default so you will need to run `npm i express`

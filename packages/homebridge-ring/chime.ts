@@ -1,8 +1,8 @@
 import { RingChime } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
+import { hap } from './hap.js'
+import { RingPlatformConfig } from './config.js'
 import { PlatformAccessory } from 'homebridge'
-import { BaseDataAccessory } from './base-data-accessory'
+import { BaseDataAccessory } from './base-data-accessory.js'
 import { logInfo } from 'ring-client-api/util'
 
 const minutesFor24Hours = 24 * 60

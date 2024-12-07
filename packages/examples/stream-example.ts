@@ -1,7 +1,7 @@
 import 'dotenv/config'
-import { RingApi } from '../ring-client-api'
+import { RingApi } from 'ring-client-api'
 import * as path from 'path'
-import { cleanOutputDirectory, outputDirectory } from './util'
+import { cleanOutputDirectory, outputDirectory } from './util.js'
 
 /**
  * This example streams to files, each with 10 seconds of video.

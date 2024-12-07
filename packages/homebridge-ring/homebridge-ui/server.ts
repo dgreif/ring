@@ -5,7 +5,7 @@ import {
 } from '@homebridge/plugin-ui-utils'
 
 import { RingRestClient } from 'ring-client-api/rest-client'
-import { controlCenterDisplayName, getSystemId } from '../config'
+import { controlCenterDisplayName, getSystemId } from '../config.js'
 
 interface LoginRequest {
   email: string

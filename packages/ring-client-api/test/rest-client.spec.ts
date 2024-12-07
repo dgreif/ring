@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { RingRestClient } from '../rest-client'
-import { clearTimeouts, getHardwareId, toBase64 } from '../util'
+import { RingRestClient } from '../rest-client.js'
+import { clearTimeouts, getHardwareId, toBase64 } from '../util.js'
 import { firstValueFrom } from 'rxjs'
 
 let sessionCreatedCount = 0,

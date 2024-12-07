@@ -3,6 +3,7 @@
   "displayName": "Ring",
   "version": "13.2.1",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
+  "type": "module",
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",

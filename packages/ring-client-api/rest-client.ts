@@ -7,12 +7,12 @@ import {
   logInfo,
   stringify,
   toBase64,
-} from './util.js'
+} from './util.ts'
 import {
   Auth2faResponse,
   AuthTokenResponse,
   SessionResponse,
-} from './ring-types.js'
+} from './ring-types.ts'
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'

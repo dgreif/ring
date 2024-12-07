@@ -1,4 +1,4 @@
-import { getBatteryLevel, cleanSnapshotUuid } from '../ring-camera.js'
+import { getBatteryLevel, cleanSnapshotUuid } from '../ring-camera.ts'
 
 describe('Ring Camera', () => {
   describe('battery level', () => {

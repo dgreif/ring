@@ -20,7 +20,7 @@ import {
   shareReplay,
   skip,
 } from 'rxjs/operators'
-import { delay, generateUuid, logDebug, logError, logInfo } from './util.js'
+import { delay, generateUuid, logDebug, logError, logInfo } from './util.ts'
 import {
   AccountMonitoringStatus,
   AlarmMode,
@@ -45,13 +45,13 @@ import {
   LocationModeInput,
   disabledLocationModes,
   isWebSocketSupportedAsset,
-} from './ring-types.js'
-import { appApi, clientApi, RingRestClient } from './rest-client.js'
-import { getSearchQueryString, RingCamera } from './ring-camera.js'
-import { RingChime } from './ring-chime.js'
-import { RingDevice } from './ring-device.js'
-import { RingIntercom } from './ring-intercom.js'
-import { Subscribed } from './subscribed.js'
+} from './ring-types.ts'
+import { appApi, clientApi, RingRestClient } from './rest-client.ts'
+import { getSearchQueryString, RingCamera } from './ring-camera.ts'
+import { RingChime } from './ring-chime.ts'
+import { RingDevice } from './ring-device.ts'
+import { RingIntercom } from './ring-intercom.ts'
+import { Subscribed } from './subscribed.ts'
 
 const deviceListMessageType = 'DeviceInfoDocGetList'
 

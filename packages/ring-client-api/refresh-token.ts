@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { RingRestClient } from './rest-client.js'
-import { requestInput } from './util.js'
-import { AuthTokenResponse } from './ring-types.js'
+import { RingRestClient } from './rest-client.ts'
+import { requestInput } from './util.ts'
+import { AuthTokenResponse } from './ring-types.ts'
 
 export async function acquireRefreshToken() {
   const email = await requestInput('Email: '),

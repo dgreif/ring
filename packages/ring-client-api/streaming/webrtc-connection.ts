@@ -7,12 +7,12 @@ import {
   Subject,
 } from 'rxjs'
 import { concatMap, take } from 'rxjs/operators'
-import { generateUuid, logDebug, logError, logInfo } from '../util.js'
-import { RingCamera } from '../ring-camera.js'
-import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection.js'
-import { Subscribed } from '../subscribed.js'
+import { generateUuid, logDebug, logError, logInfo } from '../util.ts'
+import { RingCamera } from '../ring-camera.ts'
+import { BasicPeerConnection, WeriftPeerConnection } from './peer-connection.ts'
+import { Subscribed } from '../subscribed.ts'
 import { RtpPacket } from 'werift'
-import { IncomingMessage } from './streaming-messages.js'
+import { IncomingMessage } from './streaming-messages.ts'
 
 export interface StreamingConnectionOptions {
   createPeerConnection?: () => BasicPeerConnection

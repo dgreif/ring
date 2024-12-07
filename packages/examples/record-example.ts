@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { RingApi } from 'ring-client-api'
-import { cleanOutputDirectory, outputDirectory } from './util.js'
+import { cleanOutputDirectory, outputDirectory } from './util.ts'
 import * as path from 'path'
 
 /**

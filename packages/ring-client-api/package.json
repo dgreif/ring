@@ -15,7 +15,7 @@
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
     "dev": "tsc --declaration --watch --preserveWatchOutput",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "NODE_OPTIONS='$NODE_OPTIONS --experimental-vm-modules' jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {

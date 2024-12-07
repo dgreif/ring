@@ -1,5 +1,12 @@
+import { createDefaultEsmPreset } from 'ts-jest'
+
 export default {
-  preset: 'ts-jest',
+  ...createDefaultEsmPreset({
+    useESM: true,
+  }),
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.spec.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
 }

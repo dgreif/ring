@@ -1,5 +1,5 @@
 import { RingCamera } from 'ring-client-api'
-import { hap } from './hap.js'
+import { hap } from './hap.ts'
 import {
   doesFfmpegSupportCodec,
   generateSrtpOptions,
@@ -36,7 +36,7 @@ import {
   SrtcpSession,
 } from 'werift'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import { OpusRepacketizer } from './opus-repacketizer.js'
+import { OpusRepacketizer } from './opus-repacketizer.ts'
 
 const readFileAsync = promisify(readFile),
   cameraOfflinePath = require.resolve('../media/camera-offline.jpg'),

@@ -9,8 +9,8 @@ import {
   RtpPacket,
 } from 'werift'
 import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs'
-import { logDebug, logError, logInfo } from '../util.js'
-import { Subscribed } from '../subscribed.js'
+import { logDebug, logError, logInfo } from '../util.ts'
+import { Subscribed } from '../subscribed.ts'
 
 const ringIceServers = [
   'stun:stun.kinesisvideo.us-east-1.amazonaws.com:443',

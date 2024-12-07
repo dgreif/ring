@@ -1,9 +1,9 @@
 import { RingDevice, RingDeviceData } from 'ring-client-api'
-import { hap } from './hap.js'
-import { RingPlatformConfig } from './config.js'
-import { BaseDataAccessory } from './base-data-accessory.js'
+import { hap } from './hap.ts'
+import { RingPlatformConfig } from './config.ts'
+import { BaseDataAccessory } from './base-data-accessory.ts'
 import { PlatformAccessory } from 'homebridge'
-import { ServiceType } from './base-accessory.js'
+import { ServiceType } from './base-accessory.ts'
 
 function getBatteryLevel({ batteryLevel, batteryStatus }: RingDeviceData) {
   if (batteryLevel !== undefined) {

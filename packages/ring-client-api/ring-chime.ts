@@ -5,8 +5,8 @@ import {
   RingtoneOptions,
   ChimeHealth,
   ChimeModel,
-} from './ring-types.js'
-import { clientApi, RingRestClient } from './rest-client.js'
+} from './ring-types.ts'
+import { clientApi, RingRestClient } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
 
 const settingsWhichRequireReboot = [

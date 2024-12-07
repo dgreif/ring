@@ -1,5 +1,5 @@
-import { platformName, pluginName, RingPlatform } from './ring-platform.js'
-import { setHap } from './hap.js'
+import { platformName, pluginName, RingPlatform } from './ring-platform.ts'
+import { setHap } from './hap.ts'
 
 export default function (homebridge: any) {
   setHap(homebridge.hap)

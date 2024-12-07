@@ -7,7 +7,7 @@ import {
   RingDeviceType,
   RingIntercom,
 } from 'ring-client-api'
-import { hap } from './hap.js'
+import { hap } from './hap.ts'
 import {
   API,
   DynamicPlatformPlugin,
@@ -15,42 +15,42 @@ import {
   PlatformAccessory,
   PlatformConfig,
 } from 'homebridge'
-import { SecurityPanel } from './security-panel.js'
-import { Chime } from './chime.js'
-import { BrightnessOnly } from './brightness-only.js'
-import { ContactSensor } from './contact-sensor.js'
-import { MotionSensor } from './motion-sensor.js'
-import { Lock } from './lock.js'
-import { SmokeAlarm } from './smoke-alarm.js'
-import { CoAlarm } from './co-alarm.js'
-import { SmokeCoListener } from './smoke-co-listener.js'
+import { SecurityPanel } from './security-panel.ts'
+import { Chime } from './chime.ts'
+import { BrightnessOnly } from './brightness-only.ts'
+import { ContactSensor } from './contact-sensor.ts'
+import { MotionSensor } from './motion-sensor.ts'
+import { Lock } from './lock.ts'
+import { SmokeAlarm } from './smoke-alarm.ts'
+import { CoAlarm } from './co-alarm.ts'
+import { SmokeCoListener } from './smoke-co-listener.ts'
 import {
   controlCenterDisplayName,
   debug,
   getSystemId,
   RingPlatformConfig,
   updateHomebridgeConfig,
-} from './config.js'
-import { Beam } from './beam.js'
-import { MultiLevelSwitch } from './multi-level-switch.js'
-import { Fan } from './fan.js'
-import { Outlet } from './outlet.js'
-import { Switch } from './switch.js'
-import { Camera } from './camera.js'
-import { PanicButtons } from './panic-buttons.js'
+} from './config.ts'
+import { Beam } from './beam.ts'
+import { MultiLevelSwitch } from './multi-level-switch.ts'
+import { Fan } from './fan.ts'
+import { Outlet } from './outlet.ts'
+import { Switch } from './switch.ts'
+import { Camera } from './camera.ts'
+import { PanicButtons } from './panic-buttons.ts'
 import { RefreshTokenAuth } from 'ring-client-api/rest-client'
 import { logError, logInfo, useLogger } from 'ring-client-api/util'
-import { BaseAccessory } from './base-accessory.js'
-import { FloodFreezeSensor } from './flood-freeze-sensor.js'
-import { FreezeSensor } from './freeze-sensor.js'
-import { TemperatureSensor } from './temperature-sensor.js'
-import { WaterSensor } from './water-sensor.js'
-import { LocationModeSwitch } from './location-mode-switch.js'
-import { Thermostat } from './thermostat.js'
-import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch.js'
-import { generateMacAddress } from './util.js'
-import { Intercom } from './intercom.js'
-import { Valve } from './valve.js'
+import { BaseAccessory } from './base-accessory.ts'
+import { FloodFreezeSensor } from './flood-freeze-sensor.ts'
+import { FreezeSensor } from './freeze-sensor.ts'
+import { TemperatureSensor } from './temperature-sensor.ts'
+import { WaterSensor } from './water-sensor.ts'
+import { LocationModeSwitch } from './location-mode-switch.ts'
+import { Thermostat } from './thermostat.ts'
+import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch.ts'
+import { generateMacAddress } from './util.ts'
+import { Intercom } from './intercom.ts'
+import { Valve } from './valve.ts'
 
 const ignoreHiddenDeviceTypes: string[] = [
   RingDeviceType.RingNetAdapter,

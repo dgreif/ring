@@ -1,7 +1,7 @@
-import { BaseDeviceAccessory } from './base-device-accessory.js'
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
 import type { RingDevice } from 'ring-client-api'
-import { hap } from './hap.js'
-import { RingPlatformConfig } from './config.js'
+import { hap } from './hap.ts'
+import { RingPlatformConfig } from './config.ts'
 import { PlatformAccessory } from 'homebridge'
 import { logInfo } from 'ring-client-api/util'
 

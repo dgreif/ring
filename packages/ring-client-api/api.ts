@@ -4,8 +4,8 @@ import {
   RefreshTokenAuth,
   RingRestClient,
   SessionOptions,
-} from './rest-client.js'
-import { Location } from './location.js'
+} from './rest-client.ts'
+import { Location } from './location.ts'
 import {
   BaseStation,
   BeamBridge,
@@ -20,9 +20,9 @@ import {
   ThirdPartyGarageDoorOpener,
   UnknownDevice,
   UserLocation,
-} from './ring-types.js'
-import { AnyCameraData, RingCamera } from './ring-camera.js'
-import { RingChime } from './ring-chime.js'
+} from './ring-types.ts'
+import { AnyCameraData, RingCamera } from './ring-camera.ts'
+import { RingChime } from './ring-chime.ts'
 import { combineLatest, EMPTY, merge, Subject } from 'rxjs'
 import {
   debounceTime,
@@ -36,11 +36,11 @@ import {
   logDebug,
   logError,
   logInfo,
-} from './util.js'
-import { setFfmpegPath } from './ffmpeg.js'
-import { Subscribed } from './subscribed.js'
+} from './util.ts'
+import { setFfmpegPath } from './ffmpeg.ts'
+import { Subscribed } from './subscribed.ts'
 import { PushReceiver } from '@eneris/push-receiver'
-import { RingIntercom } from './ring-intercom.js'
+import { RingIntercom } from './ring-intercom.ts'
 import JSONbig from 'json-bigint'
 
 export interface RingApiOptions extends SessionOptions {

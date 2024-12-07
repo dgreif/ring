@@ -15,8 +15,8 @@ import {
   OnvifCameraData,
   RingCameraKind,
   PushNotification,
-} from './ring-types.js'
-import { appApi, clientApi, deviceApi, RingRestClient } from './rest-client.js'
+} from './ring-types.ts'
+import { appApi, clientApi, deviceApi, RingRestClient } from './rest-client.ts'
 import { BehaviorSubject, firstValueFrom, ReplaySubject, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
@@ -32,17 +32,17 @@ import {
   delay,
   logDebug,
   logError,
-} from './util.js'
-import { Subscribed } from './subscribed.js'
+} from './util.ts'
+import { Subscribed } from './subscribed.ts'
 import {
   StreamingConnectionOptions,
   WebrtcConnection,
-} from './streaming/webrtc-connection.js'
+} from './streaming/webrtc-connection.ts'
 import {
   FfmpegOptions,
   StreamingSession,
-} from './streaming/streaming-session.js'
-import { SimpleWebRtcSession } from './streaming/simple-webrtc-session.js'
+} from './streaming/streaming-session.ts'
+import { SimpleWebRtcSession } from './streaming/simple-webrtc-session.ts'
 
 export type AnyCameraData = CameraData | OnvifCameraData
 

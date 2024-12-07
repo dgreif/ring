@@ -1,5 +1,13 @@
 # ring-client-api
 
+## 13.2.1
+
+### Patch Changes
+
+- [#1532](https://github.com/dgreif/ring/pull/1532) [`209f13e`](https://github.com/dgreif/ring/commit/209f13ead4707dad6e478578a81d6623b0642776) Thanks [@tsightler](https://github.com/tsightler)! - Increase keepalive and adjust connection pooling, which will hopefully result in more stable fetch requests
+
+- [`a480048`](https://github.com/dgreif/ring/commit/a480048f4a4adca1cac9516bf2b2c1be62a59868) Thanks [@tsightler](https://github.com/tsightler)! - Handle errors when connecting to push notification service
+
 ## 13.2.0
 
 ### Minor Changes

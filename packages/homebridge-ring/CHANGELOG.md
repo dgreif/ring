@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 13.2.1
+
+### Patch Changes
+
+- [#1532](https://github.com/dgreif/ring/pull/1532) [`209f13e`](https://github.com/dgreif/ring/commit/209f13ead4707dad6e478578a81d6623b0642776) Thanks [@tsightler](https://github.com/tsightler)! - Increase keepalive and adjust connection pooling, which will hopefully result in more stable fetch requests
+
+- [`a480048`](https://github.com/dgreif/ring/commit/a480048f4a4adca1cac9516bf2b2c1be62a59868) Thanks [@tsightler](https://github.com/tsightler)! - Handle errors when connecting to push notification service
+
+- [`a36c7d9`](https://github.com/dgreif/ring/commit/a36c7d93ea74c495073032484324778e5915a2d5) Thanks [@dgreif](https://github.com/dgreif)! - Mark homebridge-ring as compatible with Homebridge v2 Beta
+
+- Updated dependencies [[`209f13e`](https://github.com/dgreif/ring/commit/209f13ead4707dad6e478578a81d6623b0642776), [`a480048`](https://github.com/dgreif/ring/commit/a480048f4a4adca1cac9516bf2b2c1be62a59868)]:
+  - ring-client-api@13.2.1
+
 ## 13.2.0
 
 ### Minor Changes

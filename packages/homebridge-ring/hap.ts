@@ -1,4 +1,4 @@
-import { HAP } from 'homebridge'
+import type { HAP } from 'homebridge'
 
 export let hap: HAP
 export function setHap(hapInstance: HAP) {

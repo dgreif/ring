@@ -1,7 +1,8 @@
 import { BehaviorSubject } from 'rxjs'
-import { deviceTypesWithVolume, RingDeviceData } from './ring-types.ts'
+import type { RingDeviceData } from './ring-types.ts'
+import { deviceTypesWithVolume } from './ring-types.ts'
 import { filter, map } from 'rxjs/operators'
-import { Location } from './location.ts'
+import type { Location } from './location.ts'
 import { Subscribed } from './subscribed.ts'
 import { logError } from './util.ts'
 

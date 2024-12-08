@@ -1,14 +1,14 @@
 /* eslint-disable brace-style */
+import type { RTCIceCandidate, RtpPacket } from 'werift'
 import {
-  ConnectionState,
+  type ConnectionState,
   MediaStreamTrack,
-  RTCIceCandidate,
   RTCPeerConnection,
-  RtcpPacket,
+  type RtcpPacket,
   RTCRtpCodecParameters,
-  RtpPacket,
 } from 'werift'
-import { interval, merge, Observable, ReplaySubject, Subject } from 'rxjs'
+import type { Observable } from 'rxjs'
+import { interval, merge, ReplaySubject, Subject } from 'rxjs'
 import { logDebug, logError, logInfo } from '../util.ts'
 import { Subscribed } from '../subscribed.ts'
 

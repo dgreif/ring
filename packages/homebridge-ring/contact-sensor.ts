@@ -1,8 +1,8 @@
 import { BaseDeviceAccessory } from './base-device-accessory.ts'
-import { RingDevice } from 'ring-client-api'
+import type { RingDevice } from 'ring-client-api'
 import { hap } from './hap.ts'
-import { RingPlatformConfig } from './config.ts'
-import { PlatformAccessory } from 'homebridge'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
 
 export class ContactSensor extends BaseDeviceAccessory {
   constructor(

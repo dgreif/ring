@@ -1,8 +1,8 @@
-import { RingDevice, RingDeviceData, AlarmState } from 'ring-client-api'
+import type { RingDevice, RingDeviceData, AlarmState } from 'ring-client-api'
 import { hap } from './hap.ts'
-import { RingPlatformConfig } from './config.ts'
+import type { RingPlatformConfig } from './config.ts'
 import { BaseDataAccessory } from './base-data-accessory.ts'
-import { PlatformAccessory } from 'homebridge'
+import type { PlatformAccessory } from 'homebridge'
 import { logInfo } from 'ring-client-api/util'
 
 const burglarStates: AlarmState[] = [

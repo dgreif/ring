@@ -1,12 +1,13 @@
-import {
+import type {
   ChimeData,
   ChimeUpdate,
   ChimeSoundKind,
   RingtoneOptions,
   ChimeHealth,
-  ChimeModel,
 } from './ring-types.ts'
-import { clientApi, RingRestClient } from './rest-client.ts'
+import { ChimeModel } from './ring-types.ts'
+import type { RingRestClient } from './rest-client.ts'
+import { clientApi } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
 
 const settingsWhichRequireReboot = [

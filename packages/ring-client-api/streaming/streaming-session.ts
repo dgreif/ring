@@ -5,10 +5,10 @@ import {
   RtpSplitter,
 } from '@homebridge/camera-utils'
 import { firstValueFrom, ReplaySubject, Subject } from 'rxjs'
-import { WebrtcConnection } from './webrtc-connection.ts'
+import type { WebrtcConnection } from './webrtc-connection.ts'
 import { getFfmpegPath } from '../ffmpeg.ts'
 import { logDebug, logError } from '../util.ts'
-import { RingCamera } from '../ring-camera.ts'
+import type { RingCamera } from '../ring-camera.ts'
 import { concatMap, map, mergeWith, take } from 'rxjs/operators'
 import { Subscribed } from '../subscribed.ts'
 

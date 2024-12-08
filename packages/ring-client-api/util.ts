@@ -1,5 +1,5 @@
 import debug from 'debug'
-import { red } from 'colors'
+import colors from 'colors'
 import { createInterface } from 'readline'
 import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
 import { uuid as getSystemUuid } from 'systeminformation'
@@ -18,7 +18,7 @@ let logger: Logger = {
       debugLogger(message)
     },
     logError(message) {
-      debugLogger(red(message))
+      debugLogger(colors.red(message))
     },
   },
   debugEnabled = false
@@ -161,7 +161,10 @@ function logPushReceiver(...args: any) {
   logDebug('[Push Receiver]')
   logDebug(args[0])
 }
-pushReceiverLogger.default.error = logPushReceiver
+
+const pushReceiverLoggerDefault =
+  pushReceiverLogger.default || pushReceiverLogger // fix for ts-jest
+pushReceiverLoggerDefault.error = logPushReceiver
 
 export function fromBase64(encodedInput: string) {
   const buff = Buffer.from(encodedInput, 'base64')

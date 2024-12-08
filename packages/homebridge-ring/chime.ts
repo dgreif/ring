@@ -1,7 +1,7 @@
-import { RingChime } from 'ring-client-api'
+import type { RingChime } from 'ring-client-api'
 import { hap } from './hap.ts'
-import { RingPlatformConfig } from './config.ts'
-import { PlatformAccessory } from 'homebridge'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory.ts'
 import { logInfo } from 'ring-client-api/util'
 

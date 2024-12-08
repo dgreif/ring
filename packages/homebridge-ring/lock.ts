@@ -1,9 +1,9 @@
 import { BaseDeviceAccessory } from './base-device-accessory.ts'
-import { RingDevice, RingDeviceData } from 'ring-client-api'
+import type { RingDevice, RingDeviceData } from 'ring-client-api'
 import { distinctUntilChanged } from 'rxjs/operators'
 import { hap } from './hap.ts'
-import { RingPlatformConfig } from './config.ts'
-import { PlatformAccessory } from 'homebridge'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
 
 function getCurrentState({ locked }: RingDeviceData) {
   const {

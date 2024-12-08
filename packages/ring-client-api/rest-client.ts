@@ -8,7 +8,7 @@ import {
   stringify,
   toBase64,
 } from './util.ts'
-import {
+import type {
   Auth2faResponse,
   AuthTokenResponse,
   SessionResponse,

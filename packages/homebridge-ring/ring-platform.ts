@@ -8,7 +8,7 @@ import {
   RingIntercom,
 } from 'ring-client-api'
 import { hap } from './hap.ts'
-import {
+import type {
   API,
   DynamicPlatformPlugin,
   Logging,
@@ -24,11 +24,11 @@ import { Lock } from './lock.ts'
 import { SmokeAlarm } from './smoke-alarm.ts'
 import { CoAlarm } from './co-alarm.ts'
 import { SmokeCoListener } from './smoke-co-listener.ts'
+import type { RingPlatformConfig } from './config.ts'
 import {
   controlCenterDisplayName,
   debug,
   getSystemId,
-  RingPlatformConfig,
   updateHomebridgeConfig,
 } from './config.ts'
 import { Beam } from './beam.ts'
@@ -38,9 +38,9 @@ import { Outlet } from './outlet.ts'
 import { Switch } from './switch.ts'
 import { Camera } from './camera.ts'
 import { PanicButtons } from './panic-buttons.ts'
-import { RefreshTokenAuth } from 'ring-client-api/rest-client'
+import type { RefreshTokenAuth } from 'ring-client-api/rest-client'
 import { logError, logInfo, useLogger } from 'ring-client-api/util'
-import { BaseAccessory } from './base-accessory.ts'
+import type { BaseAccessory } from './base-accessory.ts'
 import { FloodFreezeSensor } from './flood-freeze-sensor.ts'
 import { FreezeSensor } from './freeze-sensor.ts'
 import { TemperatureSensor } from './temperature-sensor.ts'

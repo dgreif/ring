@@ -25,7 +25,7 @@
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.1",
     "socket.io-client": "^2.5.0",
-    "systeminformation": "^5.23.5",
+    "systeminformation": "^5.23.8",
     "undici": "^6.21.0",
     "uuid": "^11.0.3",
     "werift": "0.20.1",

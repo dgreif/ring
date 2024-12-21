@@ -1,13 +1,14 @@
-import {
+import type {
   IntercomHandsetAudioData,
   PushNotification,
-  PushNotificationAction,
-} from './ring-types'
-import { clientApi, commandsApi, RingRestClient } from './rest-client'
+} from './ring-types.ts'
+import { PushNotificationAction } from './ring-types.ts'
+import type { RingRestClient } from './rest-client.ts'
+import { clientApi, commandsApi } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
-import { getBatteryLevel } from './ring-camera'
-import { logError } from './util'
+import { getBatteryLevel } from './ring-camera.ts'
+import { logError } from './util.ts'
 
 export class RingIntercom {
   id

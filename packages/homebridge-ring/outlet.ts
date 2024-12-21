@@ -1,8 +1,8 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
-import { PlatformAccessory } from 'homebridge'
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
+import type { RingDevice } from 'ring-client-api'
+import { hap } from './hap.ts'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
 import { logInfo } from 'ring-client-api/util'
 
 export class Outlet extends BaseDeviceAccessory {

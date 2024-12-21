@@ -43,7 +43,7 @@ export default tseslint.config(
       'no-debugger': 2,
       'no-dupe-keys': 2,
       'no-dupe-class-members': 2,
-      'no-duplicate-imports': 2,
+      'no-duplicate-imports': 0,
       'no-empty': 2,
       'no-empty-character-class': 2,
       'no-ex-assign': 2,
@@ -195,6 +195,7 @@ export default tseslint.config(
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
       '@typescript-eslint/no-unused-vars': 0,
+      '@typescript-eslint/consistent-type-imports': 2,
       // '@typescript-eslint/no-unused-vars': [
       //   'error',
       //   { argsIgnorePattern: '^_' },

@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs'
+import type { Subscription } from 'rxjs'
 
 export class Subscribed {
   private readonly subscriptions: Subscription[] = []

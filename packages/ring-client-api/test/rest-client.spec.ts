@@ -1,8 +1,17 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { RingRestClient } from '../rest-client'
-import { clearTimeouts, getHardwareId, toBase64 } from '../util'
+import { RingRestClient } from '../rest-client.ts'
+import { clearTimeouts, getHardwareId, toBase64 } from '../util.ts'
 import { firstValueFrom } from 'rxjs'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest'
 
 let sessionCreatedCount = 0,
   client: RingRestClient
@@ -205,7 +214,7 @@ afterEach(() => {
 })
 
 describe('getAuth', () => {
-  test('It should throw and set the 2fa prompt', async () => {
+  it('should throw and set the 2fa prompt', async () => {
     client = new RingRestClient({
       password,
       email,
@@ -221,7 +230,7 @@ describe('getAuth', () => {
     expect(client.using2fa).toEqual(true)
   })
 
-  test('It should accept a 2fa code', async () => {
+  it('should accept a 2fa code', async () => {
     client = new RingRestClient({
       password,
       email,
@@ -239,7 +248,7 @@ describe('getAuth', () => {
     expect(client.refreshToken).toEqual(await wrapRefreshToken(refreshToken))
   })
 
-  test('it should handle invalid credentials', async () => {
+  it('should handle invalid credentials', async () => {
     client = new RingRestClient({
       password: 'incorrect password',
       email,
@@ -250,13 +259,13 @@ describe('getAuth', () => {
     )
   })
 
-  test('it should handle invalid 2fa code', async () => {
+  it('should handle invalid 2fa code', async () => {
     client = new RingRestClient({
       password,
       email,
     })
 
-    // ignore the first reject, it's tested above
+    // ignore the first reject, it's it('ove
     await expect(() => client.getAuth()).rejects.toThrow()
 
     // call getAuth again with an invalid 2fa code, which should fail
@@ -268,7 +277,7 @@ describe('getAuth', () => {
     )
   })
 
-  test('it should establish a valid auth token with a valid refresh token', async () => {
+  it('should establish a valid auth token with a valid refresh token', async () => {
     client = new RingRestClient({
       refreshToken,
     })
@@ -282,7 +291,7 @@ describe('getAuth', () => {
     )
   })
 
-  test('it should emit an event when a new refresh token is created', async () => {
+  it('should emit an event when a new refresh token is created', async () => {
     client = new RingRestClient({
       refreshToken,
     })

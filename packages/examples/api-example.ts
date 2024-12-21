@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { RingApi } from '../ring-client-api'
+import { RingApi } from 'ring-client-api'
 
 async function example() {
   const { env } = process,
@@ -38,24 +38,29 @@ async function example() {
 
   // Camera API
   const eventsResponse = await camera.getEvents({
-    limit: 10,
-    kind: 'ding',
-    state: 'accepted',
-    // olderThanId: previousEventsResponse.meta.pagination_key
-    // favorites: true
-  })
-  console.log('Got events', eventsResponse.events[0])
-  const eventsWithRecordings = eventsResponse.events.filter(
+      limit: 10,
+      kind: 'ding',
+      state: 'accepted',
+      // olderThanId: previousEventsResponse.meta.pagination_key
+      // favorites: true
+    }),
+    [firstRecordedEvent] = eventsResponse.events.filter(
       (event) => event.recording_status === 'ready',
-    ),
-    transcodedUrl = await camera.getRecordingUrl(
-      eventsWithRecordings[0].ding_id_str, // MUST use the ding_id_str, not ding_id
+    )
+
+  if (!firstRecordedEvent) {
+    console.log('No events with recordings found')
+    return
+  }
+
+  const transcodedUrl = await camera.getRecordingUrl(
+      firstRecordedEvent.ding_id_str, // MUST use the ding_id_str, not ding_id
       {
         transcoded: true, // get transcoded version of the video.  false by default.  transcoded has ring log and timestamp
       },
     ),
     untranscodedUrl = await camera.getRecordingUrl(
-      eventsWithRecordings[0].ding_id_str,
+      firstRecordedEvent.ding_id_str,
     )
 
   console.log('Recording Transcoded URL', transcodedUrl)

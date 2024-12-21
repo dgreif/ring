@@ -3,6 +3,7 @@
   "version": "13.2.1",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
+  "type": "module",
   "exports": {
     ".": "./lib/index.js",
     "./ffmpeg": "./lib/ffmpeg.js",
@@ -11,15 +12,14 @@
     "./streaming/streaming-session": "./lib/streaming/streaming-session.js"
   },
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
+    "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js && rm -rf ./lib/test",
     "dev": "tsc --declaration --watch --preserveWatchOutput",
     "lint": "eslint .",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "vitest"
   },
   "dependencies": {
     "@eneris/push-receiver": "4.3.0",
-    "@homebridge/camera-utils": "^2.2.7",
+    "@homebridge/camera-utils": "^3.0.0",
     "colors": "1.4.0",
     "debug": "^4.3.7",
     "json-bigint": "^1.0.0",
@@ -33,18 +33,16 @@
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
-    "@types/jest": "29.5.14",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "22.9.3",
     "@types/socket.io-client": "1.4.36",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.13",
     "eslint-config-shared": "*",
-    "jest": "29.7.0",
     "msw": "^2.6.4",
-    "ts-jest": "29.2.5",
     "tsconfig": "*",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

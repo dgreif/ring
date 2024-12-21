@@ -1,9 +1,9 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
 import type { RingDevice } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
+import { hap } from './hap.ts'
+import type { RingPlatformConfig } from './config.ts'
 import { distinctUntilChanged, filter, map } from 'rxjs/operators'
-import { PlatformAccessory } from 'homebridge'
+import type { PlatformAccessory } from 'homebridge'
 import { logInfo } from 'ring-client-api/util'
 
 export class WaterSensor extends BaseDeviceAccessory {

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@eneris/push-receiver": "4.3.0",
-    "@homebridge/camera-utils": "^2.2.7",
+    "@homebridge/camera-utils": "^3.0.0",
     "colors": "1.4.0",
     "debug": "^4.3.7",
     "json-bigint": "^1.0.0",

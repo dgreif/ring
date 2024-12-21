@@ -13,8 +13,8 @@
     "dev:run": "RING_DEBUG=true node --watch ../../node_modules/.bin/homebridge -U ../../.homebridge"
   },
   "dependencies": {
-    "@homebridge/camera-utils": "^2.2.7",
-    "@homebridge/plugin-ui-utils": "^1.0.3",
+    "@homebridge/camera-utils": "^3.0.0",
+    "@homebridge/plugin-ui-utils": "^2.0.0",
     "ring-client-api": "13.2.1",
     "werift": "0.20.1"
   },

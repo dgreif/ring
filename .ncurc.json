@@ -1,7 +1,3 @@
 {
-  "reject": [
-    "socket.io-client",
-    "@types/socket.io-client",
-    "@homebridge/camera-utils"
-  ]
+  "reject": ["socket.io-client", "@types/socket.io-client"]
 }

@@ -163,7 +163,7 @@ function logPushReceiver(...args: any) {
 }
 
 const pushReceiverLoggerDefault =
-  pushReceiverLogger.default || pushReceiverLogger // fix for ts-jest
+  pushReceiverLogger.default || pushReceiverLogger // fix for vitest
 pushReceiverLoggerDefault.error = logPushReceiver
 
 export function fromBase64(encodedInput: string) {

@@ -12,11 +12,10 @@
     "./streaming/streaming-session": "./lib/streaming/streaming-session.js"
   },
   "scripts": {
-    "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js",
+    "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js && rm -rf ./lib/test",
     "dev": "tsc --declaration --watch --preserveWatchOutput",
     "lint": "eslint .",
-    "test": "NODE_OPTIONS='$NODE_OPTIONS --experimental-vm-modules' jest",
-    "test:watch": "jest --watch"
+    "test": "vitest"
   },
   "dependencies": {
     "@eneris/push-receiver": "4.3.0",
@@ -45,7 +44,8 @@
     "msw": "^2.6.4",
     "ts-jest": "29.2.5",
     "tsconfig": "*",
-    "typescript": "5.7.2"
+    "typescript": "5.7.2",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

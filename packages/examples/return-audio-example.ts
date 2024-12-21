@@ -25,7 +25,8 @@ async function example() {
   await cleanOutputDirectory()
 
   console.log(`Starting Return Audio to ${camera.name}...`)
-  const call = await camera.startLiveCall()
+  const call = await camera.startLiveCall(),
+    __dirname = new URL('.', import.meta.url).pathname
 
   console.log('Call started, activating return audio...')
   await Promise.all([

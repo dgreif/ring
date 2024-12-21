@@ -24,6 +24,7 @@ async function example() {
   }
 
   const app = express(),
+    __dirname = new URL('.', import.meta.url).pathname,
     publicOutputDirectory = path.join(__dirname, 'public/output')
 
   app.use('/', express.static(path.join(__dirname, 'public')))

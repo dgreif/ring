@@ -42,9 +42,10 @@ import { OpusRepacketizer } from './opus-repacketizer.ts'
 import path from 'node:path'
 
 const __dirname = new URL('.', import.meta.url).pathname,
+  mediaDirectory = path.join(__dirname.replace('/lib', ''), 'media'),
   readFileAsync = promisify(readFile),
-  cameraOfflinePath = path.join(__dirname, '../media/camera-offline.jpg'),
-  snapshotsBlockedPath = path.join(__dirname, '../media/snapshots-blocked.jpg')
+  cameraOfflinePath = path.join(mediaDirectory, 'camera-offline.jpg'),
+  snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg')
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000

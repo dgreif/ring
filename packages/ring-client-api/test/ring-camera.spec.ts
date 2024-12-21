@@ -1,4 +1,5 @@
-import { getBatteryLevel, cleanSnapshotUuid } from '../index'
+import { getBatteryLevel, cleanSnapshotUuid } from '../ring-camera.ts'
+import { describe, expect, it } from 'vitest'
 
 describe('Ring Camera', () => {
   describe('battery level', () => {

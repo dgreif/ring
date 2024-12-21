@@ -1,6 +1,7 @@
 {
   "name": "ring",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
@@ -8,12 +9,12 @@
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "test:watch": "npm run test:watch -w ring-client-api",
-    "example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/example.ts",
-    "api-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/api-example.ts",
-    "record-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/record-example.ts",
-    "return-audio-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/return-audio-example.ts",
-    "stream-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/stream-example.ts",
-    "browser-example": "turbo build --filter=ring-client-api && DEBUG=ring node -r @swc-node/register ./packages/examples/browser-example.ts",
+    "example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/example.ts",
+    "api-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/api-example.ts",
+    "record-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/record-example.ts",
+    "return-audio-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/return-audio-example.ts",
+    "stream-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/stream-example.ts",
+    "browser-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-transform-types ./packages/examples/browser-example.ts",
     "auth-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-auth-cli.js",
     "device-data-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-device-data-cli.js",
     "push-with-tags": "git push --follow-tags",
@@ -27,7 +28,6 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.0",
     "@changesets/cli": "^2.27.10",
-    "@swc-node/register": "^1.10.9",
     "turbo": "^2.2.3"
   },
   "workspaces": [

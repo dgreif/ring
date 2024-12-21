@@ -1,15 +1,14 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
-import {
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
+import type {
   AlarmMode,
   AlarmState,
-  allAlarmStates,
   RingDevice,
   RingDeviceData,
-  RingDeviceType,
 } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
-import { PlatformAccessory } from 'homebridge'
+import { allAlarmStates, RingDeviceType } from 'ring-client-api'
+import { hap } from './hap.ts'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
 import { logError, logInfo } from 'ring-client-api/util'
 
 function isValidNightModeBypass(mode?: AlarmMode) {

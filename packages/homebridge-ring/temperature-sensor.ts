@@ -1,9 +1,9 @@
-import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingDevice } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
+import type { RingDevice } from 'ring-client-api'
+import { hap } from './hap.ts'
+import type { RingPlatformConfig } from './config.ts'
 import { distinctUntilChanged, map } from 'rxjs/operators'
-import { PlatformAccessory } from 'homebridge'
+import type { PlatformAccessory } from 'homebridge'
 
 export class TemperatureSensor extends BaseDeviceAccessory {
   constructor(

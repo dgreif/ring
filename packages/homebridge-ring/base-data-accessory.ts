@@ -1,24 +1,22 @@
-import {
-  BaseAccessory,
-  CharacteristicType,
-  ServiceType,
-} from './base-accessory'
-import { Observable, Subject } from 'rxjs'
+import type { CharacteristicType, ServiceType } from './base-accessory.ts'
+import { BaseAccessory } from './base-accessory.ts'
+import type { Observable } from 'rxjs'
+import { Subject } from 'rxjs'
 import type {
   RingCamera,
   RingChime,
   RingDevice,
   RingIntercom,
 } from 'ring-client-api'
-import { RingPlatformConfig } from './config'
+import type { RingPlatformConfig } from './config.ts'
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators'
-import {
+import type {
   PlatformAccessory,
   CharacteristicValue,
   CharacteristicSetCallback,
   CharacteristicGetCallback,
-  CharacteristicEventTypes,
 } from 'homebridge'
+import { CharacteristicEventTypes } from 'homebridge'
 import { logError } from 'ring-client-api/util'
 
 export abstract class BaseDataAccessory<

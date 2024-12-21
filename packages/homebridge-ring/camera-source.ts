@@ -1,26 +1,28 @@
-import { RingCamera } from 'ring-client-api'
-import { hap } from './hap'
+import type { RingCamera } from 'ring-client-api'
+import { hap } from './hap.ts'
+import type { SrtpOptions } from '@homebridge/camera-utils'
 import {
   doesFfmpegSupportCodec,
   generateSrtpOptions,
   ReturnAudioTranscoder,
   RtpSplitter,
-  SrtpOptions,
 } from '@homebridge/camera-utils'
-import {
-  AudioStreamingCodecType,
-  AudioStreamingSamplerate,
+import type {
   CameraStreamingDelegate,
-  H264Level,
-  H264Profile,
   PrepareStreamCallback,
   PrepareStreamRequest,
   SnapshotRequest,
   SnapshotRequestCallback,
-  SRTPCryptoSuites,
   StartStreamRequest,
   StreamingRequest,
   StreamRequestCallback,
+} from 'homebridge'
+import {
+  AudioStreamingCodecType,
+  AudioStreamingSamplerate,
+  H264Level,
+  H264Profile,
+  SRTPCryptoSuites,
 } from 'homebridge'
 import { logDebug, logError, logInfo } from 'ring-client-api/util'
 import { debounceTime, delay, take } from 'rxjs/operators'
@@ -36,11 +38,14 @@ import {
   SrtcpSession,
 } from 'werift'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import { OpusRepacketizer } from './opus-repacketizer'
+import { OpusRepacketizer } from './opus-repacketizer.ts'
+import path from 'node:path'
 
-const readFileAsync = promisify(readFile),
-  cameraOfflinePath = require.resolve('../media/camera-offline.jpg'),
-  snapshotsBlockedPath = require.resolve('../media/snapshots-blocked.jpg')
+const __dirname = new URL('.', import.meta.url).pathname,
+  mediaDirectory = path.join(__dirname.replace('/lib', ''), 'media'),
+  readFileAsync = promisify(readFile),
+  cameraOfflinePath = path.join(mediaDirectory, 'camera-offline.jpg'),
+  snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg')
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000

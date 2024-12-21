@@ -1,8 +1,8 @@
-import { RingIntercom } from 'ring-client-api'
-import { hap } from './hap'
-import { RingPlatformConfig } from './config'
-import { PlatformAccessory } from 'homebridge'
-import { BaseDataAccessory } from './base-data-accessory'
+import type { RingIntercom } from 'ring-client-api'
+import { hap } from './hap.ts'
+import type { RingPlatformConfig } from './config.ts'
+import type { PlatformAccessory } from 'homebridge'
+import { BaseDataAccessory } from './base-data-accessory.ts'
 import { logError, logInfo } from 'ring-client-api/util'
 import { map, throttleTime } from 'rxjs/operators'
 

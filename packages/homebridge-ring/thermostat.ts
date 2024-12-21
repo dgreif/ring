@@ -1,12 +1,14 @@
-import { PlatformAccessory } from 'homebridge'
-import { Observable, combineLatest } from 'rxjs'
+import type { PlatformAccessory } from 'homebridge'
+import type { Observable } from 'rxjs'
+import { combineLatest } from 'rxjs'
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 
-import { RingDevice, RingDeviceType, ThermostatMode } from 'ring-client-api'
+import type { RingDevice, ThermostatMode } from 'ring-client-api'
+import { RingDeviceType } from 'ring-client-api'
 import { logDebug, logError, logInfo } from 'ring-client-api/util'
-import { BaseDeviceAccessory } from './base-device-accessory'
-import { RingPlatformConfig } from './config'
-import { hap } from './hap'
+import { BaseDeviceAccessory } from './base-device-accessory.ts'
+import type { RingPlatformConfig } from './config.ts'
+import { hap } from './hap.ts'
 
 export class Thermostat extends BaseDeviceAccessory {
   private onTemperature: Observable<number | undefined>

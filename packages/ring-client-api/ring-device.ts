@@ -1,9 +1,10 @@
 import { BehaviorSubject } from 'rxjs'
-import { deviceTypesWithVolume, RingDeviceData } from './ring-types'
+import type { RingDeviceData } from './ring-types.ts'
+import { deviceTypesWithVolume } from './ring-types.ts'
 import { filter, map } from 'rxjs/operators'
-import { Location } from './location'
-import { Subscribed } from './subscribed'
-import { logError } from './util'
+import type { Location } from './location.ts'
+import { Subscribed } from './subscribed.ts'
+import { logError } from './util.ts'
 
 export class RingDevice extends Subscribed {
   onData

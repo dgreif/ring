@@ -1,17 +1,19 @@
-import { hap } from './hap'
+import { hap } from './hap.ts'
 import { shareReplay, take } from 'rxjs/operators'
-import { firstValueFrom, Observable } from 'rxjs'
-import { debug, RingPlatformConfig } from './config'
-import {
+import type { Observable } from 'rxjs'
+import { firstValueFrom } from 'rxjs'
+import type { RingPlatformConfig } from './config.ts'
+import { debug } from './config.ts'
+import type {
   Characteristic,
   PlatformAccessory,
   Service,
-  CharacteristicEventTypes,
   CharacteristicGetCallback,
   CharacteristicValue,
   CharacteristicSetCallback,
   WithUUID,
 } from 'homebridge'
+import { CharacteristicEventTypes } from 'homebridge'
 import { logError, logInfo } from 'ring-client-api/util'
 
 function isServiceInstance(

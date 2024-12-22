@@ -1,4 +1,5 @@
-import { SocketTicketResponse, RingCameraKind } from './ring-types.ts'
+import type { SocketTicketResponse } from './ring-types.ts'
+import { RingCameraKind } from './ring-types.ts'
 import {
   type CameraData,
   type CameraDeviceSettingsData,

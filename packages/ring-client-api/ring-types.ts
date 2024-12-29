@@ -100,6 +100,7 @@ export enum RingCameraKind {
   floodlight_pro = 'floodlight_pro',
   cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
   cocoa_doorbell = 'cocoa_doorbell',
+  cocoa_doorbell_v2 = 'cocoa_doorbell_v2',
   cocoa_doorbell_v3 = 'cocoa_doorbell_v3',
   cocoa_floodlight = 'cocoa_floodlight',
   cocoa_spotlight = 'cocoa_spotlight', // used for the Spotlight Cam Plus (potentially other Spotlight models)
@@ -137,6 +138,7 @@ export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   floodlight_pro: 'Floodlight Pro',
   cocoa_camera: 'Stick Up Cam',
   cocoa_doorbell: 'Doorbell Gen 2',
+  cocoa_doorbell_v2: 'Battery Doorbell Plus',
   cocoa_doorbell_v3: 'Battery Doorbell Pro',
   cocoa_floodlight: 'Floodlight Cam Plus',
   cocoa_spotlight: 'Spotlight Cam Plus',

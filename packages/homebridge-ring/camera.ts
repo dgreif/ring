@@ -20,10 +20,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
   ) {
     super()
 
-    this.cameraSource = new CameraSource(
-      this.device,
-      this.config.unbridgeCameras,
-    )
+    this.cameraSource = new CameraSource(this.device)
 
     if (!hap.CameraController) {
       const error =

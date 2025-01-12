@@ -211,7 +211,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
       platformAccessories: PlatformAccessory[] = [],
       externalAccessories: PlatformAccessory[] = [],
       activeAccessoryIds: string[] = []
-    let hasBridgedCameras = false
 
     logInfo('Found the following locations:')
 
@@ -286,8 +285,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
         hapDevices.forEach(
           ({ deviceType, device, isCamera, id, name, AccessoryClass }) => {
             const uuid = hap.uuid.generate(debugPrefix + id),
-              displayName = debugPrefix + name,
-              isExternalCamera = isCamera && this.config.unbridgeCameras
+              displayName = debugPrefix + name
 
             if (
               !AccessoryClass ||
@@ -302,7 +300,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
               return
             }
 
-            if (isExternalCamera && this.homebridgeAccessories[uuid]) {
+            if (isCamera && this.homebridgeAccessories[uuid]) {
               // Camera was previously bridged.  Remove it from the platform so that it can be added as an external accessory
               this.log.warn(
                 `Camera ${displayName} was previously bridged. You will need to manually pair it as a new accessory.`,
@@ -322,7 +320,7 @@ export class RingPlatform implements DynamicPlatformPlugin {
                     : hap.Categories.SECURITY_SYSTEM,
                 )
 
-                if (isExternalCamera) {
+                if (isCamera) {
                   logInfo(
                     `Configured camera ${uuid} ${deviceType} ${displayName}`,
                   )
@@ -332,17 +330,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
                     `Adding new accessory ${uuid} ${deviceType} ${displayName}`,
                   )
                   platformAccessories.push(accessory)
-                }
-
-                if (
-                  isCamera &&
-                  !isExternalCamera &&
-                  typeof hap.Accessory.cleanupAccessoryData === 'function'
-                ) {
-                  // This is a one-time cleanup that will remove persist files for old external accessories from unbridged cameras
-                  hap.Accessory.cleanupAccessoryData(
-                    generateMacAddress(accessory.UUID),
-                  )
                 }
 
                 return accessory
@@ -358,8 +345,6 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
             this.homebridgeAccessories[uuid] = homebridgeAccessory
             activeAccessoryIds.push(uuid)
-
-            hasBridgedCameras ||= isCamera && !isExternalCamera
           },
         )
       }),
@@ -406,11 +391,5 @@ export class RingPlatform implements DynamicPlatformPlugin {
         })
       },
     )
-
-    if (hasBridgedCameras) {
-      logError(
-        'Bridged camera support will be removed in the next major release of homebridge-ring. Please enable the unbridgeCameras option in your configuration and add the individual cameras to HomeKit to prepare for this change.',
-      )
-    }
   }
 }

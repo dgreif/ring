@@ -222,7 +222,7 @@ export class Camera extends BaseDataAccessory<RingCamera> {
      * followed shortly by a second notification with the image uuid. We need to
      * wait for the second notification before we can load the snapshot.
      */
-    if (this.device.operatingOnBattery && !imageUuid) {
+    if (!this.device.canTakeSnapshotWhileRecording && !imageUuid) {
       await Promise.race([
         firstValueFrom(
           this.device.onNewNotification.pipe(
@@ -233,12 +233,12 @@ export class Camera extends BaseDataAccessory<RingCamera> {
         delay(2000),
       ])
       imageUuid = this.device.latestNotificationSnapshotUuid
-    }
 
-    if (this.device.operatingOnBattery && !imageUuid) {
-      // battery cameras cannot fetch a new snapshot while recording is in progress
-      logInfo(this.device.name + ' ' + eventDescription)
-      return characteristicValue
+      if (!imageUuid) {
+        // did not receive an image uuid and one can't be taken while recording. Proceed without a snapshot
+        logInfo(this.device.name + ' ' + eventDescription)
+        return characteristicValue
+      }
     }
 
     logInfo(

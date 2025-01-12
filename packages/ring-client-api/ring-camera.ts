@@ -1,4 +1,4 @@
-import type { SocketTicketResponse, RingCameraKind } from './ring-types.ts'
+import { SocketTicketResponse, RingCameraKind } from './ring-types.ts'
 import {
   type CameraData,
   type CameraDeviceSettingsData,
@@ -122,6 +122,10 @@ export function cleanSnapshotUuid(uuid?: string | null) {
 
   return uuid.replace(/:.*$/, '')
 }
+
+const wiredModelsWithNoSnapshotDuringRecording = new Set([
+  RingCameraKind.doorbell_graham_cracker,
+])
 
 export class RingCamera extends Subscribed {
   id
@@ -277,6 +281,15 @@ export class RingCamera extends Subscribed {
 
   get operatingOnBattery() {
     return this.hasBattery && this.data.settings.power_mode !== 'wired'
+  }
+
+  get canTakeSnapshotWhileRecording() {
+    return (
+      !this.operatingOnBattery &&
+      !wiredModelsWithNoSnapshotDuringRecording.has(
+        this.data.kind as RingCameraKind,
+      )
+    )
   }
 
   get isOffline() {
@@ -568,7 +581,7 @@ export class RingCamera extends Subscribed {
             },
       ),
       delay(maxSnapshotRefreshSeconds * 1000).then(() => {
-        const extraMessageForBatteryCam = this.operatingOnBattery
+        const extraMessageForBatteryCam = !this.canTakeSnapshotWhileRecording
           ? '.  This is normal behavior since this camera is unable to capture snapshots while streaming'
           : ''
         throw new Error(

@@ -8,5 +8,12 @@
     "ring-client-api": "13.2.1",
     "tsconfig": "0.0.0-dev"
   },
-  "changesets": []
+  "changesets": [
+    "afraid-waves-rhyme",
+    "blue-months-divide",
+    "dry-moles-wave",
+    "fluffy-bees-bathe",
+    "fresh-bobcats-move",
+    "proud-ligers-joke"
+  ]
 }

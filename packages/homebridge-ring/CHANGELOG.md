@@ -1,5 +1,28 @@
 # homebridge-ring
 
+## 14.0.0-beta.0
+
+### Major Changes
+
+- [`f76974a`](https://github.com/dgreif/ring/commit/f76974a06dbc8c3f2fd30cc00c615406e66f1ba5) Thanks [@dgreif](https://github.com/dgreif)! - Removed bridged cameras. If you already had `unbridgeCameras: true` in your config, this change will not affect you. For those who were still using bridged cameras, you will need to manually add each camera to HomeKit after upgrading. This change allows us to stop requiring special builds of ffmpeg and should make video streaming more reliable. Unbridge cameras are also avoid blocking the whole bridge while waiting for requests (e.g. Snapshot), which leads to a better overall experience. After updating, you can delete the `unbridgeCameras` option from your config.
+
+- [`c492877`](https://github.com/dgreif/ring/commit/c49287762a1f12e96306007c8f3579980895e657) Thanks [@dgreif](https://github.com/dgreif)! - Converted project to ESM. This should not impact homebridge-ring, but will require any other projects using ring-client-api to also use ESM in order to use the latest version.
+
+### Minor Changes
+
+- [`2b801e0`](https://github.com/dgreif/ring/commit/2b801e09affa47cb2fd1195d0e6f02734639670c) Thanks [@dgreif](https://github.com/dgreif)! - Avoid snapshots while recording for doorbell_graham_cracker. This should allow notifications to work on these devices in homebridge.
+
+- [`b0f735c`](https://github.com/dgreif/ring/commit/b0f735c0c4e02db487ed619d8fe1f823d51e95fa) Thanks [@tsightler](https://github.com/tsightler)! - Simplified handling of Opus audio packets, which should lead to better audio when streaming
+
+- [`4daeb5f`](https://github.com/dgreif/ring/commit/4daeb5fc352c8d78853e3f7803dcf5f72a98f188) Thanks [@hkoci](https://github.com/hkoci)! - Add support for Battery Video Doorbell Pro and Battery Video Doorbell Plus
+
+### Patch Changes
+
+- [`6b3bd96`](https://github.com/dgreif/ring/commit/6b3bd96d7b3d89dbb20f79be419e63f424b22ce9) Thanks [@dgreif](https://github.com/dgreif)! - Update Dependencies
+
+- Updated dependencies [[`2b801e0`](https://github.com/dgreif/ring/commit/2b801e09affa47cb2fd1195d0e6f02734639670c), [`4daeb5f`](https://github.com/dgreif/ring/commit/4daeb5fc352c8d78853e3f7803dcf5f72a98f188), [`c492877`](https://github.com/dgreif/ring/commit/c49287762a1f12e96306007c8f3579980895e657), [`6b3bd96`](https://github.com/dgreif/ring/commit/6b3bd96d7b3d89dbb20f79be419e63f424b22ce9)]:
+  - ring-client-api@14.0.0-beta.0
+
 ## 13.2.1
 
 ### Patch Changes

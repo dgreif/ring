@@ -1,5 +1,21 @@
 # ring-client-api
 
+## 14.0.0-beta.0
+
+### Major Changes
+
+- [`c492877`](https://github.com/dgreif/ring/commit/c49287762a1f12e96306007c8f3579980895e657) Thanks [@dgreif](https://github.com/dgreif)! - Converted project to ESM. This should not impact homebridge-ring, but will require any other projects using ring-client-api to also use ESM in order to use the latest version.
+
+### Minor Changes
+
+- [`2b801e0`](https://github.com/dgreif/ring/commit/2b801e09affa47cb2fd1195d0e6f02734639670c) Thanks [@dgreif](https://github.com/dgreif)! - Avoid snapshots while recording for doorbell_graham_cracker. This should allow notifications to work on these devices in homebridge.
+
+- [`4daeb5f`](https://github.com/dgreif/ring/commit/4daeb5fc352c8d78853e3f7803dcf5f72a98f188) Thanks [@hkoci](https://github.com/hkoci)! - Add support for Battery Video Doorbell Pro and Battery Video Doorbell Plus
+
+### Patch Changes
+
+- [`6b3bd96`](https://github.com/dgreif/ring/commit/6b3bd96d7b3d89dbb20f79be419e63f424b22ce9) Thanks [@dgreif](https://github.com/dgreif)! - Update Dependencies
+
 ## 13.2.1
 
 ### Patch Changes

@@ -2,7 +2,6 @@ import type { RingCamera } from 'ring-client-api'
 import { hap } from './hap.ts'
 import type { SrtpOptions } from '@homebridge/camera-utils'
 import {
-  doesFfmpegSupportCodec,
   generateSrtpOptions,
   ReturnAudioTranscoder,
   RtpSplitter,
@@ -38,7 +37,6 @@ import {
   SrtcpSession,
 } from 'werift'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import { OpusRepacketizer } from './opus-repacketizer.ts'
 import path from 'node:path'
 
 const __dirname = new URL('.', import.meta.url).pathname,
@@ -70,7 +68,7 @@ class StreamingSessionWrapper {
   videoSrtp = generateSrtpOptions()
   audioSplitter = new RtpSplitter()
   videoSplitter = new RtpSplitter()
-  repacketizeAudioSplitter = new RtpSplitter()
+  transcodedAudioSplitter = new RtpSplitter()
 
   constructor(
     public streamingSession: StreamingSession,
@@ -142,56 +140,25 @@ class StreamingSessionWrapper {
         targetAddress,
         audio: { port: audioPort },
       } = this.prepareStreamRequest,
-      {
-        audio: {
-          codec: audioCodec,
-          sample_rate: audioSampleRate,
-          packet_time: audioPacketTime,
-        },
-      } = startStreamRequest,
-      // Repacketize the audio stream after it's been transcoded
-      opusRepacketizer = new OpusRepacketizer(audioPacketTime / 20),
-      audioIntervalScale = ((audioSampleRate / 8) * audioPacketTime) / 20,
+      timestampIncrement =
+        startStreamRequest.audio.sample_rate *
+        startStreamRequest.audio.packet_time,
       audioSrtpSession = new SrtpSession(getSessionConfig(this.audioSrtp))
 
-    let firstTimestamp: number,
-      audioPacketCount = 0
+    let runningTimestamp: number
 
-    this.repacketizeAudioSplitter.addMessageHandler(({ message }) => {
-      let rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
+    this.transcodedAudioSplitter.addMessageHandler(({ message }) => {
+      const rtp: RtpPacket | undefined = RtpPacket.deSerialize(message)
 
-      if (audioCodec === AudioStreamingCodecType.OPUS) {
-        // borrowed from scrypted
-        // Original source: https://github.com/koush/scrypted/blob/c13ba09889c3e0d9d3724cb7d49253c9d787fb97/plugins/homekit/src/types/camera/camera-streaming-srtp-sender.ts#L124-L143
-        rtp = opusRepacketizer.repacketize(rtp)
-
-        if (!rtp) {
-          return null
-        }
-
-        if (!firstTimestamp) {
-          firstTimestamp = rtp.header.timestamp
-        }
-
-        // from HAP spec:
-        // RTP Payload Format for Opus Speech and Audio Codec RFC 7587 with an exception
-        // that Opus audio RTP Timestamp shall be based on RFC 3550.
-        // RFC 3550 indicates that PCM audio based with a sample rate of 8k and a packet
-        // time of 20ms would have a monotonic interval of 8k / (1000 / 20) = 160.
-        // So 24k audio would have a monotonic interval of (24k / 8k) * 160 = 480.
-        // HAP spec also states that it may request packet times of 20, 30, 40, or 60.
-        // In practice, HAP has been seen to request 20 on LAN and 60 over LTE.
-        // So the RTP timestamp must scale accordingly.
-        // Further investigation indicates that HAP doesn't care about the actual sample rate at all,
-        // that's merely a suggestion. When encoding Opus, it can seemingly be an arbitrary sample rate,
-        // audio will work so long as the rtp timestamps are created properly: which is a construct of the sample rate
-        // HAP requests, and the packet time is respected,
-        // opus 48khz will work just fine.
-        rtp.header.timestamp =
-          (firstTimestamp + audioPacketCount * 160 * audioIntervalScale) %
-          0xffffffff
-        audioPacketCount++
+      // For some reason HAP uses RFC 3550 timestamps instead of following RTP Paylod
+      // Format for Opus Speech and Audio Codec from RFC 7587 like everyone else.
+      // This calculates and replaces the timestamps before forwarding to Homekit.
+      if (!runningTimestamp) {
+        runningTimestamp = rtp.header.timestamp
       }
+
+      rtp.header.timestamp = runningTimestamp % 0xffffffff
+      runningTimestamp += timestampIncrement
 
       // encrypt the packet
       const encryptedPacket = audioSrtpSession.encrypt(rtp.payload, rtp.header)
@@ -246,36 +213,29 @@ class StreamingSessionWrapper {
     const transcodingPromise = this.streamingSession.startTranscoding({
       input: ['-vn'],
       audio: [
-        '-map',
-        '0:a',
-
-        // OPUS specific - it works, but audio is very choppy
         '-acodec',
         'libopus',
-        '-frame_duration',
-        request.audio.packet_time,
         '-application',
         'lowdelay',
-
-        // Shared options
+        '-frame_duration',
+        request.audio.packet_time.toString(),
         '-flags',
         '+global_header',
-        '-ac',
-        `${request.audio.channel}`,
         '-ar',
         `${request.audio.sample_rate}k`,
         '-b:a',
         `${request.audio.max_bit_rate}k`,
         '-bufsize',
         `${request.audio.max_bit_rate * 4}k`,
+        '-ac',
+        `${request.audio.channel}`,
         '-payload_type',
         request.audio.pt,
         '-ssrc',
         this.audioSsrc,
         '-f',
         'rtp',
-        `rtp://127.0.0.1:${await this.repacketizeAudioSplitter
-          .portPromise}?pkt_size=376`,
+        `rtp://127.0.0.1:${await this.transcodedAudioSplitter.portPromise}`,
       ],
       video: false,
       output: [],
@@ -309,16 +269,20 @@ class StreamingSessionWrapper {
         outputArgs: [
           '-acodec',
           'libopus',
-          '-ac',
-          '1',
-          '-ar',
-          '24k',
-          '-b:a',
-          '24k',
           '-application',
           'lowdelay',
+          '-frame_duration',
+          '60',
           '-flags',
           '+global_header',
+          '-ar',
+          '48k',
+          '-b:a',
+          '48k',
+          '-bufsize',
+          '192k',
+          '-ac',
+          '2',
           '-f',
           'rtp',
           `rtp://127.0.0.1:${await returnAudioTranscodedSplitter.portPromise}`,
@@ -344,7 +308,7 @@ class StreamingSessionWrapper {
 
   stop() {
     this.audioSplitter.close()
-    this.repacketizeAudioSplitter.close()
+    this.transcodedAudioSplitter.close()
     this.videoSplitter.close()
     this.streamingSession.stop()
   }
@@ -363,6 +327,7 @@ export class CameraSource implements CameraStreamingDelegate {
         supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
         video: {
           resolutions: [
+            [1920, 1024, 30],
             [1280, 720, 30],
             [1024, 768, 30],
             [640, 480, 30],

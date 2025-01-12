@@ -16,11 +16,6 @@
         "description": "Click \"Generate New Refresh Token\" above to change accounts or if your refresh token has expired",
         "placeholder": "Refresh Token"
       },
-      "unbridgeCameras": {
-        "title": "Unbridge Cameras",
-        "type": "boolean",
-        "description": "If enabled, all Ring Cameras we be treated as external accessories, which generally leads to better performance. This means they each need to be individually added to HomeKit. This option will be enabled by default in the next major release. WARNING: If your cameras are already bridged, they will be deleted from HomeKit when you enable this option, and you will need to reconfigure any associated automations or HomeKit settings"
-      },
       "alarmOnEntryDelay": {
         "title": "Alarm on Entry Delay",
         "type": "boolean",
@@ -157,7 +152,6 @@
       "title": "Optional Configuration",
       "expandable": true,
       "items": [
-        "unbridgeCameras",
         "alarmOnEntryDelay",
         "hideLightGroups",
         "hideDoorbellSwitch",

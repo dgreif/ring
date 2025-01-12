@@ -72,25 +72,6 @@ class StreamingSessionWrapper {
   videoSplitter = new RtpSplitter()
   repacketizeAudioSplitter = new RtpSplitter()
 
-  libfdkAacInstalledPromise = doesFfmpegSupportCodec(
-    'libfdk_aac',
-    getFfmpegPath(),
-  )
-    .then((supported) => {
-      if (!supported) {
-        logError(
-          'Streaming video only - found ffmpeg, but libfdk_aac is not installed. See https://github.com/dgreif/ring/wiki/FFmpeg for details.',
-        )
-      }
-      return supported
-    })
-    .catch(() => {
-      logError(
-        'Streaming video only - ffmpeg was not found. See https://github.com/dgreif/ring/wiki/FFmpeg for details.',
-      )
-      return false
-    })
-
   constructor(
     public streamingSession: StreamingSession,
     public prepareStreamRequest: PrepareStreamRequest,
@@ -262,38 +243,19 @@ class StreamingSessionWrapper {
       }),
     )
 
-    const shouldTranscodeAudio = await this.libfdkAacInstalledPromise
-    if (!shouldTranscodeAudio) {
-      return this.streamingSession.requestKeyFrame()
-    }
-
     const transcodingPromise = this.streamingSession.startTranscoding({
       input: ['-vn'],
       audio: [
         '-map',
         '0:a',
 
-        ...(request.audio.codec === AudioStreamingCodecType.OPUS
-          ? [
-              // OPUS specific - it works, but audio is very choppy
-              '-acodec',
-              'libopus',
-              '-frame_duration',
-              request.audio.packet_time,
-              '-application',
-              'lowdelay',
-            ]
-          : [
-              // AAC-eld specific
-              '-acodec',
-              'libfdk_aac',
-              '-profile:a',
-              'aac_eld',
-              '-eld_sbr:a',
-              '1',
-              '-eld_v2',
-              '1',
-            ]),
+        // OPUS specific - it works, but audio is very choppy
+        '-acodec',
+        'libopus',
+        '-frame_duration',
+        request.audio.packet_time,
+        '-application',
+        'lowdelay',
 
         // Shared options
         '-flags',
@@ -337,7 +299,6 @@ class StreamingSessionWrapper {
 
         return null
       }),
-      isRingUsingOpus = await this.streamingSession.isUsingOpus,
       returnAudioTranscoder = new ReturnAudioTranscoder({
         prepareStreamRequest: this.prepareStreamRequest,
         startStreamRequest: request,
@@ -347,19 +308,15 @@ class StreamingSessionWrapper {
         },
         outputArgs: [
           '-acodec',
-          ...(isRingUsingOpus
-            ? [
-                'libopus',
-                '-ac',
-                '1',
-                '-ar',
-                '24k',
-                '-b:a',
-                '24k',
-                '-application',
-                'lowdelay',
-              ]
-            : ['pcm_mulaw', '-ac', 1, '-ar', '8k']),
+          'libopus',
+          '-ac',
+          '1',
+          '-ar',
+          '24k',
+          '-b:a',
+          '24k',
+          '-application',
+          'lowdelay',
           '-flags',
           '+global_header',
           '-f',
@@ -398,10 +355,7 @@ export class CameraSource implements CameraStreamingDelegate {
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
 
-  constructor(
-    private ringCamera: RingCamera,
-    private useOpus = false,
-  ) {
+  constructor(private ringCamera: RingCamera) {
     this.controller = new hap.CameraController({
       cameraStreamCount: 10,
       delegate: this,
@@ -425,28 +379,21 @@ export class CameraSource implements CameraStreamingDelegate {
           },
         },
         audio: {
-          codecs: this.useOpus
-            ? [
-                {
-                  type: AudioStreamingCodecType.OPUS,
-                  // required by watch
-                  samplerate: AudioStreamingSamplerate.KHZ_8,
-                },
-                {
-                  type: AudioStreamingCodecType.OPUS,
-                  samplerate: AudioStreamingSamplerate.KHZ_16,
-                },
-                {
-                  type: AudioStreamingCodecType.OPUS,
-                  samplerate: AudioStreamingSamplerate.KHZ_24,
-                },
-              ]
-            : [
-                {
-                  type: AudioStreamingCodecType.AAC_ELD,
-                  samplerate: AudioStreamingSamplerate.KHZ_16,
-                },
-              ],
+          codecs: [
+            {
+              type: AudioStreamingCodecType.OPUS,
+              // required by watch
+              samplerate: AudioStreamingSamplerate.KHZ_8,
+            },
+            {
+              type: AudioStreamingCodecType.OPUS,
+              samplerate: AudioStreamingSamplerate.KHZ_16,
+            },
+            {
+              type: AudioStreamingCodecType.OPUS,
+              samplerate: AudioStreamingSamplerate.KHZ_24,
+            },
+          ],
         },
       },
     })

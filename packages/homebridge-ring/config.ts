@@ -22,7 +22,6 @@ export interface RingPlatformConfig extends RingApiOptions {
   nightModeBypassFor: AlarmMode
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
-  unbridgeCameras?: boolean
   disableLogs?: boolean
 }
 

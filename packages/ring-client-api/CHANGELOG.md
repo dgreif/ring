@@ -1,5 +1,11 @@
 # ring-client-api
 
+## 14.0.0
+
+### Major Changes
+
+- [#1550](https://github.com/dgreif/ring/pull/1550) [`5bd6bf7`](https://github.com/dgreif/ring/commit/5bd6bf7d6caeb2a8fb6bb9e0b2df260dec434b4f) Thanks [@dgreif](https://github.com/dgreif)! - Converted project to ESM. This should not impact homebridge-ring, but will require any other projects using ring-client-api to also use ESM in order to use the latest version.
+
 ## 13.2.1
 
 ### Patch Changes

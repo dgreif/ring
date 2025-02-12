@@ -126,6 +126,46 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
       })
     }
 
+    // Notification Switch Service
+    const notificationService = this.getService(Service.Switch) || 
+        this.accessory.addService(Service.Switch, 'Ring Notifications', 'notifications');  // Added unique subtype
+
+    // Set this service as a linked service rather than primary
+    lockService.addLinkedService(notificationService);
+
+    this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: notificationService,
+        getValue: () => {
+            return this.accessory.context.notificationsEnabled !== false;
+        },
+        setValue: async (state) => {
+            this.accessory.context.notificationsEnabled = state;
+            
+            if (state) {
+                await device.subscribeToDingEvents().catch((e) => {
+                    (0, util_1.logError)('Failed to subscribe to ding events: ' + e);
+                });
+            } else {
+                await device.unsubscribeFromDingEvents().catch((e) => {
+                    (0, util_1.logError)('Failed to unsubscribe from ding events: ' + e);
+                });
+            }
+        },
+    });
+
+    // Make sure the notification service has its own identity
+    notificationService
+        .setCharacteristic(Characteristic.Name, 'Ring Notifications')
+        .setCharacteristic(Characteristic.ConfiguredName, 'Ring Notifications');
+
+    // Update the notification subscription on startup based on stored state
+    if (this.accessory.context.notificationsEnabled !== false) {
+        device.subscribeToDingEvents().catch((e) => {
+            (0, util_1.logError)('Failed to subscribe to ding events on startup: ' + e);
+        });
+    }
+
     // Accessory Information Service
     this.registerCharacteristic({
       characteristicType: Characteristic.Manufacturer,

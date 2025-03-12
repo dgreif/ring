@@ -42,7 +42,7 @@
     "msw": "^2.6.4",
     "tsconfig": "*",
     "typescript": "5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

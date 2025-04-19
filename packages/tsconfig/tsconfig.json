@@ -7,6 +7,7 @@
     "allowJs": true,
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
     "strict": true,
     "skipLibCheck": true
   }

@@ -1,114 +1,119 @@
 type Firmware = string | 'Up To Date'
 
-// eslint-disable-next-line no-shadow
-export enum RingDeviceType {
-  BaseStation = 'hub.redsky',
-  BaseStationPro = 'hub.kili',
-  Keypad = 'security-keypad',
-  SecurityPanel = 'security-panel',
-  ContactSensor = 'sensor.contact',
-  MotionSensor = 'sensor.motion',
-  FloodFreezeSensor = 'sensor.flood-freeze',
-  FreezeSensor = 'sensor.freeze',
-  TemperatureSensor = 'sensor.temperature',
-  WaterSensor = 'sensor.water',
-  TiltSensor = 'sensor.tilt',
-  GlassbreakSensor = 'sensor.glassbreak',
-  RangeExtender = 'range-extender.zwave',
-  ZigbeeAdapter = 'adapter.zigbee',
-  AccessCodeVault = 'access-code.vault',
-  AccessCode = 'access-code',
-  SmokeAlarm = 'alarm.smoke',
-  CoAlarm = 'alarm.co',
-  SmokeCoListener = 'listener.smoke-co',
-  MultiLevelSwitch = 'switch.multilevel',
-  Fan = 'switch.multilevel',
-  MultiLevelBulb = 'switch.multilevel.bulb',
-  Switch = 'switch',
-  BeamsMotionSensor = 'motion-sensor.beams',
-  BeamsSwitch = 'switch.beams',
-  BeamsMultiLevelSwitch = 'switch.multilevel.beams',
-  BeamsLightGroupSwitch = 'group.light-group.beams',
-  BeamsTransformerSwitch = 'switch.transformer.beams',
-  BeamsDevice = 'device.beams',
-  RetrofitBridge = 'bridge.flatline',
-  RetrofitZone = 'sensor.zone',
-  Thermostat = 'temperature-control.thermostat',
-  Sensor = 'sensor',
-  RingNetAdapter = 'adapter.ringnet',
-  CodeVault = 'access-code.vault',
-  SecurityAccessCode = 'access-code',
-  ZWaveAdapter = 'adapter.zwave',
-  ZWaveExtender = 'range-extender.zwave',
-  PanicButton = 'security-panic',
-  UnknownZWave = 'unknown.zwave',
-  OnvifCamera = 'onvif_camera',
-  ThirdPartyGarageDoorOpener = 'third_party_gdo',
-  IntercomHandsetAudio = 'intercom_handset_audio',
-  WaterValve = 'valve.water',
-}
+export const RingDeviceType = {
+  BaseStation: 'hub.redsky',
+  BaseStationPro: 'hub.kili',
+  Keypad: 'security-keypad',
+  SecurityPanel: 'security-panel',
+  ContactSensor: 'sensor.contact',
+  MotionSensor: 'sensor.motion',
+  FloodFreezeSensor: 'sensor.flood-freeze',
+  FreezeSensor: 'sensor.freeze',
+  TemperatureSensor: 'sensor.temperature',
+  WaterSensor: 'sensor.water',
+  TiltSensor: 'sensor.tilt',
+  GlassbreakSensor: 'sensor.glassbreak',
+  RangeExtender: 'range-extender.zwave',
+  ZigbeeAdapter: 'adapter.zigbee',
+  AccessCodeVault: 'access-code.vault',
+  AccessCode: 'access-code',
+  SmokeAlarm: 'alarm.smoke',
+  CoAlarm: 'alarm.co',
+  SmokeCoListener: 'listener.smoke-co',
+  MultiLevelSwitch: 'switch.multilevel',
+  Fan: 'switch.multilevel',
+  MultiLevelBulb: 'switch.multilevel.bulb',
+  Switch: 'switch',
+  BeamsMotionSensor: 'motion-sensor.beams',
+  BeamsSwitch: 'switch.beams',
+  BeamsMultiLevelSwitch: 'switch.multilevel.beams',
+  BeamsLightGroupSwitch: 'group.light-group.beams',
+  BeamsTransformerSwitch: 'switch.transformer.beams',
+  BeamsDevice: 'device.beams',
+  RetrofitBridge: 'bridge.flatline',
+  RetrofitZone: 'sensor.zone',
+  Thermostat: 'temperature-control.thermostat',
+  Sensor: 'sensor',
+  RingNetAdapter: 'adapter.ringnet',
+  CodeVault: 'access-code.vault',
+  SecurityAccessCode: 'access-code',
+  ZWaveAdapter: 'adapter.zwave',
+  ZWaveExtender: 'range-extender.zwave',
+  PanicButton: 'security-panic',
+  UnknownZWave: 'unknown.zwave',
+  OnvifCamera: 'onvif_camera',
+  ThirdPartyGarageDoorOpener: 'third_party_gdo',
+  IntercomHandsetAudio: 'intercom_handset_audio',
+  WaterValve: 'valve.water',
+} as const
+// eslint-disable-next-line no-redeclare
+export type RingDeviceType =
+  (typeof RingDeviceType)[keyof typeof RingDeviceType]
 
-// eslint-disable-next-line no-shadow
-export enum RingDeviceCategory {
-  Outlets = 1,
-  Lights = 2,
-  Sensors = 5,
-  Appliances = 7,
-  Locks = 10,
-  Thermostats = 11,
-  Cameras = 12,
-  Alarms = 15,
-  Fans = 17,
-  Security = 22,
-  Unknown = 29,
-  SensorsMotion = 30,
-  Controller = 31,
-  RangeExtenders = 32,
-  Keypads = 33,
-  Sirens = 34,
-  PanicButtons = 35,
-  WaterValves = 37,
-}
+export const RingDeviceCategory = {
+  Outlets: 1,
+  Lights: 2,
+  Sensors: 5,
+  Appliances: 7,
+  Locks: 10,
+  Thermostats: 11,
+  Cameras: 12,
+  Alarms: 15,
+  Fans: 17,
+  Security: 22,
+  Unknown: 29,
+  SensorsMotion: 30,
+  Controller: 31,
+  RangeExtenders: 32,
+  Keypads: 33,
+  Sirens: 34,
+  PanicButtons: 35,
+  WaterValves: 37,
+} as const
+// eslint-disable-next-line no-redeclare
+export type RingDeviceCategory =
+  (typeof RingDeviceCategory)[keyof typeof RingDeviceCategory]
 
-// eslint-disable-next-line no-shadow
-export enum RingCameraKind {
-  doorbot = 'doorbot',
-  doorbell = 'doorbell',
-  doorbell_v3 = 'doorbell_v3',
-  doorbell_v4 = 'doorbell_v4',
-  doorbell_v5 = 'doorbell_v5',
-  doorbell_oyster = 'doorbell_oyster', // used for the Ring Video Doorbell 4
-  doorbell_portal = 'doorbell_portal',
-  doorbell_scallop = 'doorbell_scallop',
-  doorbell_scallop_lite = 'doorbell_scallop_lite',
-  doorbell_graham_cracker = 'doorbell_graham_cracker',
-  lpd_v1 = 'lpd_v1',
-  lpd_v2 = 'lpd_v2',
-  lpd_v4 = 'lpd_v4',
-  jbox_v1 = 'jbox_v1',
-  stickup_cam = 'stickup_cam',
-  stickup_cam_v3 = 'stickup_cam_v3',
-  stickup_cam_elite = 'stickup_cam_elite',
-  stickup_cam_longfin = 'stickup_cam_longfin',
-  stickup_cam_lunar = 'stickup_cam_lunar',
-  spotlightw_v2 = 'spotlightw_v2',
-  hp_cam_v1 = 'hp_cam_v1',
-  hp_cam_v2 = 'hp_cam_v2',
-  stickup_cam_v4 = 'stickup_cam_v4',
-  floodlight_v1 = 'floodlight_v1',
-  floodlight_v2 = 'floodlight_v2',
-  floodlight_pro = 'floodlight_pro',
-  cocoa_camera = 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
-  cocoa_doorbell = 'cocoa_doorbell',
-  cocoa_doorbell_v2 = 'cocoa_doorbell_v2',
-  cocoa_doorbell_v3 = 'cocoa_doorbell_v3',
-  cocoa_floodlight = 'cocoa_floodlight',
-  cocoa_spotlight = 'cocoa_spotlight', // used for the Spotlight Cam Plus (potentially other Spotlight models)
-  stickup_cam_mini = 'stickup_cam_mini',
-  onvif_camera = 'onvif_camera',
-}
+export const RingCameraKind = {
+  doorbot: 'doorbot',
+  doorbell: 'doorbell',
+  doorbell_v3: 'doorbell_v3',
+  doorbell_v4: 'doorbell_v4',
+  doorbell_v5: 'doorbell_v5',
+  doorbell_oyster: 'doorbell_oyster', // used for the Ring Video Doorbell 4
+  doorbell_portal: 'doorbell_portal',
+  doorbell_scallop: 'doorbell_scallop',
+  doorbell_scallop_lite: 'doorbell_scallop_lite',
+  doorbell_graham_cracker: 'doorbell_graham_cracker',
+  lpd_v1: 'lpd_v1',
+  lpd_v2: 'lpd_v2',
+  lpd_v4: 'lpd_v4',
+  jbox_v1: 'jbox_v1',
+  stickup_cam: 'stickup_cam',
+  stickup_cam_v3: 'stickup_cam_v3',
+  stickup_cam_elite: 'stickup_cam_elite',
+  stickup_cam_longfin: 'stickup_cam_longfin',
+  stickup_cam_lunar: 'stickup_cam_lunar',
+  spotlightw_v2: 'spotlightw_v2',
+  hp_cam_v1: 'hp_cam_v1',
+  hp_cam_v2: 'hp_cam_v2',
+  stickup_cam_v4: 'stickup_cam_v4',
+  floodlight_v1: 'floodlight_v1',
+  floodlight_v2: 'floodlight_v2',
+  floodlight_pro: 'floodlight_pro',
+  cocoa_camera: 'cocoa_camera', // appears to be used for all next gen stickup cams (wired/battery/solar)
+  cocoa_doorbell: 'cocoa_doorbell',
+  cocoa_doorbell_v2: 'cocoa_doorbell_v2',
+  cocoa_doorbell_v3: 'cocoa_doorbell_v3',
+  cocoa_floodlight: 'cocoa_floodlight',
+  cocoa_spotlight: 'cocoa_spotlight', // used for the Spotlight Cam Plus (potentially other Spotlight models)
+  stickup_cam_mini: 'stickup_cam_mini',
+  onvif_camera: 'onvif_camera',
+} as const
+// eslint-disable-next-line no-redeclare
+export type RingCameraKind =
+  (typeof RingCameraKind)[keyof typeof RingCameraKind]
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const RingCameraModel: { readonly [P in RingCameraKind]: string } = {
   doorbot: 'Doorbell',
   doorbell: 'Doorbell',
@@ -276,7 +281,7 @@ export interface RingDeviceData {
 export const deviceTypesWithVolume = [
   RingDeviceType.BaseStation,
   RingDeviceType.Keypad,
-]
+] as const as RingDeviceType[]
 
 export interface BaseStation {
   address: string
@@ -317,7 +322,6 @@ export interface BeamBridge {
 }
 
 export type ChimeKind = 'chime' | 'chime_pro' | 'chime_v2' | 'chime_pro_v2'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ChimeModel: { readonly [P in ChimeKind]: string } = {
   chime: 'Chime',
   chime_pro: 'Chime Pro',
@@ -428,12 +432,13 @@ export interface TicketAsset {
   uuid: string
 }
 
-// eslint-disable-next-line no-shadow
-export enum DoorbellType {
-  Mechanical = 0,
-  Digital = 1,
-  None = 2,
-}
+export const DoorbellType = {
+  Mechanical: 0,
+  Digital: 1,
+  None: 2,
+} as const
+// eslint-disable-next-line no-redeclare
+export type DoorbellType = (typeof DoorbellType)[keyof typeof DoorbellType]
 
 export interface BaseCameraData {
   alerts: {
@@ -577,7 +582,7 @@ export interface BaseCameraData {
 }
 
 export interface CameraData extends BaseCameraData {
-  kind: Omit<RingCameraKind, RingCameraKind.onvif_camera>
+  kind: Omit<RingCameraKind, typeof RingCameraKind.onvif_camera>
 
   address: string
   battery_life: number | string | null // 4003 or 100 or "100" or "71"
@@ -593,7 +598,7 @@ export interface CameraData extends BaseCameraData {
 }
 
 export interface OnvifCameraData extends BaseCameraData {
-  kind: RingCameraKind.onvif_camera
+  kind: typeof RingCameraKind.onvif_camera
 
   metadata: {
     legacy_fw_migrated: boolean
@@ -613,7 +618,7 @@ export interface OnvifCameraData extends BaseCameraData {
 
 export interface ThirdPartyGarageDoorOpener {
   id: number
-  kind: RingDeviceType.ThirdPartyGarageDoorOpener
+  kind: typeof RingDeviceType.ThirdPartyGarageDoorOpener
   description: string
   location_id: string
   owner_id: number
@@ -638,7 +643,7 @@ export interface IntercomHandsetAudioData {
   id: number
   description: string
   device_id: string
-  kind: RingDeviceType.IntercomHandsetAudio
+  kind: typeof RingDeviceType.IntercomHandsetAudio
   function: {
     name: null
   }
@@ -1000,28 +1005,32 @@ export interface RingDeviceHistoryEvent {
 
 export type DingState = 'ringing' | 'connected' | 'timed_out' | 'completed'
 
-// eslint-disable-next-line no-shadow
-export enum NotificationDetectionType {
+export const NotificationDetectionType = {
   // Note, this list may not be complete
-  Human = 'human',
-  Loitering = 'loitering',
-  Motion = 'motion',
-  OtherMotion = 'other_motion',
-  NotAvailable = 'null',
-  StreamBroken = 'stream_broken',
-}
+  Human: 'human',
+  Loitering: 'loitering',
+  Motion: 'motion',
+  OtherMotion: 'other_motion',
+  NotAvailable: 'null',
+  StreamBroken: 'stream_broken',
+} as const
+// eslint-disable-next-line no-redeclare
+export type NotificationDetectionType =
+  (typeof NotificationDetectionType)[keyof typeof NotificationDetectionType]
 
-// eslint-disable-next-line no-shadow
-export enum PushNotificationAction {
-  Ding = 'com.ring.pn.live-event.ding',
-  Motion = 'com.ring.pn.live-event.motion',
-  IntercomDing = 'com.ring.pn.live-event.intercom',
-  IntercomUnlock = 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
-  AlarmModeNone = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_NONE_NOTICE',
-  AlarmModeSome = 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_SOME_NOTICE',
-  AlarmSoundSiren = 'com.ring.push.HANDLE_NEW_USER_SOUND_SIREN',
-  AlarmSilenceSiren = 'com.ring.push.HANDLE_NEW_NON_ALARM_SIREN_SILENCED',
-}
+export const PushNotificationAction = {
+  Ding: 'com.ring.pn.live-event.ding',
+  Motion: 'com.ring.pn.live-event.motion',
+  IntercomDing: 'com.ring.pn.live-event.intercom',
+  IntercomUnlock: 'com.ring.push.INTERCOM_UNLOCK_FROM_APP',
+  AlarmModeNone: 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_NONE_NOTICE',
+  AlarmModeSome: 'com.ring.push.HANDLE_NEW_SECURITY_PANEL_MODE_SOME_NOTICE',
+  AlarmSoundSiren: 'com.ring.push.HANDLE_NEW_USER_SOUND_SIREN',
+  AlarmSilenceSiren: 'com.ring.push.HANDLE_NEW_NON_ALARM_SIREN_SILENCED',
+} as const
+// eslint-disable-next-line no-redeclare
+export type PushNotificationAction =
+  (typeof PushNotificationAction)[keyof typeof PushNotificationAction]
 
 export interface PushNotificationDingV2 {
   version: '2.0.0' | string
@@ -1042,7 +1051,7 @@ export interface PushNotificationDingV2 {
     device: {
       e2ee_enabled: boolean
       id: number
-      kind: RingCameraKind | RingDeviceType.IntercomHandsetAudio
+      kind: RingCameraKind | typeof RingDeviceType.IntercomHandsetAudio
       name: string
     }
     event: {
@@ -1095,7 +1104,7 @@ interface PushNotificationIntercomUnlock {
   aps: {
     alert: string
   }
-  action: PushNotificationAction.IntercomUnlock
+  action: typeof PushNotificationAction.IntercomUnlock
   alarm_meta: {
     device_zid: number
     location_id: string
@@ -1184,11 +1193,13 @@ export interface AccountMonitoringStatus {
   dispatchSetupComplete: boolean
 }
 
-// eslint-disable-next-line no-shadow
-export enum DispatchSignalType {
-  Burglar = 'user-verified-burglar-xa',
-  Fire = 'user-verified-fire-xa',
-}
+export const DispatchSignalType = {
+  Burglar: 'user-verified-burglar-xa',
+  Fire: 'user-verified-fire-xa',
+} as const
+// eslint-disable-next-line no-redeclare
+export type DispatchSignalType =
+  (typeof DispatchSignalType)[keyof typeof DispatchSignalType]
 
 export type LocationModeInput = 'home' | 'away' | 'disarmed'
 export type LocationMode = LocationModeInput | 'disabled' | 'unset'

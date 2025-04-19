@@ -18,12 +18,20 @@ function isValidNightModeBypass(mode?: AlarmMode) {
 export class SecurityPanel extends BaseDeviceAccessory {
   private alarmStates: AlarmState[]
 
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingDevice,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingDevice,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
 
     this.alarmStates = this.config.alarmOnEntryDelay
       ? allAlarmStates

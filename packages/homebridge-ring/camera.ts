@@ -13,13 +13,20 @@ export class Camera extends BaseDataAccessory<RingCamera> {
   private inHomeDoorbellStatus: boolean | undefined
   private cameraSource
 
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingCamera,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingCamera,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
 
+    this.device = device
+    this.accessory = accessory
+    this.config = config
     this.cameraSource = new CameraSource(this.device)
 
     if (!hap.CameraController) {

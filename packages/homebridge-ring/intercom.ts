@@ -10,12 +10,21 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
   private unlocking = false
   private unlockTimeout?: ReturnType<typeof setTimeout>
 
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingIntercom,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingIntercom,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
+
     const { Characteristic, Service } = hap,
       lockService = this.getService(Service.LockMechanism),
       { LockCurrentState, LockTargetState, ProgrammableSwitchEvent } =

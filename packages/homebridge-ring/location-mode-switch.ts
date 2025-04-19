@@ -34,12 +34,19 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
   private targetState: any
   public device
 
+  private readonly location
+  public readonly accessory
+  public readonly config
+
   constructor(
-    private readonly location: Location,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    location: Location,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+    this.location = location
+    this.accessory = accessory
+    this.config = config
     this.device = location // for use in BaseAccessory
 
     const {

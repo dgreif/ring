@@ -13,16 +13,22 @@ export class RingDevice extends Subscribed {
   deviceType
   categoryId
   onComponentDevices
+  private initialData
+  public location
+  public assetId
 
   constructor(
-    private initialData: RingDeviceData,
-    public location: Location,
-    public assetId: string,
+    initialData: RingDeviceData,
+    location: Location,
+    assetId: string,
   ) {
     super()
 
-    this.onData = new BehaviorSubject(this.initialData)
-    this.zid = this.initialData.zid
+    this.initialData = initialData
+    this.location = location
+    this.assetId = assetId
+    this.onData = new BehaviorSubject(initialData)
+    this.zid = initialData.zid
     this.id = this.zid
     this.deviceType = this.initialData.deviceType
     this.categoryId = this.initialData.categoryId

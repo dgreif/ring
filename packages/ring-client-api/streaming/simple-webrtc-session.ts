@@ -8,11 +8,13 @@ function liveViewUrl(path: string) {
 
 export class SimpleWebRtcSession {
   readonly sessionId = generateUuid()
+  private readonly camera
+  private restClient
 
-  constructor(
-    private readonly camera: RingCamera,
-    private restClient: RingRestClient,
-  ) {}
+  constructor(camera: RingCamera, restClient: RingRestClient) {
+    this.camera = camera
+    this.restClient = restClient
+  }
 
   async start(sdp: string): Promise<string> {
     const response = await this.restClient.request<{ sdp: string }>({

@@ -70,12 +70,22 @@ class StreamingSessionWrapper {
   videoSplitter = new RtpSplitter()
   transcodedAudioSplitter = new RtpSplitter()
 
+  public streamingSession
+  public prepareStreamRequest
+  public ringCamera
+  public start
+
   constructor(
-    public streamingSession: StreamingSession,
-    public prepareStreamRequest: PrepareStreamRequest,
-    public ringCamera: RingCamera,
-    public start: number,
+    streamingSession: StreamingSession,
+    prepareStreamRequest: PrepareStreamRequest,
+    ringCamera: RingCamera,
+    start: number,
   ) {
+    this.streamingSession = streamingSession
+    this.prepareStreamRequest = prepareStreamRequest
+    this.ringCamera = ringCamera
+    this.start = start
+
     const {
         targetAddress,
         video: { port: videoPort },
@@ -318,8 +328,10 @@ export class CameraSource implements CameraStreamingDelegate {
   public controller
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
+  private ringCamera
 
-  constructor(private ringCamera: RingCamera) {
+  constructor(ringCamera: RingCamera) {
+    this.ringCamera = ringCamera
     this.controller = new hap.CameraController({
       cameraStreamCount: 10,
       delegate: this,

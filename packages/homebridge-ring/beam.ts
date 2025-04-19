@@ -9,23 +9,30 @@ import { logInfo } from 'ring-client-api/util'
 export class Beam extends BaseDeviceAccessory {
   private isLightGroup
   private groupId
+  public readonly device
+  public readonly accessory
+  public readonly config
 
   constructor(
-    public readonly device: RingDevice,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingDevice,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
 
+    this.device = device
+    this.accessory = accessory
+    this.config = config
+
     this.isLightGroup =
-      this.device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch
-    this.groupId = this.device.data.groupId
+      device.data.deviceType === RingDeviceType.BeamsLightGroupSwitch
+    this.groupId = device.data.groupId
 
     const { Characteristic, Service } = hap,
       { MotionSensor } = Service,
       {
         data: { deviceType },
-      } = this.device
+      } = device
 
     if (deviceType !== RingDeviceType.BeamsMotionSensor) {
       this.registerCharacteristic({

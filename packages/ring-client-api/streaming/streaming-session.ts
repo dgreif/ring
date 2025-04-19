@@ -39,13 +39,14 @@ export class StreamingSession extends Subscribed {
   private readonly audioSplitter = new RtpSplitter()
   private readonly videoSplitter = new RtpSplitter()
   private readonly returnAudioSplitter = new RtpSplitter()
+  private readonly camera
+  private connection
 
-  constructor(
-    private readonly camera: RingCamera,
-    private connection: WebrtcConnection,
-  ) {
+  constructor(camera: RingCamera, connection: WebrtcConnection) {
     super()
 
+    this.camera = camera
+    this.connection = connection
     this.bindToConnection(connection)
   }
 

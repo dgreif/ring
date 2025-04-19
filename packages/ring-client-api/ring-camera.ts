@@ -124,9 +124,13 @@ export function cleanSnapshotUuid(uuid?: string | null) {
   return uuid.replace(/:.*$/, '')
 }
 
-const wiredModelsWithNoSnapshotDuringRecording = new Set([
-  RingCameraKind.doorbell_graham_cracker,
-])
+const wiredModelsWithNoSnapshotDuringRecording = new Set<RingCameraKind>([
+    RingCameraKind.doorbell_graham_cracker,
+  ]),
+  enabledDoorbellTypes = new Set<DoorbellType>([
+    DoorbellType.Mechanical,
+    DoorbellType.Digital,
+  ])
 
 export class RingCamera extends Subscribed {
   id
@@ -169,15 +173,23 @@ export class RingCamera extends Subscribed {
   )
   onBatteryLevel
   onInHomeDoorbellStatus
+  private initialData
+  public isDoorbot
+  private restClient
+  private avoidSnapshotBatteryDrain
 
   constructor(
-    private initialData: AnyCameraData,
-    public isDoorbot: boolean,
-    private restClient: RingRestClient,
-    private avoidSnapshotBatteryDrain: boolean,
+    initialData: AnyCameraData,
+    isDoorbot: boolean,
+    restClient: RingRestClient,
+    avoidSnapshotBatteryDrain: boolean,
   ) {
     super()
 
+    this.initialData = initialData
+    this.isDoorbot = isDoorbot
+    this.restClient = restClient
+    this.avoidSnapshotBatteryDrain = avoidSnapshotBatteryDrain
     this.id = this.initialData.id
     this.deviceType = this.initialData.kind
     this.model =
@@ -306,12 +318,7 @@ export class RingCamera extends Subscribed {
 
     return (
       this.isDoorbot &&
-      Boolean(
-        chime_settings &&
-          [DoorbellType.Mechanical, DoorbellType.Digital].includes(
-            chime_settings.type,
-          ),
-      )
+      Boolean(chime_settings && enabledDoorbellTypes.has(chime_settings.type))
     )
   }
 

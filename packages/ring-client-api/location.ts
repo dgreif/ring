@@ -130,20 +130,33 @@ export class Location extends Subscribed {
   hasHubs
   hasAlarmBaseStation
 
+  public readonly locationDetails
+  public readonly cameras
+  public readonly chimes
+  public readonly intercoms
+  public readonly options
+  private restClient
+
   constructor(
-    public readonly locationDetails: UserLocation,
-    public readonly cameras: RingCamera[],
-    public readonly chimes: RingChime[],
-    public readonly intercoms: RingIntercom[],
-    public readonly options: {
+    locationDetails: UserLocation,
+    cameras: RingCamera[],
+    chimes: RingChime[],
+    intercoms: RingIntercom[],
+    options: {
       hasHubs: boolean
       hasAlarmBaseStation: boolean
       locationModePollingSeconds?: number
     },
-    private restClient: RingRestClient,
+    restClient: RingRestClient,
   ) {
     super()
 
+    this.locationDetails = locationDetails
+    this.cameras = cameras
+    this.chimes = chimes
+    this.intercoms = intercoms
+    this.options = options
+    this.restClient = restClient
     this.hasHubs = this.options.hasHubs
     this.hasAlarmBaseStation = this.options.hasAlarmBaseStation
 
@@ -164,7 +177,6 @@ export class Location extends Subscribed {
 
           if (connectionStatus === 'online') {
             if (assetWasOffline) {
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
               this.requestList(deviceListMessageType, assetUuid).catch(() => {})
               this.offlineAssets = this.offlineAssets.filter(
                 (id) => id !== assetUuid,

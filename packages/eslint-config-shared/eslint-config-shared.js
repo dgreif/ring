@@ -23,6 +23,9 @@ export default tseslint.config(
   prettierRecommended,
   {
     files: ['**/*.ts'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+    },
     plugins: {
       prettier,
       deprecation,

@@ -42,5 +42,4 @@ export async function logRefreshToken() {
   console.log(`"refreshToken": "${refreshToken}"`)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 process.on('unhandledRejection', () => {})

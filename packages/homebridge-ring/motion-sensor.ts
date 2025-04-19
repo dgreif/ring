@@ -5,12 +5,20 @@ import type { RingPlatformConfig } from './config.ts'
 import type { PlatformAccessory } from 'homebridge'
 
 export class MotionSensor extends BaseDeviceAccessory {
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingDevice,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingDevice,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
 
     const { Service } = hap
 

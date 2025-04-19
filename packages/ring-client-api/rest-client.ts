@@ -276,10 +276,10 @@ export class RingRestClient {
   }>(1)
   public onSession = new ReplaySubject<SessionResponse>(1)
   public readonly baseSessionMetadata
+  private authOptions
 
-  constructor(
-    private authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions,
-  ) {
+  constructor(authOptions: (EmailAuth | RefreshTokenAuth) & SessionOptions) {
+    this.authOptions = authOptions
     this.refreshToken =
       'refreshToken' in authOptions ? authOptions.refreshToken : undefined
     this.authConfig = parseAuthConfig(this.refreshToken)

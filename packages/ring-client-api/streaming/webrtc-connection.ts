@@ -35,13 +35,16 @@ export class WebrtcConnection extends Subscribed {
   readonly onVideoRtp
   private readonly pc
   private readonly ws
+  private camera
 
   constructor(
     ticket: string,
-    private camera: RingCamera,
+    camera: RingCamera,
     options: StreamingConnectionOptions,
   ) {
     super()
+
+    this.camera = camera
     this.ws = new WebSocket(
       `wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${generateUuid()}&token=${ticket}`,
       {

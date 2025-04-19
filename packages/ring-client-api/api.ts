@@ -54,10 +54,12 @@ export interface RingApiOptions extends SessionOptions {
 export class RingApi extends Subscribed {
   public readonly restClient
   public readonly onRefreshTokenUpdated
+  public readonly options
 
-  constructor(public readonly options: RingApiOptions & RefreshTokenAuth) {
+  constructor(options: RingApiOptions & RefreshTokenAuth) {
     super()
 
+    this.options = options
     this.restClient = new RingRestClient(this.options)
     this.onRefreshTokenUpdated =
       this.restClient.onRefreshTokenUpdated.asObservable()

@@ -18,13 +18,17 @@ export class RingIntercom {
   onBatteryLevel
   onDing = new Subject<void>()
   onUnlocked = new Subject<void>()
+  private initialData
+  private restClient
 
   constructor(
-    private initialData: IntercomHandsetAudioData,
-    private restClient: RingRestClient,
+    initialData: IntercomHandsetAudioData,
+    restClient: RingRestClient,
   ) {
-    this.id = this.initialData.id
-    this.deviceType = this.initialData.kind
+    this.initialData = initialData
+    this.restClient = restClient
+    this.id = initialData.id
+    this.deviceType = initialData.kind
     this.onData = new BehaviorSubject<IntercomHandsetAudioData>(
       this.initialData,
     )

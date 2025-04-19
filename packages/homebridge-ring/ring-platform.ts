@@ -149,11 +149,19 @@ export class RingPlatform implements DynamicPlatformPlugin {
     [uuid: string]: PlatformAccessory
   } = {}
 
+  public log
+  public config
+  public api
+
   constructor(
-    public log: Logging,
-    public config: PlatformConfig & RingPlatformConfig & RefreshTokenAuth,
-    public api: API,
+    log: Logging,
+    config: PlatformConfig & RingPlatformConfig & RefreshTokenAuth,
+    api: API,
   ) {
+    this.log = log
+    this.config = config
+    this.api = api
+
     if (!config.disableLogs) {
       useLogger({
         logInfo(message) {

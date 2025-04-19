@@ -8,12 +8,21 @@ import { logInfo } from 'ring-client-api/util'
 const minutesFor24Hours = 24 * 60
 
 export class Chime extends BaseDataAccessory<RingChime> {
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingChime,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingChime,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
+
     const { Characteristic, Service } = hap,
       snoozeService = this.getService(
         Service.Switch,

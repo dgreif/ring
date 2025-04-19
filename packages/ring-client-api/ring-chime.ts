@@ -23,13 +23,14 @@ export class RingChime {
   model
   onData
   onRequestUpdate = new Subject()
+  private initialData
+  private restClient
 
-  constructor(
-    private initialData: ChimeData,
-    private restClient: RingRestClient,
-  ) {
-    this.id = this.initialData.id
-    this.deviceType = this.initialData.kind
+  constructor(initialData: ChimeData, restClient: RingRestClient) {
+    this.initialData = initialData
+    this.restClient = restClient
+    this.id = initialData.id
+    this.deviceType = initialData.kind
     this.model = ChimeModel[this.deviceType] || 'Chime'
     this.onData = new BehaviorSubject<ChimeData>(this.initialData)
   }

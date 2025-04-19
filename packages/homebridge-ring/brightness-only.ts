@@ -6,12 +6,20 @@ import { hap } from './hap.ts'
 import { logInfo } from 'ring-client-api/util'
 
 export class BrightnessOnly extends BaseDeviceAccessory {
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingDevice,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingDevice,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
 
     const { Characteristic, Service } = hap,
       { context } = accessory

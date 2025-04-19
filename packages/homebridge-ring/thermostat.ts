@@ -13,12 +13,20 @@ import { hap } from './hap.ts'
 export class Thermostat extends BaseDeviceAccessory {
   private onTemperature: Observable<number | undefined>
 
+  public readonly device
+  public readonly accessory
+  public readonly config
+
   constructor(
-    public readonly device: RingDevice,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: RingPlatformConfig,
+    device: RingDevice,
+    accessory: PlatformAccessory,
+    config: RingPlatformConfig,
   ) {
     super()
+
+    this.device = device
+    this.accessory = accessory
+    this.config = config
 
     const { Characteristic, Service } = hap
 

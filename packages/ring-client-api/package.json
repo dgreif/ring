@@ -23,26 +23,26 @@
     "colors": "1.4.0",
     "debug": "^4.4.0",
     "json-bigint": "^1.0.0",
-    "rxjs": "^7.8.1",
+    "rxjs": "^7.8.2",
     "socket.io-client": "^2.5.0",
     "systeminformation": "^5.25.11",
-    "undici": "^7.2.1",
-    "uuid": "^11.0.5",
-    "werift": "0.21.6",
-    "ws": "^8.18.0"
+    "undici": "^7.8.0",
+    "uuid": "^11.1.0",
+    "werift": "0.22.1",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "22.10.5",
+    "@types/node": "22.14.1",
     "@types/socket.io-client": "1.4.36",
     "@types/uuid": "10.0.0",
-    "@types/ws": "^8.5.13",
+    "@types/ws": "^8.18.1",
     "eslint-config-shared": "*",
-    "msw": "^2.7.0",
+    "msw": "^2.7.5",
     "tsconfig": "*",
-    "typescript": "5.7.3",
-    "vitest": "^2.1.9"
+    "typescript": "5.8.3",
+    "vitest": "^3.1.1"
   },
   "engines": {
     "node": "^18 || ^20 || ^22"

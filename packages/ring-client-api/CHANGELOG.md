@@ -1,5 +1,13 @@
 # ring-client-api
 
+## 14.0.0-beta.1
+
+### Patch Changes
+
+- [`dbe2c34`](https://github.com/dgreif/ring/commit/dbe2c34e62c192bbfbafec0a0a6562d92e3f9148) Thanks [@dgreif](https://github.com/dgreif)! - Only allow erasable typescript syntax. This will have a minor impact on anyone using `ring-client-api` with TypeScript as the types for enums have been replaced with objects and union types.
+
+- [`abb0f04`](https://github.com/dgreif/ring/commit/abb0f041118ad4e55ed5b68a6138a05415e78fcf) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 14.0.0-beta.0
 
 ### Major Changes

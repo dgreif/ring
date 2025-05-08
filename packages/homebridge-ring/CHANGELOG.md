@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 14.0.0-beta.2
+
+### Major Changes
+
+- [`c9919a2`](https://github.com/dgreif/ring/commit/c9919a2a859960d40f2a90587f7a40c8aea4d863) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node 18 support since it has reached end of life
+
+### Patch Changes
+
+- [`4d24ccd`](https://github.com/dgreif/ring/commit/4d24ccdbd93f1e761b56c19269c61dbfc46f7331) Thanks [@dgreif](https://github.com/dgreif)! - Use undici for all websocket connections. This fixes https://github.com/dgreif/ring/issues/1605 where websockets were failing to connect for alarms and light hubs. It also allows us to drop the socket.io client, which was a very outdated dependency.
+
+- Updated dependencies [[`c9919a2`](https://github.com/dgreif/ring/commit/c9919a2a859960d40f2a90587f7a40c8aea4d863), [`4d24ccd`](https://github.com/dgreif/ring/commit/4d24ccdbd93f1e761b56c19269c61dbfc46f7331)]:
+  - ring-client-api@14.0.0-beta.2
+
 ## 14.0.0-beta.1
 
 ### Patch Changes

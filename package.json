@@ -27,8 +27,8 @@
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.2",
-    "turbo": "^2.5.0"
+    "@changesets/cli": "^2.29.3",
+    "turbo": "^2.5.3"
   },
   "workspaces": [
     "packages/*"

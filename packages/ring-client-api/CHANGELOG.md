@@ -1,5 +1,29 @@
 # ring-client-api
 
+## 14.0.0
+
+### Major Changes
+
+- [`0884bcb`](https://github.com/dgreif/ring/commit/0884bcb921c2a7de8f194f578f5c2972c9d523bb) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node 18 support since it has reached end of life
+
+- [#1550](https://github.com/dgreif/ring/pull/1550) [`5bd6bf7`](https://github.com/dgreif/ring/commit/5bd6bf7d6caeb2a8fb6bb9e0b2df260dec434b4f) Thanks [@dgreif](https://github.com/dgreif)! - Converted project to ESM. This should not impact homebridge-ring, but will require any other projects using ring-client-api to also use ESM in order to use the latest version.
+
+### Minor Changes
+
+- [`725fafd`](https://github.com/dgreif/ring/commit/725fafd639b3a05b3d3bbf03e0c1b2a40e53ea5d) Thanks [@dgreif](https://github.com/dgreif)! - Avoid snapshots while recording for doorbell_graham_cracker. This should allow notifications to work on these devices in homebridge.
+
+- [`cbc7147`](https://github.com/dgreif/ring/commit/cbc7147616f7603ba0b8c923b98efffcf3ab3730) Thanks [@hkoci](https://github.com/hkoci)! - Add support for Battery Video Doorbell Pro and Battery Video Doorbell Plus
+
+### Patch Changes
+
+- [`8bcafca`](https://github.com/dgreif/ring/commit/8bcafcad92a8326a35c65b5e4a25f028f11b9af3) Thanks [@dgreif](https://github.com/dgreif)! - Use undici for all websocket connections. This fixes https://github.com/dgreif/ring/issues/1605 where websockets were failing to connect for alarms and light hubs. It also allows us to drop the socket.io client, which was a very outdated dependency.
+
+- [`433169f`](https://github.com/dgreif/ring/commit/433169f3b356f91fdc3446a994b026fb268a3102) Thanks [@dgreif](https://github.com/dgreif)! - Only allow erasable typescript syntax. This will have a minor impact on anyone using `ring-client-api` with TypeScript as the types for enums have been replaced with objects and union types.
+
+- [`62fde87`](https://github.com/dgreif/ring/commit/62fde872d796de165869fc2319303257a17f2c1e) Thanks [@dgreif](https://github.com/dgreif)! - Update Dependencies
+
+- [`10c1639`](https://github.com/dgreif/ring/commit/10c1639b093f5be9bf2b007b8bdc6a65f645a50f) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 13.2.1
 
 ### Patch Changes

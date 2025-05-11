@@ -1,6 +1,6 @@
 {
   "name": "ring-client-api",
-  "version": "13.2.1",
+  "version": "14.0.0",
   "description": "Unofficial API for Ring doorbells, cameras, security alarm system and smart lighting",
   "main": "lib/index.js",
   "type": "module",

@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 14.0.1
+
+### Patch Changes
+
+- [`dde2a6d`](https://github.com/dgreif/ring/commit/dde2a6d14b078145218b5c1dab305e4573bb36cd) Thanks [@dgreif](https://github.com/dgreif)! - Properly load snapshot placeholder images in all environments. Fixes #1610
+
+- Updated dependencies []:
+  - ring-client-api@14.0.1
+
 ## 14.0.0
 
 ### Major Changes

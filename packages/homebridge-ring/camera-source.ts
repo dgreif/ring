@@ -40,7 +40,7 @@ import type { StreamingSession } from 'ring-client-api/streaming/streaming-sessi
 import path from 'node:path'
 
 const __dirname = new URL('.', import.meta.url).pathname,
-  mediaDirectory = path.join(__dirname.replace('/lib', ''), 'media'),
+  mediaDirectory = path.join(__dirname.replace(/\/lib\/?$/, ''), 'media'),
   readFileAsync = promisify(readFile),
   cameraOfflinePath = path.join(mediaDirectory, 'camera-offline.jpg'),
   snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg')

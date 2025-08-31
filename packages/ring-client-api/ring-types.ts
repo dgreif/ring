@@ -45,6 +45,7 @@ export const RingDeviceType = {
   ThirdPartyGarageDoorOpener: 'third_party_gdo',
   IntercomHandsetAudio: 'intercom_handset_audio',
   WaterValve: 'valve.water',
+  KiddeSmokeCoAlarm: 'comp.bluejay.sensor_bluejay_wsc'
 } as const
 // eslint-disable-next-line no-redeclare
 export type RingDeviceType =

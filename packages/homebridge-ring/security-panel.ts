@@ -156,23 +156,29 @@ export class SecurityPanel extends BaseDeviceAccessory {
       logInfo(
         `[Ring Alarm] Disarm attempt from HomeKit blocked (allowDisarm=false) for ${this.device.name}`
       )
-      try {
-        const service = this.getService(hap.Service.SecuritySystem)
+      const svc = this.getService(hap.Service.SecuritySystem)
+      const { SecuritySystemTargetState, SecuritySystemCurrentState } = hap.Characteristic
 
-        // Reset Target so the Home app snaps back
-        service
-          .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
-          .updateValue(this.getTargetState(this.device.data))
+      // Use the *actual* current state for both chars so Home sees no transition pending
+      const cur = this.getCurrentState(this.device.data)
 
-        // Reset Current so the Home app shows correct current state too
-        service
-          .getCharacteristic(hap.Characteristic.SecuritySystemCurrentState)
-          .updateValue(this.getCurrentState(this.device.data))
-      } catch (_) {
-        // best effort only
+      const setBoth = (val: any) => {
+        svc.getCharacteristic(SecuritySystemTargetState).updateValue(val)
+        svc.getCharacteristic(SecuritySystemCurrentState).updateValue(val)
       }
-      return // short-circuit: do NOT call Ring backend
-}
+
+      // 1) immediate snap-back
+      setBoth(cur)
+
+      // 2) nudge after the set-tx completes on Home’s side
+      setTimeout(() => setBoth(cur), 200)
+
+      // 3) one last nudge in case the previous gets coalesced by the Home app
+      setTimeout(() => setBoth(cur), 1000)
+
+      this.targetingNightMode = false
+      return
+    }
 
     const bypassContactSensors = bypass
         ? (await location.getDevices()).filter((device) => {

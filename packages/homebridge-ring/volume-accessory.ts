@@ -4,98 +4,158 @@ import { hap } from './hap.ts'
 import { BaseDeviceAccessory } from './base-device-accessory.ts'
 
 /**
- * Presents device volume as a HomeKit slider.
- * Maps Brightness (0–100) <-> Ring volume (0.0–1.0).
- * Attaches to any Ring device that:
- *   - exposes data.volume (number)
- *   - implements setVolume(number)
+ * Expose Ring Alarm panel/keypad volume to HomeKit.
+ *
+ * Config:
+ *   - exposeAlarmVolume?: boolean         // enable in platform config
+ *   - volumeService?: 'lightbulb'|'fan'|'speaker' (default 'lightbulb')
+ *
+ * Mappings:
+ *   - Lightbulb.Brightness (0..100)  <-> volume (0.0..1.0)
+ *   - Fan.RotationSpeed (0..100)     <-> volume (0.0..1.0)
+ *   - Speaker.Volume (0..100)        <-> volume (0.0..1.0)
+ *   - On (Light/Fan): >0 = true; Off => set volume=0
+ *   - Speaker.Mute: true => 0, false => restore last %
  */
 export class VolumeAccessory extends BaseDeviceAccessory {
-  // BaseDeviceAccessory in this repo expects subclasses to expose these fields
-  public device: any
-  public accessory: any
-  public config: any
-
-  constructor(device: any, accessory: any, config: any) {
-    super() // Base class takes no constructor args in this codebase
-
-    this.device = device
-    this.accessory = accessory
-    this.config = config
-
-    // Create a Lightbulb so Home shows a visible slider (Brightness)
-    this.service = this.getService(hap.Service.Lightbulb)
+  constructor(public device: any, public accessory: any, public config: any) {
+    super()
+    // remember last non-zero % so toggling On can restore it
+    if (typeof this.accessory.context.volumePct !== 'number') {
+      this.accessory.context.volumePct = 100
+    }
     this.init()
   }
 
-  private service: any
-
   private init() {
-    // "<Device Name> Volume"
-    this.service.setCharacteristic(
-      hap.Characteristic.Name,
-      `${this.device.name} Volume`,
-    )
+    const svcPref = (this.config?.volumeService ?? 'lightbulb') as
+      | 'lightbulb'
+      | 'fan'
+      | 'speaker'
 
-    // Required On characteristic (true if volume > 0)
-    this.service
-      .getCharacteristic(hap.Characteristic.On)
-      .onGet(() => this.currentVolume() > 0)
-      .onSet(async (value: unknown) => {
-        const on = Boolean(value)
-        if (!on) {
-          await this.setVolume(0)
-        }
-        // Turning on is handled by Brightness updates
-      })
+    if (svcPref === 'speaker') {
+      this.initAsSpeaker()
+    } else if (svcPref === 'fan') {
+      this.initAsFan()
+    } else {
+      this.initAsLightbulb()
+    }
+  }
 
-    // Brightness is the actual volume slider
-    this.service
-      .getCharacteristic(hap.Characteristic.Brightness)
-      .onGet(() => Math.round(this.currentVolume() * 100))
-      .onSet(async (value: unknown) => {
-        const pct = Math.max(0, Math.min(100, Number(value)))
-        await this.setVolume(pct / 100)
-      })
+  // ---------- Lightbulb variant (default) ----------
+  private initAsLightbulb() {
+    const { Service, Characteristic } = hap
+    const service = this.getService(Service.Lightbulb)
+    service.setCharacteristic(Characteristic.Name, `${this.device.name} Volume`)
 
-    // Keep HomeKit in sync if device data changes
-    this.device.onData.subscribe((data: any) => {
-      const vol = typeof data?.volume === 'number' ? data.volume : undefined
-      if (typeof vol === 'number') {
-        this.service.updateCharacteristic(
-          hap.Characteristic.Brightness,
-          Math.round(vol * 100),
-        )
-        this.service.updateCharacteristic(hap.Characteristic.On, vol > 0)
-      }
+    // Brightness: 0..100
+    this.registerLevelCharacteristic({
+      characteristicType: Characteristic.Brightness,
+      serviceType: Service.Lightbulb,
+      getValue: (data: any) => this.getPercent(data),
+      setValue: (pct: number) => this.setPercent(pct),
+    })
+
+    // On: >0 => true; Off => set to 0
+    this.registerCharacteristic({
+      characteristicType: Characteristic.On,
+      serviceType: Service.Lightbulb,
+      getValue: (data: any) => this.getPercent(data) > 0,
+      setValue: (on: unknown) => {
+        const isOn = Boolean(on)
+        const restore = this.accessory.context.volumePct || 100
+        return this.setPercent(isOn ? restore : 0)
+      },
     })
   }
 
-  private currentVolume(): number {
-    const vol = this.device?.data?.volume
-    return typeof vol === 'number' ? vol : 1
+  // ---------- Fan variant ----------
+  private initAsFan() {
+    const { Service, Characteristic } = hap
+    // HAP-NodeJS may have Fanv2; fall back to Fan
+    const FanService: any = (Service as any).Fanv2 ?? Service.Fan
+    const service = this.getService(FanService)
+    service.setCharacteristic(Characteristic.Name, `${this.device.name} Volume`)
+
+    // RotationSpeed: 0..100
+    this.registerLevelCharacteristic({
+      characteristicType: Characteristic.RotationSpeed,
+      serviceType: FanService,
+      getValue: (data: any) => this.getPercent(data),
+      setValue: (pct: number) => this.setPercent(pct),
+    })
+
+    // On mirrors >0%
+    this.registerCharacteristic({
+      characteristicType: Characteristic.On,
+      serviceType: FanService,
+      getValue: (data: any) => this.getPercent(data) > 0,
+      setValue: (on: unknown) => {
+        const isOn = Boolean(on)
+        const restore = this.accessory.context.volumePct || 100
+        return this.setPercent(isOn ? restore : 0)
+      },
+    })
   }
 
-  private async setVolume(vol: number) {
+  // ---------- Speaker variant ----------
+  private initAsSpeaker() {
+    const { Service, Characteristic } = hap
+    const service = this.getService(Service.Speaker)
+    service.setCharacteristic(Characteristic.Name, `${this.device.name} Volume`)
+
+    // Volume: 0..100
+    this.registerLevelCharacteristic({
+      characteristicType: Characteristic.Volume,
+      serviceType: Service.Speaker,
+      getValue: (data: any) => this.getPercent(data),
+      setValue: (pct: number) => this.setPercent(pct),
+    })
+
+    // Optional Mute: true => 0, false => restore last %
+    this.registerCharacteristic({
+      characteristicType: Characteristic.Mute,
+      serviceType: Service.Speaker,
+      getValue: (data: any) => this.getPercent(data) <= 0,
+      setValue: (mute: unknown) => {
+        const m = Boolean(mute)
+        const restore = this.accessory.context.volumePct || 100
+        return this.setPercent(m ? 0 : restore)
+      },
+    })
+  }
+
+  // ---------- Helpers ----------
+  private getPercent(data: any): number {
+    const raw = Number(data?.volume ?? this.device?.data?.volume ?? 0)
+    const pct = Math.round(this.clamp01(raw) * 100)
+    // remember last non-zero
+    if (pct > 0) {
+      this.accessory.context.volumePct = pct
+    }
+    return pct
+  }
+
+  private async setPercent(pctInput: unknown) {
+    const pct = Math.max(0, Math.min(100, Number(pctInput)))
+    const vol = pct / 100
     try {
-      const dev: any = this.device
-      if (typeof dev?.setVolume === 'function') {
-        await dev.setVolume(vol)
-        logInfo(`Set ${dev.name} volume to ${Math.round(vol * 100)}%`)
-      } else {
-        throw new Error(
-          `Device ${dev?.name ?? 'unknown'} does not support setVolume()`,
-        )
+      if (typeof this.device?.setVolume !== 'function') {
+        throw new Error(`Device ${this.device?.name ?? 'unknown'} has no setVolume()`)
+      }
+      logInfo(`Setting ${this.device.name} volume to ${pct}%`)
+      await this.device.setVolume(this.clamp01(vol))
+      if (pct > 0) {
+        this.accessory.context.volumePct = pct
       }
     } catch (e) {
       logError(e)
-      // Reflect last known device volume back to HomeKit
-      const back = this.currentVolume()
-      this.service.updateCharacteristic(
-        hap.Characteristic.Brightness,
-        Math.round(back * 100),
-      )
-      this.service.updateCharacteristic(hap.Characteristic.On, back > 0)
+      // let BaseDeviceAccessory / HomeKit refresh from device state on next poll/update
     }
+  }
+
+  private clamp01(n: number) {
+    if (isNaN(n)) return 0
+    return n < 0 ? 0 : n > 1 ? 1 : n
   }
 }

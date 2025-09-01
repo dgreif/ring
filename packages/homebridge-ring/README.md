@@ -59,6 +59,7 @@ Only include an optional parameter if you actually need it. Default behavior wit
 {
   "alarmOnEntryDelay": true,
   "beamDurationSeconds": 60,
+  "allowDisarm": false,
   "hideDeviceIds": [
     "477e4800-fcde-4493-969b-d1a06f683102",
     "5aaed7a7-06df-4f18-b3af-291c89854d60"
@@ -102,6 +103,7 @@ Only include an optional parameter if you actually need it. Default behavior wit
 | `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable. By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridge) will be used. If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`. |
 | `debug` | false | Turns on additional logging. In particular, ffmpeg logging. |
 | `disableLogs` | false | Turns off all logging |
+| `allowDisarm` | `true` | If `false`, prevents disarming your Ring Alarm from HomeKit for added security. |
 
 ### Cameras
 

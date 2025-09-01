@@ -133,7 +133,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
         Characteristic: { SecuritySystemTargetState: State },
       } = hap,
       { location } = this.device,
-      { nightModeBypassFor } = this.config
+      { nightModeBypassFor, allowDisarm } = this.config
 
     let bypass = false
     this.targetingNightMode = state === State.NIGHT_ARM
@@ -149,6 +149,11 @@ export class SecurityPanel extends BaseDeviceAccessory {
         // Switch to Home since we don't know which mode the user wanted
         state = State.STAY_ARM
       }
+    }
+
+    // Prevent disarming if allowDisarm is false
+    if (state === State.DISARM && allowDisarm === false) {
+      throw new Error(`Disarming is disabled by configuration for ${this.device.name}`)
     }
 
     const bypassContactSensors = bypass

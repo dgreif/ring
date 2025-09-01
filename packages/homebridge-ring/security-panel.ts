@@ -133,7 +133,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
         Characteristic: { SecuritySystemTargetState: State },
       } = hap,
       { location } = this.device,
-      { nightModeBypassFor, allowDisarm } = this.config
+      { nightModeBypassFor, blockDisarm } = this.config
 
     let bypass = false
     this.targetingNightMode = state === State.NIGHT_ARM
@@ -151,10 +151,10 @@ export class SecurityPanel extends BaseDeviceAccessory {
       }
     }
 
-    // Prevent disarming if allowDisarm is false
-    if (state === State.DISARM && allowDisarm === false) {
+    // Prevent disarming if blockDisarm is false
+    if (state === State.DISARM && blockDisarm === true) {
       logInfo(
-        `[Ring Alarm] Disarm attempt from HomeKit blocked (allowDisarm=false) for ${this.device.name}`
+        `[Ring Alarm] Disarm attempt from HomeKit blocked (blockDisarm=true) for ${this.device.name}`
       )
       const svc = this.getService(hap.Service.SecuritySystem)
       const { SecuritySystemTargetState, SecuritySystemCurrentState } = hap.Characteristic

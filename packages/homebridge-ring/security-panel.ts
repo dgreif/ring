@@ -153,7 +153,17 @@ export class SecurityPanel extends BaseDeviceAccessory {
 
     // Prevent disarming if allowDisarm is false
     if (state === State.DISARM && allowDisarm === false) {
-      throw new Error(`Disarming is disabled by configuration for ${this.device.name}`)
+      // Quietly block instead of throwing (avoids Home app error toast)
+      logInfo(`[Ring Alarm] Disarm blocked (allowDisarm=false) for ${this.device.name}`)
+      try {
+        // Nudge the Home app UI back to the previously known target state
+        this.getService(hap.Service.SecuritySystem)
+          .getCharacteristic(hap.Characteristic.SecuritySystemTargetState)
+          .updateValue(this.getTargetState(this.device.data))
+      } catch (_) {
+        // best effort only
+      }
+      return // short-circuit: do NOT call Ring backend
     }
 
     const bypassContactSensors = bypass

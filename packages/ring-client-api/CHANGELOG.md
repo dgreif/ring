@@ -1,5 +1,15 @@
 # ring-client-api
 
+## 14.1.0
+
+### Minor Changes
+
+- [`c1a519f`](https://github.com/dgreif/ring/commit/c1a519f4ff24e3dbd5455a4e8edd5c0a3bb37110) Thanks [@dgreif](https://github.com/dgreif)! - Allow Node.js 24 as supported engine
+
+### Patch Changes
+
+- [`406abf1`](https://github.com/dgreif/ring/commit/406abf154fd20a439431b1ed78409d8bcf679b9a) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 14.0.1
 
 ## 14.0.0

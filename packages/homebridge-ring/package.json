@@ -14,16 +14,16 @@
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
-    "@homebridge/plugin-ui-utils": "^2.0.2",
+    "@homebridge/plugin-ui-utils": "^2.1.0",
     "ring-client-api": "14.0.1",
-    "werift": "0.22.1"
+    "werift": "0.22.2"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2",
+    "concurrently": "^9.2.1",
     "eslint-config-shared": "*",
-    "homebridge": "1.9.0",
+    "homebridge": "1.11.0",
     "tsconfig": "*",
-    "typescript": "5.8.3"
+    "typescript": "5.9.2"
   },
   "engines": {
     "node": "^20 || ^22 || ^24",

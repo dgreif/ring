@@ -21,25 +21,25 @@
     "@eneris/push-receiver": "4.3.0",
     "@homebridge/camera-utils": "^3.0.0",
     "colors": "1.4.0",
-    "debug": "^4.4.0",
+    "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.25.11",
-    "undici": "^7.8.0",
-    "uuid": "^11.1.0",
-    "werift": "0.22.1"
+    "systeminformation": "^5.27.10",
+    "undici": "^7.16.0",
+    "uuid": "^13.0.0",
+    "werift": "0.22.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "22.15.17",
-    "@types/uuid": "10.0.0",
+    "@types/node": "24.5.2",
+    "@types/uuid": "11.0.0",
     "@types/ws": "^8.18.1",
     "eslint-config-shared": "*",
-    "msw": "^2.8.0",
+    "msw": "^2.11.3",
     "tsconfig": "*",
-    "typescript": "5.8.3",
-    "vitest": "^3.1.3"
+    "typescript": "5.9.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

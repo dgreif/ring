@@ -44,6 +44,7 @@ export const RingDeviceType = {
   OnvifCamera: 'onvif_camera',
   ThirdPartyGarageDoorOpener: 'third_party_gdo',
   IntercomHandsetAudio: 'intercom_handset_audio',
+  IntercomHandsetVideo: 'intercom_handset_video',
   WaterValve: 'valve.water',
   KiddeSmokeCoAlarm: 'comp.bluejay.sensor_bluejay_wsc',
 } as const
@@ -640,11 +641,13 @@ export interface ThirdPartyGarageDoorOpener {
   is_sidewalk_gateway: boolean
 }
 
-export interface IntercomHandsetAudioData {
+export interface IntercomHandsetData {
   id: number
   description: string
   device_id: string
-  kind: typeof RingDeviceType.IntercomHandsetAudio
+  kind:
+    | typeof RingDeviceType.IntercomHandsetAudio
+    | typeof RingDeviceType.IntercomHandsetVideo
   function: {
     name: null
   }
@@ -1052,7 +1055,10 @@ export interface PushNotificationDingV2 {
     device: {
       e2ee_enabled: boolean
       id: number
-      kind: RingCameraKind | typeof RingDeviceType.IntercomHandsetAudio
+      kind:
+        | RingCameraKind
+        | typeof RingDeviceType.IntercomHandsetAudio
+        | typeof RingDeviceType.IntercomHandsetVideo
       name: string
     }
     event: {

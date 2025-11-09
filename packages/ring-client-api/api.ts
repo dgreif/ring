@@ -6,7 +6,7 @@ import type {
   BeamBridge,
   CameraData,
   ChimeData,
-  IntercomHandsetAudioData,
+  IntercomHandsetData,
   OnvifCameraData,
   ProfileResponse,
   PushNotification,
@@ -98,14 +98,14 @@ export class RingApi extends Subscribed {
         base_stations: BaseStation[]
         beams_bridges: BeamBridge[]
         other: (
-          | IntercomHandsetAudioData
+          | IntercomHandsetData
           | OnvifCameraData
           | ThirdPartyGarageDoorOpener
           | UnknownDevice
         )[]
       }>({ url: clientApi('ring_devices') }),
       onvifCameras = [] as OnvifCameraData[],
-      intercoms = [] as IntercomHandsetAudioData[],
+      intercoms = [] as IntercomHandsetData[],
       thirdPartyGarageDoorOpeners = [] as ThirdPartyGarageDoorOpener[],
       unknownDevices = [] as UnknownDevice[]
 
@@ -114,8 +114,9 @@ export class RingApi extends Subscribed {
         case RingDeviceType.OnvifCamera:
           onvifCameras.push(device as OnvifCameraData)
           break
+        case RingDeviceType.IntercomHandsetVideo:
         case RingDeviceType.IntercomHandsetAudio:
-          intercoms.push(device as IntercomHandsetAudioData)
+          intercoms.push(device as IntercomHandsetData)
           break
         case RingDeviceType.ThirdPartyGarageDoorOpener:
           thirdPartyGarageDoorOpeners.push(device as ThirdPartyGarageDoorOpener)

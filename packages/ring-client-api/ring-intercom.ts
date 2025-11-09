@@ -1,7 +1,4 @@
-import type {
-  IntercomHandsetAudioData,
-  PushNotification,
-} from './ring-types.ts'
+import type { IntercomHandsetData, PushNotification } from './ring-types.ts'
 import { PushNotificationAction } from './ring-types.ts'
 import type { RingRestClient } from './rest-client.ts'
 import { clientApi, commandsApi } from './rest-client.ts'
@@ -21,17 +18,12 @@ export class RingIntercom {
   private initialData
   private restClient
 
-  constructor(
-    initialData: IntercomHandsetAudioData,
-    restClient: RingRestClient,
-  ) {
+  constructor(initialData: IntercomHandsetData, restClient: RingRestClient) {
     this.initialData = initialData
     this.restClient = restClient
     this.id = initialData.id
     this.deviceType = initialData.kind
-    this.onData = new BehaviorSubject<IntercomHandsetAudioData>(
-      this.initialData,
-    )
+    this.onData = new BehaviorSubject<IntercomHandsetData>(this.initialData)
 
     this.onBatteryLevel = this.onData.pipe(
       map((data) => getBatteryLevel(data)),
@@ -48,7 +40,7 @@ export class RingIntercom {
     }
   }
 
-  updateData(update: IntercomHandsetAudioData) {
+  updateData(update: IntercomHandsetData) {
     this.onData.next(update)
   }
 

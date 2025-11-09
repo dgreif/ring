@@ -28,10 +28,10 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
-    "turbo": "^2.5.8"
+    "turbo": "^2.6.0"
   },
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "npm@11.6.1"
+  "packageManager": "npm@11.6.2"
 }

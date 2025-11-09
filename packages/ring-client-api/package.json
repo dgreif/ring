@@ -24,7 +24,7 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.27.10",
+    "systeminformation": "^5.27.11",
     "undici": "^7.16.0",
     "uuid": "^13.0.0",
     "werift": "0.22.2"
@@ -32,14 +32,14 @@
   "devDependencies": {
     "@types/debug": "4.1.12",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "24.5.2",
+    "@types/node": "24.10.0",
     "@types/uuid": "11.0.0",
     "@types/ws": "^8.18.1",
     "eslint-config-shared": "*",
-    "msw": "^2.11.3",
+    "msw": "^2.12.1",
     "tsconfig": "*",
-    "typescript": "5.9.2",
-    "vitest": "^3.2.4"
+    "typescript": "5.9.3",
+    "vitest": "^4.0.8"
   },
   "engines": {
     "node": "^20 || ^22 || ^24"

@@ -1,5 +1,18 @@
 # homebridge-ring
 
+## 14.2.0
+
+### Minor Changes
+
+- [`56ecd51`](https://github.com/dgreif/ring/commit/56ecd5101e03d6baa92df77af2f13ce5e662d4c4) Thanks [@majd](https://github.com/majd)! - Add basic support for Ring Intercom Video (ding notifications, but no video/audio streaming)
+
+### Patch Changes
+
+- [`32030b4`](https://github.com/dgreif/ring/commit/32030b425cef31c536f6aaae7f8954eec3937abf) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- Updated dependencies [[`56ecd51`](https://github.com/dgreif/ring/commit/56ecd5101e03d6baa92df77af2f13ce5e662d4c4), [`32030b4`](https://github.com/dgreif/ring/commit/32030b425cef31c536f6aaae7f8954eec3937abf)]:
+  - ring-client-api@14.2.0
+
 ## 14.1.0
 
 ### Minor Changes

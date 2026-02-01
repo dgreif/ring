@@ -98,6 +98,7 @@ function getAccessoryClass(
     case RingDeviceType.CoAlarm:
       return CoAlarm
     case RingDeviceType.SmokeCoListener:
+    case RingDeviceType.KiddeSmokeCoAlarm:
       return SmokeCoListener
     case RingDeviceType.BeamsMotionSensor:
     case RingDeviceType.BeamsSwitch:

@@ -92,10 +92,7 @@ describe('Ring Camera', () => {
 
       // Attempt to start a live call and expect it to throw
       await expect(camera.startLiveCall()).rejects.toThrow(
-        'Live view is currently disabled for Test Camera',
-      )
-      await expect(camera.startLiveCall()).rejects.toThrow(
-        'Enable live view for this camera in the Ring app to start streaming',
+        /Live view is currently disabled for Test Camera.*Enable live view for this camera in the Ring app to start streaming/,
       )
     })
 

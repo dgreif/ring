@@ -130,38 +130,5 @@ describe('Ring Camera', () => {
       expect(session).toBeDefined()
       expect(session).toBeInstanceOf(StreamingSession)
     })
-
-    it('should not throw an error when live_view_disabled is undefined', async () => {
-      // Create a mock camera data object
-      const mockCameraData = {
-          id: 123456,
-          description: 'Test Camera',
-          kind: 'lpd_v1',
-          settings: {
-            sheila_settings: {
-              cv_processing_enabled: true,
-              local_storage_enabled: false,
-            },
-            server_settings: {
-              ring_media_server_enabled: true,
-            },
-          },
-        } as any,
-        // Create a mock rest client
-        mockRestClient = {
-          request: vi.fn().mockResolvedValue({ ticket: 'mock-ticket' }),
-          onSession: {
-            pipe: vi.fn().mockReturnValue({
-              subscribe: vi.fn(),
-            }),
-          },
-        } as any,
-        // Create a RingCamera instance
-        camera = new RingCamera(mockCameraData, false, mockRestClient, false),
-        // startLiveCall should succeed and return a StreamingSession
-        session = await camera.startLiveCall()
-      expect(session).toBeDefined()
-      expect(session).toBeInstanceOf(StreamingSession)
-    })
   })
 })

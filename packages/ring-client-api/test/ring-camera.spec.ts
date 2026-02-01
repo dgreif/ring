@@ -3,6 +3,7 @@ import {
   cleanSnapshotUuid,
   RingCamera,
 } from '../ring-camera.ts'
+import { StreamingSession } from '../streaming/streaming-session.ts'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('Ring Camera', () => {
@@ -127,7 +128,7 @@ describe('Ring Camera', () => {
         // startLiveCall should succeed and return a StreamingSession
         session = await camera.startLiveCall()
       expect(session).toBeDefined()
-      expect(session.constructor.name).toBe('StreamingSession')
+      expect(session).toBeInstanceOf(StreamingSession)
     })
 
     it('should not throw an error when live_view_disabled is undefined', async () => {
@@ -160,7 +161,7 @@ describe('Ring Camera', () => {
         // startLiveCall should succeed and return a StreamingSession
         session = await camera.startLiveCall()
       expect(session).toBeDefined()
-      expect(session.constructor.name).toBe('StreamingSession')
+      expect(session).toBeInstanceOf(StreamingSession)
     })
   })
 })

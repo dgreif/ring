@@ -27,7 +27,6 @@ export default tseslint.config(
     },
     plugins: {
       prettier,
-      deprecation,
     },
     languageOptions: {
       globals: globals.node,
@@ -202,7 +201,6 @@ export default tseslint.config(
       //   'error',
       //   { argsIgnorePattern: '^_' },
       // ],
-      'deprecation/deprecation': 2,
     },
   },
 )

@@ -24,13 +24,8 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-<<<<<<< HEAD
-    "systeminformation": "^5.27.14",
-    "undici": "^7.18.2",
-=======
     "systeminformation": "^5.30.7",
     "undici": "^7.19.2",
->>>>>>> origin/main
     "uuid": "^13.0.0",
     "werift": "0.22.4"
   },

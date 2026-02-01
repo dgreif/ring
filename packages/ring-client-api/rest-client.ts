@@ -355,20 +355,41 @@ export class RingRestClient {
         refresh_token: this.refreshToken,
       }
     } catch (requestError: any) {
-      if (grantData.refresh_token) {
-        // failed request with refresh token
-        this.refreshToken = undefined
-        this.authConfig = undefined
-        logError(requestError)
-        return this.getAuth()
-      }
-
       const response = requestError.response || {},
         responseData: Auth2faResponse = response.body || {},
         responseError =
           'error' in responseData && typeof responseData.error === 'string'
             ? responseData.error
             : ''
+
+      // If we were using a refresh token and got an invalid_grant error,
+      // clear the token and retry with email/password (if available)
+      if (grantData.refresh_token) {
+        // Check if this is a permanent authentication failure (invalid token)
+        // Only clear the refresh token if it's actually invalid
+        // Common error codes that indicate the token is truly invalid:
+        // - invalid_grant: token is expired or revoked
+        // - access_denied: token doesn't have access
+        const isInvalidToken =
+          response.status === 401 &&
+          (responseError === 'invalid_grant' ||
+            responseError === 'access_denied')
+
+        if (isInvalidToken) {
+          // Token is truly invalid, clear it and retry with email/password if available
+          this.refreshToken = undefined
+          this.authConfig = undefined
+          logError('Refresh token is invalid and has been cleared')
+          logError(requestError)
+          return this.getAuth(twoFactorAuthCode)
+        }
+
+        // For all other errors (network errors, server errors, rate limiting, etc.),
+        // do NOT clear the refresh token - just fall through to error handling
+        // This allows the system to recover from temporary failures
+        logError('Authentication failed but refresh token not cleared')
+        logError(requestError)
+      }
 
       if (
         response.status === 412 || // need 2fa code

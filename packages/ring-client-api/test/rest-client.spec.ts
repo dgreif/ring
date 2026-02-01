@@ -211,6 +211,7 @@ afterAll(() => {
 afterEach(() => {
   client.clearTimeouts()
   clearTimeouts()
+  server.resetHandlers()
 })
 
 describe('getAuth', () => {
@@ -305,6 +306,96 @@ describe('getAuth', () => {
       oldRefreshToken: refreshToken,
       newRefreshToken: await wrapRefreshToken(secondRefreshToken),
     })
+  })
+
+  it('should clear refresh token only on invalid_grant error', async () => {
+    const invalidToken = 'invalid_token'
+    client = new RingRestClient({
+      refreshToken: invalidToken,
+    })
+
+    // The invalid token should be cleared when it gets a 401 invalid_grant response
+    // Because there's no email/password, it will fall back to throwing the error from getGrantData
+    await expect(() => client.getAuth()).rejects.toThrow(
+      'Refresh token is not valid.  Unable to authenticate with Ring servers',
+    )
+
+    // Verify the token was cleared
+    expect(client.refreshToken).toBeUndefined()
+  })
+
+  it('should NOT clear refresh token on server errors', async () => {
+    const validToken = await wrapRefreshToken(refreshToken)
+    client = new RingRestClient({
+      refreshToken: validToken,
+    })
+
+    // Mock a server error
+    server.use(
+      http.post('https://oauth.ring.com/oauth/token', () => {
+        // Simulate 503 Service Unavailable
+        return HttpResponse.json(
+          { error: 'service_unavailable' },
+          { status: 503 },
+        )
+      }),
+    )
+
+    // Should throw an error but NOT clear the token
+    await expect(() => client.getAuth()).rejects.toThrow(
+      'Failed to fetch oauth token from Ring',
+    )
+
+    // Verify the token was NOT cleared
+    expect(client.refreshToken).toBe(validToken)
+  })
+
+  it('should NOT clear refresh token on rate limiting errors', async () => {
+    const validToken = await wrapRefreshToken(refreshToken)
+    client = new RingRestClient({
+      refreshToken: validToken,
+    })
+
+    // Mock a rate limiting error
+    server.use(
+      http.post('https://oauth.ring.com/oauth/token', () => {
+        // Simulate 429 Too Many Requests
+        return HttpResponse.json(
+          { error: 'rate_limit_exceeded' },
+          { status: 429 },
+        )
+      }),
+    )
+
+    // Should throw an error but NOT clear the token
+    await expect(() => client.getAuth()).rejects.toThrow(
+      'Failed to fetch oauth token from Ring',
+    )
+
+    // Verify the token was NOT cleared - this is critical for recovery from temporary issues
+    expect(client.refreshToken).toBe(validToken)
+  })
+
+  it('should NOT clear refresh token on access_denied from non-401 status', async () => {
+    const validToken = await wrapRefreshToken(refreshToken)
+    client = new RingRestClient({
+      refreshToken: validToken,
+    })
+
+    // Mock an error that has access_denied but not 401 status
+    server.use(
+      http.post('https://oauth.ring.com/oauth/token', () => {
+        return HttpResponse.json({ error: 'access_denied' }, { status: 403 })
+      }),
+    )
+
+    // Should throw an error but NOT clear the token (only 401 + invalid_grant/access_denied should clear)
+    await expect(() => client.getAuth()).rejects.toThrow(
+      'Failed to fetch oauth token from Ring',
+    )
+
+    // Verify the token was NOT cleared
+    expect(client.refreshToken).toBe(validToken)
   })
 })
 

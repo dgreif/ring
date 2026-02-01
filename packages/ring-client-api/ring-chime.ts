@@ -151,4 +151,18 @@ export class RingChime {
 
     return response.device_health
   }
+
+  async setNightlightEnabled(enabled: boolean) {
+    await this.restClient.request({
+      url: `https://api.ring.com/devices/v1/devices/${this.id}/settings`,
+      method: 'PATCH',
+      json: {
+        night_light_settings: {
+          light_sensor_enabled: enabled,
+        },
+      },
+    })
+
+    this.requestUpdate()
+  }
 }

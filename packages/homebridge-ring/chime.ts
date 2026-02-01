@@ -38,7 +38,10 @@ export class Chime extends BaseDataAccessory<RingChime> {
         Service.Switch,
         device.name + ' Play Motion',
         'play-motion',
-      )
+      ),
+      hasNightlight =
+        device.data.settings.night_light_settings?.light_sensor_enabled !==
+        undefined
 
     // Snooze Switch
     this.registerCharacteristic({
@@ -116,6 +119,29 @@ export class Chime extends BaseDataAccessory<RingChime> {
       },
       requestUpdate: () => device.requestUpdate(),
     })
+
+    // Nightlight (if supported)
+    if (hasNightlight) {
+      const nightlightService = this.getService(
+        Service.Lightbulb,
+        device.name + ' Nightlight',
+        'nightlight',
+      )
+
+      this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: nightlightService,
+        getValue: (data) =>
+          Boolean(data.settings.night_light_settings?.light_sensor_enabled),
+        setValue: (enabled: boolean) => {
+          logInfo(
+            `${device.name} nightlight ${enabled ? 'enabled' : 'disabled'}`,
+          )
+          return device.setNightlightEnabled(enabled)
+        },
+        requestUpdate: () => device.requestUpdate(),
+      })
+    }
 
     // Accessory Information Service
     this.registerCharacteristic({

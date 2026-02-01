@@ -352,7 +352,11 @@ export interface ChimeData {
     ding_audio_id: string
     motion_audio_user_id: string
     motion_audio_id: string
+    night_light_settings?: {
+      light_sensor_enabled: boolean
+    }
   }
+  night_light_state?: string
   features: {
     ringtones_enabled: boolean
   }
@@ -388,6 +392,9 @@ export interface ChimeUpdate {
     ding_audio_id?: string
     motion_audio_user_id?: string
     motion_audio_id?: string
+    night_light_settings?: {
+      light_sensor_enabled?: boolean
+    }
   }
 }
 

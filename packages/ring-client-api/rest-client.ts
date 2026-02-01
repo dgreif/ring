@@ -379,7 +379,7 @@ export class RingRestClient {
           // Token is truly invalid, clear it and retry with email/password if available
           this.refreshToken = undefined
           this.authConfig = undefined
-          logError('Refresh token is invalid and has been cleared')
+          logError('Refresh token is invalid and was cleared')
           logError(requestError)
           return this.getAuth(twoFactorAuthCode)
         }
@@ -387,7 +387,7 @@ export class RingRestClient {
         // For all other errors (network errors, server errors, rate limiting, etc.),
         // do NOT clear the refresh token - just fall through to error handling
         // This allows the system to recover from temporary failures
-        logError('Authentication failed but refresh token not cleared')
+        logError('Authentication failed but refresh token preserved')
         logError(requestError)
       }
 

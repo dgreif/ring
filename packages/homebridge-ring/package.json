@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
-    "@homebridge/plugin-ui-utils": "^2.1.0",
+    "@homebridge/plugin-ui-utils": "^2.1.2",
     "ring-client-api": "14.2.0",
-    "werift": "0.22.2"
+    "werift": "0.22.4"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

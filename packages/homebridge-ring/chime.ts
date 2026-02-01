@@ -39,9 +39,7 @@ export class Chime extends BaseDataAccessory<RingChime> {
         device.name + ' Play Motion',
         'play-motion',
       ),
-      hasNightlight =
-        device.data.settings.night_light_settings?.light_sensor_enabled !==
-        undefined
+      hasNightlight = device.data.settings.night_light_settings !== undefined
 
     // Snooze Switch
     this.registerCharacteristic({

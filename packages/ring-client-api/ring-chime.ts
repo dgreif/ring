@@ -7,7 +7,7 @@ import type {
 } from './ring-types.ts'
 import { ChimeModel } from './ring-types.ts'
 import type { RingRestClient } from './rest-client.ts'
-import { clientApi } from './rest-client.ts'
+import { clientApi, deviceApi } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
 
 const settingsWhichRequireReboot = [
@@ -150,5 +150,19 @@ export class RingChime {
     })
 
     return response.device_health
+  }
+
+  async setNightlightEnabled(enabled: boolean) {
+    await this.restClient.request({
+      url: deviceApi(`devices/${this.id}/settings`),
+      method: 'PATCH',
+      json: {
+        night_light_settings: {
+          light_sensor_enabled: enabled,
+        },
+      },
+    })
+
+    this.requestUpdate()
   }
 }

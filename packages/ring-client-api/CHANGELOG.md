@@ -1,5 +1,19 @@
 # ring-client-api
 
+## 14.3.0
+
+### Minor Changes
+
+- [#1706](https://github.com/dgreif/ring/pull/1706) [`8381520`](https://github.com/dgreif/ring/commit/8381520f86d7d7813f670e3887b43d92542f0a41) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add support for Ring Chime Pro nightlight
+
+- [#1705](https://github.com/dgreif/ring/pull/1705) [`5360c16`](https://github.com/dgreif/ring/commit/5360c16f91d8680a20e68b2dd28e63cc0108c241) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Block streaming from cameras based on location mode settings. This may prevent you from streaming in cases where you could previously stream in HomeKit but not the Ring app.
+
+- [#1707](https://github.com/dgreif/ring/pull/1707) [`5a8c844`](https://github.com/dgreif/ring/commit/5a8c844ffe4adc39e8a517628b26611fac36ef0a) Thanks [@copilot-swe-agent](https://github.com/apps/copilot-swe-agent)! - Add support for Kidde Ring Smoke + CO Alarm device (comp.bluejay.sensor_bluejay_wsc). Note, this has not been tested and may not be working yet.
+
+### Patch Changes
+
+- [`875f024`](https://github.com/dgreif/ring/commit/875f024c5f27c55785d7250bc78eff0fda0a4aa9) Thanks [@dgreif](https://github.com/dgreif)! - Update dependencies
+
 ## 14.2.0
 
 ### Minor Changes

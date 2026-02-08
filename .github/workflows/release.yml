@@ -9,7 +9,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write # needed for release PR creation
-  id-token: write # needed for provenance
+  id-token: write # needed for provenance and publishing to npm
 
 jobs:
   release:
@@ -41,5 +41,4 @@ jobs:
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CHANGESETS }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

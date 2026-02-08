@@ -51,6 +51,7 @@ import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch.ts'
 import { generateMacAddress } from './util.ts'
 import { Intercom } from './intercom.ts'
 import { Valve } from './valve.ts'
+import { VolumeAccessory } from './volume-accessory.ts'
 
 const ignoreHiddenDeviceTypes: string[] = [
   RingDeviceType.RingNetAdapter,
@@ -262,6 +263,29 @@ export class RingPlatform implements DynamicPlatformPlugin {
           onlyDeviceTypes = config.onlyDeviceTypes?.length
             ? config.onlyDeviceTypes
             : undefined
+
+        // add a VolumeAccessory when enabled and supported by the device
+        if (config.exposeAlarmVolume) {
+          devices.forEach((d) => {
+            const dev: any = d
+            const supportsVolume =
+              typeof dev?.setVolume === 'function' &&
+              typeof dev?.data?.volume === 'number'
+
+            if (supportsVolume) {
+              hapDevices.push({
+                deviceType: d.deviceType as string,
+                device: d as any,
+                isCamera: false,
+                id: d.id.toString() + 'volume',
+                name: `${d.name} Volume`,
+                AccessoryClass: VolumeAccessory as unknown as new (
+                  ...args: any[]
+                ) => BaseAccessory<any>,
+              })
+            }
+          })
+        }
 
         if (config.showPanicButtons && securityPanel) {
           hapDevices.push({

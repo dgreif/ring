@@ -10,7 +10,7 @@
   "devDependencies": {
     "dotenv": "17.2.3",
     "eslint-config-shared": "*",
-    "ring-client-api": "14.2.0",
+    "ring-client-api": "14.3.0",
     "tsconfig": "*"
   }
 }

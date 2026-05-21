@@ -59,7 +59,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
   generateToken = async ({ email, password, code }: TokenRequest) => {
     // use the existing restClient to avoid sending a token again
     this.restClient = this.restClient || new RingRestClient({ email, password })
-    console.log(`Getting token for ${email} with code ${code}`)
+    console.log(`Getting token for ${email}`)
 
     try {
       const authResponse = await this.restClient.getAuth(code)

@@ -94,6 +94,7 @@ function getAccessoryClass(
     case RingDeviceType.Keypad:
       return BrightnessOnly
     case RingDeviceType.SmokeAlarm:
+    case RingDeviceType.KiddeSmokeAlarm:
       return SmokeAlarm
     case RingDeviceType.CoAlarm:
       return CoAlarm

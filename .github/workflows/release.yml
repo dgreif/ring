@@ -20,7 +20,7 @@ jobs:
       # Enable turbo remote caching
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_REMOTE_ONLY: true
+      TURBO_CACHE: remote:w # Write-only to prevent cache poisoning during a release
 
     steps:
       - name: Checkout Repo
@@ -36,7 +36,7 @@ jobs:
         run: npm ci
 
       - name: Create Release Pull Request
-        uses: changesets/action@v1
+        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b # v1.8.0
         with:
           publish: npm run release
         env:

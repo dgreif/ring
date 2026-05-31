@@ -2,6 +2,10 @@ name: Node-CI
 
 on: [push, pull_request]
 
+# Least-privilege default token: this workflow only builds/tests/lints.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,7 +14,7 @@ jobs:
       # Enable turbo remote caching
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_REMOTE_ONLY: true
+      TURBO_CACHE: remote:rw
 
     strategy:
       matrix:

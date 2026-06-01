@@ -4,10 +4,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # Wait 3 days after a release before opening routine version-update PRs.
-    # Security Updates are unaffected and continue to open immediately.
-    cooldown:
-      default-days: 3
     groups:
       all-dependencies:
         patterns:
@@ -17,6 +13,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait 3 days after a release before opening routine version-update PRs.
+    # Security Updates are unaffected and continue to open immediately.
     cooldown:
       default-days: 3
     groups:

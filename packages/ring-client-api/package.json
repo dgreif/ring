@@ -5,15 +5,36 @@
   "main": "lib/index.js",
   "type": "module",
   "exports": {
-    ".": "./lib/index.js",
-    "./ffmpeg": "./lib/ffmpeg.js",
-    "./util": "./lib/util.js",
-    "./rest-client": "./lib/rest-client.js",
-    "./streaming/streaming-session": "./lib/streaming/streaming-session.js"
+    ".": {
+      "types": "./lib/index.d.ts",
+      "development": "./index.ts",
+      "default": "./lib/index.js"
+    },
+    "./ffmpeg": {
+      "types": "./lib/ffmpeg.d.ts",
+      "development": "./ffmpeg.ts",
+      "default": "./lib/ffmpeg.js"
+    },
+    "./util": {
+      "types": "./lib/util.d.ts",
+      "development": "./util.ts",
+      "default": "./lib/util.js"
+    },
+    "./rest-client": {
+      "types": "./lib/rest-client.d.ts",
+      "development": "./rest-client.ts",
+      "default": "./lib/rest-client.js"
+    },
+    "./streaming/streaming-session": {
+      "types": "./lib/streaming/streaming-session.d.ts",
+      "development": "./streaming/streaming-session.ts",
+      "default": "./lib/streaming/streaming-session.js"
+    }
   },
   "scripts": {
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js && rm -rf ./lib/test",
-    "dev": "tsc --declaration --watch --preserveWatchOutput",
+    "auth-cli": "node --conditions=development --env-file=../../.env ./ring-auth-cli.ts",
+    "device-data-cli": "node --conditions=development --env-file=../../.env ./ring-device-data-cli.ts",
     "lint": "eslint .",
     "test": "vitest run"
   },

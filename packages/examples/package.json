@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "example": "RING_ENV_FILE=../../.env DEBUG=ring node --conditions=development --env-file=../../.env ./example.ts",
+    "api-example": "DEBUG=ring node --conditions=development --env-file=../../.env ./api-example.ts",
+    "record-example": "DEBUG=ring node --conditions=development --env-file=../../.env ./record-example.ts",
+    "return-audio-example": "DEBUG=ring node --conditions=development --env-file=../../.env ./return-audio-example.ts",
+    "stream-example": "DEBUG=ring node --conditions=development --env-file=../../.env ./stream-example.ts",
+    "browser-example": "DEBUG=ring node --conditions=development --env-file=../../.env ./browser-example.ts",
     "lint": "eslint .",
     "build": "tsc --noEmit"
   },
   "devDependencies": {
-    "dotenv": "17.4.2",
     "eslint-config-shared": "*",
     "ring-client-api": "14.3.0",
     "tsconfig": "*"

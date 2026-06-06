@@ -8,9 +8,8 @@
   "scripts": {
     "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
     "lint": "eslint .",
-    "dev": "concurrently -c yellow,blue --kill-others \"npm:dev:build\" \"npm:dev:run\" ",
-    "dev:build": "tsc --watch --preserveWatchOutput",
-    "dev:run": "RING_DEBUG=true node --watch ../../node_modules/.bin/homebridge -U ../../.homebridge"
+    "dev": "bash ./dev-homebridge.sh",
+    "dev:run": "npm run dev"
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
@@ -19,7 +18,6 @@
     "werift": "0.23.0"
   },
   "devDependencies": {
-    "concurrently": "^10.0.3",
     "eslint-config-shared": "*",
     "homebridge": "2.0.2",
     "tsconfig": "*",

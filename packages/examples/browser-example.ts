@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { RingApi } from 'ring-client-api'
 import fs from 'node:fs/promises'
 import path from 'node:path'

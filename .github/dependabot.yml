@@ -1,23 +1,22 @@
-version: 2
 updates:
-  - package-ecosystem: npm
-    directory: /
-    schedule:
-      interval: weekly
-    groups:
-      all-dependencies:
-        patterns:
-          - '*'
-
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: weekly
-    # Wait 3 days after a release before opening routine version-update PRs.
-    # Security Updates are unaffected and continue to open immediately.
-    cooldown:
-      default-days: 3
-    groups:
-      all-dependencies:
-        patterns:
-          - '*'
+- directory: /
+  groups:
+    all-dependencies:
+      patterns:
+      - "*"
+  package-ecosystem: npm
+  schedule:
+    interval: weekly
+- cooldown:
+    default-days: 3
+  directory: /
+  groups:
+    all-dependencies:
+      patterns:
+      - "*"
+  ignore:
+  - dependency-name: "github/gh-aw-actions/**" # Managed by gh aw compile. Version-locked to the gh-aw compiler; do not bump.
+  package-ecosystem: github-actions
+  schedule:
+    interval: weekly
+version: 2

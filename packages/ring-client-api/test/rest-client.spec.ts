@@ -3,6 +3,7 @@ import { setupServer } from 'msw/node'
 import { RingRestClient } from '../rest-client.ts'
 import { clearTimeouts, getHardwareId, toBase64 } from '../util.ts'
 import { firstValueFrom } from 'rxjs'
+import { createHash } from 'crypto'
 import {
   afterAll,
   afterEach,
@@ -14,7 +15,14 @@ import {
 } from 'vitest'
 
 let sessionCreatedCount = 0,
-  client: RingRestClient
+  client: RingRestClient,
+  // Tracks whether the PKCE signin flow has been authenticated (simulates session cookies)
+  pkceAuthenticated = false,
+  // Stores the code_challenge from the initial authorize request for PKCE verification
+  storedCodeChallenge = '',
+  // Stores the state from the initial authorize request so it can be returned after auth
+  storedState = ''
+
 const email = 'some@one.com',
   password = 'abc123!',
   phone = '+1xxxxxxxx89',
@@ -25,14 +33,149 @@ const email = 'some@one.com',
   refreshToken = 'ey__refresh_token',
   secondRefreshToken = 'ey__second_refresh_token',
   thirdRefreshToken = 'ey__third_refresh_token',
+  authorizationCode = 'test_auth_code_12345',
+  csrfToken = 'test-csrf-token-abc',
   server = setupServer(
+    // GET /oauth/v2/authorize — Initiates or completes the OAuth PKCE flow
+    http.get(
+      'https://oauth.ring.com/oauth/v2/authorize',
+      ({ request: req }) => {
+        const url = new URL(req.url)
+        const codeChallenge = url.searchParams.get('code_challenge')
+        const state = url.searchParams.get('state')
+
+        if (pkceAuthenticated) {
+          // After successful signin/2FA, return 302 with authorization code
+          // Use the stored state from the initial authorize call (second call may not have params)
+          return new HttpResponse(null, {
+            status: 302,
+            headers: {
+              Location: `https://ring.com/signin/callback?code=${authorizationCode}&state=${storedState}`,
+            },
+          })
+        }
+
+        // First call — store the code_challenge and state, then redirect to signin
+        if (codeChallenge) {
+          storedCodeChallenge = codeChallenge
+        }
+        if (state) {
+          storedState = state
+        }
+
+        return new HttpResponse(null, {
+          status: 302,
+          headers: {
+            Location: '/oauth/v2/signin',
+            'Set-Cookie': 'ring_session=test-session; Path=/',
+          },
+        })
+      },
+    ),
+
+    // GET /oauth/v2/signin — Returns the signin page with CSRF token
+    http.get('https://oauth.ring.com/oauth/v2/signin', () => {
+      return new HttpResponse(
+        `<!DOCTYPE html>
+<html>
+<head><title>Ring Sign In</title></head>
+<body>
+<script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"csrfToken":"${csrfToken}"}}}</script>
+</body>
+</html>`,
+        {
+          headers: {
+            'Content-Type': 'text/html',
+            'Set-Cookie': 'ring_session=test-session; Path=/',
+          },
+        },
+      )
+    }),
+
+    // POST /oauth/v2/signin — Submit credentials
+    http.post(
+      'https://oauth.ring.com/oauth/v2/signin',
+      async ({ request: req }) => {
+        const body = await req.text()
+        const params = new URLSearchParams(body)
+
+        const submittedCsrf = params.get('csrf-token')
+        if (submittedCsrf !== csrfToken) {
+          return HttpResponse.json(
+            { error: 'Invalid CSRF token' },
+            { status: 403 },
+          )
+        }
+
+        const submittedEmail = params.get('username')
+        const submittedPassword = params.get('password')
+
+        if (submittedEmail !== email || submittedPassword !== password) {
+          // Wrong credentials
+          return HttpResponse.json(
+            { error: 'access_denied' },
+            { status: 401 },
+          )
+        }
+
+        // Correct credentials — return 412 requiring 2FA
+        return HttpResponse.json(
+          {
+            next_time_in_secs: 60,
+            phone,
+            tsv_state: 'sms',
+          },
+          {
+            status: 412,
+            headers: {
+              'Set-Cookie': 'ring_session=test-session-authed; Path=/',
+            },
+          },
+        )
+      },
+    ),
+
+    // POST /oauth/v2/2fa/verify — Verify 2FA code
+    http.post(
+      'https://oauth.ring.com/oauth/v2/2fa/verify',
+      async ({ request: req }) => {
+        const body = await req.text()
+        const params = new URLSearchParams(body)
+
+        const code = params.get('2fa_code')
+
+        if (code !== twoFactorAuthCode) {
+          // Wrong 2FA code
+          return HttpResponse.json(
+            { error: 'Verification Code is invalid or expired' },
+            { status: 400 },
+          )
+        }
+
+        // Correct 2FA code — mark as authenticated
+        pkceAuthenticated = true
+        return HttpResponse.json(
+          {
+            redirect_url: '/oauth/v2/authorize',
+            status: 'auth-completed',
+            user_id: 9463336,
+          },
+          {
+            status: 201,
+            headers: {
+              'Set-Cookie':
+                'ring_session=test-session-2fa-verified; Path=/',
+            },
+          },
+        )
+      },
+    ),
+
+    // POST /oauth/token — Token exchange (authorization_code or refresh_token)
     http.post(
       'https://oauth.ring.com/oauth/token',
       async ({ request: req }) => {
-        const body: any = await req.json()
-
         if (
-          req.headers.get('2fa-support') !== 'true' ||
           req.headers.get('User-Agent') !== 'android:com.ringapp' ||
           req.headers.get('hardware_id') !== (await hardwareIdPromise)
         ) {
@@ -40,39 +183,71 @@ const email = 'some@one.com',
             {
               code: 1,
               error:
-                'Invalid auth headers: ' + JSON.stringify(req.headers, null, 2),
+                'Invalid auth headers',
             },
             { status: 400 },
           )
         }
 
-        if (body.grant_type === 'refresh_token') {
-          if (body.refresh_token === refreshToken) {
-            // Valid refresh token
+        const bodyText = await req.text()
+        const params = new URLSearchParams(bodyText)
+        const grantType = params.get('grant_type')
+
+        if (grantType === 'authorization_code') {
+          const code = params.get('code')
+          const codeVerifier = params.get('code_verifier')
+          const clientId = params.get('client_id')
+
+          if (code !== authorizationCode || clientId !== 'ring_official_android') {
             return HttpResponse.json(
-              {
-                access_token: accessToken,
-                expires_in: 3600,
-                refresh_token: secondRefreshToken,
-                scope: 'client',
-                token_type: 'Bearer',
-              },
-              { status: 200 },
+              { error: 'invalid_grant' },
+              { status: 400 },
             )
           }
 
-          if (body.refresh_token === secondRefreshToken) {
-            // Valid refresh token
-            return HttpResponse.json(
-              {
-                access_token: secondAccessToken,
-                expires_in: 3600,
-                refresh_token: thirdRefreshToken,
-                scope: 'client',
-                token_type: 'Bearer',
-              },
-              { status: 200 },
-            )
+          // Verify PKCE: SHA256(code_verifier) should equal the stored code_challenge
+          if (codeVerifier && storedCodeChallenge) {
+            const computedChallenge = createHash('sha256')
+              .update(codeVerifier)
+              .digest('base64url')
+            if (computedChallenge !== storedCodeChallenge) {
+              return HttpResponse.json(
+                { error: 'invalid_grant', error_description: 'PKCE verification failed' },
+                { status: 400 },
+              )
+            }
+          }
+
+          return HttpResponse.json({
+            access_token: accessToken,
+            expires_in: 3600,
+            refresh_token: refreshToken,
+            scope: 'client',
+            token_type: 'Bearer',
+          })
+        }
+
+        if (grantType === 'refresh_token') {
+          const rt = params.get('refresh_token')
+
+          if (rt === refreshToken) {
+            return HttpResponse.json({
+              access_token: accessToken,
+              expires_in: 3600,
+              refresh_token: secondRefreshToken,
+              scope: 'client',
+              token_type: 'Bearer',
+            })
+          }
+
+          if (rt === secondRefreshToken) {
+            return HttpResponse.json({
+              access_token: secondAccessToken,
+              expires_in: 3600,
+              refresh_token: thirdRefreshToken,
+              scope: 'client',
+              token_type: 'Bearer',
+            })
           }
 
           // Invalid refresh token
@@ -85,68 +260,14 @@ const email = 'some@one.com',
           )
         }
 
-        if (
-          body.grant_type !== 'password' ||
-          body.client_id !== 'ring_official_android' ||
-          body.scope !== 'client'
-        ) {
-          return HttpResponse.json(
-            {
-              code: 1,
-              error: 'Invalid auth request: ' + JSON.stringify(body),
-            },
-            { status: 400 },
-          )
-        }
-
-        if (body.username !== email || body.password !== password) {
-          // Wrong username or password
-          return HttpResponse.json(
-            {
-              error: 'access_denied',
-              error_description: 'invalid user credentials',
-            },
-            { status: 401 },
-          )
-        }
-
-        if (
-          req.headers.get('2fa-code') &&
-          req.headers.get('2fa-code') !== twoFactorAuthCode
-        ) {
-          // Wrong 2fa code
-          return HttpResponse.json(
-            {
-              err_msg: 'bad request response from dependency service',
-              error: 'Verification Code is invalid or expired',
-            },
-            { status: 400 },
-          )
-        }
-
-        if (req.headers.get('2fa-code') === twoFactorAuthCode) {
-          // Successfull login with correct 2fa code
-          return HttpResponse.json({
-            access_token: accessToken,
-            expires_in: 3600,
-            refresh_token: refreshToken,
-            scope: 'client',
-            token_type: 'Bearer',
-            responseTimestamp: Date.now(),
-          })
-        }
-
-        // 2fa code not provided, so return the 2fa prompt
         return HttpResponse.json(
-          {
-            next_time_in_secs: 60,
-            phone,
-            tsv_state: 'sms',
-          },
-          { status: 412 },
+          { error: 'unsupported_grant_type' },
+          { status: 400 },
         )
       },
     ),
+
+    // POST /clients_api/session — Session creation
     http.post(
       'https://api.ring.com/clients_api/session',
       async ({ request: req }) => {
@@ -195,6 +316,9 @@ async function wrapRefreshToken(rt: string) {
 
 beforeEach(() => {
   sessionCreatedCount = 0
+  pkceAuthenticated = false
+  storedCodeChallenge = ''
+  storedState = ''
 })
 
 beforeAll(() => {
@@ -255,7 +379,7 @@ describe('getAuth', () => {
     })
 
     await expect(() => client.getAuth()).rejects.toThrow(
-      'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: access_denied)',
+      'Failed to fetch oauth token from Ring. Verify that your email and password are correct.',
     )
   })
 
@@ -265,7 +389,7 @@ describe('getAuth', () => {
       email,
     })
 
-    // ignore the first reject, it's it('ove
+    // ignore the first reject, it triggers 2fa prompt
     await expect(() => client.getAuth()).rejects.toThrow()
 
     // call getAuth again with an invalid 2fa code, which should fail
@@ -305,6 +429,23 @@ describe('getAuth', () => {
       oldRefreshToken: refreshToken,
       newRefreshToken: await wrapRefreshToken(secondRefreshToken),
     })
+  })
+
+  it('should verify PKCE code_verifier matches code_challenge', async () => {
+    client = new RingRestClient({
+      password,
+      email,
+    })
+
+    // First call triggers 2FA
+    await expect(() => client.getAuth()).rejects.toThrow()
+
+    // Second call with valid 2FA code should succeed with valid PKCE verification
+    const auth = await client.getAuth(twoFactorAuthCode)
+    expect(auth.access_token).toEqual(accessToken)
+
+    // Verify that a code_challenge was stored by the mock (meaning PKCE params were sent)
+    expect(storedCodeChallenge).toBeTruthy()
   })
 })
 

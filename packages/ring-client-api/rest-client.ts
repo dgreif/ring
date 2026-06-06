@@ -379,7 +379,7 @@ export class RingRestClient {
 
         if (response.status === 400) {
           this.promptFor2fa = 'Invalid 2fa code entered.  Please try again.'
-          throw new Error(responseError)
+          throw new Error(responseError, { cause: requestError })
         }
 
         if ('tsv_state' in responseData) {
@@ -396,6 +396,7 @@ export class RingRestClient {
 
         throw new Error(
           'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.',
+          { cause: requestError },
         )
       }
 
@@ -413,7 +414,7 @@ export class RingRestClient {
           ` (error: ${responseError})`
       logError(requestError.response || requestError)
       logError(errorMessage)
-      throw new Error(errorMessage)
+      throw new Error(errorMessage, { cause: requestError })
     }
   }
 
@@ -563,7 +564,12 @@ export class RingRestClient {
           return this.request(options)
         }
 
-        throw new Error('Not found with response: ' + stringify(response.body))
+        throw new Error(
+          'Not found with response: ' + stringify(response.body),
+          {
+            cause: e,
+          },
+        )
       }
 
       if (response.status) {

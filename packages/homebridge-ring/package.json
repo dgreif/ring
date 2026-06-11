@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "eslint-config-shared": "*",
-    "homebridge": "2.0.2",
+    "homebridge": "2.1.0",
     "tsconfig": "*",
     "typescript": "6.0.3"
   },

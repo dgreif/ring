@@ -195,12 +195,11 @@ export default tseslint.config(
       '@typescript-eslint/no-object-literal-type-assertion': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
-      '@typescript-eslint/no-unused-vars': 0,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/consistent-type-imports': 2,
-      // '@typescript-eslint/no-unused-vars': [
-      //   'error',
-      //   { argsIgnorePattern: '^_' },
-      // ],
     },
   },
 )

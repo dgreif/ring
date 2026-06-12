@@ -316,7 +316,7 @@ export class WebrtcConnection extends Subscribed {
         method: 'close',
       })
       this.ws.close()
-    } catch (_) {
+    } catch {
       // ignore any errors since we are stopping the call
     }
     this.hasEnded = true

@@ -54,7 +54,6 @@
     "@types/debug": "4.1.13",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "25.9.1",
-    "@types/uuid": "11.0.0",
     "@types/ws": "^8.18.1",
     "eslint-config-shared": "*",
     "msw": "^2.14.6",

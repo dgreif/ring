@@ -154,7 +154,7 @@ function logPushReceiver(...args: any) {
       // don't log ECONNRESET errors
       return
     }
-  } catch (_) {
+  } catch {
     // proceed to log error
   }
 

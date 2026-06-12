@@ -285,7 +285,7 @@ export class Location extends Subscribed {
         if (channel === 'DataUpdate') {
           this.onDataUpdate.next(message)
         }
-      } catch (e) {
+      } catch {
         logError('Error parsing message from server: ' + event.data)
       }
     })

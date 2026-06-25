@@ -16,6 +16,7 @@ on:
         required: true
         type: number
   reaction: eyes
+  roles: all
 
 permissions: read-all
 

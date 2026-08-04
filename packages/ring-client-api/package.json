@@ -45,21 +45,21 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.31.7",
-    "undici": "^7.29.0",
-    "uuid": "^14.0.0",
-    "werift": "0.23.0"
+    "systeminformation": "^5.33.1",
+    "undici": "^8.9.0",
+    "uuid": "^14.0.1",
+    "werift": "0.24.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.13",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "25.9.1",
+    "@types/node": "26.1.2",
     "@types/ws": "^8.18.1",
     "eslint-config-shared": "*",
-    "msw": "^2.14.6",
+    "msw": "^2.15.0",
     "tsconfig": "*",
-    "typescript": "6.0.3",
-    "vitest": "^4.1.8"
+    "typescript": "7.0.2",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": "^20 || ^22 || ^24 || ^26"

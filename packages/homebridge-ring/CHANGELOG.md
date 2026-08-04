@@ -1,5 +1,14 @@
 # homebridge-ring
 
+## 14.3.1
+
+### Patch Changes
+
+- [#1746](https://github.com/dgreif/ring/pull/1746) [`25c6ec6`](https://github.com/dgreif/ring/commit/25c6ec63a9826f42f3f4269d0c2aad6f1e0e4185) Thanks [@kzaky](https://github.com/kzaky)! - Redact the 2FA code from the homebridge-ui server log on token exchange. Codes are short-lived and single-use, but logs are frequently pasted into bug reports, so removing the value from the log is a small defensive improvement.
+
+- Updated dependencies []:
+  - ring-client-api@14.3.1
+
 ## 14.3.0
 
 ### Minor Changes

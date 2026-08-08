@@ -25,13 +25,7 @@ import {
   switchMap,
   throttleTime,
 } from 'rxjs/operators'
-import {
-  clearTimeouts,
-  enableDebug,
-  logDebug,
-  logError,
-  logInfo,
-} from './util.ts'
+import { clearTimeouts, enableDebug, logDebug, logError } from './util.ts'
 import { setFfmpegPath } from './ffmpeg.ts'
 import { Subscribed } from './subscribed.ts'
 import { PushReceiver } from '@eneris/push-receiver'
@@ -322,9 +316,11 @@ export class RingApi extends Subscribed {
 
     // NOTE: We intentionally do NOT drop the first 2 seconds of pushes.
     // The original code silently discarded the initial burst of queued
-    // notifications on every (re)connect, which meant legitimate events
-    // that arrived during FCM reconnect were lost. push-receiver
-    // deduplicates by persistentId within a session, which is sufficient.
+    // notifications received in the first 2 seconds after this listener is
+    // registered (i.e. at startup, since this only runs once per RingApi
+    // instance), which meant legitimate events already queued at boot were
+    // lost. push-receiver deduplicates by persistentId within a session,
+    // which is sufficient protection against re-processing.
     pushReceiver.onNotification(({ message }) => {
       try {
         const messageData = {} as any

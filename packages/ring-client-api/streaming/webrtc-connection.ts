@@ -27,7 +27,9 @@ export class WebrtcConnection extends Subscribed {
   private readonly dialogId = generateUuid()
   readonly onCameraConnected = new ReplaySubject<void>(1)
   readonly onCallAnswered = new ReplaySubject<string>(1)
-  readonly onCallEnded = new ReplaySubject<void>(1)
+  readonly onCallEnded = new ReplaySubject<
+    { code: number; text: string } | undefined
+  >(1)
   readonly onError = new ReplaySubject<void>(1)
   readonly onMessage = new ReplaySubject<{ method: string }>()
   readonly onWsOpen
@@ -224,7 +226,7 @@ export class WebrtcConnection extends Subscribed {
       case 'close':
         logError('Video stream closed')
         logError(message.body)
-        this.callEnded()
+        this.callEnded(message.body.reason)
         return
       case 'camera_started':
       case 'stream_info':
@@ -305,7 +307,7 @@ export class WebrtcConnection extends Subscribed {
   }
 
   private hasEnded = false
-  private callEnded() {
+  private callEnded(reason?: { code: number; text: string }) {
     if (this.hasEnded) {
       return
     }
@@ -322,7 +324,7 @@ export class WebrtcConnection extends Subscribed {
     this.hasEnded = true
 
     this.unsubscribe()
-    this.onCallEnded.next()
+    this.onCallEnded.next(reason)
     this.pc.close()
   }
 

@@ -41,12 +41,18 @@ export class StreamingSession extends Subscribed {
   private readonly returnAudioSplitter = new RtpSplitter()
   private readonly camera
   private connection
+  private readonly createConnection
 
-  constructor(camera: RingCamera, connection: WebrtcConnection) {
+  constructor(
+    camera: RingCamera,
+    connection: WebrtcConnection,
+    createConnection: () => Promise<WebrtcConnection>,
+  ) {
     super()
 
     this.camera = camera
     this.connection = connection
+    this.createConnection = createConnection
     this.bindToConnection(connection)
   }
 
@@ -57,7 +63,14 @@ export class StreamingSession extends Subscribed {
       connection.onCallAnswered.subscribe((sdp) => {
         this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
       }),
-      connection.onCallEnded.subscribe(() => this.callEnded()),
+      connection.onCallEnded.subscribe((reason) => {
+        if (reason?.code === 10 && reason.text === 'answered_timeout') {
+          void this.reconnect()
+          return
+        }
+
+        this.callEnded()
+      }),
     )
   }
 
@@ -221,6 +234,34 @@ export class StreamingSession extends Subscribed {
         },
       })
     this.onCallEnded.pipe(take(1)).subscribe(() => ff.stop())
+  }
+
+  private reconnecting = false
+
+  private async reconnect() {
+    if (this.reconnecting || this.hasEnded) {
+      return
+    }
+
+    this.reconnecting = true
+
+    try {
+      const connection = await this.createConnection()
+
+      if (this.hasEnded) {
+        connection.stop()
+        return
+      }
+
+      this.connection = connection
+      this.bindToConnection(connection)
+    } catch (error) {
+      logError(`Failed to reconnect stream for ${this.camera.name}`)
+      logError(error)
+      this.callEnded()
+    } finally {
+      this.reconnecting = false
+    }
   }
 
   private hasEnded = false

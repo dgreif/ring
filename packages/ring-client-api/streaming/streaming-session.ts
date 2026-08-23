@@ -7,12 +7,26 @@ import {
 import { firstValueFrom, ReplaySubject, Subject } from 'rxjs'
 import type { WebrtcConnection } from './webrtc-connection.ts'
 import { getFfmpegPath } from '../ffmpeg.ts'
-import { logDebug, logError } from '../util.ts'
+import { logDebug, logError, logInfo } from '../util.ts'
 import type { RingCamera } from '../ring-camera.ts'
 import { concatMap, map, mergeWith, take } from 'rxjs/operators'
 import { Subscribed } from '../subscribed.ts'
 
 type SpawnInput = string | number
+type RtpState = {
+  generation: number
+  inputSequenceNumber: number
+  inputTimestamp: number
+  outputSequenceNumber: number
+  outputTimestamp: number
+  timestampIncrement: number
+}
+
+function unsignedDelta(value: number, previousValue: number, bits: 16 | 32) {
+  const modulus = 2 ** bits
+  return (value - previousValue + modulus) % modulus
+}
+
 export interface FfmpegOptions {
   input?: SpawnInput[]
   video?: SpawnInput[] | false
@@ -42,6 +56,9 @@ export class StreamingSession extends Subscribed {
   private readonly camera
   private connection
   private readonly createConnection
+  private videoRtpState?: RtpState
+  private audioRtpState?: RtpState
+  private connectionGeneration = 0
 
   constructor(
     camera: RingCamera,
@@ -57,21 +74,87 @@ export class StreamingSession extends Subscribed {
   }
 
   private bindToConnection(connection: WebrtcConnection) {
+    const generation = this.connectionGeneration++
+
     this.addSubscriptions(
-      connection.onAudioRtp.subscribe(this.onAudioRtp),
-      connection.onVideoRtp.subscribe(this.onVideoRtp),
+      connection.onAudioRtp.subscribe((rtp) => {
+        this.forwardRtp(rtp, 'audio', generation)
+      }),
+      connection.onVideoRtp.subscribe((rtp) => {
+        this.forwardRtp(rtp, 'video', generation)
+      }),
       connection.onCallAnswered.subscribe((sdp) => {
         this.onUsingOpus.next(sdp.toLocaleLowerCase().includes(' opus/'))
+
+        if (generation > 0) {
+          logInfo(`Reconnected stream for ${this.camera.name}`)
+          connection.requestKeyFrame()
+        }
       }),
       connection.onCallEnded.subscribe((reason) => {
         if (reason?.code === 10 && reason.text === 'answered_timeout') {
-          void this.reconnect()
+          this.reconnect().catch(logError)
           return
         }
 
         this.callEnded()
       }),
     )
+  }
+
+  private forwardRtp(
+    rtp: RtpPacket,
+    media: 'audio' | 'video',
+    generation: number,
+  ) {
+    const stateProperty = media === 'video' ? 'videoRtpState' : 'audioRtpState',
+      subject = media === 'video' ? this.onVideoRtp : this.onAudioRtp,
+      state = this[stateProperty]
+
+    if (!state) {
+      this[stateProperty] = {
+        generation,
+        inputSequenceNumber: rtp.header.sequenceNumber,
+        inputTimestamp: rtp.header.timestamp,
+        outputSequenceNumber: rtp.header.sequenceNumber,
+        outputTimestamp: rtp.header.timestamp,
+        timestampIncrement: media === 'video' ? 3000 : 960,
+      }
+      subject.next(rtp)
+      return
+    }
+
+    const isNewConnection = state.generation !== generation,
+      sequenceIncrement = isNewConnection
+        ? 1
+        : unsignedDelta(
+            rtp.header.sequenceNumber,
+            state.inputSequenceNumber,
+            16,
+          ),
+      inputTimestampIncrement = unsignedDelta(
+        rtp.header.timestamp,
+        state.inputTimestamp,
+        32,
+      ),
+      timestampIncrement = isNewConnection
+        ? state.timestampIncrement
+        : inputTimestampIncrement
+
+    state.generation = generation
+    state.inputSequenceNumber = rtp.header.sequenceNumber
+    state.inputTimestamp = rtp.header.timestamp
+    state.outputSequenceNumber =
+      (state.outputSequenceNumber + sequenceIncrement) & 0xffff
+    state.outputTimestamp = (state.outputTimestamp + timestampIncrement) >>> 0
+
+    if (!isNewConnection && inputTimestampIncrement > 0) {
+      state.timestampIncrement = inputTimestampIncrement
+    }
+
+    rtp.header.sequenceNumber = state.outputSequenceNumber
+    rtp.header.timestamp = state.outputTimestamp
+    subject.next(rtp)
   }
 
   /**
@@ -254,6 +337,7 @@ export class StreamingSession extends Subscribed {
       }
 
       this.connection = connection
+      logInfo(`Reconnecting stream for ${this.camera.name}`)
       this.bindToConnection(connection)
     } catch (error) {
       logError(`Failed to reconnect stream for ${this.camera.name}`)

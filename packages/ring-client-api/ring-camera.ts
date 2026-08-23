@@ -438,10 +438,8 @@ export class RingCamera extends Subscribed {
     }
 
     const connection = await this.createStreamingConnection(options)
-    return new StreamingSession(
-      this,
-      connection,
-      () => this.createStreamingConnection(options),
+    return new StreamingSession(this, connection, () =>
+      this.createStreamingConnection(options),
     )
   }
 

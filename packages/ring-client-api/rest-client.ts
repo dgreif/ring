@@ -64,6 +64,14 @@ function generateState() {
   return randomBytes(16).toString('hex')
 }
 
+function parseJsonBody<T>(body: string): T | undefined {
+  try {
+    return JSON.parse(body) as T
+  } catch {
+    return undefined
+  }
+}
+
 class SimpleCookieJar {
   private cookies = new Map<string, string>()
 
@@ -530,15 +538,35 @@ export class RingRestClient {
     )
 
     cookieJar.extractFromResponse(response)
+    const location = response.headers.get('location')
     logDebug(`Cookies after submitCredentials: ${cookieJar.getCookieHeader()}`)
     logDebug(`submitCredentials response status: ${response.status}`)
+    logDebug(`submitCredentials response location: ${location}`)
 
-    if (response.status === 412) {
-      // 2FA required
-      const responseData = (await response.json()) as Auth2faResponse
+    const responseBody = await response.text().catch(() => ''),
+      responseData = parseJsonBody<Auth2faResponse>(responseBody)
+    logDebug(
+      `submitCredentials response body: ${responseBody.substring(0, 1000)}`,
+    )
+
+    // Ring has historically signalled "2fa required" with a 412, but has also
+    // been seen returning 2xx (or a redirect to the 2fa page) carrying the same
+    // payload.  Detect it from the response contents rather than the status
+    // alone — missing it means we never prompt for the code Ring just sent, and
+    // the following /authorize call returns the 2fa page instead of a redirect
+    // carrying the authorization code.
+    const needs2fa =
+      response.status === 412 ||
+      Boolean(
+        responseData &&
+          ('tsv_state' in responseData || 'next_time_in_secs' in responseData),
+      ) ||
+      Boolean(location?.includes('/2fa'))
+
+    if (needs2fa) {
       this.using2fa = true
 
-      if ('tsv_state' in responseData) {
+      if (responseData && 'tsv_state' in responseData) {
         const { tsv_state, phone } = responseData,
           prompt =
             tsv_state === 'totp'
@@ -555,10 +583,9 @@ export class RingRestClient {
       )
     }
 
-    if (!response.ok && response.status !== 302) {
-      const errorBody = await response.text().catch(() => '')
+    if (!response.ok && !(response.status >= 300 && response.status < 400)) {
       throw new Error(
-        `Sign-in failed with status ${response.status}: ${errorBody}`,
+        `Sign-in failed with status ${response.status}: ${responseBody}`,
       )
     }
   }

@@ -103,18 +103,22 @@ export class RingApi extends Subscribed {
   }
 
   async fetchRingDevices() {
-    const { devices } = await this.restClient.request<{
-        devices: (
-          | CameraData
-          | ChimeData
-          | BaseStation
-          | BeamBridge
-          | IntercomHandsetData
-          | OnvifCameraData
-          | ThirdPartyGarageDoorOpener
-          | UnknownDevice
-        )[]
-      }>({ url: deviceInfoApi('devices') }),
+    const { devices, device_operation_sets: deviceOperationSets } =
+        await this.restClient.request<{
+          devices: (
+            | CameraData
+            | ChimeData
+            | BaseStation
+            | BeamBridge
+            | IntercomHandsetData
+            | OnvifCameraData
+            | ThirdPartyGarageDoorOpener
+            | UnknownDevice
+          )[]
+          device_operation_sets?: {
+            [operationSet: string]: { [operation: string]: object }
+          }
+        }>({ url: deviceInfoApi('devices') }),
       doorbots = [] as CameraData[],
       authorizedDoorbots = [] as CameraData[],
       stickupCams = [] as CameraData[],
@@ -127,7 +131,18 @@ export class RingApi extends Subscribed {
       unknownDevices = [] as UnknownDevice[]
 
     for (const device of devices) {
-      const kind = device.kind as string
+      // Resolve the operation set the device was tagged with into the list of
+      // operations this account may perform on it.  Devices shared by another
+      // account can be limited to a subset (no device_alerts_manage, for
+      // example, which is required to subscribe to ding/motion notifications)
+      const kind = device.kind as string,
+        operationSet = (device as CameraData).operation_set
+
+      if (operationSet && deviceOperationSets?.[operationSet]) {
+        ;(device as CameraData).operations = Object.keys(
+          deviceOperationSets[operationSet],
+        )
+      }
 
       if (doorbellKinds.has(kind)) {
         if ((device as CameraData).owned === false) {
@@ -312,7 +327,7 @@ export class RingApi extends Subscribed {
               device: {
                 metadata: {
                   ...this.restClient.baseSessionMetadata,
-                  pn_dict_version: '2.0.0',
+                  pn_dict_version: '2.4.0',
                   pn_service: 'fcm',
                 },
                 os: 'android',

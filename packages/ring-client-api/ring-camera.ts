@@ -5,6 +5,7 @@ import {
   type CameraDeviceSettingsData,
   type CameraEventOptions,
   type CameraEventResponse,
+  type EventHistoryResponse,
   type CameraHealth,
   DoorbellType,
   type HistoryOptions,
@@ -17,7 +18,13 @@ import {
   type PushNotification,
 } from './ring-types.ts'
 import type { RingRestClient } from './rest-client.ts'
-import { appApi, clientApi, deviceApi } from './rest-client.ts'
+import {
+  appApi,
+  clientApi,
+  deviceApi,
+  deviceInfoApi,
+  evmApi,
+} from './rest-client.ts'
 import { BehaviorSubject, firstValueFrom, ReplaySubject, Subject } from 'rxjs'
 import {
   distinctUntilChanged,
@@ -93,6 +100,98 @@ export function getBatteryLevel(
   }
 
   return Math.min(...levels)
+}
+
+// Matches the timestamp format used by the legacy health endpoints
+// (ex. 2026-08-25T23:01:14+00:00)
+function formatHealthUpdatedAt(lastUpdateTime: number | undefined) {
+  const updatedAt = lastUpdateTime
+    ? new Date(lastUpdateTime * 1000)
+    : new Date()
+
+  return updatedAt.toISOString().replace(/\.\d{3}Z$/, '+00:00')
+}
+
+// The legacy clients_api health endpoint only works for devices owned by the
+// authenticated account, returning a 404 for shared devices, so health is
+// instead derived from the health data included with the device data
+export function mapCameraHealth(
+  id: number,
+  health: Partial<CameraData['health']> | undefined,
+): CameraHealth | undefined {
+  if (!health || !Object.keys(health).length) {
+    // Some device types (chimes, for example) have no health data in the
+    // device_info api and must continue to use the legacy health endpoint
+    return undefined
+  }
+
+  const { rssi, rssi_category: rssiCategory, ...rest } = health
+
+  return {
+    id,
+    wifi_name: rest.wifi_name,
+    battery_percentage: rest.battery_percentage,
+    battery_percentage_category: rest.battery_percentage_category ?? 'unknown',
+    battery_voltage: rest.battery_voltage ?? null,
+    battery_voltage_category: rest.battery_voltage_category ?? null,
+    latest_signal_strength: rssi ?? null,
+    latest_signal_category: rssiCategory ?? 'NA',
+    average_signal_strength: rssi ?? null,
+    average_signal_category: rssiCategory ?? 'NA',
+    firmware: rest.firmware_version_status ?? rest.firmware_version ?? '',
+    updated_at: formatHealthUpdatedAt(rest.last_update_time),
+    wifi_is_ring_network: rest.wifi_is_ring_network,
+    packet_loss_category: rest.packet_loss_category ?? 'NA',
+    packet_loss_strength: rest.packet_loss ?? null,
+    network_connection: rest.network_connection_value,
+    transformer_voltage: rest.transformer_voltage,
+    transformer_voltage_category: rest.transformer_voltage_category,
+    ext_power_state: rest.ext_power_state,
+  }
+}
+
+// The evm history api replaces the legacy clients_api events endpoints, which
+// return a 404 for devices that are shared with, but not owned by, this account
+export function getEventHistory(
+  restClient: RingRestClient,
+  sourceIds: (string | number)[],
+  options: CameraEventOptions = {},
+) {
+  const { limit, kind, state, favorites, olderThanId, pagination_key } =
+      options,
+    queryString = Object.entries({
+      source_ids: sourceIds.join(','),
+      limit,
+      event_types: kind,
+      state,
+      favorites,
+      pagination_key: pagination_key ?? olderThanId,
+    })
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+      .join('&')
+
+  return restClient
+    .request<EventHistoryResponse>({
+      url: evmApi(`history/devices?${queryString}`),
+    })
+    .then(
+      ({ events, pagination_key: paginationKey }): CameraEventResponse => ({
+        events: (events ?? []).map((event) => ({
+          ...event,
+          created_at: event.start_time,
+          cv_properties: event.cv,
+          ding_id: Number(event.event_id),
+          ding_id_str: event.event_id,
+          doorbot_id: Number(event.source_id),
+          favorite: event.is_favorite,
+          kind: event.event_type,
+          recorded: event.recording_status === 'ready',
+        })),
+        meta: { pagination_key: paginationKey },
+        pagination_key: paginationKey,
+      }),
+    )
 }
 
 export function getSearchQueryString(
@@ -219,6 +318,14 @@ export class RingCamera extends Subscribed {
       this.restClient.onSession
         .pipe(startWith(undefined), throttleTime(1000)) // Force this to run immediately, but don't double run if a session is created due to these api calls
         .subscribe(() => {
+          if (!this.canSubscribeToNotifications) {
+            logDebug(
+              initialData.description +
+                ' is shared with this account without the device_alerts_manage operation, so it cannot be subscribed to ding/motion notifications',
+            )
+            return
+          }
+
           this.subscribeToDingEvents().catch((e) => {
             logError(
               'Failed to subscribe ' +
@@ -307,6 +414,22 @@ export class RingCamera extends Subscribed {
 
   get isOffline() {
     return this.data.alerts.connection === 'offline'
+  }
+
+  // Operations this account is allowed to perform on the device.  Devices
+  // shared by another account may allow only a subset, and the api answers
+  // with a 404 for anything outside of it.  Undefined when the api did not
+  // report an operation set, in which case no operation should be assumed
+  // unavailable.
+  canPerformOperation(operation: string) {
+    const { operations } = this.data as CameraData
+
+    return operations ? operations.includes(operation) : undefined
+  }
+
+  // device_alerts_manage is required to subscribe to ding/motion notifications
+  get canSubscribeToNotifications() {
+    return this.canPerformOperation('device_alerts_manage') !== false
   }
 
   get isRingEdgeEnabled() {
@@ -407,13 +530,13 @@ export class RingCamera extends Subscribed {
   }
 
   async getHealth() {
-    const response = await this.restClient.request<{
-      device_health: CameraHealth
+    const { device } = await this.restClient.request<{
+      device: { health?: Partial<CameraData['health']> }
     }>({
-      url: this.doorbotUrl('health'),
+      url: deviceInfoApi(`devices/${this.id}`),
     })
 
-    return response.device_health
+    return mapCameraHealth(this.id, device.health)
   }
 
   private async createStreamingConnection(options: StreamingConnectionOptions) {
@@ -476,13 +599,7 @@ export class RingCamera extends Subscribed {
   }
 
   getEvents(options: CameraEventOptions = {}) {
-    return this.restClient.request<CameraEventResponse>({
-      url: clientApi(
-        `locations/${this.data.location_id}/devices/${
-          this.id
-        }/events${getSearchQueryString(options)}`,
-      ),
-    })
+    return getEventHistory(this.restClient, [this.id], options)
   }
 
   videoSearch(

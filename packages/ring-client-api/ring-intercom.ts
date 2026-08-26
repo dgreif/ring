@@ -1,10 +1,15 @@
-import type { IntercomHandsetData, PushNotification } from './ring-types.ts'
+import type {
+  CameraData,
+  CameraHealth,
+  IntercomHandsetData,
+  PushNotification,
+} from './ring-types.ts'
 import { PushNotificationAction } from './ring-types.ts'
 import type { RingRestClient } from './rest-client.ts'
-import { clientApi, commandsApi } from './rest-client.ts'
+import { clientApi, commandsApi, deviceInfoApi } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
-import { getBatteryLevel } from './ring-camera.ts'
+import { getBatteryLevel, mapCameraHealth } from './ring-camera.ts'
 import { logError } from './util.ts'
 
 export class RingIntercom {
@@ -84,6 +89,29 @@ export class RingIntercom {
 
   private doorbotUrl(path = '') {
     return clientApi(`doorbots/${this.id}/${path}`)
+  }
+
+  async getHealth() {
+    const { device } = await this.restClient.request<{
+        device: { health?: Partial<CameraData['health']> }
+      }>({
+        url: deviceInfoApi(`devices/${this.id}`),
+      }),
+      health = mapCameraHealth(this.id, device.health)
+
+    if (health) {
+      return health
+    }
+
+    // Fall back to the legacy health endpoint, which does not work for shared
+    // devices, but does still return data which the device_info api may not
+    const response = await this.restClient.request<{
+      device_health: CameraHealth
+    }>({
+      url: this.doorbotUrl('health'),
+    })
+
+    return response.device_health
   }
 
   subscribeToDingEvents() {

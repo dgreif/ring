@@ -487,6 +487,12 @@ export interface BaseCameraData {
   motion_snooze: null | { scheduled: boolean }
   night_mode_status: 'unknown' | 'true' | 'false'
   owned: boolean
+  // The operation set this device is tagged with ('owner' for owned devices, a
+  // numeric code for devices shared by another account)
+  operation_set?: string
+  // Resolved by this client from the device_operation_sets map returned
+  // alongside the device list, not a field returned per device by the api
+  operations?: string[]
   ring_net_id: null
 
   settings: {
@@ -578,6 +584,7 @@ export interface BaseCameraData {
     packet_loss_category: 'good' | string
     rssi: number
     battery_voltage: number
+    wifi_name?: string
     wifi_is_ring_network: boolean
     supported_rpc_commands: string[]
     ota_status: 'successful' | string
@@ -599,6 +606,8 @@ export interface BaseCameraData {
     battery_save: boolean
     firmware_version_status: 'Up to Date'
     tx_rate: number
+    transformer_voltage?: number
+    transformer_voltage_category?: 'good' | string
     ptz_connected?: 'penguin'
   }
 }
@@ -919,9 +928,27 @@ export interface ChimeHealth {
   packet_loss_strength: number
 }
 
-export interface CameraHealth extends ChimeHealth {
+// Legacy shape of the camera health data, which is now derived from the
+// health data included in the device_info api responses
+export interface CameraHealth {
+  id: number
+  wifi_name?: string | null
+  battery_percentage?: number | null
+  battery_percentage_category: HealthCategory
+  battery_voltage: number | null
+  battery_voltage_category: HealthCategory
+  latest_signal_strength: number | null
+  latest_signal_category: HealthCategory
+  average_signal_strength: number | null
+  average_signal_category: HealthCategory
+  firmware: Firmware
+  updated_at: string
+  wifi_is_ring_network?: boolean
+  packet_loss_category: HealthCategory
+  packet_loss_strength: number | null
+  network_connection?: 'wifi' | 'ethernet' | string
   transformer_voltage?: number
-  transformer_voltage_category?: 'good'
+  transformer_voltage_category?: HealthCategory
   ext_power_state?: number
 }
 
@@ -937,21 +964,74 @@ export type DingKind =
   | 'OFFLINE_FOOTAGE'
   | 'OFFLINE_MOTION'
 
-export interface CameraEvent {
-  created_at: string
-  cv_properties: {
-    detection_type: null | any
-    person_detected: null | any
-    stream_broken: null | any
+export interface CameraEventCvProperties {
+  detection_type: null | any
+  detection_types?:
+    | { detection_type: string; verified_timestamps: number[] }[]
+    | null
+  person_detected: null | any
+  stream_broken: null | any
+  security_alerts?: any
+  full_description?: string | null
+  short_description?: string | null
+}
+
+export interface CameraEventMedia {
+  url: string | null
+  start_time: string
+  end_time: string | null
+  file_type: 'VIDEO' | 'THUMBNAIL' | string
+  file_family?: string
+  is_e2ee: boolean
+  playback_duration?: number | null
+  custom_metadata?: any
+}
+
+// Event as returned by the evm history api
+export interface EventHistoryEvent {
+  source_id: string
+  event_id: string
+  start_time: string
+  end_time: string | null
+  event_type: DingKind | string
+  duration_ms?: number | null
+  session_duration?: number | null
+  state: 'timed_out' | 'completed' | string
+  had_subscription: boolean
+  is_favorite: boolean
+  recording_status: 'ready' | 'audio_ready' | string
+  cv: CameraEventCvProperties
+  properties?: {
+    is_alexa?: boolean
+    is_sidewalk?: boolean
+    is_autoreply?: boolean
+    stark_reviewed?: boolean
   }
+  updated_at?: string
+  visualizations?: {
+    cloud_media_visualization?: { media: CameraEventMedia[] } | null
+  } | null
+  device?: { id: number; description: string; type: string } | null
+  owner_id?: string | null
+}
+
+export interface EventHistoryResponse {
+  events: EventHistoryEvent[]
+  feed?: { id: string; type: string }[]
+  pagination_key?: string
+}
+
+// An evm history event, with the field names used by the legacy clients_api
+// events endpoints retained for backwards compatibility
+export interface CameraEvent extends EventHistoryEvent {
+  created_at: string
+  cv_properties: CameraEventCvProperties
   ding_id: number
   ding_id_str: string
   doorbot_id: number
   favorite: boolean
-  kind: DingKind
-  recorded: false
-  recording_status: 'ready' | 'audio_ready'
-  state: 'timed_out' | 'completed'
+  kind: DingKind | string
+  recorded: boolean
 }
 
 // timed_out + ding === Missed Ring
@@ -959,7 +1039,8 @@ export interface CameraEvent {
 
 export interface CameraEventResponse {
   events: CameraEvent[]
-  meta: { pagination_key: string }
+  meta: { pagination_key?: string }
+  pagination_key?: string
 }
 
 export interface CameraEventOptions {

@@ -46,6 +46,10 @@ const fetchAgent = new Agent({
   deviceApiBaseUrl = 'https://api.ring.com/devices/v1/',
   commandsApiBaseUrl = 'https://api.ring.com/commands/v1/',
   appApiBaseUrl = 'https://prd-api-us.prd.rings.solutions/api/v1/',
+  deviceInfoApiBaseUrl = 'https://api.ring.com/device_info/v3/',
+  locationInfoApiBaseUrl = 'https://api.ring.com/location_info/v3/',
+  evmApiBaseUrl = 'https://api.ring.com/evm/v3/',
+  oauthBaseUrl = 'https://oauth.ring.com',
   apiVersion = 11
 
 export function clientApi(path: string) {
@@ -62,6 +66,18 @@ export function commandsApi(path: string) {
 
 export function appApi(path: string) {
   return appApiBaseUrl + path
+}
+
+export function deviceInfoApi(path: string) {
+  return deviceInfoApiBaseUrl + path
+}
+
+export function locationInfoApi(path: string) {
+  return locationInfoApiBaseUrl + path
+}
+
+export function evmApi(path: string) {
+  return evmApiBaseUrl + path
 }
 
 export interface ExtendedResponse {

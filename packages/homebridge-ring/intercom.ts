@@ -4,10 +4,13 @@ import type { RingPlatformConfig } from './config.ts'
 import type { PlatformAccessory } from 'homebridge'
 import { BaseDataAccessory } from './base-data-accessory.ts'
 import { logError, logInfo } from 'ring-client-api/util'
-import { map, throttleTime } from 'rxjs/operators'
+import { distinctUntilChanged, map, throttleTime } from 'rxjs/operators'
+import { appendFile } from 'fs'
+import { join } from 'path'
 
 export class Intercom extends BaseDataAccessory<RingIntercom> {
   private unlocking = false
+  private doNotDisturb = false
   private unlockTimeout?: ReturnType<typeof setTimeout>
 
   public readonly device
@@ -108,18 +111,116 @@ export class Intercom extends BaseDataAccessory<RingIntercom> {
     })
 
     // Programmable Switch Service
-    this.registerObservableCharacteristic({
-      characteristicType: ProgrammableSwitchEvent,
-      serviceType: programableSwitchService,
-      onValue: onDoorbellPressed,
-    })
-
-    // Hide long and double press events by setting max value
-    programableSwitchService
-      .getCharacteristic(ProgrammableSwitchEvent)
-      .setProps({
-        maxValue: ProgrammableSwitchEvent.SINGLE_PRESS,
+    // `hideDoorbellSwitch` is honored in camera.ts, but here the switch was always
+    // created regardless of the option, so anyone who did not want it was stuck with
+    // an extra accessory in the Home app and no way to remove it.
+    if (!config.hideDoorbellSwitch) {
+      this.registerObservableCharacteristic({
+        characteristicType: ProgrammableSwitchEvent,
+        serviceType: programableSwitchService,
+        onValue: onDoorbellPressed,
       })
+
+      // Hide long and double press events by setting max value
+      programableSwitchService
+        .getCharacteristic(ProgrammableSwitchEvent)
+        .setProps({
+          maxValue: ProgrammableSwitchEvent.SINGLE_PRESS,
+        })
+    }
+
+    // ── Ding log ──────────────────────────────────────────────────────────────
+    // HomeKit keeps no history, and the Doorbell service above throttles to 15s, so
+    // two rings close together look like one. This records EVERY ding, unthrottled,
+    // to a JSONL file that survives restarts.
+    // The async appendFile is deliberate: a logging failure must never delay or break
+    // the doorbell notification, which is the part that actually matters.
+    if (config.logIntercomDings) {
+      const logPath = join(
+          config.intercomDingLogPath || '/var/lib/homebridge',
+          'ring-intercom-dings.jsonl',
+        ),
+        writeEvent = (event: string) => {
+          const line =
+            JSON.stringify({
+              time: new Date().toISOString(),
+              device: device.name,
+              deviceId: device.id,
+              event,
+            }) + '\n'
+          appendFile(logPath, line, (err) => {
+            if (err) {
+              logError(
+                `Failed to write the intercom ding log at ${logPath}: ${err.message}`,
+              )
+            }
+          })
+        }
+
+      device.onDing.subscribe(() => writeEvent('ding'))
+      device.onUnlocked.subscribe(() => writeEvent('unlocked'))
+      logInfo(`Logging intercom dings to ${logPath}`)
+    }
+
+    // ── Connectivity sensor ───────────────────────────────────────────────────
+    // The API exposes `alerts.connection` and the plugin never used it: if the
+    // intercom dropped off the network there was no way to find out until someone
+    // rang and nothing happened. ContactSensor is the only service HomeKit allows
+    // as both an automation trigger and a notification source.
+    // "Detected" (contact open) = intercom OFFLINE.
+    if (config.showOfflineSensor) {
+      this.registerObservableCharacteristic({
+        characteristicType: Characteristic.ContactSensorState,
+        serviceType: Service.ContactSensor,
+        name: device.name + ' Offline',
+        serviceSubType: 'offline',
+        onValue: device.onData.pipe(
+          map((data) =>
+            data.alerts?.connection === 'offline'
+              ? Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+              : Characteristic.ContactSensorState.CONTACT_DETECTED,
+          ),
+          distinctUntilChanged(),
+        ),
+      })
+    }
+
+    // ── Do Not Disturb ────────────────────────────────────────────────────────
+    // Uses subscribe/unsubscribeToDingEvents, which the API already offered and the
+    // plugin never called. Unlike turning the volume down, this stops the alert at
+    // the source: Ring stops sending the push.
+    // SAFETY: the state is deliberately NOT persisted. After a restart it goes back
+    // to "receiving dings" — a Do Not Disturb that forgets itself is far better than
+    // silently losing your doorbell with no idea why.
+    if (config.showDoNotDisturbSwitch) {
+      this.registerCharacteristic({
+        characteristicType: Characteristic.On,
+        serviceType: Service.Switch,
+        name: device.name + ' Do Not Disturb',
+        serviceSubType: 'dnd',
+        getValue: () => this.doNotDisturb,
+        setValue: async (on: boolean) => {
+          try {
+            if (on) {
+              await device.unsubscribeFromDingEvents()
+              logInfo(
+                `Do Not Disturb ON for ${device.name}: Ring will stop sending ding alerts`,
+              )
+            } else {
+              await device.subscribeToDingEvents()
+              logInfo(
+                `Do Not Disturb off for ${device.name}: ding alerts restored`,
+              )
+            }
+            this.doNotDisturb = Boolean(on)
+          } catch (e) {
+            // If the call fails, do not lie to the user about the switch state
+            logError(e as Error)
+            this.doNotDisturb = !on
+          }
+        },
+      })
+    }
 
     // Battery Service
     if (device.batteryLevel !== null) {

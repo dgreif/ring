@@ -39,7 +39,7 @@ import { Switch } from './switch.ts'
 import { Camera } from './camera.ts'
 import { PanicButtons } from './panic-buttons.ts'
 import type { RefreshTokenAuth } from 'ring-client-api/rest-client'
-import { logInfo, useLogger } from 'ring-client-api/util'
+import { logError, logInfo, useLogger } from 'ring-client-api/util'
 import type { BaseAccessory } from './base-accessory.ts'
 import { FloodFreezeSensor } from './flood-freeze-sensor.ts'
 import { FreezeSensor } from './freeze-sensor.ts'
@@ -49,6 +49,8 @@ import { LocationModeSwitch } from './location-mode-switch.ts'
 import { Thermostat } from './thermostat.ts'
 import { UnknownZWaveSwitchSwitch } from './unknown-zwave-switch.ts'
 import { Intercom } from './intercom.ts'
+import { IntercomCamera } from './intercom-camera.ts'
+import { IntercomCameraSource } from './intercom-camera-source.ts'
 import { Valve } from './valve.ts'
 
 const ignoreHiddenDeviceTypes: string[] = [
@@ -355,6 +357,91 @@ export class RingPlatform implements DynamicPlatformPlugin {
             activeAccessoryIds.push(uuid)
           },
         )
+
+        // ── Ring Intercom audio ───────────────────────────────────────────────
+        // Published as a separate EXTERNAL accessory, leaving the existing intercom
+        // accessory untouched: HomeKit requires cameras to be unbridged, and
+        // converting the current accessory would force a re-pair and lose its
+        // automations. This way the familiar intercom stays as it is and the audio
+        // is added alongside it.
+        if (config.enableIntercomAudio && intercoms.length) {
+          intercoms.forEach((intercom) => {
+            const audioUuid = hap.uuid.generate(
+                debugPrefix + 'intercom-audio-' + intercom.id,
+              ),
+              audioName = debugPrefix + intercom.name + ' Audio'
+
+            if (activeAccessoryIds.includes(audioUuid)) {
+              return
+            }
+
+            try {
+              const audioAccessory =
+                  this.homebridgeAccessories[audioUuid] ||
+                  new api.platformAccessory(
+                    audioName,
+                    audioUuid,
+                    hap.Categories.CAMERA,
+                  ),
+                intercomCamera = new IntercomCamera(
+                  intercom,
+                  ringApi.restClient,
+                  config.ffmpegPath,
+                  config.intercomSpeakerGainDb,
+                  config.intercomMicGainDb,
+                ),
+                cameraSource = new IntercomCameraSource(intercomCamera)
+
+              audioAccessory.configureController(cameraSource.controller)
+
+              // Without the Microphone and Speaker services, HomeKit does NOT draw
+              // the microphone button: negotiating two-way audio on the
+              // CameraController is not enough. camera.ts adds them to cameras for
+              // this same reason.
+              const { Characteristic, Service } = hap
+              for (const svcType of [Service.Microphone, Service.Speaker]) {
+                const svc =
+                  audioAccessory.getService(svcType) ||
+                  audioAccessory.addService(svcType, intercom.name)
+                svc.getCharacteristic(Characteristic.Mute).onGet(() => false)
+              }
+
+              // Doorbell on the audio accessory itself: that way, when someone
+              // rings, the notification leads straight to this stream instead of
+              // leaving the audio on a separate accessory the user has to go find.
+              const doorbellSvc =
+                audioAccessory.getService(Service.Doorbell) ||
+                audioAccessory.addService(Service.Doorbell, intercom.name)
+              doorbellSvc
+                .getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+                .setProps({
+                  maxValue: Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+                })
+              intercom.onDing.subscribe(() => {
+                doorbellSvc
+                  .getCharacteristic(Characteristic.ProgrammableSwitchEvent)
+                  .updateValue(
+                    Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+                  )
+              })
+
+              if (!this.homebridgeAccessories[audioUuid]) {
+                externalAccessories.push(audioAccessory)
+                logInfo(`Configured intercom audio ${audioUuid} ${audioName}`)
+              }
+              this.homebridgeAccessories[audioUuid] = audioAccessory
+              activeAccessoryIds.push(audioUuid)
+            } catch (e) {
+              // A failure here must not take the rest of the plugin down: the
+              // regular intercom (unlock, ding) has to keep working.
+              logError(
+                `Failed to configure audio for ${intercom.name}: ${
+                  (e as Error).message
+                }`,
+              )
+            }
+          })
+        }
       }),
     )
 

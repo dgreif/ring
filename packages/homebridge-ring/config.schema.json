@@ -62,6 +62,51 @@
         "type": "string",
         "description": "A custom path to the ffmpeg executable. By default, the static binaries built in ffmpeg-for-homebridge will be used. If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply [ ffmpeg ] to use ffmpeg from your PATH."
       },
+      "enableIntercomAudio": {
+        "title": "Ring Intercom: Two-Way Audio",
+        "type": "boolean",
+        "default": false,
+        "description": "Publishes an extra camera accessory for each Ring Intercom, with a still image and live two-way audio, so you can hear the street on demand and talk back. **Requires a working `ffmpegPath`.** Cameras must be unbridged, so this accessory has to be added to the Home app by hand, once, using your Homebridge PIN."
+      },
+      "intercomMicGainDb": {
+        "title": "Ring Intercom: Incoming Volume (dB)",
+        "type": "integer",
+        "default": 12,
+        "minimum": 0,
+        "maximum": 25,
+        "description": "How much to boost the audio coming from the door, which the Intercom microphone captures very quietly. A limiter is applied, so raising this does not clip."
+      },
+      "intercomSpeakerGainDb": {
+        "title": "Ring Intercom: Outgoing Volume (dB)",
+        "type": "integer",
+        "default": 10,
+        "minimum": 0,
+        "maximum": 25,
+        "description": "How much to boost your voice on its way out through the door speaker."
+      },
+      "showOfflineSensor": {
+        "title": "Ring Intercom: Connectivity Sensor",
+        "type": "boolean",
+        "default": false,
+        "description": "Adds a contact sensor that reports when the Intercom loses its connection, instead of finding out when someone rings and nothing happens."
+      },
+      "showDoNotDisturbSwitch": {
+        "title": "Ring Intercom: Do Not Disturb Switch",
+        "type": "boolean",
+        "default": false,
+        "description": "Adds a switch that turns ding alerts off on Ring's servers, the same way the Ring app does. The state is deliberately not restored on restart: better it forgets it was on than you silently lose your doorbell."
+      },
+      "logIntercomDings": {
+        "title": "Ring Intercom: Log Dings",
+        "type": "boolean",
+        "default": false,
+        "description": "Appends every ding and unlock, with a timestamp, to a JSONL file. HomeKit keeps no history, and its doorbell notification coalesces rings less than 15 seconds apart, so this catches the ones it hides."
+      },
+      "intercomDingLogPath": {
+        "title": "Ring Intercom: Ding Log Path",
+        "type": "string",
+        "description": "Folder for the ding log. Defaults to the Homebridge storage directory."
+      },
       "nightModeBypassFor": {
         "title": "Night Mode as Bypass For Mode",
         "type": "string",
@@ -69,11 +114,15 @@
         "oneOf": [
           {
             "title": "Home",
-            "enum": ["some"]
+            "enum": [
+              "some"
+            ]
           },
           {
             "title": "Away",
-            "enum": ["all"]
+            "enum": [
+              "all"
+            ]
           }
         ]
       },
@@ -139,13 +188,17 @@
         "type": "string"
       }
     },
-    "required": ["refreshToken"]
+    "required": [
+      "refreshToken"
+    ]
   },
   "layout": [
     {
       "type": "flex",
       "flex-flow": "row wrap",
-      "items": ["refreshToken"]
+      "items": [
+        "refreshToken"
+      ]
     },
     {
       "type": "fieldset",
@@ -232,6 +285,25 @@
           "type": "help",
           "helpvalue": "<p>If you only want to display certain device types, you can specify a those device types here.  All other device types will be removed from HomeKit.  Example: security-panel to show your alarm, hp_cam_v1 to show floodlight cams.</p>"
         }
+      ]
+    },
+    {
+      "type": "fieldset",
+      "title": "Ring Intercom",
+      "expandable": true,
+      "items": [
+        {
+          "type": "help",
+          "helpvalue": "<p>The Ring Intercom is audio-only, so the two-way audio accessory shows a still image instead of video. Everything here is off by default and none of it changes the Intercom's lock or ding, which work as before.</p>"
+        },
+        "enableIntercomAudio",
+        "ffmpegPath",
+        "intercomMicGainDb",
+        "intercomSpeakerGainDb",
+        "showOfflineSensor",
+        "showDoNotDisturbSwitch",
+        "logIntercomDings",
+        "intercomDingLogPath"
       ]
     }
   ]

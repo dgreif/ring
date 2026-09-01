@@ -122,7 +122,11 @@ export class IntercomCamera {
     return this.intercom.isOffline
   }
 
-  hasSnapshotWithinLifetime() {
+  // A GETTER, not a method, matching RingCamera. camera-source reads it as a plain
+  // property (`!this.ringCamera.hasSnapshotWithinLifetime`); as a method it would be a
+  // function object, always truthy, so the negation would always be false and the
+  // snapshot would never load — logging "No snapshot cached" on every request.
+  get hasSnapshotWithinLifetime() {
     return Boolean(this.snapshot)
   }
 

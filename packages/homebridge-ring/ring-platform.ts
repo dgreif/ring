@@ -396,14 +396,22 @@ export class RingPlatform implements DynamicPlatformPlugin {
 
               // Without the Microphone and Speaker services, HomeKit does NOT draw
               // the microphone button: negotiating two-way audio on the
-              // CameraController is not enough. camera.ts adds them to cameras for
-              // this same reason.
+              // CameraController is not enough.
+              //
+              // configureController usually creates both itself, so only add what is
+              // actually missing, and only attach a Mute handler to a service we
+              // created. Attaching one to the controller's own service makes HAP warn
+              // "Ignoring on('get') handler as onGet handler was defined instead" and
+              // overrides handling that already works.
               const { Characteristic, Service } = hap
               for (const svcType of [Service.Microphone, Service.Speaker]) {
-                const svc =
-                  audioAccessory.getService(svcType) ||
-                  audioAccessory.addService(svcType, intercom.name)
-                svc.getCharacteristic(Characteristic.Mute).onGet(() => false)
+                if (audioAccessory.getService(svcType)) {
+                  continue
+                }
+                audioAccessory
+                  .addService(svcType, intercom.name)
+                  .getCharacteristic(Characteristic.Mute)
+                  .onGet(() => false)
               }
 
               // Doorbell on the audio accessory itself: that way, when someone

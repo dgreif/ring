@@ -55,6 +55,15 @@ describe('Ring Intercom', () => {
       expect(await camera.getSnapshot()).toBe(await camera.getSnapshot())
     })
 
+    it('exposes hasSnapshotWithinLifetime as a property, not a method', () => {
+      // camera-source reads this as a plain property. Declared as a method it would be
+      // a function object — always truthy — so `!hasSnapshotWithinLifetime` would
+      // always be false, loadSnapshot() would never run, and every request would log
+      // "No snapshot cached" while the image never loaded.
+      const camera = makeCamera()
+      expect(typeof camera.hasSnapshotWithinLifetime).toEqual('boolean')
+    })
+
     it('gives ffmpeg the path of the bundled file', () => {
       expect(makeCamera().getSnapshotPath()).toMatch(
         /media\/intercom-still\.jpg$/,

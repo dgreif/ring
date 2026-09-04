@@ -3,11 +3,17 @@ import { PushNotificationAction } from './ring-types.ts'
 import type { RingRestClient } from './rest-client.ts'
 import { clientApi, commandsApi } from './rest-client.ts'
 import { BehaviorSubject, Subject } from 'rxjs'
-import { distinctUntilChanged, map } from 'rxjs/operators'
+import {
+  distinctUntilChanged,
+  map,
+  startWith,
+  throttleTime,
+} from 'rxjs/operators'
 import { getBatteryLevel } from './ring-camera.ts'
+import { Subscribed } from './subscribed.ts'
 import { logError } from './util.ts'
 
-export class RingIntercom {
+export class RingIntercom extends Subscribed {
   id
   deviceType
   onData
@@ -19,6 +25,8 @@ export class RingIntercom {
   private restClient
 
   constructor(initialData: IntercomHandsetData, restClient: RingRestClient) {
+    super()
+
     this.initialData = initialData
     this.restClient = restClient
     this.id = initialData.id
@@ -30,14 +38,20 @@ export class RingIntercom {
       distinctUntilChanged(),
     )
 
-    if (!initialData.subscribed) {
-      this.subscribeToDingEvents().catch((e) => {
-        logError(
-          'Failed to subscribe ' + initialData.description + ' to ding events',
-        )
-        logError(e)
-      })
-    }
+    this.addSubscriptions(
+      this.restClient.onSession
+        .pipe(startWith(undefined), throttleTime(1000)) // Force this to run immediately, but don't double run if a session is created due to these api calls
+        .subscribe(() => {
+          this.subscribeToDingEvents().catch((e) => {
+            logError(
+              'Failed to subscribe ' +
+                initialData.description +
+                ' to ding events',
+            )
+            logError(e)
+          })
+        }),
+    )
   }
 
   updateData(update: IntercomHandsetData) {
@@ -113,5 +127,9 @@ export class RingIntercom {
     ) {
       this.onUnlocked.next()
     }
+  }
+
+  disconnect() {
+    this.unsubscribe()
   }
 }

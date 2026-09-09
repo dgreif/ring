@@ -59,7 +59,7 @@
     "msw": "^2.14.6",
     "tsconfig": "*",
     "typescript": "6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": "^20 || ^22 || ^24 || ^26"

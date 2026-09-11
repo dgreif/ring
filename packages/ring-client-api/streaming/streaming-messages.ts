@@ -29,6 +29,11 @@ interface SessionStartedMessage {
   body: SessionBody
 }
 
+interface PingMessage {
+  method: 'ping'
+  body: SessionBody
+}
+
 interface PongMessage {
   method: 'pong'
   body: SessionBody
@@ -79,6 +84,7 @@ export type IncomingMessage =
   | IceCandidateMessage
   | SessionCreatedMessage
   | SessionStartedMessage
+  | PingMessage
   | PongMessage
   | CloseMessage
   | NotificationMessage

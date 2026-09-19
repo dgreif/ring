@@ -46,6 +46,8 @@ const fetchAgent = new Agent({
   deviceApiBaseUrl = 'https://api.ring.com/devices/v1/',
   commandsApiBaseUrl = 'https://api.ring.com/commands/v1/',
   appApiBaseUrl = 'https://prd-api-us.prd.rings.solutions/api/v1/',
+  locationInfoApiBaseUrl = 'https://api.ring.com/location_info/v3/',
+  deviceInfoApiBaseUrl = 'https://api.ring.com/device_info/v3/',
   apiVersion = 11
 
 export function clientApi(path: string) {
@@ -62,6 +64,18 @@ export function commandsApi(path: string) {
 
 export function appApi(path: string) {
   return appApiBaseUrl + path
+}
+
+// `location_info` and `device_info` are the endpoints used by the Ring mobile
+// app.  Unlike the older `devices/v1/locations` and `clients_api/ring_devices`
+// endpoints, they include locations and devices which have been *shared* with
+// this account by another owner.
+export function locationInfoApi(path: string) {
+  return locationInfoApiBaseUrl + path
+}
+
+export function deviceInfoApi(path: string) {
+  return deviceInfoApiBaseUrl + path
 }
 
 export interface ExtendedResponse {

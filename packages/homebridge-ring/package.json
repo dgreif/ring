@@ -21,7 +21,7 @@
     "eslint-config-shared": "*",
     "homebridge": "2.4.0",
     "tsconfig": "*",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26",

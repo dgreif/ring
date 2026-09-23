@@ -160,7 +160,7 @@ export class WeriftPeerConnection
     await this.pc.setRemoteDescription(answer)
   }
 
-  addIceCandidate(candidate: RTCIceCandidate) {
+  addIceCandidate(candidate: Partial<RTCIceCandidate>) {
     return this.pc.addIceCandidate(candidate)
   }
 

@@ -15,7 +15,7 @@
     "@homebridge/camera-utils": "^3.0.0",
     "@homebridge/plugin-ui-utils": "^2.2.6",
     "ring-client-api": "14.3.0",
-    "werift": "0.23.0"
+    "werift": "0.24.4"
   },
   "devDependencies": {
     "eslint-config-shared": "*",

@@ -48,7 +48,7 @@
     "systeminformation": "^5.33.13",
     "undici": "^7.29.1",
     "uuid": "^14.0.2",
-    "werift": "0.23.0"
+    "werift": "0.24.4"
   },
   "devDependencies": {
     "@types/debug": "4.1.13",

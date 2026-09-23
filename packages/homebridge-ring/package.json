@@ -24,7 +24,7 @@
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": "^20 || ^22 || ^24 || ^26",
+    "node": "^22.19.0 || ^24 || ^26",
     "homebridge": ">=1.4.0 || ^2.0.0-beta.0"
   },
   "repository": {

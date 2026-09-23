@@ -46,7 +46,7 @@
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
     "systeminformation": "^5.33.13",
-    "undici": "^7.29.1",
+    "undici": "^8.11.0",
     "uuid": "^14.0.2",
     "werift": "0.24.4"
   },
@@ -62,7 +62,7 @@
     "vitest": "^5.0.1"
   },
   "engines": {
-    "node": "^20 || ^22 || ^24 || ^26"
+    "node": "^22.19.0 || ^24 || ^26"
   },
   "repository": {
     "type": "git",

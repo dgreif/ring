@@ -364,10 +364,15 @@ export class RingRestClient {
       }
 
       const response = requestError.response || {},
-        responseData: Auth2faResponse = response.body || {},
+        responseData: Auth2faResponse =
+          typeof response.body === 'object' && response.body !== null
+            ? response.body
+            : {},
         responseError =
           'error' in responseData && typeof responseData.error === 'string'
             ? responseData.error
+            : response.status
+            ? `HTTP ${response.status}`
             : ''
 
       if (

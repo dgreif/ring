@@ -209,6 +209,7 @@ afterAll(() => {
 })
 
 afterEach(() => {
+  server.resetHandlers()
   client.clearTimeouts()
   clearTimeouts()
 })
@@ -256,6 +257,25 @@ describe('getAuth', () => {
 
     await expect(() => client.getAuth()).rejects.toThrow(
       'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: access_denied)',
+    )
+  })
+
+  it('should handle a non-json error response', async () => {
+    server.use(
+      http.post('https://oauth.ring.com/oauth/token', () =>
+        HttpResponse.text(
+          '<html><head><title>406 Not Acceptable</title></head></html>',
+          { status: 406 },
+        ),
+      ),
+    )
+    client = new RingRestClient({
+      password,
+      email,
+    })
+
+    await expect(() => client.getAuth()).rejects.toThrow(
+      'Failed to fetch oauth token from Ring. Verify that your email and password are correct. (error: HTTP 406)',
     )
   })
 

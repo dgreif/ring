@@ -16,7 +16,7 @@ import type {
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'
-import { Agent } from 'undici'
+import { Agent, fetch, type RequestInit as UndiciRequestInit } from 'undici'
 
 interface RequestOptions extends RequestInit {
   responseType?: 'json' | 'buffer'
@@ -132,11 +132,11 @@ async function requestWithRetry<T>(
     }
 
     // make the fetch request
-    const response = await fetch(options.url, options),
+    const response = await fetch(options.url, options as UndiciRequestInit),
       headers = response.headers
 
     if (!response.ok) {
-      const error = await responseToError(response)
+      const error = await responseToError(response as unknown as Response)
       throw error
     }
 

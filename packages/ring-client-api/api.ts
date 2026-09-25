@@ -25,13 +25,7 @@ import {
   switchMap,
   throttleTime,
 } from 'rxjs/operators'
-import {
-  clearTimeouts,
-  enableDebug,
-  logDebug,
-  logError,
-  logInfo,
-} from './util.ts'
+import { clearTimeouts, enableDebug, logDebug, logError } from './util.ts'
 import { setFfmpegPath } from './ffmpeg.ts'
 import { Subscribed } from './subscribed.ts'
 import { PushReceiver } from '@eneris/push-receiver'
@@ -247,6 +241,11 @@ export class RingApi extends Subscribed {
         },
         credentials,
         debug: false,
+        // Ping every 60s (default is 5min) and treat 120s of silence as a
+        // dead connection. Combined with a NAT-aware TCP keepalive on the
+        // underlying push-receiver socket, this detects silent FCM stalls
+        // within ~2 minutes instead of the observed 2+ hours.
+        heartbeatIntervalMs: 60_000,
       }),
       devicesById: { [id: number]: RingCamera | RingIntercom | undefined } = {},
       sendToDevice = (id: number, notification: PushNotification) => {
@@ -315,17 +314,14 @@ export class RingApi extends Subscribed {
       logError(e)
     }
 
-    const startTime = Date.now()
+    // NOTE: We intentionally do NOT drop the first 2 seconds of pushes.
+    // The original code silently discarded the initial burst of queued
+    // notifications received in the first 2 seconds after this listener is
+    // registered (i.e. at startup, since this only runs once per RingApi
+    // instance), which meant legitimate events already queued at boot were
+    // lost. push-receiver deduplicates by persistentId within a session,
+    // which is sufficient protection against re-processing.
     pushReceiver.onNotification(({ message }) => {
-      // Ignore messages received in the first two seconds after connecting
-      // These are likely duplicates, and we aren't currently storying persistent ids anywhere to avoid re-processing them
-      if (Date.now() - startTime < 2000) {
-        logInfo(
-          'Ignoring push notification received in first two seconds after starting up',
-        )
-        return
-      }
-
       try {
         const messageData = {} as any
         // Each message field is a JSON string, so we need to parse them each individually

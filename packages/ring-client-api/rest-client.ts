@@ -16,9 +16,17 @@ import type {
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'
-import { Agent } from 'undici'
+// Import fetch from the same undici package as Agent. Node's global fetch is
+// backed by a bundled undici that can be a different major than the npm
+// dependency; passing an undici@8 Agent into global fetch then fails with
+// UND_ERR_INVALID_ARG ("invalid onRequestStart method") on Node 22/24.
+import {
+  Agent,
+  fetch as undiciFetch,
+  type RequestInit as UndiciRequestInit,
+} from 'undici'
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions extends Omit<RequestInit, 'dispatcher'> {
   responseType?: 'json' | 'buffer'
   timeout?: number
   json?: object
@@ -100,12 +108,6 @@ async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean },
   retryCount = 0,
 ): Promise<T & ExtendedResponse> {
-  if (typeof fetch !== 'function') {
-    throw new Error(
-      `Your current NodeJS version (${process.version}) is too old to support this plugin.  Please upgrade to the latest LTS version of NodeJS.`,
-    )
-  }
-
   try {
     if (requestOptions.json || requestOptions.responseType === 'json') {
       requestOptions.headers = {
@@ -131,12 +133,15 @@ async function requestWithRetry<T>(
       options.signal = AbortSignal.timeout(options.timeout)
     }
 
-    // make the fetch request
-    const response = await fetch(options.url, options),
+    // undici fetch + undici Agent must stay paired (see import comment)
+    const response = await undiciFetch(
+        options.url,
+        options as UndiciRequestInit,
+      ),
       headers = response.headers
 
     if (!response.ok) {
-      const error = await responseToError(response)
+      const error = await responseToError(response as unknown as Response)
       throw error
     }
 

@@ -11,7 +11,24 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from 'vitest'
+
+// rest-client uses undici's fetch (paired with undici Agent). MSW only
+// intercepts global fetch, so route undici.fetch through globalThis.fetch
+// in tests. Drop `dispatcher` — Node's global fetch rejects an undici@8 Agent.
+vi.mock('undici', async (importOriginal) => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest importOriginal typing
+  const undici = await importOriginal<typeof import('undici')>()
+  return {
+    ...undici,
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+      const rest = { ...(init as RequestInit & { dispatcher?: unknown }) }
+      delete rest.dispatcher
+      return globalThis.fetch(input, rest)
+    },
+  }
+})
 
 let sessionCreatedCount = 0,
   client: RingRestClient

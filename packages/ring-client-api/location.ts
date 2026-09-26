@@ -163,6 +163,30 @@ export class Location extends Subscribed {
       // start listening for devices immediately
       this.onDevices.subscribe(),
 
+      this.onDataUpdate.subscribe((message) => {
+        const impulses = message.body?.[0]?.impulse?.v1 || []
+        for (const impulse of impulses) {
+          if (impulse.impulseType.startsWith('security-panel.mode-switched.')) {
+            const rawType = impulse.impulseType.split('.').pop()
+            let finalMode: LocationMode
+
+            switch (rawType) {
+              case 'all':
+                finalMode = 'away'
+                break
+              case 'some':
+                finalMode = 'home'
+                break
+              case 'none':
+              default:
+                finalMode = 'disarmed'
+            }
+
+            this.onLocationMode.next(finalMode)
+          }
+        }
+      }),
+
       // watch for sessions to come online
       this.onSessionInfo.subscribe((sessions) => {
         sessions.forEach(({ connectionStatus, assetUuid }) => {

@@ -121,6 +121,76 @@ export function mockRingChime(initial: Record<string, unknown> = {}) {
   }
 }
 
+export function mockRingCamera(initial: Record<string, unknown> = {}) {
+  const onData = new BehaviorSubject({
+      id: 1002,
+      description: 'Garage Cam',
+      kind: 'stickup_cam_mini',
+      device_id: 'cam-hw-1',
+      led_status: 'off',
+      siren_status: { seconds_remaining: 0 },
+      battery_life: '87',
+      ...initial,
+    }),
+    onMotionDetected = new BehaviorSubject(false),
+    onDoorbellPressed = new Subject<null>(),
+    onBatteryLevel = new BehaviorSubject<number | null>(87),
+    onInHomeDoorbellStatus = new BehaviorSubject<boolean | undefined>(
+      undefined,
+    ),
+    onNewNotification = new Subject<any>()
+
+  return {
+    get name() {
+      return onData.getValue().description
+    },
+    get id() {
+      return onData.getValue().id
+    },
+    get data() {
+      return onData.getValue()
+    },
+    model: 'Indoor Cam',
+    isDoorbot: false,
+    hasLight: true,
+    hasSiren: true,
+    hasInHomeDoorbell: false,
+    hasBattery: true,
+    hasLowBattery: false,
+    isCharging: false,
+    canTakeSnapshotWhileRecording: true,
+    latestNotificationSnapshotUuid: undefined as string | undefined,
+    onData,
+    onMotionDetected,
+    onDoorbellPressed,
+    onBatteryLevel,
+    onInHomeDoorbellStatus,
+    onNewNotification,
+    updateData(patch: Record<string, unknown>) {
+      onData.next({ ...onData.getValue(), ...patch } as any)
+    },
+    setLight: vi.fn(() => Promise.resolve(true)),
+    setSiren: vi.fn(() => Promise.resolve(true)),
+    setInHomeDoorbell: vi.fn(() => Promise.resolve(true)),
+    requestUpdate: vi.fn(),
+  }
+}
+
+export function mockLocationMode(initialMode: string = 'disarmed') {
+  const onLocationMode = new BehaviorSubject(initialMode)
+  return {
+    name: 'Home',
+    onLocationMode,
+    getLocationMode: vi.fn(() =>
+      Promise.resolve({ mode: onLocationMode.getValue() }),
+    ),
+    setLocationMode: vi.fn((mode: string) => {
+      onLocationMode.next(mode)
+      return Promise.resolve({ mode })
+    }),
+  }
+}
+
 export function mockRingIntercom(initial: Record<string, unknown> = {}) {
   const onData = new BehaviorSubject({
       id: 5001,

@@ -174,6 +174,111 @@ export const hubDeviceDocs = {
     on: true,
     level: 0.75,
   }),
+  keypad: nestDevice({
+    zid: 'zid-keypad',
+    name: 'Entry Keypad',
+    deviceType: RingDeviceType.Keypad,
+    categoryId: RingDeviceCategory.Keypads,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    brightness: 0.5,
+    volume: 0.5,
+  }),
+  freezeSensor: nestDevice({
+    zid: 'zid-freeze',
+    name: 'Garage Freeze',
+    deviceType: RingDeviceType.FreezeSensor,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    faulted: false,
+  }),
+  temperatureSensor: nestDevice({
+    zid: 'zid-temp',
+    name: 'Attic Temp',
+    deviceType: RingDeviceType.TemperatureSensor,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    celsius: 19.5,
+  }),
+  waterSensor: nestDevice({
+    zid: 'zid-water',
+    name: 'Laundry Water',
+    deviceType: RingDeviceType.WaterSensor,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    faulted: false,
+  }),
+  tiltSensor: nestDevice({
+    zid: 'zid-tilt',
+    name: 'Garage Tilt',
+    deviceType: RingDeviceType.TiltSensor,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    faulted: false,
+  }),
+  glassbreakSensor: nestDevice({
+    zid: 'zid-glass',
+    name: 'Window Glass',
+    deviceType: RingDeviceType.GlassbreakSensor,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    faulted: false,
+  }),
+  smokeCoListener: nestDevice({
+    zid: 'zid-smoke-co',
+    name: 'Smoke CO Listener',
+    deviceType: RingDeviceType.SmokeCoListener,
+    categoryId: RingDeviceCategory.Alarms,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    smoke: { alarmStatus: 'inactive' },
+    co: { alarmStatus: 'inactive' },
+  }),
+  kidde: nestDevice({
+    zid: 'zid-kidde',
+    name: 'Kidde Detector',
+    deviceType: RingDeviceType.KiddeSmokeCoAlarm,
+    categoryId: RingDeviceCategory.Alarms,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    components: {
+      'alarm.smoke': { alarmStatus: 'inactive' },
+      'alarm.co': { alarmStatus: 'inactive' },
+    },
+  }),
+  unknownZWave: nestDevice({
+    zid: 'zid-zwave',
+    name: 'Unknown ZWave',
+    deviceType: RingDeviceType.UnknownZWave,
+    categoryId: RingDeviceCategory.Unknown,
+    batteryStatus: 'none',
+    tamperStatus: 'ok',
+    tags: [],
+    basicValue: 0,
+  }),
+  retrofitZone: nestDevice({
+    zid: 'zid-zone',
+    name: 'Retrofit Zone',
+    deviceType: RingDeviceType.RetrofitZone,
+    categoryId: RingDeviceCategory.Sensors,
+    batteryStatus: 'ok',
+    tamperStatus: 'ok',
+    tags: [],
+    faulted: false,
+  }),
 }
 
 export const beamDeviceDocs = {
@@ -222,6 +327,48 @@ export const beamDeviceDocs = {
     motionStatus: 'clear',
     motionSensorEnabled: true,
   }),
+  beamTransformer: nestDevice({
+    zid: 'zid-beam-transformer',
+    name: 'Beam Transformer',
+    deviceType: RingDeviceType.BeamsTransformerSwitch,
+    categoryId: RingDeviceCategory.Lights,
+    batteryStatus: 'none',
+    tamperStatus: 'ok',
+    tags: [],
+    on: false,
+  }),
+}
+
+export function sessionInfoMessage(
+  sessions: {
+    assetUuid: string
+    connectionStatus: 'unknown' | 'cell-backup' | 'online'
+    doorbotId: number
+    kind: string
+    sessionId: number
+  }[],
+) {
+  return {
+    channel: 'DataUpdate',
+    msg: {
+      msg: 'SessionInfo' as const,
+      datatype: 'SessionInfoType' as const,
+      src: sessions[0]?.assetUuid ?? BASE_ASSET_UUID,
+      body: sessions,
+    },
+  }
+}
+
+export function hubDisconnectionMessage(src: string = BASE_ASSET_UUID) {
+  return {
+    channel: 'message',
+    msg: {
+      msg: 'DeviceInfoDocGetList' as const,
+      datatype: 'HubDisconnectionEventType' as const,
+      src,
+      body: [],
+    },
+  }
 }
 
 export function deviceListMessage(src: string, body: unknown[]) {

@@ -13,6 +13,8 @@ import {
   dataUpdateMessage,
   deviceListMessage,
   hubDeviceDocs,
+  hubDisconnectionMessage,
+  sessionInfoMessage,
 } from './fixtures/hub-devices.ts'
 import {
   MockWebSocket,
@@ -92,16 +94,31 @@ describe('Location hub websocket', () => {
       types = devices.map((d) => d.deviceType)
 
     expect(types).toContain(RingDeviceType.SecurityPanel)
+    expect(types).toContain(RingDeviceType.BaseStation)
+    expect(types).toContain(RingDeviceType.Keypad)
     expect(types).toContain(RingDeviceType.ContactSensor)
     expect(types).toContain(RingDeviceType.MotionSensor)
     expect(types).toContain(RingDeviceType.FloodFreezeSensor)
+    expect(types).toContain(RingDeviceType.FreezeSensor)
+    expect(types).toContain(RingDeviceType.TemperatureSensor)
+    expect(types).toContain(RingDeviceType.WaterSensor)
+    expect(types).toContain(RingDeviceType.TiltSensor)
+    expect(types).toContain(RingDeviceType.GlassbreakSensor)
     expect(types).toContain(RingDeviceType.SmokeAlarm)
     expect(types).toContain(RingDeviceType.CoAlarm)
+    expect(types).toContain(RingDeviceType.SmokeCoListener)
+    expect(types).toContain(RingDeviceType.KiddeSmokeCoAlarm)
     expect(types).toContain(RingDeviceType.Thermostat)
     expect(types).toContain(RingDeviceType.WaterValve)
+    expect(types).toContain(RingDeviceType.UnknownZWave)
+    expect(types).toContain(RingDeviceType.RetrofitZone)
+    expect(types).toContain(RingDeviceType.Switch)
+    expect(types).toContain(RingDeviceType.MultiLevelSwitch)
     expect(types).toContain(RingDeviceType.BeamsSwitch)
     expect(types).toContain(RingDeviceType.BeamsMultiLevelSwitch)
     expect(types).toContain(RingDeviceType.BeamsLightGroupSwitch)
+    expect(types).toContain(RingDeviceType.BeamsMotionSensor)
+    expect(types).toContain(RingDeviceType.BeamsTransformerSwitch)
     expect(types).toContain('lock')
 
     const contact = devices.find((d) => d.zid === 'zid-contact')!
@@ -160,5 +177,79 @@ describe('Location hub websocket', () => {
       /does not have any hubs/,
     )
     noHub.disconnect()
+  })
+
+  it('tracks SessionInfo offline/online and re-requests device list on recovery', async () => {
+    const devicesPromise = location.getDevices()
+    await vi.waitFor(() => expect(MockWebSocket.latest()).toBeTruthy())
+    const socket = MockWebSocket.latest()!
+    await vi.waitFor(() => expect(socket.sent.length).toBeGreaterThanOrEqual(2))
+
+    socket.receive(deviceListMessage(BASE_ASSET_UUID, alarmDeviceList))
+    socket.receive(deviceListMessage(BEAM_ASSET_UUID, beamDeviceList))
+    await devicesPromise
+
+    const sentBeforeOffline = socket.sent.length
+
+    socket.receive(
+      sessionInfoMessage([
+        {
+          assetUuid: BASE_ASSET_UUID,
+          connectionStatus: 'cell-backup',
+          doorbotId: 3001,
+          kind: 'base_station_v1',
+          sessionId: 1,
+        },
+      ]),
+    )
+
+    await vi.waitFor(() =>
+      expect(location.offlineAssets).toContain(BASE_ASSET_UUID),
+    )
+
+    socket.receive(
+      sessionInfoMessage([
+        {
+          assetUuid: BASE_ASSET_UUID,
+          connectionStatus: 'online',
+          doorbotId: 3001,
+          kind: 'base_station_v1',
+          sessionId: 2,
+        },
+      ]),
+    )
+
+    await vi.waitFor(() =>
+      expect(location.offlineAssets).not.toContain(BASE_ASSET_UUID),
+    )
+    await vi.waitFor(() =>
+      expect(socket.sent.length).toBeGreaterThan(sentBeforeOffline),
+    )
+
+    const lastSent = JSON.parse(socket.sent[socket.sent.length - 1]!)
+    expect(lastSent.msg.msg).toBe('DeviceInfoDocGetList')
+    expect(lastSent.msg.dst).toBe(BASE_ASSET_UUID)
+  })
+
+  it('reconnects the websocket on HubDisconnectionEventType', async () => {
+    vi.useFakeTimers()
+    try {
+      location.getConnection().catch(() => undefined)
+      await vi.waitFor(() => expect(MockWebSocket.instances.length).toBe(1))
+      // Allow the open microtask to run
+      await Promise.resolve()
+      await vi.waitFor(() => expect(location.onConnected.getValue()).toBe(true))
+
+      const firstSocket = MockWebSocket.latest()!
+      firstSocket.receive(hubDisconnectionMessage())
+
+      // reconnect() closes the socket and waits 1s before creating a new one
+      await vi.advanceTimersByTimeAsync(1100)
+      await vi.waitFor(() => expect(MockWebSocket.instances.length).toBe(2))
+      await Promise.resolve()
+      await vi.waitFor(() => expect(location.onConnected.getValue()).toBe(true))
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

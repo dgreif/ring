@@ -17,11 +17,16 @@ import {
 import { RingDeviceType } from 'ring-client-api'
 
 describe('sensors — Ring → Homebridge', () => {
-  it('ContactSensor: faulted flips ContactSensorState', () => {
+  it.each([
+    ['ContactSensor', RingDeviceType.ContactSensor],
+    ['TiltSensor', RingDeviceType.TiltSensor],
+    ['GlassbreakSensor', RingDeviceType.GlassbreakSensor],
+    ['RetrofitZone', RingDeviceType.RetrofitZone],
+  ] as const)('%s: faulted flips ContactSensorState', (_label, deviceType) => {
     const device = mockRingDevice({
-        name: 'Front Door',
-        zid: 'zid-contact',
-        deviceType: RingDeviceType.ContactSensor,
+        name: 'Sensor',
+        zid: `zid-${deviceType}`,
+        deviceType,
         batteryStatus: 'ok',
         tamperStatus: 'ok',
         faulted: false,
@@ -30,8 +35,8 @@ describe('sensors — Ring → Homebridge', () => {
       { platformAccessory } = initAccessory(
         ContactSensor,
         device,
-        'Front Door',
-        'contact-1',
+        'Sensor',
+        `contact-${deviceType}`,
       ),
       contact = getCharacteristic(
         platformAccessory,

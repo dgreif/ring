@@ -1,8 +1,8 @@
 ---
 description: |
-  Initial triage for newly opened issues. Uses Copilot to assess the issue,
-  match it against documented categories, and take the best action: point the
-  author to the relevant wiki page and close documented setup/network/runtime
+  Initial triage for newly opened issues. Uses an AI coding agent to assess the
+  issue, match it against documented categories, and take the best action: point
+  the author to the relevant wiki page and close documented setup/network/runtime
   issues, ask for device data on new-device requests (without closing), or leave
   the issue for a human maintainer when it looks like a real bug or is unclear.
 
@@ -25,8 +25,9 @@ network:
     - defaults
     - github
 
+# Uses OpenAI Codex. Requires the OPENAI_API_KEY (or CODEX_API_KEY) Actions secret.
 engine:
-  id: copilot
+  id: codex
 
 safe-outputs:
   add-comment:

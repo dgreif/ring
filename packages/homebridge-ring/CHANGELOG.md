@@ -1,5 +1,21 @@
 # homebridge-ring
 
+## 15.0.0
+
+### Major Changes
+
+- [#1846](https://github.com/dgreif/ring/pull/1846) [`2a6371d`](https://github.com/dgreif/ring/commit/2a6371d0890e35a80bf97fb1e1ccfa2a7c283b4e) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node 20 support, and bump undici to 8.x
+
+### Patch Changes
+
+- [#1746](https://github.com/dgreif/ring/pull/1746) [`25c6ec6`](https://github.com/dgreif/ring/commit/25c6ec63a9826f42f3f4269d0c2aad6f1e0e4185) Thanks [@kzaky](https://github.com/kzaky)! - Redact the 2FA code from the homebridge-ui server log on token exchange. Codes are short-lived and single-use, but logs are frequently pasted into bug reports, so removing the value from the log is a small defensive improvement.
+
+- [#1838](https://github.com/dgreif/ring/pull/1838) [`c78c8b3`](https://github.com/dgreif/ring/commit/c78c8b3fadb0650d210d1220d2724309aec02611) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- [#1840](https://github.com/dgreif/ring/pull/1840) [`5e4afd4`](https://github.com/dgreif/ring/commit/5e4afd43e88802e62bfc8acab743433d9bfaabfa) Thanks [@dgreif](https://github.com/dgreif)! - Bump werift to 0.24.4 (clears `ip` audit) and accept partial ICE candidates for Ring signaling
+- Updated dependencies [[`e368e26`](https://github.com/dgreif/ring/commit/e368e26f789f4ca2093ac015dcec4bc9ce181d62), [`003c0d0`](https://github.com/dgreif/ring/commit/003c0d0740cedd3c393ce86baf628d7e5bc26c86), [`2a6371d`](https://github.com/dgreif/ring/commit/2a6371d0890e35a80bf97fb1e1ccfa2a7c283b4e), [`c78c8b3`](https://github.com/dgreif/ring/commit/c78c8b3fadb0650d210d1220d2724309aec02611), [`5e4afd4`](https://github.com/dgreif/ring/commit/5e4afd43e88802e62bfc8acab743433d9bfaabfa)]:
+  - ring-client-api@15.0.0
+
 ## 14.3.0
 
 ### Minor Changes

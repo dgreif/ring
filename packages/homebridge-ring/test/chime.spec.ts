@@ -1,20 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Chime } from '../chime.ts'
-import { Intercom } from '../intercom.ts'
 import {
   getCharacteristic,
   hap,
   initAccessory,
   mockRingChime,
-  mockRingIntercom,
 } from './harness.ts'
 
-describe('chime / intercom — Ring ↔ Homebridge', () => {
+describe('Chime', () => {
   afterEach(() => {
     vi.useRealTimers()
   })
 
-  it('Chime: snooze On from do_not_disturb; SET calls snooze/clearSnooze', async () => {
+  it('snooze On from do_not_disturb; SET calls snooze/clearSnooze', async () => {
     const device = mockRingChime(),
       { platformAccessory } = initAccessory(
         Chime,
@@ -40,7 +38,7 @@ describe('chime / intercom — Ring ↔ Homebridge', () => {
     expect(device.clearSnooze).toHaveBeenCalled()
   })
 
-  it('Chime: volume SET (debounced) → setVolume', async () => {
+  it('volume SET (debounced) → setVolume', async () => {
     vi.useFakeTimers()
     const device = mockRingChime(),
       { platformAccessory } = initAccessory(
@@ -59,23 +57,5 @@ describe('chime / intercom — Ring ↔ Homebridge', () => {
     await volume.setValue(9)
     await vi.advanceTimersByTimeAsync(500)
     expect(device.setVolume).toHaveBeenCalledWith(9)
-  })
-
-  it('Intercom: LockTargetState unlock → device.unlock()', async () => {
-    const device = mockRingIntercom(),
-      { platformAccessory } = initAccessory(
-        Intercom,
-        device,
-        'Lobby Intercom',
-        'intercom-1',
-      ),
-      target = getCharacteristic(
-        platformAccessory,
-        hap.Service.LockMechanism,
-        hap.Characteristic.LockTargetState,
-      )
-
-    await target.setValue(hap.Characteristic.LockTargetState.UNSECURED)
-    expect(device.unlock).toHaveBeenCalled()
   })
 })

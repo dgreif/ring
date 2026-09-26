@@ -47,6 +47,7 @@ export const RingDeviceType = {
   IntercomHandsetVideo: 'intercom_handset_video',
   WaterValve: 'valve.water',
   KiddeSmokeCoAlarm: 'comp.bluejay.sensor_bluejay_wsc',
+  KiddeSmokeAlarm: 'comp.bluejay.sensor_bluejay_s',
 } as const
 // eslint-disable-next-line no-redeclare
 export type RingDeviceType =
@@ -239,7 +240,7 @@ export interface RingDeviceData {
   alarmStatus?: 'active'
   co?: { alarmStatus?: 'active' | 'inactive' }
   smoke?: { alarmStatus?: 'active' | 'inactive' }
-  // Kidde Smoke/CO Alarm (comp.bluejay.sensor_bluejay_wsc)
+  // Kidde Smoke/CO Alarm (comp.bluejay.sensor_bluejay_wsc, comp.bluejay.sensor_bluejay_s)
   components?: {
     'alarm.co'?: { alarmStatus?: 'active' | 'inactive' }
     'alarm.smoke'?: { alarmStatus?: 'active' | 'inactive' }

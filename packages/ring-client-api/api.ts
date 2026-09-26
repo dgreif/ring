@@ -1,5 +1,11 @@
 import type { RefreshTokenAuth, SessionOptions } from './rest-client.ts'
-import { clientApi, deviceApi, RingRestClient } from './rest-client.ts'
+import {
+  clientApi,
+  deviceApi,
+  deviceInfoApi,
+  locationInfoApi,
+  RingRestClient,
+} from './rest-client.ts'
 import { Location } from './location.ts'
 import type {
   BaseStation,
@@ -50,6 +56,13 @@ export interface RingApiOptions extends SessionOptions {
     end: number
   }
 }
+
+// Ring exposes no "is a doorbell" flag, and the `kind` strings are not
+// consistently prefixed - `lpd_v2` and `jbox_v1` are doorbells, while newer
+// models are named after their product line (`cocoa_doorbell`).  Owned devices
+// are classified by which bucket `clients_api/ring_devices` returns them in;
+// shared devices arrive in a flat list, so they are classified by name.
+const doorbellKindMarkers = ['doorbell', 'doorbot', 'lpd_', 'jbox_']
 
 export class RingApi extends Subscribed {
   public readonly restClient
@@ -127,6 +140,33 @@ export class RingApi extends Subscribed {
       }
     })
 
+    // `clients_api/ring_devices` omits cameras shared with this account by
+    // another owner.  `device_info/v3/devices` (used by the Ring app) includes
+    // them, so anything it reports which we have not already seen is appended.
+    // A failure here must not break accounts which only have owned devices, so
+    // the shared lookup is best-effort.
+    const knownCameraIds = new Set(
+        [
+          ...doorbots,
+          ...stickupCams,
+          ...authorizedDoorbots,
+          ...onvifCameras,
+        ].map((camera) => camera.id),
+      ),
+      sharedCameras = await this.fetchSharedCameras(knownCameraIds)
+
+    for (const camera of sharedCameras) {
+      if (camera.kind === RingDeviceType.OnvifCamera) {
+        onvifCameras.push(camera as OnvifCameraData)
+      } else if (
+        doorbellKindMarkers.some((marker) => camera.kind.includes(marker))
+      ) {
+        authorizedDoorbots.push(camera as CameraData)
+      } else {
+        stickupCams.push(camera as CameraData)
+      }
+    }
+
     return {
       doorbots,
       chimes,
@@ -144,6 +184,23 @@ export class RingApi extends Subscribed {
       thirdPartyGarageDoorOpeners,
       intercoms,
       unknownDevices,
+    }
+  }
+
+  private async fetchSharedCameras(knownCameraIds: Set<number>) {
+    try {
+      const { devices } = await this.restClient.request<{
+        devices: AnyCameraData[]
+      }>({ url: deviceInfoApi('devices') })
+
+      return devices.filter(
+        (device) => device.kind && !knownCameraIds.has(device.id),
+      )
+    } catch (e) {
+      logDebug(
+        `Unable to fetch shared devices, continuing with owned devices only. ${e}`,
+      )
+      return []
     }
   }
 
@@ -395,9 +452,26 @@ export class RingApi extends Subscribed {
   }
 
   async fetchRawLocations() {
-    const { user_locations: rawLocations } = await this.restClient.request<{
-      user_locations: UserLocation[]
-    }>({ url: deviceApi('locations') })
+    // `devices/v1/locations` only returns locations owned by this account.
+    // `location_info/v3/locations` (used by the Ring app) also returns
+    // locations shared with this account, which is the only way to reach
+    // cameras at a property owned by someone else.  Fall back to the legacy
+    // endpoint so a failure of the newer one cannot take an account offline.
+    const fetchLocations = async () => {
+        try {
+          const { user_locations } = await this.restClient.request<{
+            user_locations: UserLocation[]
+          }>({ url: locationInfoApi('locations') })
+          return user_locations
+        } catch (e) {
+          logDebug(`Falling back to legacy locations endpoint. ${e}`)
+          const { user_locations } = await this.restClient.request<{
+            user_locations: UserLocation[]
+          }>({ url: deviceApi('locations') })
+          return user_locations
+        }
+      },
+      rawLocations = await fetchLocations()
 
     if (!rawLocations) {
       throw new Error(

@@ -67,6 +67,7 @@ Only include an optional parameter if you actually need it. Default behavior wit
   "hideDoorbellSwitch": true,
   "hideCameraLight": true,
   "hideCameraMotionSensor": true,
+  "useLastLiveStreamSnapshot": true,
   "hideCameraSirenSwitch": true,
   "hideInHomeDoorbellSwitch": true,
   "hideAlarmSirenSwitch": true,
@@ -89,6 +90,7 @@ Only include an optional parameter if you actually need it. Default behavior wit
 | `hideDoorbellSwitch` | `false` | If you have a Ring video doorbell, you will see a Programmable Switch associated with it. This switch can be used to perform actions on when the doorbell is pressed using "Single Press" actions. If you do not care to perform actions when the doorbell is pressed, you can hide the Programmable Switch by setting this option to `true`. You will still be able to receive _notifications_ from the doorbell even if the Programmable Switch is hidden (notifications can be configured in the settings for the doorbell camera in the Home app) |
 | `hideCameraLight` | `false` | If `true`, hides the light for Ring cameras in HomeKit. |
 | `hideCameraMotionSensor` | `false` | If `true`, hides the motion sensor for Ring cameras in HomeKit. |
+| `useLastLiveStreamSnapshot` | `false` | If `true`, when Ring reports snapshots blocked, the plugin starts a short live call (including after a delayed Ring status update following Homebridge startup), caches frames during live view, and refreshes the tile in response to Home's snapshot requests. Only complete video frames are used; packet loss may delay a refresh. Refreshes are limited to once every 30 seconds (60 seconds on battery), using camera power and bandwidth. If no frame is cached, a tile request waits up to six seconds for one; later requests show the previous frame during refresh. Home controls when the tile redraws and may label an older cached frame "Now." Frames older than five minutes fall back to Snapshot Blocked. The cache is cleared on restart; motion detection and Ring snapshots remain disabled. |
 | `hideCameraSirenSwitch` | `false` | If `true`, hides the siren switch for Ring cameras in HomeKit. |
 | `hideInHomeDoorbellSwitch` | `false` | If `true`, hides the switch for in-home doorbells in HomeKit. |
 | `hideAlarmSirenSwitch` | `false` | If you have a Ring Alarm, you will see both the alarm and a "Siren" switch in HomeKit. The siren switch can sometimes get triggered by Siri commands by accident, which is loud and annoying. Set this option to `true` to hide the siren switch. |

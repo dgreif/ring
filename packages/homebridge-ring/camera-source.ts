@@ -2,6 +2,7 @@ import type { RingCamera } from 'ring-client-api'
 import { hap } from './hap.ts'
 import type { SrtpOptions } from '@homebridge/camera-utils'
 import {
+  defaultFfmpegPath,
   generateSrtpOptions,
   ReturnAudioTranscoder,
   RtpSplitter,
@@ -24,10 +25,12 @@ import {
   SRTPCryptoSuites,
 } from 'homebridge'
 import { logDebug, logError, logInfo } from 'ring-client-api/util'
-import { debounceTime, delay, take } from 'rxjs/operators'
+import { debounceTime, delay, filter, take } from 'rxjs/operators'
 import { interval, merge, of, Subject } from 'rxjs'
-import { readFile } from 'fs'
-import { promisify } from 'util'
+import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
+import { readFile } from 'node:fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
 import { getFfmpegPath } from 'ring-client-api/ffmpeg'
 import {
   RtcpSenderInfo,
@@ -37,13 +40,17 @@ import {
   SrtcpSession,
 } from 'werift'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import path from 'node:path'
+import { SnapshotFrameBuffer } from './snapshot-frame-buffer.ts'
+import { SnapshotH264FrameBuffer } from './snapshot-h264-frame-buffer.ts'
 
 const __dirname = new URL('.', import.meta.url).pathname,
   mediaDirectory = path.join(__dirname.replace(/\/lib\/?$/, ''), 'media'),
   readFileAsync = promisify(readFile),
   cameraOfflinePath = path.join(mediaDirectory, 'camera-offline.jpg'),
-  snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg')
+  snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg'),
+  backgroundSnapshotTimeoutMs = 15000,
+  initialSnapshotWaitMs = 6000,
+  maxLiveSnapshotAgeMs = 5 * 60 * 1000
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000
@@ -61,6 +68,84 @@ function getSessionConfig(srtpOptions: SrtpOptions) {
   }
 }
 
+function captureLiveStreamSnapshots(
+  streamingSession: StreamingSession,
+  cameraName: string,
+  onSnapshot: (snapshot: Buffer) => void,
+) {
+  const snapshotTranscoder: ChildProcessWithoutNullStreams = spawn(
+      getFfmpegPath() || defaultFfmpegPath,
+      [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-skip_frame',
+        'nokey',
+        '-f',
+        'h264',
+        '-i',
+        'pipe:0',
+        '-c:v',
+        'mjpeg',
+        '-fps_mode',
+        'passthrough',
+        '-f',
+        'image2pipe',
+        'pipe:1',
+      ],
+    ),
+    frames = new SnapshotFrameBuffer(onSnapshot)
+  let lastKeyFrameRequestAt = 0
+  const h264Frames = new SnapshotH264FrameBuffer(() => {
+    if (Date.now() - lastKeyFrameRequestAt >= 1000) {
+      logDebug(`Discarded incomplete live video frame for ${cameraName}`)
+      streamingSession.requestKeyFrame()
+      lastKeyFrameRequestAt = Date.now()
+    }
+  })
+  snapshotTranscoder.stdout.on('data', (chunk: Buffer) => {
+    frames.append(chunk)
+  })
+  snapshotTranscoder.stderr.on('data', (message: Buffer) => {
+    logDebug(`Live stream snapshot (${cameraName}): ${message}`)
+  })
+  snapshotTranscoder.on('error', logError)
+  snapshotTranscoder.stdin.on('error', (error) => {
+    if (!error.message.includes('EPIPE')) {
+      logError(error)
+    }
+  })
+
+  let backpressured = false
+  snapshotTranscoder.stdin.on('drain', () => {
+    backpressured = false
+    if (!snapshotTranscoder.stdin.writableEnded) {
+      streamingSession.requestKeyFrame()
+    }
+  })
+
+  streamingSession.addSubscriptions(
+    streamingSession.onVideoRtp.subscribe((rtp) => {
+      if (backpressured || snapshotTranscoder.stdin.destroyed) {
+        return
+      }
+
+      try {
+        const frame = h264Frames.append(rtp)
+        if (frame) {
+          backpressured = !snapshotTranscoder.stdin.write(frame)
+        }
+      } catch (error) {
+        logError(`Failed to process live stream video for ${cameraName}`)
+        logError(error)
+      }
+    }),
+  )
+  streamingSession.onCallEnded.pipe(take(1)).subscribe(() => {
+    snapshotTranscoder.stdin.end()
+  })
+}
+
 class StreamingSessionWrapper {
   audioSsrc = hap.CameraController.generateSynchronisationSource()
   videoSsrc = hap.CameraController.generateSynchronisationSource()
@@ -74,17 +159,20 @@ class StreamingSessionWrapper {
   public prepareStreamRequest
   public ringCamera
   public start
+  private readonly onLiveStreamSnapshot?: (snapshot: Buffer) => void
 
   constructor(
     streamingSession: StreamingSession,
     prepareStreamRequest: PrepareStreamRequest,
     ringCamera: RingCamera,
     start: number,
+    onLiveStreamSnapshot?: (snapshot: Buffer) => void,
   ) {
     this.streamingSession = streamingSession
     this.prepareStreamRequest = prepareStreamRequest
     this.ringCamera = ringCamera
     this.start = start
+    this.onLiveStreamSnapshot = onLiveStreamSnapshot
 
     const {
         targetAddress,
@@ -313,6 +401,22 @@ class StreamingSessionWrapper {
 
     this.listenForAudioPackets(request)
     await returnAudioTranscoder.start()
+
+    if (this.onLiveStreamSnapshot) {
+      let hasCachedSnapshot = false
+      captureLiveStreamSnapshots(
+        this.streamingSession,
+        this.ringCamera.name,
+        (snapshot) => {
+          this.onLiveStreamSnapshot?.(snapshot)
+          if (!hasCachedSnapshot) {
+            hasCachedSnapshot = true
+            logDebug(`Cached live stream snapshot for ${this.ringCamera.name}`)
+          }
+        },
+      )
+    }
+
     await transcodingPromise
   }
 
@@ -328,10 +432,19 @@ export class CameraSource implements CameraStreamingDelegate {
   public controller
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
+  private liveStreamSnapshot?: Buffer
+  private liveStreamSnapshotAt = 0
+  private lastBackgroundSnapshotAttempt = 0
+  private backgroundSnapshotPromise?: Promise<void>
+  private backgroundSnapshotSession?: StreamingSession
+  private backgroundSnapshotVersion = 0
+  private lastBackgroundSnapshotSkipReason?: string
   private ringCamera
+  private useLastLiveStreamSnapshot
 
-  constructor(ringCamera: RingCamera) {
+  constructor(ringCamera: RingCamera, useLastLiveStreamSnapshot = false) {
     this.ringCamera = ringCamera
+    this.useLastLiveStreamSnapshot = useLastLiveStreamSnapshot
     this.controller = new hap.CameraController({
       cameraStreamCount: 10,
       delegate: this,
@@ -374,6 +487,187 @@ export class CameraSource implements CameraStreamingDelegate {
         },
       },
     })
+
+    if (useLastLiveStreamSnapshot) {
+      logInfo(
+        `Live snapshot refresh enabled for ${ringCamera.name}: snapshots ${
+          ringCamera.snapshotsAreBlocked ? 'blocked' : 'available'
+        }, ${ringCamera.isOffline ? 'offline' : 'online'}, ${
+          ringCamera.operatingOnBattery ? 'battery' : 'wired'
+        }`,
+      )
+      if (!ringCamera.snapshotsAreBlocked || ringCamera.isOffline) {
+        logDebug(`Waiting for blocked snapshot status for ${ringCamera.name}`)
+      }
+      ringCamera.onData
+        .pipe(
+          filter(() => ringCamera.snapshotsAreBlocked && !ringCamera.isOffline),
+          take(1),
+        )
+        .subscribe(() => this.refreshBlockedSnapshotIfNeeded())
+    }
+  }
+
+  private cacheLiveStreamSnapshot(snapshot: Buffer) {
+    this.liveStreamSnapshot = snapshot
+    this.liveStreamSnapshotAt = Date.now()
+  }
+
+  private async refreshBlockedSnapshot(version: number) {
+    let liveCall: StreamingSession | undefined,
+      timeout: ReturnType<typeof setTimeout> | undefined,
+      expired = false
+
+    const timedOut = new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => {
+        expired = true
+        reject(
+          new Error(
+            `Timed out refreshing snapshot for ${this.ringCamera.name}`,
+          ),
+        )
+      }, backgroundSnapshotTimeoutMs)
+    })
+
+    try {
+      logDebug(
+        `Refreshing blocked snapshot for ${this.ringCamera.name} from live video`,
+      )
+      liveCall = await Promise.race([
+        this.ringCamera.startLiveCall().then((call) => {
+          if (expired || version !== this.backgroundSnapshotVersion) {
+            call.stop()
+            return undefined
+          }
+          return call
+        }),
+        timedOut,
+      ])
+
+      if (!liveCall) {
+        return
+      }
+
+      const session = liveCall
+      let capturedFrame = false
+      this.backgroundSnapshotSession = session
+      await Promise.race([
+        new Promise<void>((resolve, reject) => {
+          session.onCallEnded.pipe(take(1)).subscribe(() => {
+            reject(
+              new Error(`Live snapshot call ended for ${this.ringCamera.name}`),
+            )
+          })
+          captureLiveStreamSnapshots(
+            session,
+            this.ringCamera.name,
+            (snapshot) => {
+              if (
+                !capturedFrame &&
+                version === this.backgroundSnapshotVersion
+              ) {
+                capturedFrame = true
+                this.cacheLiveStreamSnapshot(snapshot)
+                logDebug(
+                  `Refreshed blocked snapshot for ${this.ringCamera.name}`,
+                )
+                resolve()
+              }
+            },
+          )
+          session.requestKeyFrame()
+        }),
+        timedOut,
+      ])
+    } finally {
+      expired = true
+      clearTimeout(timeout)
+      liveCall?.stop()
+      if (this.backgroundSnapshotSession === liveCall) {
+        this.backgroundSnapshotSession = undefined
+      }
+    }
+  }
+
+  private refreshBlockedSnapshotIfNeeded() {
+    const refreshInterval = this.ringCamera.operatingOnBattery ? 60000 : 30000
+    if (!this.useLastLiveStreamSnapshot) {
+      return
+    }
+
+    const skipReason = this.ringCamera.isOffline
+      ? 'camera offline'
+      : !this.ringCamera.snapshotsAreBlocked
+      ? 'snapshots available'
+      : this.backgroundSnapshotPromise
+      ? 'refresh already running'
+      : Object.keys(this.sessions).length
+      ? 'live stream active'
+      : Date.now() - this.lastBackgroundSnapshotAttempt < refreshInterval
+      ? 'rate limit'
+      : Date.now() - this.liveStreamSnapshotAt < refreshInterval
+      ? 'recent live frame'
+      : undefined
+
+    if (skipReason) {
+      if (skipReason !== this.lastBackgroundSnapshotSkipReason) {
+        logDebug(
+          `Blocked snapshot refresh deferred for ${this.ringCamera.name}: ${skipReason}`,
+        )
+        this.lastBackgroundSnapshotSkipReason = skipReason
+      }
+      return
+    }
+
+    this.lastBackgroundSnapshotSkipReason = undefined
+    this.lastBackgroundSnapshotAttempt = Date.now()
+    const version = this.backgroundSnapshotVersion,
+      refresh = this.refreshBlockedSnapshot(version).catch((error) => {
+        if (version === this.backgroundSnapshotVersion) {
+          logError(
+            `Failed to refresh live snapshot for ${this.ringCamera.name}`,
+          )
+          logError(error)
+        }
+      })
+    this.backgroundSnapshotPromise = refresh
+    refresh
+      .finally(() => {
+        if (this.backgroundSnapshotPromise === refresh) {
+          this.backgroundSnapshotPromise = undefined
+        }
+      })
+      .catch(logError)
+  }
+
+  private hasCurrentLiveStreamSnapshot() {
+    return (
+      this.liveStreamSnapshot &&
+      Date.now() - this.liveStreamSnapshotAt < maxLiveSnapshotAgeMs
+    )
+  }
+
+  private async waitForInitialLiveStreamSnapshot() {
+    if (
+      !this.useLastLiveStreamSnapshot ||
+      !this.ringCamera.snapshotsAreBlocked ||
+      this.hasCurrentLiveStreamSnapshot() ||
+      !this.backgroundSnapshotPromise
+    ) {
+      return
+    }
+
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    try {
+      await Promise.race([
+        this.backgroundSnapshotPromise,
+        new Promise<void>((resolve) => {
+          timeout = setTimeout(resolve, initialSnapshotWaitMs)
+        }),
+      ])
+    } finally {
+      clearTimeout(timeout)
+    }
   }
 
   private previousLoadSnapshotPromise?: Promise<any>
@@ -453,6 +747,14 @@ export class CameraSource implements CameraStreamingDelegate {
     }
 
     if (this.ringCamera.snapshotsAreBlocked) {
+      if (this.useLastLiveStreamSnapshot) {
+        this.refreshBlockedSnapshotIfNeeded()
+        if (this.hasCurrentLiveStreamSnapshot()) {
+          logDebug(`Used live stream snapshot for ${this.ringCamera.name}`)
+          return this.liveStreamSnapshot
+        }
+      }
+
       return readFileAsync(snapshotsBlockedPath)
     }
 
@@ -475,7 +777,17 @@ export class CameraSource implements CameraStreamingDelegate {
     callback: SnapshotRequestCallback,
   ) {
     try {
-      const snapshot = await this.getCurrentSnapshot()
+      let snapshot = await this.getCurrentSnapshot()
+      if (
+        this.useLastLiveStreamSnapshot &&
+        this.ringCamera.snapshotsAreBlocked &&
+        !this.ringCamera.isOffline
+      ) {
+        await this.waitForInitialLiveStreamSnapshot()
+        if (this.hasCurrentLiveStreamSnapshot()) {
+          snapshot = this.liveStreamSnapshot
+        }
+      }
 
       if (!snapshot) {
         // return an error to prevent "empty image buffer" warnings
@@ -500,15 +812,27 @@ export class CameraSource implements CameraStreamingDelegate {
     logInfo(`Preparing Live Stream for ${this.ringCamera.name}`)
 
     try {
+      this.backgroundSnapshotVersion++
+      this.backgroundSnapshotSession?.stop()
       const liveCall = await this.ringCamera.startLiveCall(),
         session = new StreamingSessionWrapper(
           liveCall,
           request,
           this.ringCamera,
           start,
+          this.useLastLiveStreamSnapshot
+            ? (snapshot) => {
+                this.cacheLiveStreamSnapshot(snapshot)
+              }
+            : undefined,
         )
 
       this.sessions[request.sessionID] = session
+      liveCall.onCallEnded.pipe(take(1)).subscribe(() => {
+        if (this.sessions[request.sessionID] === session) {
+          delete this.sessions[request.sessionID]
+        }
+      })
 
       logInfo(
         `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(

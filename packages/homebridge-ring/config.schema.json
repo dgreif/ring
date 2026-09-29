@@ -39,6 +39,11 @@
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
       },
+      "useLastLiveStreamSnapshot": {
+        "title": "Refresh Blocked Snapshots from Live Video",
+        "type": "boolean",
+        "description": "Refresh blocked Home camera snapshots from brief live calls. Uses camera power and bandwidth; Home may label cached frames \"Now.\""
+      },
       "hideCameraSirenSwitch": {
         "title": "Hide Camera Siren Switch",
         "type": "boolean"
@@ -157,6 +162,7 @@
         "hideDoorbellSwitch",
         "hideCameraLight",
         "hideCameraMotionSensor",
+        "useLastLiveStreamSnapshot",
         "hideCameraSirenSwitch",
         "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",

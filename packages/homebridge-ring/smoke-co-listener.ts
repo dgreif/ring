@@ -29,7 +29,10 @@ export class SmokeCoListener extends BaseDeviceAccessory {
       characteristicType: SmokeDetected,
       serviceType: SmokeSensor,
       getValue: (data) => {
-        return data.smoke && data.smoke.alarmStatus === 'active'
+        const smokeAlarmStatus =
+          data.smoke?.alarmStatus ??
+          data.components?.['alarm.smoke']?.alarmStatus
+        return smokeAlarmStatus === 'active'
           ? SmokeDetected.SMOKE_DETECTED
           : SmokeDetected.SMOKE_NOT_DETECTED
       },
@@ -38,7 +41,9 @@ export class SmokeCoListener extends BaseDeviceAccessory {
       characteristicType: CarbonMonoxideDetected,
       serviceType: CarbonMonoxideSensor,
       getValue: (data) => {
-        return data.co && data.co.alarmStatus === 'active'
+        const coAlarmStatus =
+          data.co?.alarmStatus ?? data.components?.['alarm.co']?.alarmStatus
+        return coAlarmStatus === 'active'
           ? CarbonMonoxideDetected.CO_LEVELS_ABNORMAL
           : CarbonMonoxideDetected.CO_LEVELS_NORMAL
       },

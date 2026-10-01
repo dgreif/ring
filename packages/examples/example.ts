@@ -1,8 +1,6 @@
-import 'dotenv/config'
 import { PushNotificationAction, RingApi } from 'ring-client-api'
 import { skip } from 'rxjs/operators'
-import { readFile, writeFile } from 'fs'
-import { promisify } from 'util'
+import { readFile, writeFile } from 'node:fs/promises'
 
 async function example() {
   const { env } = process,
@@ -26,12 +24,11 @@ async function example() {
         return
       }
 
-      const currentConfig = await promisify(readFile)('.env'),
-        updatedConfig = currentConfig
-          .toString()
-          .replace(oldRefreshToken, newRefreshToken)
+      const envFile = process.env.RING_ENV_FILE ?? '.env',
+        currentConfig = await readFile(envFile, 'utf8'),
+        updatedConfig = currentConfig.replace(oldRefreshToken, newRefreshToken)
 
-      await promisify(writeFile)('.env', updatedConfig)
+      await writeFile(envFile, updatedConfig)
     },
   )
 

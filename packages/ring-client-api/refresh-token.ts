@@ -11,7 +11,7 @@ export async function acquireRefreshToken() {
       const code = await requestInput('2fa Code: ')
       try {
         return await restClient.getAuth(code)
-      } catch (_) {
+      } catch {
         console.log('Incorrect 2fa code. Please try again.')
         return getAuthWith2fa()
       }

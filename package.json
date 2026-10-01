@@ -4,34 +4,34 @@
   "type": "module",
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
     "test:watch": "npm run test:watch -w ring-client-api",
-    "example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/example.ts",
-    "api-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/api-example.ts",
-    "record-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/record-example.ts",
-    "return-audio-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/return-audio-example.ts",
-    "stream-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/stream-example.ts",
-    "browser-example": "turbo build --filter=ring-client-api && DEBUG=ring node --experimental-strip-types ./packages/examples/browser-example.ts",
-    "auth-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-auth-cli.js",
-    "device-data-cli": "turbo build --filter=ring-client-api && ./packages/ring-client-api/lib/ring-device-data-cli.js",
+    "example": "npm run example -w examples",
+    "api-example": "npm run api-example -w examples",
+    "record-example": "npm run record-example -w examples",
+    "return-audio-example": "npm run return-audio-example -w examples",
+    "stream-example": "npm run stream-example -w examples",
+    "browser-example": "npm run browser-example -w examples",
+    "auth-cli": "npm run auth-cli -w ring-client-api",
+    "device-data-cli": "npm run device-data-cli -w ring-client-api",
     "push-with-tags": "git push --follow-tags",
     "predeploy": "git pull -r && turbo run build test lint",
     "postdeploy": "npm run push-with-tags",
     "deploy": "changeset version && git commit -am 'Bump versions for release' && changeset publish",
     "release": "turbo run build test lint && changeset publish",
     "prepare-beta": "changeset pre enter beta && changeset version && git add .changeset/pre.json && git commit -am 'Prepare for beta release' && git push --follow-tags",
-    "exit-beta": "changeset pre exit && changeset version && commit -am 'Exit beta release and create main release' && git push --follow-tags"
+    "exit-beta": "changeset pre exit && changeset version && git commit -am 'Exit beta release and create main release' && git push --follow-tags"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.7",
-    "turbo": "^2.6.0"
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
+    "turbo": "^2.11.2"
   },
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "npm@11.6.2"
+  "packageManager": "npm@12.1.0"
 }

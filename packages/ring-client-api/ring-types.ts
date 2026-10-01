@@ -237,8 +237,13 @@ export interface RingDeviceData {
   }
   siren?: { state: 'on' | 'off' }
   alarmStatus?: 'active'
-  co?: { alarmStatus?: 'active' }
-  smoke?: { alarmStatus?: 'active' }
+  co?: { alarmStatus?: 'active' | 'inactive' }
+  smoke?: { alarmStatus?: 'active' | 'inactive' }
+  // Kidde Smoke/CO Alarm (comp.bluejay.sensor_bluejay_wsc)
+  components?: {
+    'alarm.co'?: { alarmStatus?: 'active' | 'inactive' }
+    'alarm.smoke'?: { alarmStatus?: 'active' | 'inactive' }
+  }
   flood?: { faulted?: boolean }
   freeze?: { faulted?: boolean }
   motionStatus?: 'clear' | 'faulted'
@@ -347,7 +352,11 @@ export interface ChimeData {
     ding_audio_id: string
     motion_audio_user_id: string
     motion_audio_id: string
+    night_light_settings?: {
+      light_sensor_enabled: boolean
+    }
   }
+  night_light_state?: string
   features: {
     ringtones_enabled: boolean
   }
@@ -383,6 +392,9 @@ export interface ChimeUpdate {
     ding_audio_id?: string
     motion_audio_user_id?: string
     motion_audio_id?: string
+    night_light_settings?: {
+      light_sensor_enabled?: boolean
+    }
   }
 }
 

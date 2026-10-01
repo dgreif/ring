@@ -16,9 +16,17 @@ import type {
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'
-import { Agent } from 'undici'
+// Import fetch from the same undici package as Agent. Node's global fetch is
+// backed by a bundled undici that can be a different major than the npm
+// dependency; passing an undici@8 Agent into global fetch then fails with
+// UND_ERR_INVALID_ARG ("invalid onRequestStart method") on Node 22/24.
+import {
+  Agent,
+  fetch as undiciFetch,
+  type RequestInit as UndiciRequestInit,
+} from 'undici'
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions extends Omit<RequestInit, 'dispatcher'> {
   responseType?: 'json' | 'buffer'
   timeout?: number
   json?: object
@@ -100,12 +108,6 @@ async function requestWithRetry<T>(
   requestOptions: RequestOptions & { url: string; allowNoResponse?: boolean },
   retryCount = 0,
 ): Promise<T & ExtendedResponse> {
-  if (typeof fetch !== 'function') {
-    throw new Error(
-      `Your current NodeJS version (${process.version}) is too old to support this plugin.  Please upgrade to the latest LTS version of NodeJS.`,
-    )
-  }
-
   try {
     if (requestOptions.json || requestOptions.responseType === 'json') {
       requestOptions.headers = {
@@ -131,12 +133,15 @@ async function requestWithRetry<T>(
       options.signal = AbortSignal.timeout(options.timeout)
     }
 
-    // make the fetch request
-    const response = await fetch(options.url, options),
+    // undici fetch + undici Agent must stay paired (see import comment)
+    const response = await undiciFetch(
+        options.url,
+        options as UndiciRequestInit,
+      ),
       headers = response.headers
 
     if (!response.ok) {
-      const error = await responseToError(response)
+      const error = await responseToError(response as unknown as Response)
       throw error
     }
 
@@ -364,10 +369,15 @@ export class RingRestClient {
       }
 
       const response = requestError.response || {},
-        responseData: Auth2faResponse = response.body || {},
+        responseData: Auth2faResponse =
+          typeof response.body === 'object' && response.body !== null
+            ? response.body
+            : {},
         responseError =
           'error' in responseData && typeof responseData.error === 'string'
             ? responseData.error
+            : response.status
+            ? `HTTP ${response.status}`
             : ''
 
       if (
@@ -379,7 +389,7 @@ export class RingRestClient {
 
         if (response.status === 400) {
           this.promptFor2fa = 'Invalid 2fa code entered.  Please try again.'
-          throw new Error(responseError)
+          throw new Error(responseError, { cause: requestError })
         }
 
         if ('tsv_state' in responseData) {
@@ -396,6 +406,7 @@ export class RingRestClient {
 
         throw new Error(
           'Your Ring account is configured to use 2-factor authentication (2fa).  See https://github.com/dgreif/ring/wiki/Refresh-Tokens for details.',
+          { cause: requestError },
         )
       }
 
@@ -413,7 +424,7 @@ export class RingRestClient {
           ` (error: ${responseError})`
       logError(requestError.response || requestError)
       logError(errorMessage)
-      throw new Error(errorMessage)
+      throw new Error(errorMessage, { cause: requestError })
     }
   }
 
@@ -563,7 +574,12 @@ export class RingRestClient {
           return this.request(options)
         }
 
-        throw new Error('Not found with response: ' + stringify(response.body))
+        throw new Error(
+          'Not found with response: ' + stringify(response.body),
+          {
+            cause: e,
+          },
+        )
       }
 
       if (response.status) {

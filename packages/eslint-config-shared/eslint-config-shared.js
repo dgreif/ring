@@ -4,7 +4,6 @@ import parser from '@typescript-eslint/parser'
 import prettier from 'eslint-plugin-prettier'
 import globals from 'globals'
 import prettierRecommended from 'eslint-plugin-prettier/recommended'
-import deprecation from 'eslint-plugin-deprecation'
 
 export default tseslint.config(
   {
@@ -28,7 +27,6 @@ export default tseslint.config(
     },
     plugins: {
       prettier,
-      deprecation,
     },
     languageOptions: {
       globals: globals.node,
@@ -197,13 +195,11 @@ export default tseslint.config(
       '@typescript-eslint/no-object-literal-type-assertion': 0,
       '@typescript-eslint/no-var-requires': 0,
       '@typescript-eslint/explicit-module-boundary-types': 0,
-      '@typescript-eslint/no-unused-vars': 0,
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/consistent-type-imports': 2,
-      // '@typescript-eslint/no-unused-vars': [
-      //   'error',
-      //   { argsIgnorePattern: '^_' },
-      // ],
-      'deprecation/deprecation': 2,
     },
   },
 )

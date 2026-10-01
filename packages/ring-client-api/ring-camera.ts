@@ -430,6 +430,13 @@ export class RingCamera extends Subscribed {
   }
 
   async startLiveCall(options: StreamingConnectionOptions = {}) {
+    // Check if live view is disabled by camera settings/modes
+    if (this.data.settings?.live_view_disabled === true) {
+      throw new Error(
+        `Live view is currently disabled for ${this.name}. This camera has been disabled via mode settings in the Ring app. Enable live view for this camera in the Ring app to start streaming.`,
+      )
+    }
+
     const connection = await this.createStreamingConnection(options)
     return new StreamingSession(this, connection)
   }

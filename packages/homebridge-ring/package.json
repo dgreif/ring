@@ -1,32 +1,30 @@
 {
   "name": "homebridge-ring",
   "displayName": "Ring",
-  "version": "14.2.0",
+  "version": "14.3.0",
   "description": "Homebridge plugin for Ring doorbells, cameras, security alarm system and smart lighting",
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
     "lint": "eslint .",
-    "dev": "concurrently -c yellow,blue --kill-others \"npm:dev:build\" \"npm:dev:run\" ",
-    "dev:build": "tsc --watch --preserveWatchOutput",
-    "dev:run": "RING_DEBUG=true node --watch ../../node_modules/.bin/homebridge -U ../../.homebridge"
+    "dev": "bash ./dev-homebridge.sh",
+    "dev:run": "npm run dev"
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
-    "@homebridge/plugin-ui-utils": "^2.1.0",
-    "ring-client-api": "14.2.0",
-    "werift": "0.22.2"
+    "@homebridge/plugin-ui-utils": "^2.2.6",
+    "ring-client-api": "14.3.0",
+    "werift": "0.24.4"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
     "eslint-config-shared": "*",
-    "homebridge": "1.11.1",
+    "homebridge": "2.4.0",
     "tsconfig": "*",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   },
   "engines": {
-    "node": "^20 || ^22 || ^24",
+    "node": "^22.19.0 || ^24 || ^26",
     "homebridge": ">=1.4.0 || ^2.0.0-beta.0"
   },
   "repository": {

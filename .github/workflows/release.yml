@@ -9,7 +9,8 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write # needed for release PR creation
-  id-token: write # needed for provenance
+  pull-requests: write # needed for version PR creation (changesets/action v2)
+  id-token: write # needed for provenance and publishing to npm
 
 jobs:
   release:
@@ -20,26 +21,25 @@ jobs:
       # Enable turbo remote caching
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_REMOTE_ONLY: true
+      TURBO_CACHE: remote:w # Write-only to prevent cache poisoning during a release
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24.x
+          node-version: 26.x
           cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Create Release Pull Request
-        uses: changesets/action@v1
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          publish: npm run release
+          publish-script: npm run release
+          github-token: ${{ secrets.GH_TOKEN_CHANGESETS }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CHANGESETS }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

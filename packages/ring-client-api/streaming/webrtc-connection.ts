@@ -18,6 +18,7 @@ import type { RtpPacket } from 'werift'
 import type { IncomingMessage } from './streaming-messages.ts'
 
 export interface StreamingConnectionOptions {
+  audioEnabled?: boolean
   createPeerConnection?: () => BasicPeerConnection
 }
 
@@ -35,6 +36,7 @@ export class WebrtcConnection extends Subscribed {
   readonly onVideoRtp
   private readonly pc
   private readonly ws
+  private readonly audioEnabled
   private camera
 
   constructor(
@@ -45,6 +47,7 @@ export class WebrtcConnection extends Subscribed {
     super()
 
     this.camera = camera
+    this.audioEnabled = options.audioEnabled ?? true
     this.ws = new WebSocket(
       `wss://api.prod.signalling.ring.devices.a2z.com:443/ws?api_version=4.0&auth_type=ring_solutions&client_id=ring_site-${generateUuid()}&token=${ticket}`,
       {
@@ -64,7 +67,7 @@ export class WebrtcConnection extends Subscribed {
       this.onVideoRtp = new Subject<RtpPacket>()
     } else {
       // no custom peer connection factory, use the werift and pass along rtp packets
-      const pc = new WeriftPeerConnection()
+      const pc = new WeriftPeerConnection(this.audioEnabled)
       this.pc = pc
       this.onAudioRtp = pc.onAudioRtp
       this.onVideoRtp = pc.onVideoRtp
@@ -160,7 +163,10 @@ export class WebrtcConnection extends Subscribed {
       dialog_id: this.dialogId,
       body: {
         doorbot_id: this.camera.id,
-        stream_options: { audio_enabled: true, video_enabled: true },
+        stream_options: {
+          audio_enabled: this.audioEnabled,
+          video_enabled: true,
+        },
         sdp,
       },
     })
@@ -288,7 +294,7 @@ export class WebrtcConnection extends Subscribed {
     // the activate_session message is required to keep the stream alive longer than 70 seconds
     this.sendSessionMessage('activate_session')
     this.sendSessionMessage('stream_options', {
-      audio_enabled: true,
+      audio_enabled: this.audioEnabled,
       video_enabled: true,
     })
   }

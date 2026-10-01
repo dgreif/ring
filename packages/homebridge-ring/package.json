@@ -7,6 +7,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
+    "test": "npm run build && node --test test/*.test.mjs",
     "lint": "eslint .",
     "dev": "bash ./dev-homebridge.sh",
     "dev:run": "npm run dev"

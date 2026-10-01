@@ -39,6 +39,11 @@
         "title": "Hide Camera Motion Sensors",
         "type": "boolean"
       },
+      "useLastLiveStreamSnapshot": {
+        "title": "Always Show Live Stream Snapshot",
+        "type": "boolean",
+        "description": "Allows Ring cameras to show a preview image in Home, even when snapshots and/or motion detection is disabled for that camera. Uses camera power and bandwidth. Refreshes at most every 30 seconds (wired) or 60 seconds (battery) when Home requests a snapshot. (If `avoidSnapshotBatteryDrain` is `true`, the battery refresh interval is increased to 10 minutes.)"
+      },
       "hideCameraSirenSwitch": {
         "title": "Hide Camera Siren Switch",
         "type": "boolean"
@@ -157,6 +162,7 @@
         "hideDoorbellSwitch",
         "hideCameraLight",
         "hideCameraMotionSensor",
+        "useLastLiveStreamSnapshot",
         "hideCameraSirenSwitch",
         "hideInHomeDoorbellSwitch",
         "hideAlarmSirenSwitch",

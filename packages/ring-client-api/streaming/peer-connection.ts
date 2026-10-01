@@ -47,7 +47,7 @@ export class WeriftPeerConnection
   returnAudioTrack = new MediaStreamTrack({ kind: 'audio' })
   private onRequestKeyFrame = new Subject<void>()
 
-  constructor() {
+  constructor(audioEnabled = true) {
     super()
     const pc = (this.pc = new RTCPeerConnection({
         codecs: {
@@ -88,26 +88,28 @@ export class WeriftPeerConnection
         iceTransportPolicy: 'all',
         bundlePolicy: 'disable',
       })),
-      audioTransceiver = pc.addTransceiver(this.returnAudioTrack, {
-        direction: 'sendrecv',
-      }),
       videoTransceiver = pc.addTransceiver('video', {
         direction: 'recvonly',
       })
 
-    audioTransceiver.onTrack.subscribe((track) => {
-      track.onReceiveRtp.subscribe((rtp) => {
-        this.onAudioRtp.next(rtp)
+    if (audioEnabled) {
+      const audioTransceiver = pc.addTransceiver(this.returnAudioTrack, {
+        direction: 'sendrecv',
       })
+      audioTransceiver.onTrack.subscribe((track) => {
+        track.onReceiveRtp.subscribe((rtp) => {
+          this.onAudioRtp.next(rtp)
+        })
 
-      track.onReceiveRtcp.subscribe((rtcp) => {
-        this.onAudioRtcp.next(rtcp)
-      })
+        track.onReceiveRtcp.subscribe((rtcp) => {
+          this.onAudioRtcp.next(rtcp)
+        })
 
-      track.onReceiveRtp.once(() => {
-        logDebug('received first audio packet')
+        track.onReceiveRtp.once(() => {
+          logDebug('received first audio packet')
+        })
       })
-    })
+    }
 
     videoTransceiver.onTrack.subscribe((track) => {
       track.onReceiveRtp.subscribe((rtp) => {

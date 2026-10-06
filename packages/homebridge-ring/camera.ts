@@ -27,7 +27,10 @@ export class Camera extends BaseDataAccessory<RingCamera> {
     this.device = device
     this.accessory = accessory
     this.config = config
-    this.cameraSource = new CameraSource(this.device)
+    this.cameraSource = new CameraSource(
+      this.device,
+      config.useLastLiveStreamSnapshot,
+    )
 
     if (!hap.CameraController) {
       const error =

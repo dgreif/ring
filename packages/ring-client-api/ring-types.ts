@@ -436,6 +436,9 @@ export interface UserLocation {
   owner_id: number
   updated_at: string
   user_verified: boolean
+  // Only returned by `location_info/v3/locations`.  False for locations which
+  // another Ring account owns and has shared with this one.
+  is_owner?: boolean
 }
 
 export interface TicketAsset {

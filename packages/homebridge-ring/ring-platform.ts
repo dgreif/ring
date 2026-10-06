@@ -39,7 +39,7 @@ import { Switch } from './switch.ts'
 import { Camera } from './camera.ts'
 import { PanicButtons } from './panic-buttons.ts'
 import type { RefreshTokenAuth } from 'ring-client-api/rest-client'
-import { logInfo, useLogger } from 'ring-client-api/util'
+import { logError, logInfo, useLogger } from 'ring-client-api/util'
 import type { BaseAccessory } from './base-accessory.ts'
 import { FloodFreezeSensor } from './flood-freeze-sensor.ts'
 import { FreezeSensor } from './freeze-sensor.ts'
@@ -394,9 +394,18 @@ export class RingPlatform implements DynamicPlatformPlugin {
           return
         }
 
-        updateHomebridgeConfig(this.api, (configContents) => {
+        const updated = updateHomebridgeConfig(this.api, (configContents) => {
           return configContents.replace(oldRefreshToken, newRefreshToken)
         })
+
+        if (!updated) {
+          // The previous token was not found in config.json, so it could not be
+          // replaced. This is silent otherwise, and leaves a stale token behind
+          // that will eventually stop working.
+          logError(
+            'Failed to store the updated refreshToken in config.json: the previous token was not found in the file. Please update the Ring refreshToken in your config manually.',
+          )
+        }
       },
     )
   }

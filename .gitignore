@@ -9,3 +9,6 @@ yarn.lock
 .hoobs
 .turbo
 .gitattributes
+
+# gh-aw local audit/download artifacts
+.github/aw/logs/

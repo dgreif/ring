@@ -206,6 +206,9 @@ export class WebrtcConnection extends Subscribed {
           sdpMLineIndex: message.body.mlineindex,
         })
         return
+      case 'ping':
+        this.sendSessionMessage('pong')
+        return
       case 'pong':
         return
       case 'notification': {

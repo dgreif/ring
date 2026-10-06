@@ -6,8 +6,9 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/",
+    "build": "rm -rf lib && tsc && cp -r ./homebridge-ui/public ./lib/homebridge-ui/public/ && rm -rf ./lib/test",
     "lint": "eslint .",
+    "test": "vitest run --exclude 'lib/**'",
     "dev": "bash ./dev-homebridge.sh",
     "dev:run": "npm run dev"
   },
@@ -18,10 +19,12 @@
     "werift": "0.24.4"
   },
   "devDependencies": {
+    "@homebridge/hap-nodejs": "^2.2.2",
     "eslint-config-shared": "*",
     "homebridge": "2.4.0",
     "tsconfig": "*",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26",

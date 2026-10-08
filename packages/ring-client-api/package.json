@@ -45,7 +45,7 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.33.13",
+    "systeminformation": "^5.33.15",
     "undici": "^8.11.2",
     "uuid": "^14.0.2",
     "werift": "0.24.4"
@@ -53,13 +53,13 @@
   "devDependencies": {
     "@types/debug": "4.1.13",
     "@types/json-bigint": "^1.0.4",
-    "@types/node": "26.6.3",
-    "@types/ws": "^8.18.1",
+    "@types/node": "26.6.4",
+    "@types/ws": "^8.18.2",
     "eslint-config-shared": "*",
-    "msw": "^2.15.0",
+    "msw": "^3.0.2",
     "tsconfig": "*",
     "typescript": "7.0.2",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.3"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26"

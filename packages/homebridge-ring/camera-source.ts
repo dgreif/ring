@@ -1,4 +1,6 @@
 import type { RingCamera } from 'ring-client-api'
+import { getFfmpegPath } from 'ring-client-api/ffmpeg'
+import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
 import { hap } from './hap.ts'
 import type { SrtpOptions } from '@homebridge/camera-utils'
 import {
@@ -26,9 +28,9 @@ import {
 import { logDebug, logError, logInfo } from 'ring-client-api/util'
 import { debounceTime, delay, take } from 'rxjs/operators'
 import { interval, merge, of, Subject } from 'rxjs'
-import { readFile } from 'fs'
-import { promisify } from 'util'
-import { getFfmpegPath } from 'ring-client-api/ffmpeg'
+import { readFile } from 'node:fs'
+import path from 'node:path'
+import { promisify } from 'node:util'
 import {
   RtcpSenderInfo,
   RtcpSrPacket,
@@ -36,8 +38,10 @@ import {
   SrtpSession,
   SrtcpSession,
 } from 'werift'
-import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
-import path from 'node:path'
+import {
+  LiveStreamSnapshot,
+  captureLiveStreamSnapshot,
+} from './live-stream-snapshot.ts'
 
 const __dirname = new URL('.', import.meta.url).pathname,
   mediaDirectory = path.join(__dirname.replace(/\/lib\/?$/, ''), 'media'),
@@ -74,17 +78,20 @@ class StreamingSessionWrapper {
   public prepareStreamRequest
   public ringCamera
   public start
+  private readonly onLiveStreamSnapshot?: (snapshot: Buffer) => void
 
   constructor(
     streamingSession: StreamingSession,
     prepareStreamRequest: PrepareStreamRequest,
     ringCamera: RingCamera,
     start: number,
+    onLiveStreamSnapshot?: (snapshot: Buffer) => void,
   ) {
     this.streamingSession = streamingSession
     this.prepareStreamRequest = prepareStreamRequest
     this.ringCamera = ringCamera
     this.start = start
+    this.onLiveStreamSnapshot = onLiveStreamSnapshot
 
     const {
         targetAddress,
@@ -313,6 +320,22 @@ class StreamingSessionWrapper {
 
     this.listenForAudioPackets(request)
     await returnAudioTranscoder.start()
+
+    if (this.onLiveStreamSnapshot) {
+      let hasCachedSnapshot = false
+      captureLiveStreamSnapshot(
+        this.streamingSession,
+        this.ringCamera.name,
+        (snapshot) => {
+          this.onLiveStreamSnapshot?.(snapshot)
+          if (!hasCachedSnapshot) {
+            hasCachedSnapshot = true
+            logDebug(`Cached live stream snapshot for ${this.ringCamera.name}`)
+          }
+        },
+      )
+    }
+
     await transcodingPromise
   }
 
@@ -328,9 +351,10 @@ export class CameraSource implements CameraStreamingDelegate {
   public controller
   private sessions: { [sessionKey: string]: StreamingSessionWrapper } = {}
   private cachedSnapshot?: Buffer
+  private liveSnapshot?: LiveStreamSnapshot
   private ringCamera
 
-  constructor(ringCamera: RingCamera) {
+  constructor(ringCamera: RingCamera, useLastLiveStreamSnapshot = false) {
     this.ringCamera = ringCamera
     this.controller = new hap.CameraController({
       cameraStreamCount: 10,
@@ -374,6 +398,13 @@ export class CameraSource implements CameraStreamingDelegate {
         },
       },
     })
+
+    if (useLastLiveStreamSnapshot) {
+      this.liveSnapshot = new LiveStreamSnapshot(
+        ringCamera,
+        () => Object.keys(this.sessions).length > 0,
+      )
+    }
   }
 
   private previousLoadSnapshotPromise?: Promise<any>
@@ -453,6 +484,15 @@ export class CameraSource implements CameraStreamingDelegate {
     }
 
     if (this.ringCamera.snapshotsAreBlocked) {
+      if (this.liveSnapshot) {
+        this.liveSnapshot.refreshIfNeeded()
+        const snapshot = this.liveSnapshot.getSnapshot()
+        if (snapshot) {
+          logDebug(`Used live stream snapshot for ${this.ringCamera.name}`)
+          return snapshot
+        }
+      }
+
       return readFileAsync(snapshotsBlockedPath)
     }
 
@@ -475,7 +515,15 @@ export class CameraSource implements CameraStreamingDelegate {
     callback: SnapshotRequestCallback,
   ) {
     try {
-      const snapshot = await this.getCurrentSnapshot()
+      let snapshot = await this.getCurrentSnapshot()
+      if (
+        this.liveSnapshot &&
+        this.ringCamera.snapshotsAreBlocked &&
+        !this.ringCamera.isOffline
+      ) {
+        await this.liveSnapshot.waitForInitialSnapshot()
+        snapshot = this.liveSnapshot.getSnapshot() || snapshot
+      }
 
       if (!snapshot) {
         // return an error to prevent "empty image buffer" warnings
@@ -500,15 +548,24 @@ export class CameraSource implements CameraStreamingDelegate {
     logInfo(`Preparing Live Stream for ${this.ringCamera.name}`)
 
     try {
+      this.liveSnapshot?.cancelRefresh()
       const liveCall = await this.ringCamera.startLiveCall(),
         session = new StreamingSessionWrapper(
           liveCall,
           request,
           this.ringCamera,
           start,
+          this.liveSnapshot
+            ? (snapshot) => this.liveSnapshot?.cache(snapshot)
+            : undefined,
         )
 
       this.sessions[request.sessionID] = session
+      liveCall.onCallEnded.pipe(take(1)).subscribe(() => {
+        if (this.sessions[request.sessionID] === session) {
+          delete this.sessions[request.sessionID]
+        }
+      })
 
       logInfo(
         `Stream Prepared for ${this.ringCamera.name} (${getDurationSeconds(

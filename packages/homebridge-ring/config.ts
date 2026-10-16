@@ -23,6 +23,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
   disableLogs?: boolean
+  useLastLiveStreamSnapshot?: boolean
 }
 
 export function updateHomebridgeConfig(

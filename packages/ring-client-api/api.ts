@@ -27,6 +27,7 @@ import {
 } from 'rxjs/operators'
 import {
   clearTimeouts,
+  delay,
   enableDebug,
   logDebug,
   logError,
@@ -315,14 +316,28 @@ export class RingApi extends Subscribed {
       logError(e)
     }
 
-    const startTime = Date.now()
+    // Ignore messages received in the first two seconds after connecting.
+    // These are likely duplicates, and we aren't currently storing persistent
+    // ids anywhere to avoid re-processing them. Summarize once so busy accounts
+    // don't flood Homebridge logs with one line per ignored notification.
+    const pushIgnoreWindowMs = 2000,
+      startTime = Date.now()
+    let ignoredPushCount = 0
+    delay(pushIgnoreWindowMs)
+      .then(() => {
+        if (ignoredPushCount > 0) {
+          logInfo(
+            `Ignored ${ignoredPushCount} push notification(s) received in the first ${
+              pushIgnoreWindowMs / 1000
+            } seconds after starting up`,
+          )
+        }
+      })
+      .catch(logError)
+
     pushReceiver.onNotification(({ message }) => {
-      // Ignore messages received in the first two seconds after connecting
-      // These are likely duplicates, and we aren't currently storying persistent ids anywhere to avoid re-processing them
-      if (Date.now() - startTime < 2000) {
-        logInfo(
-          'Ignoring push notification received in first two seconds after starting up',
-        )
+      if (Date.now() - startTime < pushIgnoreWindowMs) {
+        ignoredPushCount++
         return
       }
 

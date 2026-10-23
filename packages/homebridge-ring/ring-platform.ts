@@ -39,7 +39,7 @@ import { Switch } from './switch.ts'
 import { Camera } from './camera.ts'
 import { PanicButtons } from './panic-buttons.ts'
 import type { RefreshTokenAuth } from 'ring-client-api/rest-client'
-import { logInfo, useLogger } from 'ring-client-api/util'
+import { logDebug, logError, logInfo, useLogger } from 'ring-client-api/util'
 import type { BaseAccessory } from './base-accessory.ts'
 import { FloodFreezeSensor } from './flood-freeze-sensor.ts'
 import { FreezeSensor } from './freeze-sensor.ts'
@@ -213,8 +213,34 @@ export class RingPlatform implements DynamicPlatformPlugin {
         controlCenterDisplayName,
         ...config,
         systemId,
-      }),
-      locations = await ringApi.getLocations(),
+      })
+
+    // Subscribe before any API calls. onRefreshTokenUpdated only replays the
+    // latest update, so subscribing after getLocations() could miss the token
+    // rotation from the initial auth, leaving the later update that adds push
+    // credentials unable to match the token saved in config.json.
+    let savedRefreshToken = config.refreshToken
+    ringApi.onRefreshTokenUpdated.subscribe(({ newRefreshToken }) => {
+      if (!savedRefreshToken || newRefreshToken === savedRefreshToken) {
+        return
+      }
+
+      const tokenToReplace = savedRefreshToken,
+        saved = updateHomebridgeConfig(this.api, (configContents) =>
+          configContents.replace(tokenToReplace, newRefreshToken),
+        )
+
+      if (saved) {
+        savedRefreshToken = newRefreshToken
+        logDebug('Saved updated refresh token to config.json')
+      } else {
+        logError(
+          'Unable to save the updated refresh token to config.json. Push notifications may stop working after a restart.',
+        )
+      }
+    })
+
+    const locations = await ringApi.getLocations(),
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),
       platformAccessories: PlatformAccessory[] = [],
       externalAccessories: PlatformAccessory[] = [],
@@ -387,17 +413,5 @@ export class RingPlatform implements DynamicPlatformPlugin {
         staleAccessories,
       )
     }
-
-    ringApi.onRefreshTokenUpdated.subscribe(
-      ({ oldRefreshToken, newRefreshToken }) => {
-        if (!oldRefreshToken) {
-          return
-        }
-
-        updateHomebridgeConfig(this.api, (configContents) => {
-          return configContents.replace(oldRefreshToken, newRefreshToken)
-        })
-      },
-    )
   }
 }

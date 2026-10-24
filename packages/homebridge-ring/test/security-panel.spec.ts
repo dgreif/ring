@@ -159,6 +159,11 @@ describe('SecurityPanel', () => {
     pushUpdate(device, { siren: { state: 'on' } })
     expect(siren.value).toBe(true)
 
+    const updateValue = vi.spyOn(siren, 'updateValue')
+    pushUpdate(device, { siren: undefined })
+    expect(updateValue).toHaveBeenLastCalledWith(false)
+    expect(siren.value).toBe(false)
+
     await expectSet(siren, false, location.silenceSiren)
     await expectSet(siren, true, location.soundSiren)
 

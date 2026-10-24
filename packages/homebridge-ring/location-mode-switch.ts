@@ -31,7 +31,8 @@ function getStateFromMode(mode: LocationMode) {
 }
 
 export class LocationModeSwitch extends BaseAccessory<Location> {
-  private targetState: any
+  private targetState: CharacteristicValue | undefined
+  private modeRequestId = 0
   public device
 
   private readonly location
@@ -73,7 +74,7 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         this.targetState = undefined
       }
 
-      if (!this.targetState) {
+      if (this.targetState === undefined) {
         targetState.updateValue(state)
       }
 
@@ -116,33 +117,60 @@ export class LocationModeSwitch extends BaseAccessory<Location> {
         callback: CharacteristicSetCallback,
       ) => {
         const {
-          Characteristic: { SecuritySystemTargetState: State },
-        } = hap
+            Characteristic: { SecuritySystemTargetState: State },
+          } = hap,
+          requestId = ++this.modeRequestId
 
         callback()
 
-        if (state === State.NIGHT_ARM) {
-          state = State.STAY_ARM
-          // Ring doesn't have night mode, so switch over to stay mode
-          setTimeout(() => targetState.updateValue(state), 100)
-        }
+        try {
+          const current = await getCurrentState()
+          if (requestId !== this.modeRequestId) {
+            return
+          }
 
-        if (state === (await getCurrentState())) {
-          this.targetState = undefined
-          return
-        }
+          if (state === State.NIGHT_ARM) {
+            state = State.STAY_ARM
+            // Ring doesn't have night mode, so switch over to stay mode
+            setTimeout(() => {
+              if (requestId === this.modeRequestId) {
+                targetState.updateValue(state)
+              }
+            }, 100)
+          }
 
-        this.targetState = state
+          if (state === current) {
+            this.targetState = undefined
+            return
+          }
 
-        if (state === State.AWAY_ARM) {
-          logInfo(`Setting ${this.location.name} Mode to away`)
-          return this.location.setLocationMode('away')
-        } else if (state === State.DISARM) {
-          logInfo(`Setting ${this.location.name} Mode to disarmed`)
-          return this.location.setLocationMode('disarmed')
+          this.targetState = state
+
+          if (state === State.AWAY_ARM) {
+            logInfo(`Setting ${this.location.name} Mode to away`)
+            await this.location.setLocationMode('away')
+          } else if (state === State.DISARM) {
+            logInfo(`Setting ${this.location.name} Mode to disarmed`)
+            await this.location.setLocationMode('disarmed')
+          } else {
+            logInfo(`Setting ${this.location.name} Mode to home`)
+            await this.location.setLocationMode('home')
+          }
+        } catch (e) {
+          logError('Failed to set location mode for ' + location.name)
+          logError(e)
+
+          if (requestId !== this.modeRequestId) {
+            return
+          }
+
+          const current = await getCurrentState()
+          if (requestId === this.modeRequestId) {
+            this.targetState = undefined
+            this.modeRequestId++
+            targetState.updateValue(current)
+          }
         }
-        logInfo(`Setting ${this.location.name} Mode to home`)
-        return this.location.setLocationMode('home')
       },
     )
 

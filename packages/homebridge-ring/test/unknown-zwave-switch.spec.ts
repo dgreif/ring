@@ -4,13 +4,15 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('UnknownZWaveSwitch', () => {
   it('basicValue → On; SET → setInfo basicValue 255/0', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Mystery ZWave',
         zid: 'zid-zwave',
         deviceType: RingDeviceType.UnknownZWave,
@@ -32,11 +34,10 @@ describe('UnknownZWaveSwitch', () => {
       )
 
     expect(on.value).toBe(false)
-    device.updateData({ basicValue: 255 })
+    pushUpdate(device, { basicValue: 255 })
     expect(on.value).toBe(true)
 
-    await on.setValue(false)
-    expect(device.setInfo).toHaveBeenCalledWith({
+    await expectSet(on, false, device.setInfo, {
       device: { v1: { basicValue: 0 } },
     })
   })

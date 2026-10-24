@@ -4,7 +4,8 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
@@ -17,7 +18,7 @@ describe('Fan', () => {
   })
 
   it('On + RotationSpeed (debounced) → setInfo', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Ceiling Fan',
         zid: 'zid-fan',
         deviceType: RingDeviceType.MultiLevelSwitch,
@@ -46,8 +47,7 @@ describe('Fan', () => {
       )
 
     expect(speed.value).toBe(50)
-    await on.setValue(true)
-    expect(device.setInfo).toHaveBeenCalledWith({
+    await expectSet(on, true, device.setInfo, {
       device: { v1: { on: true } },
     })
 

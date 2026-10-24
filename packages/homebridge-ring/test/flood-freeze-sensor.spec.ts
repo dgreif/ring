@@ -4,13 +4,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('FloodFreezeSensor', () => {
   it('flood/freeze faulted map to leak + occupancy', () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Basement',
         zid: 'zid-ff',
         deviceType: RingDeviceType.FloodFreezeSensor,
@@ -42,10 +43,10 @@ describe('FloodFreezeSensor', () => {
       hap.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED,
     )
 
-    device.updateData({ flood: { faulted: true } })
+    pushUpdate(device, { flood: { faulted: true } })
     expect(leak.value).toBe(hap.Characteristic.LeakDetected.LEAK_DETECTED)
 
-    device.updateData({ freeze: { faulted: true } })
+    pushUpdate(device, { freeze: { faulted: true } })
     expect(freeze.value).toBe(
       hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED,
     )

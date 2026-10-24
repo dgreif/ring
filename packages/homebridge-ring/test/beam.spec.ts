@@ -1,16 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'vitest'
 import { Beam } from '../beam.ts'
 import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
 describe('Beam', () => {
   it('On → light-mode.set; light group → setLightGroup', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Path Light',
         zid: 'zid-beam',
         deviceType: RingDeviceType.BeamsSwitch,
@@ -32,13 +33,12 @@ describe('Beam', () => {
         hap.Characteristic.On,
       )
 
-    await on.setValue(true)
-    expect(device.sendCommand).toHaveBeenCalledWith('light-mode.set', {
+    await expectSet(on, true, device.sendCommand, 'light-mode.set', {
       lightMode: 'on',
       duration: undefined,
     })
 
-    const groupDevice = mockRingDevice({
+    const groupDevice = createRingDevice({
         name: 'All Lights',
         zid: 'zid-beam-group',
         deviceType: RingDeviceType.BeamsLightGroupSwitch,
@@ -60,8 +60,10 @@ describe('Beam', () => {
         hap.Service.Lightbulb,
         hap.Characteristic.On,
       )
-    await groupOn.setValue(true)
-    expect(groupDevice.location.setLightGroup).toHaveBeenCalledWith(
+    await expectSet(
+      groupOn,
+      true,
+      groupDevice.location.setLightGroup,
       'group-1',
       true,
       undefined,

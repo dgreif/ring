@@ -4,7 +4,7 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
@@ -17,7 +17,7 @@ describe('BrightnessOnly', () => {
   })
 
   it('brightness from Ring → Lightbulb; SET debounces to setInfo', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Keypad',
         zid: 'zid-keypad',
         deviceType: RingDeviceType.Keypad,

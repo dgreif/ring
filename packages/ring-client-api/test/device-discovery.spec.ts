@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import { RingApi } from '../api.ts'
 import { RingCamera } from '../ring-camera.ts'
 import { RingChime } from '../ring-chime.ts'
@@ -14,24 +14,6 @@ import {
 } from './fixtures/ring-devices.ts'
 import { createMockRestClient } from './fixtures/mock-websocket.ts'
 import { clientApi, deviceApi } from '../rest-client.ts'
-
-vi.mock('@eneris/push-receiver', () => ({
-  PushReceiver: class {
-    on() {
-      return this
-    }
-    onCredentialsChanged() {
-      return this
-    }
-    onNotification() {
-      return this
-    }
-    connect() {
-      return Promise.resolve()
-    }
-    whenReady = Promise.resolve()
-  },
-}))
 
 describe('RingApi device discovery from location endpoints', () => {
   let restClient: ReturnType<typeof createMockRestClient>, api: RingApi

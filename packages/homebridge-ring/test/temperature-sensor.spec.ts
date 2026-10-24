@@ -5,13 +5,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('TemperatureSensor', () => {
   it('celsius → CurrentTemperature', () => {
-    const tempDevice = mockRingDevice({
+    const tempDevice = createRingDevice({
         name: 'Temp',
         zid: 'zid-temp',
         deviceType: RingDeviceType.TemperatureSensor,
@@ -33,7 +34,7 @@ describe('TemperatureSensor', () => {
         hap.Characteristic.CurrentTemperature,
       )
     expect(temp.value).toBe(20)
-    tempDevice.updateData({ celsius: 22.5 })
+    pushUpdate(tempDevice, { celsius: 22.5 })
     expect(temp.value).toBe(22.5)
   })
 })

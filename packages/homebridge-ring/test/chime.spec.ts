@@ -5,6 +5,7 @@ import {
   hap,
   initAccessory,
   mockRingChime,
+  expectSet,
 } from './harness.ts'
 
 describe('Chime', () => {
@@ -31,11 +32,9 @@ describe('Chime', () => {
     device.updateData({ do_not_disturb: { seconds_left: 100 } })
     expect(snooze.value).toBe(true)
 
-    await snooze.setValue(true)
-    expect(device.snooze).toHaveBeenCalledWith(24 * 60)
+    await expectSet(snooze, true, device.snooze, 24 * 60)
 
-    await snooze.setValue(false)
-    expect(device.clearSnooze).toHaveBeenCalled()
+    await expectSet(snooze, false, device.clearSnooze)
   })
 
   it('volume SET (debounced) → setVolume', async () => {

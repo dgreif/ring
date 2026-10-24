@@ -49,4 +49,51 @@ describe('LocationModeSwitch', () => {
       expect(location.setLocationMode).toHaveBeenCalledWith('disarmed'),
     )
   })
+
+  it('keeps the requested target until Ring reports the matching mode', async () => {
+    const location = mockLocationMode('disarmed'),
+      { platformAccessory } = initAccessory(
+        LocationModeSwitch as any,
+        location,
+        'Home Mode',
+        'mode-2',
+      ),
+      current = getCharacteristic(
+        platformAccessory,
+        hap.Service.SecuritySystem,
+        hap.Characteristic.SecuritySystemCurrentState,
+      ),
+      target = getCharacteristic(
+        platformAccessory,
+        hap.Service.SecuritySystem,
+        hap.Characteristic.SecuritySystemTargetState,
+      ),
+      {
+        SecuritySystemCurrentState: Current,
+        SecuritySystemTargetState: Target,
+      } = hap.Characteristic
+
+    // Ring acknowledges the request but the mode change lands later
+    location.setLocationMode.mockImplementation((mode: string) =>
+      Promise.resolve({ mode }),
+    )
+
+    target.setValue(Target.AWAY_ARM)
+    await vi.waitFor(() =>
+      expect(location.setLocationMode).toHaveBeenCalledWith('away'),
+    )
+
+    // An unrelated mode change updates current state but not the pending target
+    location.onLocationMode.next('home')
+    expect(current.value).toBe(Current.STAY_ARM)
+    expect(target.value).toBe(Target.AWAY_ARM)
+
+    location.onLocationMode.next('away')
+    expect(current.value).toBe(Current.AWAY_ARM)
+
+    // With no pending target, mode changes drive the target again
+    location.onLocationMode.next('disarmed')
+    expect(target.value).toBe(Target.DISARM)
+    expect(target.props.validValues).not.toContain(Target.NIGHT_ARM)
+  })
 })

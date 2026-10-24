@@ -5,14 +5,16 @@ import {
   hap,
   initAccessory,
   mockLocation,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('PanicButtons', () => {
   it('alarmInfo burglar/fire → On; SET triggers location panic APIs', async () => {
     const location = mockLocation(),
-      device = mockRingDevice(
+      device = createRingDevice(
         {
           name: 'Security Panel',
           zid: 'zid-panel-panic',
@@ -22,7 +24,7 @@ describe('PanicButtons', () => {
           manufacturerName: 'Ring',
           mode: 'none',
         },
-        { location },
+        location,
       ),
       { platformAccessory } = initAccessory(
         PanicButtons,
@@ -46,15 +48,13 @@ describe('PanicButtons', () => {
     expect(burglar.value).toBe(false)
     expect(fire.value).toBe(false)
 
-    device.updateData({
+    pushUpdate(device, {
       alarmInfo: { state: 'burglar-alarm', faultedDevices: [] },
     })
     expect(burglar.value).toBe(true)
 
-    await fire.setValue(true)
-    expect(location.triggerFireAlarm).toHaveBeenCalled()
+    await expectSet(fire, true, location.triggerFireAlarm)
 
-    await burglar.setValue(false)
-    expect(location.setAlarmMode).toHaveBeenCalledWith('none')
+    await expectSet(burglar, false, location.setAlarmMode, 'none')
   })
 })

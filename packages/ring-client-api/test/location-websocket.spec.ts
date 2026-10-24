@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { firstValueFrom } from 'rxjs'
-import { take } from 'rxjs/operators'
+import { filter } from 'rxjs/operators'
 import { Location } from '../location.ts'
-import { RingDeviceType } from '../ring-types.ts'
 import { userLocation } from './fixtures/locations.ts'
 import {
   BASE_ASSET_UUID,
@@ -81,7 +80,7 @@ describe('Location hub websocket', () => {
     expect(devices.length).toBe(alarmDeviceList.length + beamDeviceList.length)
   })
 
-  it('discovers representative alarm and beam device types', async () => {
+  it('tags devices with their hub asset so commands route to the right hub', async () => {
     const devicesPromise = location.getDevices()
     await vi.waitFor(() => expect(MockWebSocket.latest()).toBeTruthy())
     const socket = MockWebSocket.latest()!
@@ -91,39 +90,23 @@ describe('Location hub websocket', () => {
     socket.receive(deviceListMessage(BEAM_ASSET_UUID, beamDeviceList))
 
     const devices = await devicesPromise,
-      types = devices.map((d) => d.deviceType)
+      contact = devices.find((d) => d.zid === 'zid-contact')!,
+      beam = devices.find((d) => d.zid === 'zid-beam-dimmer')!
 
-    expect(types).toContain(RingDeviceType.SecurityPanel)
-    expect(types).toContain(RingDeviceType.BaseStation)
-    expect(types).toContain(RingDeviceType.Keypad)
-    expect(types).toContain(RingDeviceType.ContactSensor)
-    expect(types).toContain(RingDeviceType.MotionSensor)
-    expect(types).toContain(RingDeviceType.FloodFreezeSensor)
-    expect(types).toContain(RingDeviceType.FreezeSensor)
-    expect(types).toContain(RingDeviceType.TemperatureSensor)
-    expect(types).toContain(RingDeviceType.WaterSensor)
-    expect(types).toContain(RingDeviceType.TiltSensor)
-    expect(types).toContain(RingDeviceType.GlassbreakSensor)
-    expect(types).toContain(RingDeviceType.SmokeAlarm)
-    expect(types).toContain(RingDeviceType.CoAlarm)
-    expect(types).toContain(RingDeviceType.SmokeCoListener)
-    expect(types).toContain(RingDeviceType.KiddeSmokeCoAlarm)
-    expect(types).toContain(RingDeviceType.Thermostat)
-    expect(types).toContain(RingDeviceType.WaterValve)
-    expect(types).toContain(RingDeviceType.UnknownZWave)
-    expect(types).toContain(RingDeviceType.RetrofitZone)
-    expect(types).toContain(RingDeviceType.Switch)
-    expect(types).toContain(RingDeviceType.MultiLevelSwitch)
-    expect(types).toContain(RingDeviceType.BeamsSwitch)
-    expect(types).toContain(RingDeviceType.BeamsMultiLevelSwitch)
-    expect(types).toContain(RingDeviceType.BeamsLightGroupSwitch)
-    expect(types).toContain(RingDeviceType.BeamsMotionSensor)
-    expect(types).toContain(RingDeviceType.BeamsTransformerSwitch)
-    expect(types).toContain('lock')
+    // Nested general.v2 / device.v1 docs are flattened onto device.data
+    expect(contact.assetId).toBe(BASE_ASSET_UUID)
+    expect(contact.data).toMatchObject({
+      name: 'Front Door Contact',
+      faulted: false,
+    })
+    expect(beam.assetId).toBe(BEAM_ASSET_UUID)
 
-    const contact = devices.find((d) => d.zid === 'zid-contact')!
-    expect(contact.data.faulted).toBe(false)
-    expect(contact.data.name).toBe('Front Door Contact')
+    const sentBefore = socket.sent.length
+    await beam.setInfo({ device: { v1: { on: true } } })
+    const sent = socket.sent.slice(sentBefore).join('\n')
+    expect(sent).toContain('DeviceInfoSet')
+    expect(sent).toContain(BEAM_ASSET_UUID)
+    expect(sent).not.toContain(BASE_ASSET_UUID)
   })
 
   it('applies live DataUpdate to existing RingDevice.onData', async () => {
@@ -136,8 +119,9 @@ describe('Location hub websocket', () => {
     socket.receive(deviceListMessage(BEAM_ASSET_UUID, beamDeviceList))
     const devices = await devicesPromise,
       contact = devices.find((d) => d.zid === 'zid-contact')!,
-      nextData = firstValueFrom(contact.onData.pipe(take(2))).then(
-        () => contact.data,
+      // onData is a BehaviorSubject, so wait for the faulted value specifically
+      nextData = firstValueFrom(
+        contact.onData.pipe(filter((data) => data.faulted === true)),
       )
 
     socket.receive(

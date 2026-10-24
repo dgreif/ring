@@ -3,10 +3,14 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import { BehaviorSubject, Subject } from 'rxjs'
 import hap from '@homebridge/hap-nodejs'
+import type { Characteristic, CharacteristicValue } from 'homebridge'
 import { Categories } from 'homebridge'
+import type { Location, RingDeviceData, RingDeviceType } from 'ring-client-api'
+import { RingDevice } from 'ring-client-api'
 import { setHap } from '../hap.ts'
 import type { RingPlatformConfig } from '../config.ts'
-import { vi } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { expect, vi } from 'vitest'
 
 setHap(hap)
 
@@ -33,15 +37,25 @@ export function createPlatformAccessory(
 
 export function mockLocation(extras: Record<string, unknown> = {}) {
   return {
+    id: 'location-1',
     name: 'Home',
+    // Real RingDevice subscribes to these, so updates flow through the same path as the hub websocket
+    onDevices: new BehaviorSubject<RingDevice[]>([]),
+    onDeviceDataUpdate: new Subject<
+      Partial<RingDeviceData> & { zid: string }
+    >(),
     sendMessage: vi.fn(() => Promise.resolve(undefined)),
-    armAway: vi.fn(() => Promise.resolve(undefined)),
-    armHome: vi.fn(() => Promise.resolve(undefined)),
+    armAway: vi.fn((_bypassSensorZids?: string[]) =>
+      Promise.resolve(undefined),
+    ),
+    armHome: vi.fn((_bypassSensorZids?: string[]) =>
+      Promise.resolve(undefined),
+    ),
     disarm: vi.fn(() => Promise.resolve(undefined)),
     soundSiren: vi.fn(() => Promise.resolve(undefined)),
     silenceSiren: vi.fn(() => Promise.resolve(undefined)),
     setLightGroup: vi.fn(() => Promise.resolve(undefined)),
-    getDevices: vi.fn(() => Promise.resolve([])),
+    getDevices: vi.fn(() => Promise.resolve([] as RingDevice[])),
     triggerBurglarAlarm: vi.fn(() => Promise.resolve(undefined)),
     triggerFireAlarm: vi.fn(() => Promise.resolve(undefined)),
     setAlarmMode: vi.fn(() => Promise.resolve(undefined)),
@@ -49,35 +63,65 @@ export function mockLocation(extras: Record<string, unknown> = {}) {
   }
 }
 
-export function mockRingDevice(
-  initial: Record<string, unknown>,
-  extras: Record<string, unknown> = {},
-) {
-  const onData = new BehaviorSubject({ ...initial }),
-    { location: locationExtra, ...restExtras } = extras,
-    location =
-      (locationExtra as ReturnType<typeof mockLocation>) ?? mockLocation()
+export type MockLocation = ReturnType<typeof mockLocation>
 
-  return {
-    name: (initial.name as string) ?? 'Device',
-    id: (initial.zid as string) ?? 'zid',
-    zid: (initial.zid as string) ?? 'zid',
-    deviceType: initial.deviceType,
-    categoryId: initial.categoryId,
-    get data() {
-      return onData.getValue()
-    },
-    onData,
-    onComponentDevices: new BehaviorSubject([] as any[]),
-    updateData(patch: Record<string, unknown>) {
-      onData.next({ ...onData.getValue(), ...patch })
-    },
-    setInfo: vi.fn(() => Promise.resolve(undefined)),
-    sendCommand: vi.fn(),
-    setVolume: vi.fn(() => Promise.resolve(undefined)),
-    location,
-    ...restExtras,
+export type RingDeviceFixture = Omit<Partial<RingDeviceData>, 'deviceType'> &
+  Pick<RingDeviceData, 'zid' | 'name'> & {
+    // string allows non-enum types like `lock` / `lock.zwave`
+    deviceType: RingDeviceType | string
   }
+
+export type TestRingDevice = RingDevice & {
+  location: MockLocation
+  setInfo: MockInstance<RingDevice['setInfo']>
+  sendCommand: MockInstance<RingDevice['sendCommand']>
+}
+
+/**
+ * Builds a real `RingDevice` backed by a mock location. `setInfo` and
+ * `sendCommand` are spied but still run, so `location.sendMessage` sees the
+ * real hub payload.
+ */
+export function createRingDevice(
+  data: RingDeviceFixture,
+  location: MockLocation = mockLocation(),
+) {
+  const device = new RingDevice(
+    {
+      categoryId: 0,
+      batteryStatus: 'none',
+      tamperStatus: 'ok',
+      manufacturerName: 'Ring',
+      tags: [],
+      ...data,
+    } as RingDeviceData,
+    location as unknown as Location,
+    'asset-1',
+  )
+
+  vi.spyOn(device, 'setInfo')
+  vi.spyOn(device, 'sendCommand')
+
+  return device as TestRingDevice
+}
+
+/** Simulates a hub DataUpdate for this device via `location.onDeviceDataUpdate` */
+export function pushUpdate(
+  device: TestRingDevice,
+  patch: Partial<RingDeviceData>,
+) {
+  device.location.onDeviceDataUpdate.next({ zid: device.zid, ...patch })
+}
+
+/** SETs a characteristic, then waits for the async Ring call and asserts its exact args */
+export async function expectSet(
+  characteristic: Characteristic,
+  value: CharacteristicValue,
+  spy: MockInstance<(...args: any[]) => any>,
+  ...expectedArgs: unknown[]
+) {
+  await characteristic.setValue(value)
+  await vi.waitFor(() => expect(spy).toHaveBeenLastCalledWith(...expectedArgs))
 }
 
 export function mockRingChime(initial: Record<string, unknown> = {}) {

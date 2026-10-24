@@ -6,6 +6,7 @@ import {
   hap,
   initAccessory,
   mockRingCamera,
+  expectSet,
 } from './harness.ts'
 
 describe('Camera', () => {
@@ -39,11 +40,9 @@ describe('Camera', () => {
     device.updateData({ siren_status: { seconds_remaining: 30 } })
     expect(siren.value).toBe(true)
 
-    await light.setValue(false)
-    expect(device.setLight).toHaveBeenCalledWith(false)
+    await expectSet(light, false, device.setLight, false)
 
-    await siren.setValue(true)
-    expect(device.setSiren).toHaveBeenCalledWith(true)
+    await expectSet(siren, true, device.setSiren, true)
   })
 
   it('motion Observable updates MotionDetected', async () => {
@@ -68,5 +67,58 @@ describe('Camera', () => {
 
     device.onMotionDetected.next(true)
     await vi.waitFor(() => expect(motion.value).toBe(true))
+  })
+
+  it('holds the light target for 30s so stale polls do not flip it back', async () => {
+    vi.useFakeTimers()
+    try {
+      const device = mockRingCamera({ led_status: 'on' }),
+        { platformAccessory } = initAccessory(
+          Camera,
+          device,
+          'Garage Cam',
+          'camera-3',
+        ),
+        light = getCharacteristic(
+          platformAccessory,
+          hap.Service.Lightbulb,
+          hap.Characteristic.On,
+        )
+
+      await light.setValue(false)
+      expect(device.setLight).toHaveBeenCalledWith(false)
+
+      // Polled status still reports the old value before Ring catches up
+      device.updateData({ led_status: 'on' })
+      expect(light.value).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(29000)
+      device.updateData({ led_status: 'on' })
+      expect(light.value).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(1000)
+      device.updateData({ led_status: 'on' })
+      expect(light.value).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('GET returns the cached value and requests a fresh update', async () => {
+    const device = mockRingCamera({ led_status: 'on' }),
+      { platformAccessory } = initAccessory(
+        Camera,
+        device,
+        'Garage Cam',
+        'camera-4',
+      ),
+      light = getCharacteristic(
+        platformAccessory,
+        hap.Service.Lightbulb,
+        hap.Characteristic.On,
+      )
+
+    expect(await light.handleGetRequest()).toBe(true)
+    expect(device.requestUpdate).toHaveBeenCalledTimes(1)
   })
 })

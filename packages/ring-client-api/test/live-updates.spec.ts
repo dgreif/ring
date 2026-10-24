@@ -3,8 +3,6 @@ import { firstValueFrom } from 'rxjs'
 import { filter, take } from 'rxjs/operators'
 import { RingApi } from '../api.ts'
 import { RingCamera } from '../ring-camera.ts'
-import { Location } from '../location.ts'
-import { RingDevice } from '../ring-device.ts'
 import { PushNotificationAction } from '../ring-types.ts'
 import { locationsResponse, userLocation } from './fixtures/locations.ts'
 import {
@@ -12,31 +10,8 @@ import {
   doorbellCamera,
   stickupCamera,
 } from './fixtures/ring-devices.ts'
-import {
-  BASE_ASSET_UUID,
-  dataUpdateMessage,
-  hubDeviceDocs,
-} from './fixtures/hub-devices.ts'
 import { createMockRestClient } from './fixtures/mock-websocket.ts'
 import { clientApi, deviceApi } from '../rest-client.ts'
-
-vi.mock('@eneris/push-receiver', () => ({
-  PushReceiver: class {
-    on() {
-      return this
-    }
-    onCredentialsChanged() {
-      return this
-    }
-    onNotification() {
-      return this
-    }
-    connect() {
-      return Promise.resolve()
-    }
-    whenReady = Promise.resolve()
-  },
-}))
 
 function mockRestForCamera() {
   return createMockRestClient(() => Promise.resolve({})) as any
@@ -113,66 +88,6 @@ describe('Live updates — camera / chime polling', () => {
     frontDoor.requestUpdate()
 
     await vi.waitFor(() => expect(ringDevicesCall).toBeGreaterThan(before))
-  })
-})
-
-describe('Live updates — hub DataUpdate without full socket', () => {
-  it('RingDevice receives location.onDeviceDataUpdate for matching zid', async () => {
-    const restClient = createMockRestClient(),
-      location = new Location(
-        userLocation,
-        [],
-        [],
-        [],
-        { hasHubs: true, hasAlarmBaseStation: true },
-        restClient as any,
-      )
-
-    location.assets = [
-      {
-        doorbotId: 1,
-        kind: 'base_station_v1',
-        onBattery: false,
-        status: 'online',
-        uuid: BASE_ASSET_UUID,
-      },
-    ]
-
-    // Seed device list through onMessage (same path as WS)
-    location.onMessage.next({
-      msg: 'DeviceInfoDocGetList',
-      datatype: 'DeviceInfoDocType',
-      src: BASE_ASSET_UUID,
-      body: [hubDeviceDocs.contactSensor],
-    })
-
-    const devices = await firstValueFrom(location.onDevices),
-      contact = devices.find((d) => d.zid === 'zid-contact')!
-    expect(contact).toBeInstanceOf(RingDevice)
-
-    const updatePromise = firstValueFrom(
-      contact.onData.pipe(
-        filter((d) => d.faulted === true),
-        take(1),
-      ),
-    )
-
-    location.onDataUpdate.next(
-      dataUpdateMessage(BASE_ASSET_UUID, [
-        {
-          ...hubDeviceDocs.contactSensor,
-          general: {
-            v2: {
-              ...hubDeviceDocs.contactSensor.general.v2,
-              faulted: true,
-            },
-          },
-        },
-      ]).msg,
-    )
-
-    expect((await updatePromise).faulted).toBe(true)
-    location.disconnect()
   })
 })
 

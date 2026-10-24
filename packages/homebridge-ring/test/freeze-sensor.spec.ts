@@ -4,13 +4,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('FreezeSensor', () => {
   it('faulted → OccupancyDetected', () => {
-    const freezeDevice = mockRingDevice({
+    const freezeDevice = createRingDevice({
         name: 'Freeze',
         zid: 'zid-freeze',
         deviceType: RingDeviceType.FreezeSensor,
@@ -30,7 +31,7 @@ describe('FreezeSensor', () => {
         hap.Service.OccupancySensor,
         hap.Characteristic.OccupancyDetected,
       )
-    freezeDevice.updateData({ faulted: true })
+    pushUpdate(freezeDevice, { faulted: true })
     expect(freezeChar.value).toBe(
       hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED,
     )

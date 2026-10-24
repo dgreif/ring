@@ -4,7 +4,7 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
@@ -17,7 +17,7 @@ describe('MultiLevelSwitch', () => {
   })
 
   it('brightness debounce → setInfo level', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Dimmer',
         zid: 'zid-dimmer',
         deviceType: RingDeviceType.MultiLevelSwitch,

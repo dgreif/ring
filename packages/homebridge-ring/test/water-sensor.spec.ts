@@ -4,13 +4,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('WaterSensor', () => {
   it('faulted → LeakDetected', () => {
-    const waterDevice = mockRingDevice({
+    const waterDevice = createRingDevice({
         name: 'Water',
         zid: 'zid-water',
         deviceType: RingDeviceType.WaterSensor,
@@ -30,7 +31,7 @@ describe('WaterSensor', () => {
         hap.Service.LeakSensor,
         hap.Characteristic.LeakDetected,
       )
-    waterDevice.updateData({ faulted: true })
+    pushUpdate(waterDevice, { faulted: true })
     expect(leak.value).toBe(hap.Characteristic.LeakDetected.LEAK_DETECTED)
   })
 })

@@ -4,13 +4,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('SmokeCoListener', () => {
   it('maps smoke + CO component alarmStatus to HK sensors', () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Smoke/CO Listener',
         zid: 'zid-smoke-co',
         deviceType: RingDeviceType.SmokeCoListener,
@@ -44,11 +45,11 @@ describe('SmokeCoListener', () => {
       hap.Characteristic.CarbonMonoxideDetected.CO_LEVELS_NORMAL,
     )
 
-    device.updateData({ smoke: { alarmStatus: 'active' } })
+    pushUpdate(device, { smoke: { alarmStatus: 'active' } })
     expect(smoke.value).toBe(hap.Characteristic.SmokeDetected.SMOKE_DETECTED)
 
     // `co.alarmStatus` takes precedence over components['alarm.co']
-    device.updateData({
+    pushUpdate(device, {
       smoke: { alarmStatus: 'inactive' },
       co: { alarmStatus: 'active' },
     })
@@ -58,7 +59,7 @@ describe('SmokeCoListener', () => {
   })
 
   it('Kidde uses components alarm.smoke / alarm.co', () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Kidde',
         zid: 'zid-kidde',
         deviceType: RingDeviceType.KiddeSmokeCoAlarm,
@@ -82,7 +83,7 @@ describe('SmokeCoListener', () => {
         hap.Characteristic.SmokeDetected,
       )
 
-    device.updateData({
+    pushUpdate(device, {
       components: {
         'alarm.smoke': { alarmStatus: 'active' },
         'alarm.co': { alarmStatus: 'inactive' },

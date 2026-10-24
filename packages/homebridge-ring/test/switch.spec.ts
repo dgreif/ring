@@ -4,13 +4,15 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
 describe('Switch', () => {
   it('onData On ↔ setInfo', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Plug Switch',
         zid: 'zid-switch',
         deviceType: RingDeviceType.Switch,
@@ -33,11 +35,10 @@ describe('Switch', () => {
       )
 
     expect(on.value).toBe(false)
-    device.updateData({ on: true })
+    pushUpdate(device, { on: true })
     expect(on.value).toBe(true)
 
-    await on.setValue(false)
-    expect(device.setInfo).toHaveBeenCalledWith({
+    await expectSet(on, false, device.setInfo, {
       device: { v1: { on: false } },
     })
   })

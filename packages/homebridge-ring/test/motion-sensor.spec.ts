@@ -4,13 +4,14 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('MotionSensor', () => {
   it('faulted → MotionDetected', () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Hall Motion',
         zid: 'zid-motion',
         deviceType: RingDeviceType.MotionSensor,
@@ -32,7 +33,7 @@ describe('MotionSensor', () => {
       )
 
     expect(motion.value).toBe(false)
-    device.updateData({ faulted: true })
+    pushUpdate(device, { faulted: true })
     expect(motion.value).toBe(true)
   })
 })

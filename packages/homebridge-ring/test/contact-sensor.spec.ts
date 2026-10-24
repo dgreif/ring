@@ -4,7 +4,8 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
@@ -15,7 +16,7 @@ describe('ContactSensor', () => {
     ['GlassbreakSensor', RingDeviceType.GlassbreakSensor],
     ['RetrofitZone', RingDeviceType.RetrofitZone],
   ] as const)('%s: faulted flips ContactSensorState', (_label, deviceType) => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Sensor',
         zid: `zid-${deviceType}`,
         deviceType,
@@ -40,7 +41,7 @@ describe('ContactSensor', () => {
       hap.Characteristic.ContactSensorState.CONTACT_DETECTED,
     )
 
-    device.updateData({ faulted: true })
+    pushUpdate(device, { faulted: true })
     expect(contact.value).toBe(
       hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED,
     )

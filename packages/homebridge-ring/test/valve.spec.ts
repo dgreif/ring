@@ -4,13 +4,15 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
 describe('Valve', () => {
   it('valveState ↔ valve.open/close', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Main Valve',
         zid: 'zid-valve',
         deviceType: RingDeviceType.WaterValve,
@@ -33,10 +35,9 @@ describe('Valve', () => {
       )
 
     expect(on.value).toBe(false)
-    device.updateData({ valveState: 'open' })
+    pushUpdate(device, { valveState: 'open' })
     expect(on.value).toBe(true)
 
-    await on.setValue(false)
-    expect(device.sendCommand).toHaveBeenCalledWith('valve.close')
+    await expectSet(on, false, device.sendCommand, 'valve.close')
   })
 })

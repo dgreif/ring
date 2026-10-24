@@ -4,13 +4,15 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory } from 'ring-client-api'
 
 describe('Lock', () => {
   it('locked state + SET → sendCommand', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Front Lock',
         zid: 'zid-lock',
         deviceType: 'lock',
@@ -39,10 +41,14 @@ describe('Lock', () => {
 
     expect(current.value).toBe(hap.Characteristic.LockCurrentState.SECURED)
 
-    device.updateData({ locked: 'unlocked' })
+    pushUpdate(device, { locked: 'unlocked' })
     expect(current.value).toBe(hap.Characteristic.LockCurrentState.UNSECURED)
 
-    await target.setValue(hap.Characteristic.LockTargetState.SECURED)
-    expect(device.sendCommand).toHaveBeenCalledWith('lock.lock')
+    await expectSet(
+      target,
+      hap.Characteristic.LockTargetState.SECURED,
+      device.sendCommand,
+      'lock.lock',
+    )
   })
 })

@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'vitest'
 import { Intercom } from '../intercom.ts'
 import {
   getCharacteristic,
   hap,
   initAccessory,
   mockRingIntercom,
+  expectSet,
 } from './harness.ts'
 
 describe('Intercom', () => {
@@ -22,7 +23,10 @@ describe('Intercom', () => {
         hap.Characteristic.LockTargetState,
       )
 
-    await target.setValue(hap.Characteristic.LockTargetState.UNSECURED)
-    expect(device.unlock).toHaveBeenCalled()
+    await expectSet(
+      target,
+      hap.Characteristic.LockTargetState.UNSECURED,
+      device.unlock,
+    )
   })
 })

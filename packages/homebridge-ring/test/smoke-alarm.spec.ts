@@ -4,19 +4,19 @@ import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  pushUpdate,
 } from './harness.ts'
 import { RingDeviceType } from 'ring-client-api'
 
 describe('SmokeAlarm', () => {
   it('alarmStatus active → smoke detected', () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Kitchen Smoke',
         zid: 'zid-smoke',
         deviceType: RingDeviceType.SmokeAlarm,
         batteryStatus: 'ok',
         tamperStatus: 'ok',
-        alarmStatus: 'inactive',
         manufacturerName: 'Ring',
       }),
       { platformAccessory } = initAccessory(
@@ -34,7 +34,7 @@ describe('SmokeAlarm', () => {
     expect(smoke.value).toBe(
       hap.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED,
     )
-    device.updateData({ alarmStatus: 'active' })
+    pushUpdate(device, { alarmStatus: 'active' })
     expect(smoke.value).toBe(hap.Characteristic.SmokeDetected.SMOKE_DETECTED)
   })
 })

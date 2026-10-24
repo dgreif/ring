@@ -1,16 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'vitest'
 import { Outlet } from '../outlet.ts'
 import {
   getCharacteristic,
   hap,
   initAccessory,
-  mockRingDevice,
+  createRingDevice,
+  expectSet,
 } from './harness.ts'
 import { RingDeviceCategory, RingDeviceType } from 'ring-client-api'
 
 describe('Outlet', () => {
   it('On SET → setInfo', async () => {
-    const device = mockRingDevice({
+    const device = createRingDevice({
         name: 'Lamp Outlet',
         zid: 'zid-outlet',
         deviceType: RingDeviceType.Switch,
@@ -32,8 +33,7 @@ describe('Outlet', () => {
         hap.Characteristic.On,
       )
 
-    await on.setValue(true)
-    expect(device.setInfo).toHaveBeenCalledWith({
+    await expectSet(on, true, device.setInfo, {
       device: { v1: { on: true } },
     })
   })

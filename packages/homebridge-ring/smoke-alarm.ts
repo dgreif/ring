@@ -29,7 +29,10 @@ export class SmokeAlarm extends BaseDeviceAccessory {
       characteristicType: SmokeDetected,
       serviceType: SmokeSensor,
       getValue: (data) => {
-        return data.alarmStatus === 'active'
+        const smokeAlarmStatus =
+          data.alarmStatus ??
+          data.components?.['alarm.smoke']?.alarmStatus
+        return smokeAlarmStatus === 'active'
           ? SmokeDetected.SMOKE_DETECTED
           : SmokeDetected.SMOKE_NOT_DETECTED
       },

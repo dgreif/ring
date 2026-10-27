@@ -25,13 +25,7 @@ import {
   switchMap,
   throttleTime,
 } from 'rxjs/operators'
-import {
-  clearTimeouts,
-  enableDebug,
-  logDebug,
-  logError,
-  logInfo,
-} from './util.ts'
+import { clearTimeouts, enableDebug, logDebug, logError } from './util.ts'
 import { setFfmpegPath } from './ffmpeg.ts'
 import { Subscribed } from './subscribed.ts'
 import { PushReceiver } from '@eneris/push-receiver'
@@ -320,7 +314,7 @@ export class RingApi extends Subscribed {
       // Ignore messages received in the first two seconds after connecting
       // These are likely duplicates, and we aren't currently storying persistent ids anywhere to avoid re-processing them
       if (Date.now() - startTime < 2000) {
-        logInfo(
+        logDebug(
           'Ignoring push notification received in first two seconds after starting up',
         )
         return

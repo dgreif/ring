@@ -23,6 +23,7 @@ export interface RingPlatformConfig extends RingApiOptions {
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
   disableLogs?: boolean
+  blockDisarm?: boolean // If true, disarming is disabled
 }
 
 export function updateHomebridgeConfig(

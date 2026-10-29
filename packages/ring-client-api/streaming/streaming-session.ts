@@ -61,14 +61,6 @@ export class StreamingSession extends Subscribed {
     )
   }
 
-  /**
-   * @deprecated
-   * activate will be removed in the future. Please use requestKeyFrame if you want to explicitly request an initial key frame
-   */
-  activate() {
-    this.requestKeyFrame()
-  }
-
   cameraSpeakerActivated = false
   activateCameraSpeaker() {
     if (this.cameraSpeakerActivated || this.hasEnded) {

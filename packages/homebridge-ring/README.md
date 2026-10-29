@@ -45,7 +45,9 @@ First, generate a `refreshToken` using the instructions in the [Refresh Tokens W
   "platforms": [
     {
       "platform": "Ring",
-      "refreshToken": "token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens"
+      "refreshToken": "token generated with ring-auth-cli.  See https://github.com/dgreif/ring/wiki/Refresh-Tokens",
+      "exposeAlarmVolume": true,
+      "volumeService": "lightbulb"
     }
   ]
 }
@@ -102,6 +104,9 @@ Only include an optional parameter if you actually need it. Default behavior wit
 | `ffmpegPath` | Uses `ffmpeg-for-homebridge` | A custom path to the `ffmpeg` executable. By default, the static binaries built in [ffmpeg-for-homebridge](https://github.com/oznu/ffmpeg-for-homebridge) will be used. If you prefer to use your own version of ffmpeg, you can pass a complete path, or simply `"ffmpeg"` to use ffmpeg from your `PATH`. |
 | `debug` | false | Turns on additional logging. In particular, ffmpeg logging. |
 | `disableLogs` | false | Turns off all logging |
+| `exposeAlarmVolume`   | boolean                      | false       | Expose Ring Alarm panel/keypad volume as a dedicated HomeKit accessory with a slider.                        |
+| `volumeService`       | `lightbulb` \| `fan` \| `speaker` | `lightbulb` | Chooses the HomeKit service used for the slider UI. `lightbulb` shows a clear brightness slider; `fan` is similar; `speaker` is most semantically correct but may be less visible in Apple’s Home app. |
+
 
 ### Cameras
 

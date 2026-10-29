@@ -45,10 +45,10 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.33.15",
+    "systeminformation": "^5.33.16",
     "undici": "^8.12.3",
     "uuid": "^14.0.3",
-    "werift": "0.25.1"
+    "werift": "0.25.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.13",

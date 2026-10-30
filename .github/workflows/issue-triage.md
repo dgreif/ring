@@ -41,7 +41,8 @@ safe-outputs:
     max: 1
 
 tools:
-  web-fetch:
+  bash: false
+  cli-proxy: false
   github:
     toolsets: [issues, labels]
     # This workflow only reads and triages the triggering issue.
@@ -78,7 +79,7 @@ Use these read-only tools before deciding anything:
 2. `get_issue_comments` — read existing comments.
 3. `list_label` — get the labels that exist in this repo. Only ever apply labels from this list.
 
-Base every decision on what the issue actually says. Do not invent logs, versions, or device details. You may `web-fetch` a wiki page from the Step 3 table if you need its exact wording.
+Base every decision on what the issue actually says. Do not invent logs, versions, or device details.
 
 ## Step 2: Hard stops
 

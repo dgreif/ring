@@ -220,25 +220,31 @@ export class RingPlatform implements DynamicPlatformPlugin {
     // rotation from the initial auth, leaving the later update that adds push
     // credentials unable to match the token saved in config.json.
     let savedRefreshToken = config.refreshToken
-    ringApi.onRefreshTokenUpdated.subscribe(({ newRefreshToken }) => {
-      if (!savedRefreshToken || newRefreshToken === savedRefreshToken) {
-        return
-      }
+    ringApi.onRefreshTokenUpdated.subscribe(
+      ({ oldRefreshToken, newRefreshToken }) => {
+        if (
+          !oldRefreshToken ||
+          !savedRefreshToken ||
+          newRefreshToken === savedRefreshToken
+        ) {
+          return
+        }
 
-      const tokenToReplace = savedRefreshToken,
-        saved = updateHomebridgeConfig(this.api, (configContents) =>
-          configContents.replace(tokenToReplace, newRefreshToken),
-        )
+        const tokenToReplace = savedRefreshToken,
+          saved = updateHomebridgeConfig(this.api, (configContents) =>
+            configContents.replace(tokenToReplace, newRefreshToken),
+          )
 
-      if (saved) {
-        savedRefreshToken = newRefreshToken
-        logDebug('Saved updated refresh token to config.json')
-      } else {
-        logError(
-          'Unable to save the updated refresh token to config.json. Push notifications may stop working after a restart.',
-        )
-      }
-    })
+        if (saved) {
+          savedRefreshToken = newRefreshToken
+          logDebug('Saved updated refresh token to config.json')
+        } else {
+          logError(
+            'Unable to save the updated refresh token to config.json. Push notifications may stop working after a restart.',
+          )
+        }
+      },
+    )
 
     const locations = await ringApi.getLocations(),
       cachedAccessoryIds = Object.keys(this.homebridgeAccessories),

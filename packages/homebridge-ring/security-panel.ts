@@ -70,7 +70,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
         characteristicType: Characteristic.On,
         serviceType: Service.Switch,
         name: this.device.name + ' Siren',
-        getValue: (data) => data.siren && data.siren.state === 'on',
+        getValue: (data) => Boolean(data.siren && data.siren.state === 'on'),
         setValue: (value) => {
           if (value) {
             return this.device.location.soundSiren()

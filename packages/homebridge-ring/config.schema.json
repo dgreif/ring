@@ -21,6 +21,12 @@
         "type": "boolean",
         "description": "If enabled, HomeKit will register a delayed entry event as a triggered alarm. Useful if you want to know as soon as someone opens a door with the alarm armed"
       },
+      "blockDisarm": {
+        "title": "Block Disarm from HomeKit",
+        "type": "boolean",
+        "default": false,
+        "description": "If enabled, HomeKit disarm requests are ignored and the accessory snaps back without an error."
+      },
       "hideLightGroups": {
         "title": "Hide Light Groups",
         "type": "boolean",
@@ -153,6 +159,7 @@
       "expandable": true,
       "items": [
         "alarmOnEntryDelay",
+        "blockDisarm",
         "hideLightGroups",
         "hideDoorbellSwitch",
         "hideCameraLight",

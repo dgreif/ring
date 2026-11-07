@@ -133,7 +133,7 @@ export class SecurityPanel extends BaseDeviceAccessory {
         Characteristic: { SecuritySystemTargetState: State },
       } = hap,
       { location } = this.device,
-      { nightModeBypassFor } = this.config
+      { nightModeBypassFor, blockDisarm } = this.config
 
     let bypass = false
     this.targetingNightMode = state === State.NIGHT_ARM
@@ -149,6 +149,35 @@ export class SecurityPanel extends BaseDeviceAccessory {
         // Switch to Home since we don't know which mode the user wanted
         state = State.STAY_ARM
       }
+    }
+
+    // Prevent disarming if blockDisarm is false
+    if (state === State.DISARM && blockDisarm === true) {
+      logInfo(
+        `[Ring Alarm] Disarm attempt from HomeKit blocked (blockDisarm=true) for ${this.device.name}`
+      )
+      const svc = this.getService(hap.Service.SecuritySystem)
+      const { SecuritySystemTargetState, SecuritySystemCurrentState } = hap.Characteristic
+
+      // Use the *actual* current state for both chars so Home sees no transition pending
+      const cur = this.getCurrentState(this.device.data)
+
+      const setBoth = (val: any) => {
+        svc.getCharacteristic(SecuritySystemTargetState).updateValue(val)
+        svc.getCharacteristic(SecuritySystemCurrentState).updateValue(val)
+      }
+
+      // 1) immediate snap-back
+      setBoth(cur)
+
+      // 2) nudge after the set-tx completes on Home’s side
+      setTimeout(() => setBoth(cur), 200)
+
+      // 3) one last nudge in case the previous gets coalesced by the Home app
+      setTimeout(() => setBoth(cur), 1000)
+
+      this.targetingNightMode = false
+      return
     }
 
     const bypassContactSensors = bypass

@@ -292,7 +292,24 @@ export class RingApi extends Subscribed {
           })
         } catch (e) {
           logError(e)
+          return
         }
+
+        // Devices subscribe to ding/motion events as soon as they are created,
+        // which can be before this push token is registered with Ring.
+        // Subscribe again now that the token is registered.
+        const results = await Promise.allSettled([
+          ...cameras.flatMap((camera) => [
+            camera.subscribeToDingEvents(),
+            camera.subscribeToMotionEvents(),
+          ]),
+          ...intercoms.map((intercom) => intercom.subscribeToDingEvents()),
+        ])
+        results.forEach((result) => {
+          if (result.status === 'rejected') {
+            logError(result.reason)
+          }
+        })
       }),
     )
 

@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
-import { RingRestClient } from '../rest-client.ts'
+import { InvalidAuthResponseError, RingRestClient } from '../rest-client.ts'
 import { clearTimeouts, getHardwareId, toBase64 } from '../util.ts'
 import { firstValueFrom } from 'rxjs'
 import {
@@ -343,6 +343,39 @@ describe('getAuth', () => {
       newRefreshToken: await wrapRefreshToken(secondRefreshToken),
     })
   })
+
+  it.each([
+    [
+      'an undecodable body',
+      () => HttpResponse.text('\x1f\x8b\x08\x00 not json', { status: 200 }),
+    ],
+    [
+      'a body without refresh_token',
+      () => HttpResponse.json({ access_token: accessToken, expires_in: 3600 }),
+    ],
+  ])(
+    'should keep the existing refresh token when Ring returns %s',
+    async (_, resolver) => {
+      server.use(http.post('https://oauth.ring.com/oauth/token', resolver))
+      const wrappedRefreshToken = await wrapRefreshToken(refreshToken),
+        updates: unknown[] = []
+      client = new RingRestClient({ refreshToken: wrappedRefreshToken })
+      client.onRefreshTokenUpdated.subscribe((update) => updates.push(update))
+
+      await expect(() => client.getAuth()).rejects.toThrow(
+        InvalidAuthResponseError,
+      )
+      expect(client.refreshToken).toEqual(wrappedRefreshToken)
+      expect(updates).toEqual([])
+
+      // recovers with the same token once Ring responds normally
+      server.resetHandlers()
+      expect(await client.getAuth()).toMatchObject({
+        access_token: accessToken,
+        refresh_token: await wrapRefreshToken(secondRefreshToken),
+      })
+    },
+  )
 })
 
 describe('fetch', () => {

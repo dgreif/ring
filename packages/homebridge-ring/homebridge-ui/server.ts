@@ -4,7 +4,10 @@ import {
   RequestError,
 } from '@homebridge/plugin-ui-utils'
 
-import { RingRestClient } from 'ring-client-api/rest-client'
+import {
+  InvalidAuthResponseError,
+  RingRestClient,
+} from 'ring-client-api/rest-client'
 import { controlCenterDisplayName, getSystemId } from '../config.ts'
 
 interface LoginRequest {
@@ -66,6 +69,11 @@ class PluginUiServer extends HomebridgePluginUiServer {
 
       return { refreshToken: authResponse.refresh_token }
     } catch (e: any) {
+      if (e instanceof InvalidAuthResponseError) {
+        console.error(e)
+        throw new RequestError(e.message, e)
+      }
+
       console.error('Incorrect 2fa Code')
       throw new RequestError('Please check the code and try again', e)
     }

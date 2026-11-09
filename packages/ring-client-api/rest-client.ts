@@ -13,6 +13,7 @@ import type {
   AuthTokenResponse,
   SessionResponse,
 } from './ring-types.ts'
+import { OAuthWebLogin } from './oauth-web-login.ts'
 import { ReplaySubject } from 'rxjs'
 import assert from 'assert'
 import type { Credentials } from '@eneris/push-receiver/dist/types.d.js'
@@ -273,6 +274,7 @@ export class RingRestClient {
     return this._authPromise
   }
   private sessionPromise?: Promise<SessionResponse> = undefined
+  private webLogin?: OAuthWebLogin
   public using2fa = false
   public promptFor2fa?: string
   public onRefreshTokenUpdated = new ReplaySubject<{
@@ -318,26 +320,57 @@ export class RingRestClient {
     )
   }
 
+  /**
+   * Signs in with email and password through Ring's OAuth web flow. The sign-in is kept
+   * between the call that triggers the 2fa code and the call that passes it in.
+   */
+  private async getWebLoginAuth(
+    hardwareId: string,
+    { username, password }: { username: string; password: string },
+    twoFactorAuthCode?: string,
+  ) {
+    if (twoFactorAuthCode && this.webLogin) {
+      await this.webLogin.verify2fa(twoFactorAuthCode)
+    } else {
+      this.webLogin = new OAuthWebLogin(
+        hardwareId,
+        this.baseSessionMetadata.device_model,
+      )
+      await this.webLogin.signIn(username, password)
+    }
+
+    const response = await this.webLogin.getToken()
+    this.webLogin = undefined
+    return response
+  }
+
   async getAuth(twoFactorAuthCode?: string): Promise<AuthTokenResponse> {
     const grantData = this.getGrantData(twoFactorAuthCode)
 
     try {
       const hardwareId = await this.hardwareIdPromise,
-        response = await requestWithRetry<AuthTokenResponse>({
-          url: 'https://oauth.ring.com/oauth/token',
-          json: {
-            client_id: 'ring_official_android',
-            scope: 'client',
-            ...grantData,
-          },
-          method: 'POST',
-          headers: {
-            '2fa-support': 'true',
-            '2fa-code': twoFactorAuthCode || '',
-            hardware_id: hardwareId,
-            'User-Agent': 'android:com.ringapp',
-          },
-        }),
+        response =
+          grantData.grant_type === 'password'
+            ? await this.getWebLoginAuth(
+                hardwareId,
+                grantData as { username: string; password: string },
+                twoFactorAuthCode,
+              )
+            : await requestWithRetry<AuthTokenResponse>({
+                url: 'https://oauth.ring.com/oauth/token',
+                json: {
+                  client_id: 'ring_official_android',
+                  scope: 'client',
+                  ...grantData,
+                },
+                method: 'POST',
+                headers: {
+                  '2fa-support': 'true',
+                  '2fa-code': twoFactorAuthCode || '',
+                  hardware_id: hardwareId,
+                  'User-Agent': 'android:com.ringapp',
+                },
+              }),
         oldRefreshToken = this.refreshToken
 
       // Store the new refresh token and auth config

@@ -33,8 +33,8 @@
   },
   "scripts": {
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js && rm -rf ./lib/test",
-    "auth-cli": "node --conditions=ring-dev --env-file=../../.env ./ring-auth-cli.ts",
-    "device-data-cli": "node --conditions=ring-dev --env-file=../../.env ./ring-device-data-cli.ts",
+    "auth-cli": "node --conditions=ring-dev --env-file-if-exists=../../.env ./ring-auth-cli.ts",
+    "device-data-cli": "node --conditions=ring-dev --env-file-if-exists=../../.env ./ring-device-data-cli.ts",
     "lint": "eslint .",
     "test": "vitest run"
   },

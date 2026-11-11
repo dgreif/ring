@@ -1,6 +1,7 @@
 import debug from 'debug'
 import colors from 'colors'
 import { createInterface } from 'readline'
+import { Writable } from 'stream'
 import { v4 as generateRandomUuid, v5 as generateUuidFromNamespace } from 'uuid'
 import { uuid as getSystemUuid } from 'systeminformation'
 import pushReceiverLogger from '@eneris/push-receiver/dist/utils/logger.js'
@@ -107,6 +108,32 @@ export async function requestInput(question: string) {
     })
 
   lineReader.close()
+
+  return answer.trim()
+}
+
+export async function requestHiddenInput(question: string) {
+  const lineReader = createInterface({
+    input: process.stdin,
+    // Discard readline's echo of each keystroke so the input stays hidden
+    output: new Writable({
+      write(_chunk, _encoding, callback) {
+        callback()
+      },
+    }),
+    // Puts a TTY stdin in raw mode so the terminal doesn't echo the input either
+    terminal: true,
+  })
+
+  process.stdout.write(question)
+
+  const answer = await new Promise<string>((resolve) => {
+    lineReader.question('', resolve)
+  })
+
+  lineReader.close()
+  // The newline readline writes when enter is pressed was discarded with the echo
+  process.stdout.write('\n')
 
   return answer.trim()
 }

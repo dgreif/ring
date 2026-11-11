@@ -7,5 +7,5 @@
 - Prove behavior changes end to end with the
   [verify-ring skill](.agents/skills/verify-ring/SKILL.md) before calling
   them done. Its "Pick a mode" section says when to use live or fake.
-- Never ask for or type a Ring password or 2FA code. The user runs
-  `npm run auth-cli` themselves.
+- Never ask for or type a Ring password or 2FA code. The user creates
+  tokens themselves (see the skill's Live mode section).

@@ -363,7 +363,7 @@ async function doctor() {
       : 'missing (only needed for live mode)',
     next: token
       ? undefined
-      : 'Ask the user to run `npm run auth-cli` and pipe the token into `ring-ctl token import`.',
+      : 'Ask the user to run `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` in their own terminal and pipe the token into `ring-ctl token import`.',
   })
 
   const lock = readLiveLock()
@@ -387,12 +387,17 @@ async function doctor() {
       : 'none',
   })
 
-  const pending = pendingWrites()
+  const pending = pendingWrites(),
+    liveRunning = session?.mode === 'live' && isSessionActive(session)
   checks.push({
     name: 'live-journal',
-    ok: pending.length === 0,
+    ok: pending.length === 0 || liveRunning,
     detail: { pendingWrites: pending.length },
-    next: 'Unrestored live writes exist. `ring-ctl launch live` restores them on startup.',
+    next: !pending.length
+      ? undefined
+      : liveRunning
+      ? 'The running live session made these writes. `ring-ctl stop` restores them.'
+      : 'Unrestored live writes exist. `ring-ctl launch live` restores them on startup.',
   })
 
   mkdirSync(evidenceRoot, { recursive: true })
@@ -523,7 +528,7 @@ async function launch(argv: string[]) {
     throw new CliError('No live refresh token has been imported', {
       code: 'no-live-token',
       next: [
-        'Ask the user to create a dedicated token by running `npm run auth-cli` themselves (it asks for their Ring password and 2FA code; never handle those yourself).',
+        'Ask the user to create a dedicated token by running `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` themselves (it asks for their Ring password and 2FA code; never handle those yourself).',
         'Then import it: `pbpaste | node .agents/skills/verify-ring/ring-ctl.ts token import`',
       ],
     })
@@ -1585,7 +1590,7 @@ async function token(argv: string[]) {
   if (!value || /\s/.test(value) || value.length < 20) {
     throw new CliError('That does not look like a Ring refresh token', {
       code: 'bad-token',
-      next: ['Paste only the token printed by `npm run auth-cli`.'],
+      next: ['Paste only the token printed by `ring-auth-cli.ts`.'],
     })
   }
   mkdirSync(liveDir, { recursive: true, mode: 0o700 })

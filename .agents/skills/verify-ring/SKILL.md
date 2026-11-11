@@ -132,8 +132,10 @@ Fake state is rebuilt from the scenario on every launch.
 Live mode talks to the user's real Ring account and real devices. Rules:
 
 1. **The token is the user's job.** Never ask for or type a Ring password or
-   2FA code. Ask the user to run `npm run auth-cli` in their own terminal,
-   then import the printed token:
+   2FA code. Ask the user to run this in their own terminal:
+   `node --conditions=development packages/ring-client-api/ring-auth-cli.ts`.
+   (`npm run auth-cli` is the same, but fails in checkouts without a root
+   `.env`, such as worktrees.) Then import the printed token:
    `pbpaste | node .agents/skills/verify-ring/ring-ctl.ts token import`.
    Ring rotates refresh tokens; the supervisor saves the rotated token
    automatically.
@@ -242,7 +244,7 @@ their issue (for example `ring-device-data-cli` output), then
 | Second `emit ding` returns `not-observed`                     | The Doorbell service passes one press per 15 seconds per device. Wait 15s                                                                                 |
 | Camera light ignores Ring changes                             | After a HomeKit write the light shows the written value for 30 seconds                                                                                    |
 | No event after `set`                                          | HAP only sends events when a value changes                                                                                                                |
-| Live token rejected                                           | Ask the user to run `npm run auth-cli` again, then `token import`                                                                                         |
+| Live token rejected                                           | Ask the user to run `ring-auth-cli.ts` again (see Live mode), then `token import`                                                                         |
 
 ## Maintaining this skill
 

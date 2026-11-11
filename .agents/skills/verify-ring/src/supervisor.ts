@@ -291,7 +291,7 @@ function startHomebridge() {
 function nextStepsForFailure(error: string) {
   if (/oauth|Refresh token|2-factor/i.test(error)) {
     return [
-      'The live refresh token was rejected. Ask the user to create a new one with `npm run auth-cli` and import it with `ring-ctl token import`.',
+      'The live refresh token was rejected. Ask the user to create a new one with `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` and import it with `ring-ctl token import`.',
     ]
   }
   if (/EADDRINUSE/.test(error)) {

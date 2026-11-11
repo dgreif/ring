@@ -242,10 +242,10 @@ export class RingPlatform implements DynamicPlatformPlugin {
                 device instanceof RingCamera
                   ? Camera
                   : device instanceof RingChime
-                  ? Chime
-                  : device instanceof RingIntercom
-                  ? Intercom
-                  : getAccessoryClass(device)
+                    ? Chime
+                    : device instanceof RingIntercom
+                      ? Intercom
+                      : getAccessoryClass(device)
               ) as (new (...args: any[]) => BaseAccessory<any>) | null
 
             return {

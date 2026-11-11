@@ -105,9 +105,9 @@ export class Location extends Subscribed {
     filter(() => {
       return Boolean(
         this.assets &&
-          this.assets.every((asset) =>
-            this.receivedAssetDeviceLists.includes(asset.uuid),
-          ),
+        this.assets.every((asset) =>
+          this.receivedAssetDeviceLists.includes(asset.uuid),
+        ),
       )
     }),
     shareReplay(1),

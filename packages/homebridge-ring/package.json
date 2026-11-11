@@ -24,7 +24,7 @@
     "homebridge": "2.5.0",
     "tsconfig": "*",
     "typescript": "7.0.2",
-    "vitest": "^5.0.1"
+    "vitest": "^5.1.0"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26",

@@ -156,8 +156,7 @@ describe('undici Agent / fetch pairing', () => {
     expect(auth.access_token).toBe('ey__access')
 
     const init = undiciTest.fetchMock.mock.calls[0]?.[1] as
-      | { dispatcher?: unknown }
-      | undefined
+      { dispatcher?: unknown } | undefined
     expect(init?.dispatcher).toBeInstanceOf(Agent)
   })
 })

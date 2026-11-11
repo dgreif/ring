@@ -32,13 +32,14 @@ feature does, how a user gets to it, and the exact commands to drive it.
 | Real-world side effects                     | None                                     | Yes, so writes are guarded and restored |
 | Startup                                     | About 6 seconds                          | About 10 to 30 seconds                  |
 
-**Live is the primary mode.** It proves the change against real Ring payloads
-and real hardware. Use it whenever a token is imported (`$R token status`)
-and the user owns the devices the change touches. Use **fake** for devices
-the user doesn't own, to inject events or Ring failures, to prove exactly
-which Ring calls the plugin made, or when there is no token (for example in a
-cloud agent). The strongest proof uses both: fake for the edge cases, live to
-confirm on real hardware. Only one checkout can run live at a time.
+**Fake is the default.** It has no real-world side effects, can inject
+events and Ring failures, and proves exactly which Ring calls the plugin
+made. Use **live** only when the user asks for it, or when the change needs
+real Ring payloads or hardware that the fake can't stand in for (for example
+a device type the fake doesn't model, or a payload shape you can't confirm
+from fixtures). Having a token imported is not a reason to use live. When
+live is warranted, prove the edge cases in fake first, then confirm on real
+hardware. Only one checkout can run live at a time.
 
 ## Launch
 

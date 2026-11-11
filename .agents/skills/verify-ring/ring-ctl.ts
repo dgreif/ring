@@ -364,7 +364,7 @@ async function doctor() {
       : 'missing (only needed for live mode)',
     next: token
       ? undefined
-      : 'Ask the user to run `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` in their own terminal and pipe the token into `ring-ctl token import`.',
+      : 'Ask the user to run `node --conditions=ring-dev packages/ring-client-api/ring-auth-cli.ts` in their own terminal and pipe the token into `ring-ctl token import`.',
   })
 
   const lock = readLiveLock()
@@ -537,7 +537,7 @@ async function launch(argv: string[]) {
     throw new CliError('No live refresh token has been imported', {
       code: 'no-live-token',
       next: [
-        'Ask the user to create a dedicated token by running `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` themselves (it asks for their Ring password and 2FA code; never handle those yourself).',
+        'Ask the user to create a dedicated token by running `node --conditions=ring-dev packages/ring-client-api/ring-auth-cli.ts` themselves (it asks for their Ring password and 2FA code; never handle those yourself).',
         'Then import it: `pbpaste | node .agents/skills/verify-ring/ring-ctl.ts token import`',
       ],
     })
@@ -597,7 +597,7 @@ async function launch(argv: string[]) {
   const out = openSync(join(runDir, 'supervisor.log'), 'a'),
     child = spawn(
       process.execPath,
-      ['--conditions=development', join(skillDir, 'src/supervisor.ts')],
+      ['--conditions=ring-dev', join(skillDir, 'src/supervisor.ts')],
       { detached: true, stdio: ['ignore', out, out], cwd: repoRoot },
     )
   child.unref()

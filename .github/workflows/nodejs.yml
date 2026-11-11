@@ -1,6 +1,12 @@
 name: Node-CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '**'
+  pull_request:
 
 # Least-privilege default token: this workflow only builds/tests/lints.
 permissions:

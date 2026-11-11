@@ -11,4 +11,4 @@ case " $* " in
     ;;
 esac
 
-RING_DEBUG="${RING_DEBUG:-true}" node --conditions=development ${watch_arg:+"$watch_arg"} ../../node_modules/.bin/homebridge -U ../../.homebridge -P . "$@"
+RING_DEBUG="${RING_DEBUG:-true}" node --conditions=ring-dev ${watch_arg:+"$watch_arg"} ../../node_modules/.bin/homebridge -U ../../.homebridge -P . "$@"

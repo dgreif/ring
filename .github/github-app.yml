@@ -1,4 +1,8 @@
 scripts:
+  - name: Install npm dependencies
+    command: npm ci
+    triggers:
+      - session.create
   - name: Link shared .homebridge
     command: npm run link-homebridge
     triggers:

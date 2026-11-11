@@ -81,6 +81,10 @@ interface ResponseError extends Error {
   response: Pick<Response, 'headers' | 'status'> & { body: any }
 }
 
+export class InvalidAuthResponseError extends Error {
+  name = 'InvalidAuthResponseError'
+}
+
 async function responseToError(response: Response) {
   const error = new Error() as ResponseError
   error.response = {
@@ -338,7 +342,18 @@ export class RingRestClient {
             'User-Agent': 'android:com.ringapp',
           },
         }),
-        oldRefreshToken = this.refreshToken
+        oldRefreshToken = this.refreshToken,
+        newRefreshToken: unknown = (
+          response as Partial<AuthTokenResponse> | null
+        )?.refresh_token
+
+      // Never replace the stored refresh token with one missing `rt` (e.g. an undecodable response body).
+      // Persisting it would guarantee `invalid_grant` on the next start, while the old token may still work.
+      if (typeof newRefreshToken !== 'string' || !newRefreshToken) {
+        throw new InvalidAuthResponseError(
+          'Received an oauth response from Ring without a refresh token. The existing refresh token has been kept. If this persists, make sure ring-client-api/homebridge-ring is up to date for your Node.js version.',
+        )
+      }
 
       // Store the new refresh token and auth config
       this.authConfig = {
@@ -360,6 +375,11 @@ export class RingRestClient {
         refresh_token: this.refreshToken,
       }
     } catch (requestError: any) {
+      if (requestError instanceof InvalidAuthResponseError) {
+        // Ring did not reject the credentials, so keep them in memory rather than clearing and retrying
+        throw requestError
+      }
+
       if (grantData.refresh_token) {
         // failed request with refresh token
         this.refreshToken = undefined

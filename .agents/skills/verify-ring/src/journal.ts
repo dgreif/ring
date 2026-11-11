@@ -39,7 +39,7 @@ export interface WriteEntry {
 }
 
 export interface ResolutionEntry {
-  type: 'restored' | 'skipped' | 'failed'
+  type: 'restored' | 'skipped' | 'failed' | 'abandoned'
   seq: number
   ts: string
   reason?: string
@@ -111,13 +111,13 @@ export function recordResolution(
   }
 }
 
-// Writes that still need to be undone. "failed" does not resolve a write:
-// the next restore attempt tries it again.
+// Only confirmed restoration or explicit abandonment resolves a write.
+// Failed and skipped attempts remain pending, including older journal entries.
 export function pendingWrites(file = liveJournalFile) {
   const entries = readJournal(file),
     resolved = new Set(
       entries
-        .filter((e) => e.type === 'restored' || e.type === 'skipped')
+        .filter((e) => e.type === 'restored' || e.type === 'abandoned')
         .map((e) => e.seq),
     )
   return entries.filter(

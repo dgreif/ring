@@ -5,6 +5,7 @@ import {
   allCharacteristics,
   type FlatCharacteristic,
   type HapTopology,
+  isReadableValue,
   loadAccessories,
   readCharacteristic,
   readCharacteristics,
@@ -151,7 +152,6 @@ async function restoreOne(
   }
 
   if (!first.beforeReadable) {
-    item.result = 'skipped'
     item.reason = 'The value before the write could not be read.'
     return item
   }
@@ -164,8 +164,19 @@ async function restoreOne(
   }
   item.ref = target.ref
 
+  if (!isReadableValue(target, first.before)) {
+    item.reason =
+      'The journal has no valid baseline value for this characteristic.'
+    return item
+  }
+
   const current = await readCharacteristic(pin, target)
   item.current = current
+  if (!isReadableValue(target, current)) {
+    item.reason =
+      'The current value could not be read; restoration is still pending.'
+    return item
+  }
   if (sameValue(target, current, first.before)) {
     item.result = 'unchanged'
     return item
@@ -254,15 +265,11 @@ export async function restoreLive({
       }
     }
     items.push(item)
-    if (item.result === 'failed') {
-      recordResolution(seqs, 'failed', item.reason)
-    } else {
-      recordResolution(
-        seqs,
-        item.result === 'skipped' ? 'skipped' : 'restored',
-        item.reason,
-      )
-    }
+    recordResolution(
+      seqs,
+      item.result === 'unchanged' ? 'restored' : item.result,
+      item.reason,
+    )
   }
 
   const drift: DriftItem[] = [],
@@ -290,7 +297,9 @@ export async function restoreLive({
     }
   }
 
-  const ok = items.every((i) => i.result !== 'failed'),
+  const ok =
+      items.every((i) => i.result === 'restored' || i.result === 'unchanged') &&
+      pendingWrites().length === 0,
     report: RestoreReport = {
       at: new Date().toISOString(),
       ok,

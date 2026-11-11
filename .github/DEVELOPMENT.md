@@ -28,6 +28,6 @@ $R stop
 ```
 
 - **Fake mode** uses a local fake Ring cloud. It covers devices you don't own and can inject dings, motion, sensor faults and Ring outages.
-- **Live mode** (`$R launch live`) uses your Ring account. Create a token with `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` (works without a `.env`) and import it with `pbpaste | $R token import`. Writes are journaled and restored on `stop`, sirens and panic buttons are blocked, and arming or unlocking needs an explicit flag.
+- **Live mode** (`$R launch live`) uses your Ring account. Create a token with `node --conditions=development packages/ring-client-api/ring-auth-cli.ts` (works without a `.env`) and import it with `pbpaste | $R token import`. Writes require a readable baseline and are journaled before being sent. `stop` attempts restoration; failed or policy-skipped restores remain pending and report failure until restored or explicitly abandoned. Sirens and panic buttons are blocked, and arming or unlocking needs an explicit flag.
 
 See [SKILL.md](../.agents/skills/verify-ring/SKILL.md) for the full command set and [features/](../.agents/skills/verify-ring/features/README.md) for how each Ring feature maps to HomeKit.

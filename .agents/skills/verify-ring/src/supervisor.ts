@@ -281,7 +281,7 @@ function startHomebridge() {
       fail(`Homebridge exited unexpectedly (code ${code}, signal ${signal})`, [
         'Read the end of `ring-ctl logs` for the crash.',
         session.mode === 'live'
-          ? 'Any live writes not yet restored are restored automatically on the next `ring-ctl launch live`.'
+          ? 'The next `ring-ctl launch live` retries unrestored writes; inspect its startupRestore report.'
           : 'Relaunch with `ring-ctl launch fake` after fixing the cause.',
       ])
     }
@@ -486,8 +486,12 @@ async function main() {
       log('found unrestored writes from an earlier live session')
       updateSession({ startupRestore: await runRestore('startup') })
     }
-    await captureBaseline(await fullTopology(), session.runId, session.runDir)
-    log('captured live baseline')
+    if (!pendingWrites().length) {
+      await captureBaseline(await fullTopology(), session.runId, session.runDir)
+      log('captured live baseline')
+    } else {
+      log('startup restoration is incomplete; preserving the previous baseline')
+    }
     syncLiveFiles()
   }
 

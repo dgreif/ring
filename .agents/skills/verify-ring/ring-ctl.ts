@@ -24,6 +24,7 @@ import {
   type FlatCharacteristic,
   type HapEvent,
   type HapTopology,
+  isReadableValue,
   labelValue,
   loadAccessories,
   readCharacteristic,
@@ -396,8 +397,8 @@ async function doctor() {
     next: !pending.length
       ? undefined
       : liveRunning
-      ? 'The running live session made these writes. `ring-ctl stop` restores them.'
-      : 'Unrestored live writes exist. `ring-ctl launch live` restores them on startup.',
+      ? 'Live writes are pending. `ring-ctl stop` attempts restoration; inspect its report.'
+      : 'Unrestored live writes exist. `ring-ctl launch live` retries them on startup.',
   })
 
   mkdirSync(evidenceRoot, { recursive: true })
@@ -413,9 +414,12 @@ async function doctor() {
 }
 
 async function readySummary(session: Session) {
-  const accessories = await accessoriesFor(session)
+  const accessories = await accessoriesFor(session),
+    incompleteRestore =
+      session.startupRestore?.ok === false && pendingWrites().length > 0
   return {
-    ok: true,
+    ok: !incompleteRestore,
+    code: incompleteRestore ? 'restore-incomplete' : undefined,
     status: session.status,
     mode: session.mode,
     runId: session.runId,
@@ -431,11 +435,16 @@ async function readySummary(session: Session) {
     })),
     startupRestore: session.startupRestore,
     next: [
+      ...(incompleteRestore
+        ? [
+            'Startup restoration is incomplete. Inspect startupRestore and retry `ring-ctl restore`; do not treat this session as verified.',
+          ]
+        : []),
       'List refs: `ring-ctl accessories --filter <name>`',
       'Change something: `ring-ctl set <ref> <value>`, then `ring-ctl get <ref>`',
       session.mode === 'fake'
         ? 'Trigger Ring events: `ring-ctl emit ding <camera>`'
-        : 'Live writes are journaled and restored by `ring-ctl stop`.',
+        : 'Live writes are journaled. `ring-ctl stop` attempts restoration; inspect its report.',
     ],
   }
 }
@@ -602,7 +611,17 @@ async function launch(argv: string[]) {
 async function stopSession() {
   const session = readSession()
   if (!session || !isSessionActive(session)) {
-    return { ok: true, wasRunning: false }
+    const pending = pendingWrites().length
+    return {
+      ok: pending === 0,
+      wasRunning: false,
+      pendingLiveWrites: pending,
+      next: pending
+        ? [
+            'Live writes are still pending. `ring-ctl launch live` retries restoration; inspect its report and tell the user what remains changed.',
+          ]
+        : undefined,
+    }
   }
 
   process.kill(session.supervisorPid!, 'SIGTERM')
@@ -625,15 +644,15 @@ async function stopSession() {
     updateSession({ status: 'stopped', stopReason: 'forced by ring-ctl stop' })
   }
 
-  const pending = session.mode === 'live' ? pendingWrites().length : 0
+  const pending = pendingWrites().length
   return {
-    ok: pending === 0,
+    ok: pending === 0 && final.shutdownRestore?.ok !== false,
     wasRunning: true,
     mode: session.mode,
     forced: forced || undefined,
     runDir: session.runDir,
     restore: final.shutdownRestore,
-    pendingLiveWrites: session.mode === 'live' ? pending : undefined,
+    pendingLiveWrites: pending,
     next: pending
       ? [
           'Some live writes were not restored. `ring-ctl launch live` retries them on startup; tell the user what is still changed.',
@@ -797,8 +816,12 @@ async function set(argv: string[]) {
 
   if (values['dry-run']) {
     const current = target.perms.includes('pr')
-      ? await readCharacteristic(session.pin, target)
-      : undefined
+        ? await readCharacteristic(session.pin, target)
+        : undefined,
+      baselineReadable = isReadableValue(target, current),
+      allowed =
+        session.mode !== 'live' ||
+        ((decision?.allowed ?? false) && baselineReadable)
     return {
       ...result,
       dryRun: true,
@@ -806,10 +829,15 @@ async function set(argv: string[]) {
       current:
         current === undefined ? undefined : describeValue(target, current),
       wouldWrite: describeValue(target, value),
-      allowed: decision ? decision.allowed : true,
-      reason: decision && !decision.allowed ? decision.reason : undefined,
+      allowed,
+      reason:
+        decision && !decision.allowed
+          ? decision.reason
+          : session.mode === 'live' && !baselineReadable
+          ? 'Cannot read a valid baseline. Live writes without a restorable value are refused.'
+          : undefined,
       requires: decision?.requires,
-      journaled: session.mode === 'live' && (decision?.allowed ?? false),
+      journaled: session.mode === 'live' && allowed,
     }
   }
 
@@ -829,17 +857,30 @@ async function set(argv: string[]) {
     }
 
     const readable = target.perms.includes('pr'),
-      before = readable ? await readCharacteristic(session.pin, target) : null,
-      entry = recordWrite({
-        runId: session.runId,
-        ref: target.ref,
-        key: keyFor(target),
-        before,
-        beforeReadable:
-          readable &&
-          !(before && typeof before === 'object' && 'hapStatus' in before),
-        after: value,
-      })
+      before = readable
+        ? await readCharacteristic(session.pin, target)
+        : undefined
+    if (!isReadableValue(target, before)) {
+      throw new CliError(
+        `Cannot read a restorable baseline for ${target.ref}`,
+        {
+          code: 'unreadable-baseline',
+          details: { ref: target.ref, before, access: access(target) },
+          next: [
+            'No write was sent or journaled. Restore device connectivity and retry `ring-ctl get`.',
+            'Use fake mode for write-only characteristics or read-failure testing.',
+          ],
+        },
+      )
+    }
+    const entry = recordWrite({
+      runId: session.runId,
+      ref: target.ref,
+      key: keyFor(target),
+      before,
+      beforeReadable: true,
+      after: value,
+    })
     grantPermits(decision.permits)
     Object.assign(result, {
       before: describeValue(target, before),
@@ -861,7 +902,7 @@ async function set(argv: string[]) {
         'Check `ring-ctl logs --grep error` for the plugin error.',
         ...(session.mode === 'live'
           ? [
-              'The write was journaled anyway; `ring-ctl stop` will put back the old value if it changed.',
+              'The write was journaled anyway; `ring-ctl stop` attempts restoration. Check its report for anything still pending.',
             ]
           : []),
       ],
@@ -1421,7 +1462,7 @@ async function restore(argv: string[]) {
       })),
       next: pending.length
         ? [
-            'Writes to the same characteristic are restored once, to the oldest "before". Restoring to an unlocked lock is skipped without --allow-unlock.',
+            'Writes to the same characteristic are restored once, to the oldest "before". Restoring to an unlocked lock stays pending without --allow-unlock.',
           ]
         : undefined,
     }
@@ -1430,7 +1471,7 @@ async function restore(argv: string[]) {
   if (values.abandon) {
     recordResolution(
       pending.map((p) => p.seq),
-      'skipped',
+      'abandoned',
       'abandoned with ring-ctl restore --abandon',
     )
     return {
@@ -1455,7 +1496,7 @@ async function restore(argv: string[]) {
       code: 'no-session',
       details: { pendingLiveWrites: pending.length },
       next: [
-        '`ring-ctl launch live` restores pending writes automatically before it reports ready.',
+        '`ring-ctl launch live` retries pending writes automatically and reports incomplete restoration if any remain.',
       ],
     })
   }
@@ -1527,6 +1568,17 @@ async function cleanup(argv: string[]) {
       }
       removed.push(dir)
     }
+
+  if (!dryRun && !stopped.ok) {
+    return {
+      ok: false,
+      stopped,
+      removed,
+      next: [
+        'Resolve pending live writes before deleting storage or evidence.',
+      ],
+    }
+  }
 
   if (values.storage) {
     for (const mode of ['fake', 'live'] as const) {
@@ -1630,7 +1682,7 @@ async function main() {
     command === '-h'
   ) {
     process.stdout.write(usage + '\n')
-    return
+    return 0
   }
   const handler = commands[command]
   if (!handler) {
@@ -1641,7 +1693,7 @@ async function main() {
   }
   if (argv.includes('--help') || argv.includes('-h')) {
     process.stdout.write(usage + '\n')
-    return
+    return 0
   }
   if (
     command !== 'token' &&
@@ -1650,7 +1702,14 @@ async function main() {
   ) {
     touchHeartbeat()
   }
-  printJson(await handler(argv))
+  const result = await handler(argv)
+  printJson(result)
+  return typeof result === 'object' &&
+    result !== null &&
+    'ok' in result &&
+    result.ok === false
+    ? 1
+    : 0
 }
 
 // stdout is async for pipes on macOS, so exiting right away can truncate a
@@ -1660,7 +1719,7 @@ function exitAfterFlush(code: number) {
 }
 
 main().then(
-  () => exitAfterFlush(0),
+  (code) => exitAfterFlush(code),
   (error) => {
     printError(error)
     exitAfterFlush(1)

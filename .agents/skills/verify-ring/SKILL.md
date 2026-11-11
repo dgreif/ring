@@ -139,13 +139,17 @@ Live mode talks to the user's real Ring account and real devices. Rules:
    `pbpaste | node .agents/skills/verify-ring/ring-ctl.ts token import`.
    Ring rotates refresh tokens; the supervisor saves the rotated token
    automatically.
-2. **Every write is journaled before it happens.** `set` reads the current
-   value, records it in `~/.ring-verify/live/journal.jsonl`, then writes.
-   `stop` (and the idle watchdog, and a crash-recovery pass on the next
-   `launch live`) restores each changed characteristic to its oldest
-   recorded value, then archives the journal into the run directory. Check
-   the `restore` block in the `stop` output and tell the user about anything
-   that is not `restored` or `unchanged`.
+2. **Every write needs a readable baseline.** `set` reads the current value
+   and refuses the write if the characteristic is write-only, the read fails,
+   or the value is missing or invalid. `--dry-run` reports the same check.
+   A valid value is flushed to `~/.ring-verify/live/journal.jsonl` before
+   granting permits or sending the write.
+   `stop` (and the idle watchdog, and crash recovery on the next `launch live`)
+   attempts to restore each characteristic to its oldest recorded value.
+   Only confirmed `restored` or `unchanged` items are resolved. Failed or
+   policy-skipped restores stay pending, return `"ok": false`, and keep the
+   journal for retry. The journal is archived only when nothing is pending.
+   Check the report and tell the user about anything still unresolved.
 3. **Some writes are blocked.** A network guard inside the Homebridge
    process enforces the same rules for anything the plugin sends, including
    writes that don't come from `ring-ctl`:
@@ -162,7 +166,7 @@ Live mode talks to the user's real Ring account and real devices. Rules:
 Only pass `--allow-arm` or `--allow-unlock` when the user explicitly asked
 for that action in this conversation. Blocked requests show up in
 `$R logs --source guard`. Chime test sounds are not blocked and will ring in
-the user's home.
+the user's home. All allowed writes still require a readable baseline.
 
 ```sh
 $R token status
@@ -173,8 +177,17 @@ $R stop
 ```
 
 If a live session dies without restoring, `doctor` reports pending writes,
-and the next `launch live` restores them before it reports ready. Use
-`restore --abandon` only if the user says the leftover state is fine.
+and the next `launch live` retries them. If recovery is incomplete, launch
+returns `"ok": false` with `startupRestore`; Homebridge stays available so
+you can inspect it and retry `restore`. `restore` and `stop` also return a
+nonzero exit code for incomplete restoration, including `stop` on an
+already-stopped session. `cleanup` preserves storage and evidence while
+live writes are unresolved. Use `restore --abandon` only if the user says
+the leftover state is fine; it records abandonment, not restoration.
+
+Automatic recovery needs a working host, Homebridge and Ring connection.
+A crash or outage can delay restoration until a later launch; pending writes
+must never be reported as successfully cleaned up.
 
 ## Evidence
 
@@ -258,6 +271,9 @@ This skill is only useful if it is true. When you use it:
 - If `ring-state --section unhandled` shows a new endpoint, teach the fake.
 - Type-check the skill with
   `node_modules/.bin/tsc -p .agents/skills/verify-ring/tsconfig.json`.
+- Run the live-safety regressions with
+  `node_modules/.bin/vitest run .agents/skills/verify-ring/test/live-safety.spec.ts`.
+  They use local HAP responses and isolated state, never the real account.
 
 Layout: `ring-ctl.ts` (CLI), `src/` (HAP client, session, supervisor, live
 journal, policy and restore), `runtime/` (preload loaded into Homebridge:

@@ -50,6 +50,7 @@ $R emit ding "Lobby Intercom"      # waits for the Doorbell event
 - Unlocking a lock or the intercom needs `--allow-unlock`, and only when the
   user asked for it.
 - `stop` never re-unlocks a door. If you locked a door that was unlocked,
-  restore leaves it locked and says so. Run `restore --allow-unlock` only if
-  the user wants it unlocked again.
+  restore leaves it locked, reports incomplete restoration, and keeps the
+  write pending. Run `restore --allow-unlock` only if the user wants it
+  unlocked again, or `restore --abandon` only if they accept leaving it locked.
 - Buzzer presses can't be injected. Ask the user to buzz and `watch`.

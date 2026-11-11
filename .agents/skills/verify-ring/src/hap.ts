@@ -221,13 +221,43 @@ function uniqueLabel(base: string, used: Set<string>) {
   }
 }
 
-// HAP reports bools as 1/0 on reads and events but accepts true/false on
-// writes, so compare bools by truthiness and everything else structurally.
+// Error responses and missing values are not device state.
+export function isReadableValue(
+  target: Pick<FlatCharacteristic, 'format'>,
+  value: unknown,
+) {
+  switch (target.format) {
+    case 'bool':
+      return value === true || value === false || value === 0 || value === 1
+    case 'uint8':
+    case 'uint16':
+    case 'uint32':
+    case 'uint64':
+    case 'int':
+    case 'float':
+      return typeof value === 'number' && Number.isFinite(value)
+    case 'string':
+    case 'data':
+    case 'tlv8':
+      return typeof value === 'string'
+    default:
+      return (
+        typeof value === 'boolean' ||
+        typeof value === 'string' ||
+        (typeof value === 'number' && Number.isFinite(value))
+      )
+  }
+}
+
+// HAP reports bools as 1/0 on reads but accepts true/false on writes.
 export function sameValue(
   target: Pick<FlatCharacteristic, 'format'>,
   a: unknown,
   b: unknown,
 ) {
+  if (!isReadableValue(target, a) || !isReadableValue(target, b)) {
+    return false
+  }
   if (target.format === 'bool') {
     return Boolean(a) === Boolean(b)
   }

@@ -1,0 +1,7 @@
+scripts:
+  - name: Link shared .homebridge
+    command: npm run link-homebridge
+    triggers:
+      - session.create
+  - name: Homebridge dev
+    command: npm run dev -w homebridge-ring

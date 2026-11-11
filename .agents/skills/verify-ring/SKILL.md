@@ -173,7 +173,7 @@ Live mode talks to the user's real Ring account and real devices. Rules:
 
 | Action                                                   | Live mode                                                                                       |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Sound a siren (alarm, camera, panel switch)              | Always blocked                                                                                  |
+| Sound a siren (alarm, camera, panel switch)              | Always blocked (siren switches are matched by name, see below)                                  |
 | Panic buttons (burglar, fire)                            | Always blocked                                                                                  |
 | Arm the alarm or set a location mode other than disarmed | Needs `--allow-arm`, restored on stop                                                           |
 | Unlock a lock or intercom door                           | Needs `--allow-unlock`. Restore never re-unlocks a door unless you run `restore --allow-unlock` |
@@ -182,8 +182,19 @@ Live mode talks to the user's real Ring account and real devices. Rules:
 
 Only pass `--allow-arm` or `--allow-unlock` when the user explicitly asked
 for that action in this conversation. Blocked requests show up in
-`$R logs --source guard`. Chime test sounds are not blocked and will ring in
-the user's home. All allowed writes still require a readable baseline.
+`$R logs --source guard`. All allowed writes still require a readable
+baseline.
+
+Some allowed writes still have real effects in the user's home. Restore puts
+the state back, but it can't undo what already happened:
+
+- Chime test sounds ring out loud.
+- Closing a water valve cuts off water until restore reopens it.
+- Siren blocking matches on names containing "siren". A Z-Wave siren that
+  shows up under another name (for example as an unknown Z-Wave switch) is
+  not blocked. Don't turn on a switch unless you know what it controls.
+
+Ask the user before any of these.
 
 ```sh
 $R token status

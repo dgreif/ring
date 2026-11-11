@@ -9,8 +9,8 @@ import { appendFileSync } from 'node:fs'
 import { createRequire, registerHooks } from 'node:module'
 import net from 'node:net'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
-import { repoRoot, skillDir } from '../src/paths.ts'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { ringClientApiDir, skillDir } from '../src/paths.ts'
 import {
   checkHubMessage,
   checkRingRequest,
@@ -21,7 +21,10 @@ const mode = process.env.RING_VERIFY_MODE,
   sinkUrl = process.env.RING_VERIFY_SINK_URL,
   guardFile = process.env.RING_VERIFY_GUARD_FILE,
   listenersFile = process.env.RING_VERIFY_LISTENERS_FILE,
-  require = createRequire(join(repoRoot, 'package.json')),
+  // Resolve undici the same way ring-client-api does, so the patches below
+  // land on the copy that actually sends Ring requests.
+  require = createRequire(join(ringClientApiDir, 'package.json')),
+  undiciPath = require.resolve('undici'),
   undici = require('undici')
 
 if (mode !== 'live' && mode !== 'fake') {
@@ -109,6 +112,34 @@ net.Server.prototype.listen = function (this: net.Server, ...args: any[]) {
 } as typeof net.Server.prototype.listen
 
 // --- Ring HTTP + hub WebSocket ----------------------------------------------
+
+function undiciRoot(path: string) {
+  const marker = '/node_modules/undici/',
+    index = path.lastIndexOf(marker)
+  return index === -1 ? undefined : path.slice(0, index + marker.length)
+}
+
+const guardedUndiciRoot = undiciRoot(undiciPath)
+
+// Fail closed if anything loads a second undici copy (for example after a
+// dependency bump nests one). Its requests would skip the guard and redirect.
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    const result = nextResolve(specifier, context)
+    if (specifier === 'undici' || specifier.startsWith('undici/')) {
+      const resolvedPath = result.url.startsWith('file:')
+          ? fileURLToPath(result.url)
+          : result.url,
+        root = undiciRoot(resolvedPath)
+      if (!guardedUndiciRoot || root !== guardedUndiciRoot) {
+        const reason = `undici resolved to ${resolvedPath}, but the guard is attached to ${undiciPath}`
+        guardLog({ action: 'block', target: 'undici', reason })
+        throw new Error(`[verify-ring guard] ${reason}`)
+      }
+    }
+    return result
+  },
+})
 
 const AgentPrototype = undici.Agent.prototype,
   originalDispatch = AgentPrototype.dispatch

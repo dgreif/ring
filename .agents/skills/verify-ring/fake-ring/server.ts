@@ -802,7 +802,10 @@ export async function startFakeRing({
       handler: (match, { body }) => {
         recordEvent('device-rpc', {
           id: Number(match[1]),
-          method: body?.data?.params?.command_name ?? body?.method,
+          method:
+            body?.request?.method ??
+            body?.data?.params?.command_name ??
+            body?.method,
           body,
         })
         return { result: { code: 0 } }

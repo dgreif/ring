@@ -12,6 +12,71 @@ All examples assume:
 R="node .agents/skills/verify-ring/ring-ctl.ts"
 ```
 
+## Baseline preconditions
+
+- `$R doctor` reports ok, then `$R launch fake` (or `launch live`) returns
+  `"ok": true` with the expected accessory count (33 for `default`, 3 for
+  `cameras-only`).
+- Each `launch --restart` rebuilds fake state from the scenario, so every
+  feature file starts from its listed scenario and config.
+- Drive only the session this checkout started. `status` and `doctor` show
+  which one that is.
+- Live mode needs a token the user imported themselves (`$R token status`).
+
+## Driving conventions
+
+- Every action goes through `$R`. Never talk to HAP or the fake cloud
+  directly.
+- Copy refs literally. If a ref doesn't resolve, use the full ref from
+  `$R accessories --filter <name>`.
+- After `set` on anything Ring confirms later (security systems, locks,
+  polled camera and chime state), `wait` for the result instead of trusting
+  the read-back.
+- Restart with `--restart` after editing plugin source or changing
+  `--platform-config`.
+
+## Proof and skip reporting
+
+- A proof pairs the HomeKit action (`set`, `emit`) with the resulting HAP
+  value (`wait`, `get`, `observed`) and, in fake mode, the Ring call in
+  `$R ring-state --section events` (or `requests`).
+- Record the sub-feature ID with each transcript.
+- A read-back alone isn't proof for anything Ring confirms asynchronously.
+- Report anything you couldn't drive with the command you tried and the
+  missing prerequisite (token, device the user doesn't own, `--allow-*` the
+  user didn't grant). Don't count a fake-mode proof as live proof.
+
+## Feature entry contract
+
+Each feature file starts with an H1 and one paragraph describing what the
+user sees. It then has exactly four H2 sections, in this order:
+
+1. `Sub-features` lists short IDs, one line each.
+2. `How to get to it (user POV)` lists every user entry point.
+3. `Driving it with ring-ctl` starts with `Preconditions:` and uses labeled
+   bullets that pair a user action with an exact command and the observable
+   result.
+4. `Gotchas` lists traps that waste or invalidate a run. Live-mode rules go
+   in a `### Live mode` subsection.
+
+Source and test pointers live only in the table below, not in the feature
+files.
+
+## Not covered
+
+These user-facing surfaces have no recipe. Report them as unreachable with
+the reason below rather than skipping silently.
+
+- **Homebridge UI login** (`packages/homebridge-ring/homebridge-ui/`). It
+  takes the user's Ring email, password and 2FA code, which an agent must
+  never handle. Ask the user to try it themselves.
+- **`ring-auth-cli` and `ring-device-data-cli`.** Both prompt for Ring
+  credentials. Only the user runs them (see Live mode in
+  [SKILL.md](../SKILL.md)).
+- **Camera live streaming.** `ring-ctl` has no stream command and the fake
+  can't serve WebRTC. Prove streaming in live mode with the user watching
+  the Home app.
+
 ## Features
 
 Plugin source is under `packages/homebridge-ring/`, tests under

@@ -1,67 +1,49 @@
 # Security panel
 
-Ring Alarm's security panel (`security-panel`) becomes a HomeKit Security
-System, plus an alarm siren switch and optional panic buttons.
-
-Source: `security-panel.ts`, `panic-buttons.ts`. Tests:
-`security-panel.spec.ts`, `panic-buttons.spec.ts`.
+Ring Alarm's security panel becomes a HomeKit Security System with an alarm
+siren switch. An optional Panic Buttons accessory can dispatch a burglar or
+fire alarm.
 
 ## Sub-features
 
-| Sub-feature          | HomeKit ref                                                            | Ring call                                                                               |
-| -------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Arm Away             | `Security Panel/SecuritySystemTargetState` AWAY_ARM                    | hub `security-panel.switch-mode {mode:"all"}`                                           |
-| Arm Home             | STAY_ARM                                                               | `security-panel.switch-mode {mode:"some"}`                                              |
-| Night                | NIGHT_ARM, only when `nightModeBypassFor` is set                       | `security-panel.switch-mode {mode:<nightModeBypassFor>, bypass:[faulted contact zids]}` |
-| Disarm               | DISARM                                                                 | `security-panel.switch-mode {mode:"none"}`                                              |
-| Current state        | `Security Panel/SecuritySystemCurrentState`                            | Hub push of the panel's `mode` and `alarmInfo`                                          |
-| Alarm triggered      | CurrentState ALARM_TRIGGERED while `alarmInfo.state` is an alarm state | Hub push                                                                                |
-| Entry delay as alarm | ALARM_TRIGGERED on `entry-delay`, only with `alarmOnEntryDelay`        | Hub push                                                                                |
-| Alarm siren          | `Security Panel/Security Panel Siren/On`                               | `security-panel.sound-siren` / `security-panel.silence-siren`                           |
-| Panic buttons        | `Panic Buttons/Burglar Alarm/On`, `Panic Buttons/Fire Alarm/On`        | `POST /api/v1/rs/monitoring/accounts/<location>/assets/<hub uuid>/userAlarm`            |
+- `panel-away` arms Away: `Security Panel/SecuritySystemTargetState` AWAY_ARM sends hub `security-panel.switch-mode {mode:"all"}`.
+- `panel-home` arms Home: STAY_ARM sends `switch-mode {mode:"some"}`.
+- `panel-night` arms Night, only with `nightModeBypassFor`: NIGHT_ARM sends `switch-mode {mode:<nightModeBypassFor>, bypass:[faulted contact zids]}`.
+- `panel-disarm` disarms: DISARM sends `switch-mode {mode:"none"}`.
+- `panel-state` mirrors the panel's `mode` and `alarmInfo` in `Security Panel/SecuritySystemCurrentState`.
+- `panel-alarm` shows ALARM_TRIGGERED while `alarmInfo.state` is an alarm state, and on `entry-delay` only with `alarmOnEntryDelay`.
+- `panel-siren` sounds and silences the alarm siren: `Security Panel/Security Panel Siren/On` sends `security-panel.sound-siren` / `security-panel.silence-siren`.
+- `panic-on` dispatches an alarm, only with `showPanicButtons`: `Panic Buttons/Burglar Alarm/On` or `Panic Buttons/Fire Alarm/On` true posts `userAlarm`.
+- `panic-off` disarms: turning either panic switch off sends `switch-mode {mode:"none"}`.
 
 ## How to get to it (user POV)
 
 - The Home app shows a Security System tile named after the panel. Tapping it
   offers Home, Away, Night (only with `nightModeBypassFor`) and Off.
-- The alarm siren shows as a switch on the same accessory, unless
+- The alarm siren is a switch on the same accessory, unless
   `hideAlarmSirenSwitch` is set.
 - With `showPanicButtons`, a separate Panic Buttons accessory has Burglar
   Alarm and Fire Alarm switches. Turning one on dispatches a real alarm.
+  Turning one off disarms the whole alarm.
 
 ## Driving it with ring-ctl
 
-```sh
-$R set "Security Panel/SecuritySystemTargetState" AWAY_ARM
-$R wait "Security Panel/SecuritySystemCurrentState" AWAY_ARM
-$R ring-state --section events     # hub-command security-panel.switch-mode {mode:"all"}
+Preconditions:
 
-$R emit hub-update "Security Panel" '{"alarmInfo":{"state":"burglar-alarm"}}'
-$R wait "Security Panel/SecuritySystemCurrentState" ALARM_TRIGGERED
-$R set "Security Panel/SecuritySystemTargetState" DISARM
-$R wait "Security Panel/SecuritySystemCurrentState" DISARMED
+- Default scenario: `$R launch fake`.
+- Night, entry delay and panic buttons need
+  `$R launch fake --restart --platform-config '{"nightModeBypassFor":"all","alarmOnEntryDelay":true,"showPanicButtons":true}'`.
+- The panel starts disarmed and `Front Door Contact` is closed.
 
-$R set "Security Panel/Security Panel Siren/On" true   # security-panel.sound-siren
-```
-
-Night mode with a faulted contact:
-
-```sh
-$R launch fake --restart --platform-config '{"nightModeBypassFor":"all"}'
-$R emit hub-update "Front Door Contact" '{"faulted":true}'
-$R set "Security Panel/SecuritySystemTargetState" NIGHT_ARM
-$R ring-state --section events     # switch-mode {mode:"all", bypass:["zid-contact"]}
-```
-
-Entry delay and panic buttons:
-
-```sh
-$R launch fake --restart --platform-config '{"alarmOnEntryDelay":true,"showPanicButtons":true}'
-$R emit hub-update "Security Panel" '{"mode":"all","alarmInfo":{"state":"entry-delay"}}'
-$R wait "Security Panel/SecuritySystemCurrentState" ALARM_TRIGGERED
-$R set "Panic Buttons/Burglar Alarm/On" true
-$R ring-state --section events     # alarm-dispatch {signalType:"user-verified-burglar-xa"}
-```
+- **Arm Away.** Choose Away. Run `$R set "Security Panel/SecuritySystemTargetState" AWAY_ARM` then `$R wait "Security Panel/SecuritySystemCurrentState" AWAY_ARM --timeout 15`. The wait returns `valueLabel:"AWAY_ARM"` and `$R ring-state --section events` has `security-panel.switch-mode {mode:"all","bypass":[]}`.
+- **Arm Home.** Choose Home. Run `$R set "Security Panel/SecuritySystemTargetState" STAY_ARM` and wait for `STAY_ARM`. Events show `switch-mode {mode:"some"}`.
+- **Arm Night with a faulted contact.** Open the front door, then choose Night. Run `$R emit hub-update "Front Door Contact" '{"faulted":true}'`, `$R set "Security Panel/SecuritySystemTargetState" NIGHT_ARM` and wait for `NIGHT_ARM`. Events show `switch-mode {mode:"all","bypass":["zid-contact"]}`.
+- **Alarm going off.** Ring reports an alarm. Run `$R emit hub-update "Security Panel" '{"alarmInfo":{"state":"burglar-alarm"}}'` then `$R wait "Security Panel/SecuritySystemCurrentState" ALARM_TRIGGERED`. The wait returns `valueLabel:"ALARM_TRIGGERED"`.
+- **Entry delay as alarm.** With `alarmOnEntryDelay`, run `$R emit hub-update "Security Panel" '{"mode":"all","alarmInfo":{"state":"entry-delay"}}'` and wait for `ALARM_TRIGGERED`.
+- **Siren.** Flip the siren switch on, then off. Run `$R set "Security Panel/Security Panel Siren/On" true`, then `false`. Read-backs are `1` then `0`, and events show `security-panel.sound-siren` then `security-panel.silence-siren`.
+- **Panic buttons.** Flip Burglar Alarm, then Fire Alarm on. Run `$R set "Panic Buttons/Burglar Alarm/On" true` and `$R set "Panic Buttons/Fire Alarm/On" true`. Events show `alarm-dispatch` with `signalType` `user-verified-burglar-xa` and `user-verified-fire-xa`.
+- **Panic off disarms.** Flip Burglar Alarm off. Run `$R set "Panic Buttons/Burglar Alarm/On" false` then `$R wait "Security Panel/SecuritySystemCurrentState" DISARMED --timeout 15`. Events show `switch-mode {mode:"none"}`.
+- **Disarm.** Choose Off. Run `$R set "Security Panel/SecuritySystemTargetState" DISARM` and wait for `DISARMED`. Events show `switch-mode {mode:"none"}`.
 
 ## Gotchas
 
@@ -70,18 +52,21 @@ $R ring-state --section events     # alarm-dispatch {signalType:"user-verified-b
 - NIGHT_ARM is only a valid target when `nightModeBypassFor` is set.
   Otherwise `set` fails with `invalid-value` and lists the valid values.
 - Without `alarmOnEntryDelay`, an entry delay leaves CurrentState at the
-  armed mode (AWAY_ARM above).
+  armed mode.
 - Ring can refuse to arm when sensors are faulted. The plugin only bypasses
   faulted contacts for Night. The fake accepts any arm request, so only live
   mode shows Ring's refusal.
 - Disarming in the fake clears `alarmInfo`, so ALARM_TRIGGERED ends.
+- A panic switch reads on only while Ring reports a matching alarm state.
+  Turning it off is a disarm, not "cancel this panic".
 
-## Live mode
+### Live mode
 
 - Arming (any target other than DISARM) needs `--allow-arm`, and only when
   the user asked for it. `stop` restores the previous mode, re-arming if
   needed.
-- Disarm is always allowed.
+- Disarm is always allowed, including the disarm a panic switch sends when
+  turned off.
 - Turning the alarm siren on is always blocked. Turning it off is allowed.
 - Panic buttons are always blocked: the guard rejects any `userAlarm`
   request, even one the plugin sends on its own.

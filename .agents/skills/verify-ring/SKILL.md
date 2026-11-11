@@ -64,6 +64,21 @@ loopback interface, so it never shows up in the user's Home app.
 A session stops itself after 15 idle minutes (`--idle-minutes`). In live
 mode that stop also restores your changes.
 
+## Doctor
+
+`$R doctor` checks Node, the Homebridge binary, the plugin sources, the live
+token, the live lock (whether another checkout is running live), this
+checkout's session and its status, live writes still waiting to be restored,
+and the evidence directory. Each check returns `ok` and a `detail`.
+
+Run it before the first drive, and again after anything surprising: a
+failed `set`, a timeout, a `failed` status, or an unexpected log line. Don't
+drive again until doctor is clean. If the session is
+healthy but its state is wrong (for example an alarm left in a mode you
+didn't expect), `launch fake --restart` resets the fake rather than undoing
+it by hand. `live-journal` with `pendingWrites` above 0 means a live run
+didn't finish restoring; run `$R restore` before anything else.
+
 ## Drive
 
 Accessories are addressed with refs: `<Accessory>/<Service label>/<Characteristic>`,
@@ -141,7 +156,9 @@ Live mode talks to the user's real Ring account and real devices. Rules:
    automatically.
 2. **Every write needs a readable baseline.** `set` reads the current value
    and refuses the write if the characteristic is write-only, the read fails,
-   or the value is missing or invalid. `--dry-run` reports the same check.
+   or the value is missing or invalid. `--dry-run` reports the same check;
+   its `journaled: true` means the real write would be journaled, and
+   nothing is recorded.
    A valid value is flushed to `~/.ring-verify/live/journal.jsonl` before
    granting permits or sending the write.
    `stop` (and the idle watchdog, and crash recovery on the next `launch live`)
@@ -213,6 +230,23 @@ $R status
 
 Put the commands you ran and the JSON they returned into your report. A claim
 without a `ring-ctl` transcript or a log line is not verified.
+
+A proof has to meet these standards:
+
+- **Real user path.** Drive through HAP with `ring-ctl`, the way the Home app
+  does. Never call plugin methods or `ring-client-api` setters directly.
+- **Action and result.** Capture the action (`set`, `emit`) and the state it
+  produced (`wait`, `get`, `observed`). A `set` read-back alone doesn't prove
+  anything Ring confirms later.
+- **Side effects.** Check what reached Ring: `ring-state --section events`
+  in fake mode (`requests` keeps only the last 50 and includes polling), or
+  `logs --source guard` in live mode.
+- **Fake only at the boundary.** The fake stands in for the Ring cloud and
+  nothing else. Homebridge, the plugin and `ring-client-api` run from source.
+- **Dry-run is observed, not assumed.** `set --dry-run` and
+  `restore --dry-run` should change nothing. Show it: the value is unchanged
+  and the `ring-state` event count doesn't grow (in live mode, no new
+  non-GET `target` in `guard.jsonl`).
 
 ## Cleanup
 

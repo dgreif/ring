@@ -7,34 +7,34 @@
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "development": "./index.ts",
+      "ring-dev": "./index.ts",
       "default": "./lib/index.js"
     },
     "./ffmpeg": {
       "types": "./lib/ffmpeg.d.ts",
-      "development": "./ffmpeg.ts",
+      "ring-dev": "./ffmpeg.ts",
       "default": "./lib/ffmpeg.js"
     },
     "./util": {
       "types": "./lib/util.d.ts",
-      "development": "./util.ts",
+      "ring-dev": "./util.ts",
       "default": "./lib/util.js"
     },
     "./rest-client": {
       "types": "./lib/rest-client.d.ts",
-      "development": "./rest-client.ts",
+      "ring-dev": "./rest-client.ts",
       "default": "./lib/rest-client.js"
     },
     "./streaming/streaming-session": {
       "types": "./lib/streaming/streaming-session.d.ts",
-      "development": "./streaming/streaming-session.ts",
+      "ring-dev": "./streaming/streaming-session.ts",
       "default": "./lib/streaming/streaming-session.js"
     }
   },
   "scripts": {
     "build": "rm -rf lib && tsc --declaration && chmod +x ./lib/ring-*-cli.js && rm -rf ./lib/test",
-    "auth-cli": "node --conditions=development --env-file=../../.env ./ring-auth-cli.ts",
-    "device-data-cli": "node --conditions=development --env-file=../../.env ./ring-device-data-cli.ts",
+    "auth-cli": "node --conditions=ring-dev --env-file=../../.env ./ring-auth-cli.ts",
+    "device-data-cli": "node --conditions=ring-dev --env-file=../../.env ./ring-device-data-cli.ts",
     "lint": "eslint .",
     "test": "vitest run"
   },

@@ -59,7 +59,8 @@ Preconditions:
   $R logs --grep "failed|FATAL"            # Ring failure logged; no FATAL
   ```
   This also applies to device volume, keypad brightness, Beams and Z-Wave
-  dimmers, and fan speed.
+  dimmers, and fan speed. The cached characteristic and HomeKit event stream
+  revert even when no Ring data update or HomeKit GET occurs after the failure.
 - `accessories` hides Speaker and Microphone only on cameras. Chime, base
   station and keypad volume are listed by default.
 

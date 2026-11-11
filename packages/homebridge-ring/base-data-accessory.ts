@@ -75,6 +75,7 @@ export abstract class BaseDataAccessory<
           newValue: CharacteristicValue,
           callback: CharacteristicSetCallback,
         ) => {
+          onValue.next(newValue)
           onValueToSet.next(newValue)
           callback()
         },

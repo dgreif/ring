@@ -83,7 +83,6 @@ describe('Chime', () => {
         )
 
       device.setVolume.mockImplementationOnce(() => {
-        device.updateData({})
         if (failure === 'throw') {
           throw error
         }

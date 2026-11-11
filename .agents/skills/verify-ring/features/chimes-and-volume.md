@@ -46,20 +46,21 @@ Preconditions:
   `chime-play` event instead.
 - Snooze and nightlight are refreshed by polling. `set` can read back the old
   value; `wait` for the new one.
-- **Known plugin bug: a failed volume write crashes Homebridge.**
-  `registerLevelCharacteristic` in `base-data-accessory.ts` calls `setValue`
-  without returning its promise, so a Ring error becomes an unhandled
-  rejection. Repro:
+- Failed level writes are logged without stopping Homebridge. HomeKit
+  acknowledges the write before the debounce completes, then returns to the
+  last level reported by Ring if the write fails. An older failed request
+  does not clear a newer target. Exercise the failure path:
   ```sh
   $R emit ring-error "/clients_api/chimes/" --method PUT
   $R set "Hall Chime/Speaker/Volume" 3   # succeeds in HomeKit
-  sleep 6                                # Homebridge shuts down after the FATAL
-  $R status                              # status "failed", error "Homebridge exited unexpectedly"
-  $R logs --grep FATAL
+  sleep 6
+  $R status                              # status "ready", running true
+  $R get "Hall Chime/Speaker/Volume"       # last reported level, not 3
+  $R logs --grep "failed|FATAL"            # Ring failure logged; no FATAL
   ```
-  Every characteristic registered with `registerLevelCharacteristic` is
-  affected: device and chime volume, keypad brightness, Beams and Z-Wave
-  dimmers, and fan speed.
+  This also applies to device volume, keypad brightness, Beams and Z-Wave
+  dimmers, and fan speed. The cached characteristic and HomeKit event stream
+  revert even when no Ring data update or HomeKit GET occurs after the failure.
 - `accessories` hides Speaker and Microphone only on cameras. Chime, base
   station and keypad volume are listed by default.
 

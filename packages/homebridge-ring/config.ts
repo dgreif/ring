@@ -23,6 +23,8 @@ export interface RingPlatformConfig extends RingApiOptions {
   onlyDeviceTypes?: string[]
   showPanicButtons?: boolean
   disableLogs?: boolean
+  exposeAlarmVolume?: boolean // Expose Base Station / Keypad volume as a HomeKit slider
+  volumeService?: 'lightbulb' | 'fan' | 'speaker'; //Choose UI service for the slider (default: 'lightbulb')
 }
 
 export function updateHomebridgeConfig(

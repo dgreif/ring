@@ -1,5 +1,27 @@
 # homebridge-ring
 
+## 15.0.0-beta.0
+
+### Major Changes
+
+- [#1846](https://github.com/dgreif/ring/pull/1846) [`2a6371d`](https://github.com/dgreif/ring/commit/2a6371d0890e35a80bf97fb1e1ccfa2a7c283b4e) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node.js 20 support and upgrade undici to 8.x. Requires Node.js 22.19.0+ (22.x), 24.x, or 26.x; earlier 22.x releases are no longer supported.
+
+### Patch Changes
+
+- [#1892](https://github.com/dgreif/ring/pull/1892) [`8c9b637`](https://github.com/dgreif/ring/commit/8c9b63740f9d1bcd30a12922325eb58ac68e4cf9) Thanks [@dgreif](https://github.com/dgreif)! - Prevent failed volume, brightness, dimmer, and fan-speed writes from crashing Homebridge. Log failures and restore the last reported Ring level without overwriting newer requests.
+
+- [#1886](https://github.com/dgreif/ring/pull/1886) [`78ae341`](https://github.com/dgreif/ring/commit/78ae341e990aa18517402a4e3809a51d3692678d) Thanks [@dgreif](https://github.com/dgreif)! - Never overwrite the stored refresh token when Ring's oauth response has no `refresh_token`. Previously, an undecodable response (for example Node.js 26 with an older undici) saved a token without `rt`, which caused permanent `invalid_grant` errors until a new token was generated
+
+- [#1871](https://github.com/dgreif/ring/pull/1871) [`c72026d`](https://github.com/dgreif/ring/commit/c72026d72c7b9ccb9ef45b4f64c6affd86d85df2) Thanks [@dgreif](https://github.com/dgreif)! - Restore the reported location mode when a HomeKit mode change fails, without overwriting newer requests. Preserve pending Home mode targets until Ring confirms them.
+
+- [#1746](https://github.com/dgreif/ring/pull/1746) [`25c6ec6`](https://github.com/dgreif/ring/commit/25c6ec63a9826f42f3f4269d0c2aad6f1e0e4185) Thanks [@kzaky](https://github.com/kzaky)! - Redact the 2FA code from the homebridge-ui server log on token exchange. Codes are short-lived and single-use, but logs are frequently pasted into bug reports, so removing the value from the log is a small defensive improvement.
+
+- [#1838](https://github.com/dgreif/ring/pull/1838) [`c78c8b3`](https://github.com/dgreif/ring/commit/c78c8b3fadb0650d210d1220d2724309aec02611) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- [#1840](https://github.com/dgreif/ring/pull/1840) [`5e4afd4`](https://github.com/dgreif/ring/commit/5e4afd43e88802e62bfc8acab743433d9bfaabfa) Thanks [@dgreif](https://github.com/dgreif)! - Bump werift to 0.26.0 (clears `ip` audit) and accept partial ICE candidates for Ring signaling
+- Updated dependencies [[`e368e26`](https://github.com/dgreif/ring/commit/e368e26f789f4ca2093ac015dcec4bc9ce181d62), [`003c0d0`](https://github.com/dgreif/ring/commit/003c0d0740cedd3c393ce86baf628d7e5bc26c86), [`98f0cb3`](https://github.com/dgreif/ring/commit/98f0cb3f87473c168f4cb369ae26d486030e059e), [`bb781fe`](https://github.com/dgreif/ring/commit/bb781fe5ea8616c568a6f7d8e05a0d15fd472104), [`78ae341`](https://github.com/dgreif/ring/commit/78ae341e990aa18517402a4e3809a51d3692678d), [`2a6371d`](https://github.com/dgreif/ring/commit/2a6371d0890e35a80bf97fb1e1ccfa2a7c283b4e), [`c78c8b3`](https://github.com/dgreif/ring/commit/c78c8b3fadb0650d210d1220d2724309aec02611), [`5e4afd4`](https://github.com/dgreif/ring/commit/5e4afd43e88802e62bfc8acab743433d9bfaabfa)]:
+  - ring-client-api@15.0.0-beta.0
+
 ## 14.3.0
 
 ### Minor Changes

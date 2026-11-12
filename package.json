@@ -25,6 +25,7 @@
     "@changesets/cli": "^3.0.3",
     "@homebridge/hap-nodejs": "^2.3.0",
     "@types/node": "26.6.6",
+    "prettier": "3.9.10",
     "turbo": "^2.11.10",
     "typescript": "~6.0.3",
     "vitest": "^5.1.0"

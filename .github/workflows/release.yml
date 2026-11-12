@@ -13,6 +13,7 @@ jobs:
   select-mode:
     name: Select release mode
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -36,7 +37,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Validate Changesets state
         id: state
@@ -63,6 +64,7 @@ jobs:
     if: needs.select-mode.outputs.mode == 'version'
     needs: select-mode
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
@@ -82,7 +84,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Create version pull request
         uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
@@ -95,6 +97,7 @@ jobs:
     if: needs.select-mode.outputs.mode == 'publish'
     needs: select-mode
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     outputs:
@@ -115,7 +118,7 @@ jobs:
           package-manager-cache: false
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Verify release versions match Changesets state
         run: |
@@ -152,6 +155,7 @@ jobs:
     if: needs.select-mode.outputs.mode == 'publish'
     needs: [select-mode, pack]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
@@ -171,8 +175,10 @@ jobs:
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
 
+      # This job can mint an npm OIDC token (id-token: write), so don't run
+      # dependency install scripts in it
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Publish packages
         uses: changesets/action/publish@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2

@@ -619,6 +619,7 @@ export class Location extends Subscribed {
     this.disconnected = true
     this.unsubscribe()
     this.cameras.forEach((camera) => camera.disconnect())
+    this.intercoms.forEach((intercom) => intercom.disconnect())
     this.getDevices()
       .then((devices) => {
         devices.forEach((device) => device.disconnect())

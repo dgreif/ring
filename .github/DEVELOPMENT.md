@@ -2,11 +2,18 @@
 
 ## Setup
 
-This repo uses [pnpm](https://pnpm.io), not npm. Install pnpm 12 ([instructions](https://pnpm.io/installation), or `npm install -g pnpm@12`), then run `pnpm install` at the repo root. npm commands such as `npm install` or `npm run` fail in this repo with `EBADDEVENGINES`. pnpm downloads the exact version recorded in `pnpm-lock.yaml` if yours differs.
+This repo uses [pnpm](https://pnpm.io), not npm. Install pnpm 12 ([instructions](https://pnpm.io/installation), or `npm install -g pnpm@12`), then run `pnpm install` at the repo root. `devEngines.packageManager` in the root `package.json` pins the version: modern npm rejects `npm install`, `npm ci` and `npm run` with `EBADDEVENGINES`, and pnpm downloads the pinned version if yours differs.
 
 - `pnpm run build`, `pnpm test` and `pnpm run lint` run the checks for every package.
 - Run a script in one package with `pnpm --filter <package> <script>`, e.g. `pnpm --filter homebridge-ring dev`.
-- Dependency install scripts only run for packages listed under `allowBuilds` in `pnpm-workspace.yaml`. If a new dependency needs its install script, add it there.
+- Dependency install scripts only run for packages set to `true` under `allowBuilds` in `pnpm-workspace.yaml`. Review a new dependency's install script before allowing it.
+- If you use a registry proxy, configure it for pnpm too (`pnpm config set --global registry <url>`). pnpm does not inherit npm's global configuration or `npm_config_*` environment variables. Keep machine-specific registry URLs and credentials out of the repo.
+
+Commit `pnpm-lock.yaml` with dependency changes. Its [two-document format](https://pnpm.io/lockfile) is intentional: the first document pins pnpm itself, and the second locks all workspace dependencies. Keep both; CI uses `pnpm install --frozen-lockfile` and rejects stale pins or dependency declarations.
+
+CI caches pnpm's content-addressable store, not `node_modules`. Compared with npm's download cache, it can reuse unpacked files and compatible install-script outputs, but the cache can be larger and slower to restore. The three-day release-age policy still applies, including during frozen installs.
+
+This is a contributor tooling change. Users can continue installing `homebridge-ring` through Homebridge or npm, and `ring-client-api` with their preferred package manager.
 
 ## Homebridge Ring
 

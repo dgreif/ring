@@ -150,8 +150,8 @@ Live mode talks to the user's real Ring account and real devices. Rules:
 1. **The token is the user's job.** Never ask for or type a Ring password or
    2FA code. Ask the user to run this in their own terminal:
    `node --conditions=ring-dev packages/ring-client-api/ring-auth-cli.ts`.
-   (`pnpm auth-cli` is the same, but fails in checkouts without a root
-   `.env`, such as worktrees.) Then import the printed token:
+   (`pnpm auth-cli` is equivalent and also works without a root `.env`.)
+   Then import the printed token:
    `pbpaste | node .agents/skills/verify-ring/ring-ctl.ts token import`.
    Ring rotates refresh tokens; the supervisor saves the rotated token
    automatically.

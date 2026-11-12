@@ -27,14 +27,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      # Neither tool depends on the other, so set them up at the same time
+      - parallel:
+          - name: Setup pnpm
+            uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 26.x
-          package-manager-cache: false
+          - name: Setup Node.js
+            uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            with:
+              node-version: 26.x
+              package-manager-cache: false
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -74,14 +76,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      # Neither tool depends on the other, so set them up at the same time
+      - parallel:
+          - name: Setup pnpm
+            uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 26.x
-          package-manager-cache: false
+          - name: Setup Node.js
+            uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            with:
+              node-version: 26.x
+              package-manager-cache: false
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -108,14 +112,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      # Neither tool depends on the other, so set them up at the same time
+      - parallel:
+          - name: Setup pnpm
+            uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 26.x
-          package-manager-cache: false
+          - name: Setup Node.js
+            uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            with:
+              node-version: 26.x
+              package-manager-cache: false
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -165,15 +171,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      # Neither tool depends on the other, so set them up at the same time
+      - parallel:
+          - name: Setup pnpm
+            uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 26.x
-          registry-url: https://registry.npmjs.org
-          package-manager-cache: false
+          - name: Setup Node.js
+            uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            with:
+              node-version: 26.x
+              registry-url: https://registry.npmjs.org
+              package-manager-cache: false
 
       # This job can mint an npm OIDC token (id-token: write), so don't run
       # dependency install scripts in it

@@ -1,5 +1,27 @@
 # ring-client-api
 
+## 15.0.0-beta.0
+
+### Major Changes
+
+- [#1846](https://github.com/dgreif/ring/pull/1846) [`2a6371d`](https://github.com/dgreif/ring/commit/2a6371d0890e35a80bf97fb1e1ccfa2a7c283b4e) Thanks [@dgreif](https://github.com/dgreif)! - Drop Node.js 20 support and upgrade undici to 8.x. Requires Node.js 22.19.0+ (22.x), 24.x, or 26.x; earlier 22.x releases are no longer supported.
+
+### Patch Changes
+
+- [#1839](https://github.com/dgreif/ring/pull/1839) [`e368e26`](https://github.com/dgreif/ring/commit/e368e26f789f4ca2093ac015dcec4bc9ce181d62) Thanks [@dgreif](https://github.com/dgreif)! - Harden `ring-device-data-cli` anonymization: fix a uuid-as-key bug that could re-emit full UUIDs, fully redact UUIDs instead of keeping a prefix, and strip additional sensitive fields (wifi name, MACs, serials, names/phones, tokens, Amazon DSNs) before users paste device discovery output into issues.
+
+- [#1818](https://github.com/dgreif/ring/pull/1818) [`003c0d0`](https://github.com/dgreif/ring/commit/003c0d0740cedd3c393ce86baf628d7e5bc26c86) Thanks [@SirLouen](https://github.com/SirLouen)! - Fix a `TypeError` in `getAuth()` when the oauth endpoint returns a non-JSON error body (for example a `406 Not Acceptable` HTML page); the failure is now reported as `(error: HTTP 406)`.
+
+- [#1834](https://github.com/dgreif/ring/pull/1834) [`98f0cb3`](https://github.com/dgreif/ring/commit/98f0cb3f87473c168f4cb369ae26d486030e059e) Thanks [@manzerw](https://github.com/manzerw)! - fix(streaming): reply to server ping keepalives with pong to prevent 30s stream disconnect
+
+- [#1894](https://github.com/dgreif/ring/pull/1894) [`bb781fe`](https://github.com/dgreif/ring/commit/bb781fe5ea8616c568a6f7d8e05a0d15fd472104) Thanks [@dgreif](https://github.com/dgreif)! - Hide the password as you type it into `ring-auth-cli` instead of showing it in plain text in the terminal.
+
+- [#1886](https://github.com/dgreif/ring/pull/1886) [`78ae341`](https://github.com/dgreif/ring/commit/78ae341e990aa18517402a4e3809a51d3692678d) Thanks [@dgreif](https://github.com/dgreif)! - Never overwrite the stored refresh token when Ring's oauth response has no `refresh_token`. Previously, an undecodable response (for example Node.js 26 with an older undici) saved a token without `rt`, which caused permanent `invalid_grant` errors until a new token was generated
+
+- [#1838](https://github.com/dgreif/ring/pull/1838) [`c78c8b3`](https://github.com/dgreif/ring/commit/c78c8b3fadb0650d210d1220d2724309aec02611) Thanks [@dgreif](https://github.com/dgreif)! - Updated dependencies
+
+- [#1840](https://github.com/dgreif/ring/pull/1840) [`5e4afd4`](https://github.com/dgreif/ring/commit/5e4afd43e88802e62bfc8acab743433d9bfaabfa) Thanks [@dgreif](https://github.com/dgreif)! - Bump werift to 0.26.0 (clears `ip` audit) and accept partial ICE candidates for Ring signaling
+
 ## 14.3.0
 
 ### Minor Changes

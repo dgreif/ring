@@ -1,5 +1,13 @@
 # homebridge-ring
 
+## 15.0.0-beta.1
+
+### Patch Changes
+
+- [#1900](https://github.com/dgreif/ring/pull/1900) [`cc9f66c`](https://github.com/dgreif/ring/commit/cc9f66c504897f4c1512a2eee1a4f7fa1fce4f52) Thanks [@dgreif](https://github.com/dgreif)! - Declare `rxjs` as a direct dependency instead of relying on it being installed through `ring-client-api`
+- Updated dependencies []:
+  - ring-client-api@15.0.0-beta.1
+
 ## 15.0.0-beta.0
 
 ### Major Changes

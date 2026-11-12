@@ -1,5 +1,9 @@
 # ring-client-api
 
+## 15.0.0-beta.1
+
+No changes in this release.
+
 ## 15.0.0-beta.0
 
 ### Major Changes

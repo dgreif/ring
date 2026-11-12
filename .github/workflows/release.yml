@@ -4,42 +4,171 @@ on:
   push:
     branches:
       - main
+      - beta
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-permissions:
-  contents: write # needed for release PR creation
-  pull-requests: write # needed for version PR creation (changesets/action v2)
-  id-token: write # needed for provenance and publishing to npm
+permissions: {}
 
 jobs:
-  release:
-    name: Release
+  select-mode:
+    name: Select release mode
     runs-on: ubuntu-latest
-
-    env:
-      # Enable turbo remote caching
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_CACHE: remote:w # Write-only to prevent cache poisoning during a release
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.select.outputs.mode }}
+      publish-plan-artifact-id: ${{ steps.select.outputs.publish-plan-artifact-id }}
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26.x
-          cache: 'npm'
+          package-manager-cache: false
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Create Release Pull Request
-        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      - name: Validate release branch configuration
+        run: |
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync } from 'node:fs';
+
+          const branch = process.env.GITHUB_REF_NAME;
+          const config = JSON.parse(readFileSync('.changeset/config.json', 'utf8'));
+          const prePath = '.changeset/pre.json';
+          const pre = existsSync(prePath) ? JSON.parse(readFileSync(prePath, 'utf8')) : undefined;
+
+          if (branch === 'beta') {
+            if (config.baseBranch !== 'beta' || pre?.mode !== 'pre' || pre.tag !== 'beta') {
+              throw new Error('The beta branch must use Changesets prerelease mode with baseBranch "beta".');
+            }
+          } else if (branch === 'main') {
+            if (config.baseBranch !== 'main' || pre) {
+              throw new Error('The main branch must use stable Changesets mode with baseBranch "main".');
+            }
+          } else {
+            throw new Error(`Releases are not configured for branch "${branch}".`);
+          }
+          NODE
+
+      - name: Select Changesets mode
+        id: select
+        uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+
+  version:
+    name: Create version pull request
+    if: needs.select-mode.outputs.mode == 'version'
+    needs: select-mode
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          publish-script: npm run release
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26.x
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Create version pull request
+        uses: changesets/action/version@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
           github-token: ${{ secrets.GH_TOKEN_CHANGESETS }}
+          pr-base-branch: ${{ github.ref_name }}
+          pr-title: ${{ github.ref_name == 'beta' && 'Version Packages (beta)' || 'Version Packages' }}
+
+  pack:
+    name: Build and pack release
+    if: needs.select-mode.outputs.mode == 'publish'
+    needs: select-mode
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      pack-dir-artifact-id: ${{ steps.pack.outputs.pack-dir-artifact-id }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26.x
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify release versions match branch
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const prerelease = process.env.GITHUB_REF_NAME === 'beta';
+          for (const path of ['packages/ring-client-api/package.json', 'packages/homebridge-ring/package.json']) {
+            const { name, version } = JSON.parse(readFileSync(path, 'utf8'));
+            if (prerelease ? !/-beta\.\d+$/.test(version) : /-/.test(version)) {
+              throw new Error(`${name}@${version} cannot be published from ${process.env.GITHUB_REF_NAME}.`);
+            }
+          }
+          NODE
+
+      - name: Build, test, and lint
+        run: npm run release:verify
+        env:
+          CI: true
+
+      - name: Pack packages
+        id: pack
+        uses: changesets/action/pack@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          publish-plan-artifact-id: ${{ needs.select-mode.outputs.publish-plan-artifact-id }}
+
+  publish:
+    name: Publish to npm
+    if: needs.select-mode.outputs.mode == 'publish'
+    needs: [select-mode, pack]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26.x
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Publish packages
+        uses: changesets/action/publish@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          github-token: ${{ secrets.GH_TOKEN_CHANGESETS }}
+          pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
         env:
           NPM_CONFIG_PROVENANCE: true

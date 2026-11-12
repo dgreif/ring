@@ -347,7 +347,7 @@ async function doctor() {
     name: 'homebridge',
     ok: existsSync(homebridgeBin),
     detail: homebridgeBin,
-    next: 'Run `npm ci` at the repo root.',
+    next: 'Run `pnpm install` at the repo root.',
   })
   checks.push({
     name: 'plugin-sources',

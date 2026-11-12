@@ -14,8 +14,12 @@
     "build": "tsc --noEmit"
   },
   "devDependencies": {
-    "eslint-config-shared": "*",
-    "ring-client-api": "15.0.0-beta.0",
-    "tsconfig": "*"
+    "@types/node": "26.6.6",
+    "eslint": "10.14.0",
+    "eslint-config-shared": "workspace:*",
+    "ring-client-api": "workspace:*",
+    "rxjs": "^7.8.2",
+    "tsconfig": "workspace:*",
+    "typescript": "7.0.2"
   }
 }

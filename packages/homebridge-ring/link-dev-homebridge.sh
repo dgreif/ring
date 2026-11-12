@@ -10,7 +10,7 @@ shared_dir="${RING_HOMEBRIDGE_DEV_DIR:-$HOME/.local/share/ring-homebridge-dev}"
 
 if [ ! -d "$shared_dir" ]; then
   echo "Skipping .homebridge link: $shared_dir does not exist."
-  echo "To share Homebridge config between worktrees, move your .homebridge there (or set RING_HOMEBRIDGE_DEV_DIR), then run: npm run link-homebridge"
+  echo "To share Homebridge config between worktrees, move your .homebridge there (or set RING_HOMEBRIDGE_DEV_DIR), then run: pnpm run link-homebridge"
   exit 0
 fi
 shared_dir="$(cd "$shared_dir" && pwd -P)"

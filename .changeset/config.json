@@ -1,11 +1,25 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@2.2.0/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "dgreif/ring" }],
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "dgreif/ring"
+    }
+  ],
   "commit": false,
-  "fixed": [["homebridge-ring", "ring-client-api"]],
+  "fixed": [
+    [
+      "homebridge-ring",
+      "ring-client-api"
+    ]
+  ],
   "linked": [],
   "access": "public",
-  "baseBranch": "main",
+  "baseBranch": "beta",
   "updateInternalDependencies": "patch",
-  "ignore": ["eslint-config-shared", "examples", "tsconfig"]
+  "ignore": [
+    "eslint-config-shared",
+    "examples",
+    "tsconfig"
+  ]
 }

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - beta
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -17,7 +16,8 @@ jobs:
     permissions:
       contents: read
     outputs:
-      mode: ${{ steps.select.outputs.mode }}
+      # Exit always needs a version PR, even if the cycle has no changesets.
+      mode: ${{ steps.state.outputs.exit == 'true' && 'version' || steps.select.outputs.mode }}
       publish-plan-artifact-id: ${{ steps.select.outputs.publish-plan-artifact-id }}
 
     steps:
@@ -35,31 +35,24 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Validate release branch configuration
+      - name: Validate Changesets state
+        id: state
         run: |
           node --input-type=module <<'NODE'
-          import { existsSync, readFileSync } from 'node:fs';
+          import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 
-          const branch = process.env.GITHUB_REF_NAME;
-          const config = JSON.parse(readFileSync('.changeset/config.json', 'utf8'));
-          const prePath = '.changeset/pre.json';
-          const pre = existsSync(prePath) ? JSON.parse(readFileSync(prePath, 'utf8')) : undefined;
-
-          if (branch === 'beta') {
-            if (config.baseBranch !== 'beta' || pre?.mode !== 'pre' || pre.tag !== 'beta') {
-              throw new Error('The beta branch must use Changesets prerelease mode with baseBranch "beta".');
-            }
-          } else if (branch === 'main') {
-            if (config.baseBranch !== 'main' || pre) {
-              throw new Error('The main branch must use stable Changesets mode with baseBranch "main".');
-            }
-          } else {
-            throw new Error(`Releases are not configured for branch "${branch}".`);
+          const path = '.changeset/pre.json'
+          const hasPre = existsSync(path)
+          const pre = hasPre ? JSON.parse(readFileSync(path, 'utf8')) : undefined
+          if (hasPre && (pre?.tag !== 'beta' || !['pre', 'exit'].includes(pre?.mode))) {
+            throw new Error('Expected Changesets beta prerelease or exit mode.')
           }
+          appendFileSync(process.env.GITHUB_OUTPUT, `exit=${pre?.mode === 'exit'}\n`)
           NODE
 
       - name: Select Changesets mode
         id: select
+        if: steps.state.outputs.exit != 'true'
         uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
 
   version:
@@ -90,7 +83,6 @@ jobs:
         with:
           github-token: ${{ secrets.GH_TOKEN_CHANGESETS }}
           pr-base-branch: ${{ github.ref_name }}
-          pr-title: ${{ github.ref_name == 'beta' && 'Version Packages (beta)' || 'Version Packages' }}
 
   pack:
     name: Build and pack release
@@ -116,16 +108,21 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Verify release versions match branch
+      - name: Verify release versions match Changesets state
         run: |
           node --input-type=module <<'NODE'
-          import { readFileSync } from 'node:fs';
+          import { existsSync, readFileSync } from 'node:fs'
 
-          const prerelease = process.env.GITHUB_REF_NAME === 'beta';
+          const path = '.changeset/pre.json'
+          const hasPre = existsSync(path)
+          const pre = hasPre ? JSON.parse(readFileSync(path, 'utf8')) : undefined
+          if (hasPre && (pre?.mode !== 'pre' || pre.tag !== 'beta')) {
+            throw new Error('Only active beta mode can publish prereleases.')
+          }
           for (const path of ['packages/ring-client-api/package.json', 'packages/homebridge-ring/package.json']) {
-            const { name, version } = JSON.parse(readFileSync(path, 'utf8'));
-            if (prerelease ? !/-beta\.\d+$/.test(version) : /-/.test(version)) {
-              throw new Error(`${name}@${version} cannot be published from ${process.env.GITHUB_REF_NAME}.`);
+            const { name, version } = JSON.parse(readFileSync(path, 'utf8'))
+            if (hasPre ? !/^\d+\.\d+\.\d+-beta\.\d+$/.test(version) : !/^\d+\.\d+\.\d+$/.test(version)) {
+              throw new Error(`${name}@${version} does not match the Changesets release state.`)
             }
           }
           NODE

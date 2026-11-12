@@ -4,27 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: Update beta from main, or start a new beta cycle
+        description: Start or exit beta mode
         required: true
         type: choice
-        default: Update beta
         options:
-          - Update beta
-          - Start new cycle
-      confirmation:
-        description: Type START BETA only when starting a new cycle
-        required: false
-        type: string
+          - Start beta
+          - Exit beta
 
 concurrency:
-  group: Release-refs/heads/beta
+  group: Release-refs/heads/main
   cancel-in-progress: false
 
 permissions: {}
 
 jobs:
   beta:
-    name: Update beta branch
+    name: Create beta management pull request
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,41 +37,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-          fetch-depth: 0
           persist-credentials: false
-
-      - name: Select beta operation
-        id: select
-        env:
-          REQUESTED_OPERATION: ${{ inputs.operation }}
-          CONFIRMATION: ${{ inputs.confirmation }}
-        run: |
-          beta_sha=$(git ls-remote origin refs/heads/beta | cut -f1)
-
-          if [ "$REQUESTED_OPERATION" = "Start new cycle" ]; then
-            if [ "$CONFIRMATION" != "START BETA" ]; then
-              echo "::error::Type START BETA to confirm starting a new beta cycle."
-              exit 1
-            fi
-            operation=start
-          elif [ "$REQUESTED_OPERATION" = "Update beta" ]; then
-            if [ -n "$beta_sha" ]; then
-              operation=sync
-            else
-              operation=start
-            fi
-          else
-            echo "::error::Unknown beta operation."
-            exit 1
-          fi
-
-          if [ "$operation" = "start" ] && [ -n "$beta_sha" ]; then
-            git fetch origin refs/heads/beta:refs/remotes/origin/beta
-            beta_sha=$(git rev-parse refs/remotes/origin/beta)
-          fi
-
-          echo "operation=$operation" >> "$GITHUB_OUTPUT"
-          echo "old-beta-sha=$beta_sha" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -85,64 +46,55 @@ jobs:
           package-manager-cache: false
 
       - name: Install dependencies
-        if: steps.select.outputs.operation == 'start'
         run: npm ci
 
-      - name: Verify main can start a new beta cycle
-        if: steps.select.outputs.operation == 'start'
+      - name: Validate beta transition
+        env:
+          OPERATION: ${{ inputs.operation }}
         run: |
           node --input-type=module <<'NODE'
-          import { existsSync, readFileSync } from 'node:fs';
+          import { existsSync, readFileSync } from 'node:fs'
 
-          const config = JSON.parse(readFileSync('.changeset/config.json', 'utf8'));
-          if (config.baseBranch !== 'main' || existsSync('.changeset/pre.json')) {
-            throw new Error('Start beta only from stable main, not from an existing prerelease cycle.');
-          }
-          for (const path of ['packages/ring-client-api/package.json', 'packages/homebridge-ring/package.json']) {
-            const { name, version } = JSON.parse(readFileSync(path, 'utf8'));
-            if (version.includes('-')) {
-              throw new Error(`Cannot start a beta cycle from prerelease version ${name}@${version}.`);
+          const path = '.changeset/pre.json'
+          const hasPre = existsSync(path)
+          const pre = hasPre ? JSON.parse(readFileSync(path, 'utf8')) : undefined
+          if (process.env.OPERATION === 'Start beta') {
+            if (hasPre) throw new Error('Cannot start beta while a prerelease cycle exists.')
+            for (const path of ['packages/ring-client-api/package.json', 'packages/homebridge-ring/package.json']) {
+              const { name, version } = JSON.parse(readFileSync(path, 'utf8'))
+              if (version.includes('-')) throw new Error(`Cannot start beta from ${name}@${version}.`)
             }
+          } else if (process.env.OPERATION === 'Exit beta') {
+            if (pre?.mode !== 'pre' || pre.tag !== 'beta') {
+              throw new Error('Cannot exit beta without an active beta cycle.')
+            }
+          } else {
+            throw new Error('Unknown beta operation.')
           }
           NODE
 
-      - name: Initialize beta cycle
-        if: steps.select.outputs.operation == 'start'
-        run: |
-          npm exec -- changeset pre enter beta
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from 'node:fs';
-
-          const path = '.changeset/config.json';
-          const config = JSON.parse(readFileSync(path, 'utf8'));
-          config.baseBranch = 'beta';
-          writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
-          NODE
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .changeset/pre.json .changeset/config.json
-          git commit -m "Start beta release cycle"
-
-      - name: Push beta branch
-        if: steps.select.outputs.operation == 'start'
+      - name: Create pull request
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_CHANGESETS }}
-          OLD_BETA_SHA: ${{ steps.select.outputs.old-beta-sha }}
+          OPERATION: ${{ inputs.operation }}
         run: |
-          gh auth setup-git
-          # Published betas stay reachable through their release tags.
-          if [ -n "$OLD_BETA_SHA" ]; then
-            git push --force-with-lease="refs/heads/beta:$OLD_BETA_SHA" origin HEAD:refs/heads/beta
+          if [ "$OPERATION" = "Start beta" ]; then
+            npm exec -- changeset pre enter beta
+            title="Start beta release cycle"
+            body="Enter Changesets beta mode on main. Merging this pull request does not publish a release."
+            operation=start
           else
-            git push origin HEAD:refs/heads/beta
+            npm exec -- changeset pre exit
+            title="Exit beta release cycle"
+            body="Exit Changesets beta mode on main. Merging this pull request does not publish a release; review and merge the subsequent version pull request to publish the stable release."
+            operation=exit
           fi
-
-      - name: Sync beta branch
-        if: steps.select.outputs.operation == 'sync'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN_CHANGESETS }}
-        run: |
-          gh auth setup-git
+          branch="manage-beta/$operation-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          node .github/scripts/sync-beta.mjs
+          git switch -c "$branch"
+          git add .changeset/pre.json
+          git commit -m "$title"
+          gh auth setup-git
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" --title "$title" --body "$body"

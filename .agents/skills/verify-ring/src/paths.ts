@@ -44,7 +44,12 @@ export const evidenceRoot = join(
   checkoutHash,
 )
 
-export const homebridgeBin = join(repoRoot, 'node_modules/.bin/homebridge')
+// The JS entry point, not node_modules/.bin/homebridge: pnpm bins are shell shims
+// and this path is passed to node.
+export const homebridgeBin = join(
+  homebridgeRingDir,
+  'node_modules/homebridge/bin/homebridge.js',
+)
 
 // A block of 32 ports per checkout: bridge, fake cloud, then external
 // accessories (cameras are published outside the bridge, one port each).

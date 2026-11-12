@@ -11,7 +11,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.7",
     "globals": "17.14.0",
-    "tsconfig": "*",
+    "tsconfig": "workspace:*",
     "typescript-eslint": "8.72.1"
   }
 }

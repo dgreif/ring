@@ -9,24 +9,31 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint -- --fix",
-    "test:watch": "npm run test:watch -w ring-client-api",
-    "example": "npm run example -w examples",
-    "api-example": "npm run api-example -w examples",
-    "record-example": "npm run record-example -w examples",
-    "return-audio-example": "npm run return-audio-example -w examples",
-    "stream-example": "npm run stream-example -w examples",
-    "browser-example": "npm run browser-example -w examples",
-    "auth-cli": "npm run auth-cli -w ring-client-api",
-    "device-data-cli": "npm run device-data-cli -w ring-client-api",
+    "test:watch": "pnpm --filter ring-client-api test:watch",
+    "example": "pnpm --filter examples example",
+    "api-example": "pnpm --filter examples api-example",
+    "record-example": "pnpm --filter examples record-example",
+    "return-audio-example": "pnpm --filter examples return-audio-example",
+    "stream-example": "pnpm --filter examples stream-example",
+    "browser-example": "pnpm --filter examples browser-example",
+    "auth-cli": "pnpm --filter ring-client-api auth-cli",
+    "device-data-cli": "pnpm --filter ring-client-api device-data-cli",
     "release:verify": "turbo run build test lint"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
-    "turbo": "^2.11.10"
+    "@homebridge/hap-nodejs": "^2.3.0",
+    "@types/node": "26.6.6",
+    "turbo": "^2.11.10",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
   },
-  "workspaces": [
-    "packages/*"
-  ],
-  "packageManager": "npm@12.1.0"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.18.0",
+      "onFail": "download"
+    }
+  }
 }

@@ -1,5 +1,7 @@
 updates:
-- directory: /
+- cooldown:
+    default-days: 3 # Matches minimumReleaseAge in pnpm-workspace.yaml.
+  directory: /
   groups:
     all-dependencies:
       patterns:

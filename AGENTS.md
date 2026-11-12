@@ -3,7 +3,8 @@
 - Packages: `packages/ring-client-api` (Ring API client) and
   `packages/homebridge-ring` (Homebridge plugin). Setup is in
   [.github/DEVELOPMENT.md](.github/DEVELOPMENT.md).
-- Checks: `npm run lint`, `npm test`, `npm run build`.
+- Use pnpm, not npm (npm commands fail here). Install with `pnpm install`.
+- Checks: `pnpm run lint`, `pnpm test`, `pnpm run build`.
 - Prove behavior changes end to end with the
   [verify-ring skill](.agents/skills/verify-ring/SKILL.md) before calling
   them done. Use fake mode by default; use live (the user's real devices)

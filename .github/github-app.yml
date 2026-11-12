@@ -1,11 +1,11 @@
 scripts:
-  - name: Install npm dependencies
-    command: npm ci
+  - name: Install pnpm dependencies
+    command: pnpm install --frozen-lockfile
     triggers:
       - session.create
   - name: Link shared .homebridge
-    command: npm run link-homebridge
+    command: pnpm run link-homebridge
     triggers:
       - session.create
   - name: Homebridge dev
-    command: npm run dev -w homebridge-ring
+    command: pnpm --filter homebridge-ring dev

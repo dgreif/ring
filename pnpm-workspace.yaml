@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+
+# Skip versions published in the last 3 days (supply-chain protection).
+minimumReleaseAge: 4320
+
+# pnpm only runs dependency install scripts that are listed here.
+allowBuilds:
+  # Downloads the ffmpeg binary used for camera streaming.
+  ffmpeg-for-homebridge: true
+  protobufjs: false

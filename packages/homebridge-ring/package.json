@@ -10,19 +10,22 @@
     "lint": "eslint .",
     "test": "vitest run",
     "dev": "bash ./dev-homebridge.sh",
-    "dev:run": "npm run dev"
+    "dev:run": "pnpm run dev"
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
     "@homebridge/plugin-ui-utils": "^2.2.7",
-    "ring-client-api": "15.0.0-beta.0",
+    "ring-client-api": "workspace:*",
+    "rxjs": "^7.8.2",
     "werift": "0.26.0"
   },
   "devDependencies": {
     "@homebridge/hap-nodejs": "^2.3.0",
-    "eslint-config-shared": "*",
+    "eslint": "10.14.0",
+    "eslint-config-shared": "workspace:*",
+    "globals": "17.14.0",
     "homebridge": "2.5.0",
-    "tsconfig": "*",
+    "tsconfig": "workspace:*",
     "typescript": "7.0.2",
     "vitest": "^5.1.0"
   },

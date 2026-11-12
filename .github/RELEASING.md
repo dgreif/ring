@@ -7,12 +7,12 @@ All feature and fix PRs land on `main` with their Changesets. The `beta` branch 
 ## Beta releases
 
 1. Merge the changes you want to test into `main`, including their Changesets.
-2. In Actions, run **Manage beta** from `main` with **Update beta** selected. It creates and initializes `beta` if the branch does not exist; otherwise it syncs the latest `main` into the active beta cycle. This does not publish to npm.
+2. In Actions, run **Manage beta** from `main` with **Update beta** selected. It creates and initializes `beta` if the branch does not exist; otherwise it syncs the latest `main` into the active beta cycle. If `beta` exists but is not in an active beta cycle (for example, a leftover from the old local flow), the run fails without pushing. Select **Start new cycle** instead, or delete `beta` and run **Update beta** again. This does not publish to npm.
 3. The Release workflow creates a **Version Packages (beta)** pull request. Review and merge it to publish the beta versions to npm with the `beta` dist-tag. The `latest` tag is not changed.
-4. To include more changes, run **Manage beta** again with **Update beta** selected. It merges the latest `main` into `beta`, preserving the prerelease state and version counter. Merge the resulting beta version pull request to publish the next beta.
+4. To include more changes, run **Manage beta** again with **Update beta** selected. It merges the latest `main` into `beta`, preserving the prerelease state and version counter. Merge the resulting beta version pull request to publish the next beta. If `beta` already contains the latest `main`, the run reports that and does not push.
 5. To start a new cycle after a stable release, select **Start new cycle** and enter `START BETA`. This resets `beta` to the current stable `main`. Earlier betas stay reachable through their release tags.
 
-Do not commit directly to `beta`. Anything that only exists on `beta` is dropped by **Start new cycle**. An update fails without pushing if there are merge conflicts or `main` has already released a new stable version. That failure does not reset the branch; start a new cycle explicitly when appropriate.
+Do not commit directly to `beta`. Anything that only exists on `beta` is dropped by **Start new cycle**. An update fails without pushing if `beta` is not in an active beta cycle, there are merge conflicts, or `main` has already released a new stable version. That failure does not reset the branch; start a new cycle explicitly when appropriate.
 
 ## Stable release
 

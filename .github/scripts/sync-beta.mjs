@@ -43,7 +43,9 @@ if (mainConfig.baseBranch !== 'main' || hasAt(main, prePath)) {
   throw new Error('main must be in stable Changesets mode.')
 }
 if (betaConfig.baseBranch !== 'beta' || !hasAt(beta, prePath)) {
-  throw new Error('No active beta cycle. Run Manage beta to initialize it.')
+  throw new Error(
+    'The beta branch has no active beta cycle. Select Start new cycle in Manage beta.',
+  )
 }
 
 const pre = readAt(beta, prePath)
@@ -72,16 +74,13 @@ for (const { name, stable, prerelease } of packages) {
       `main has changed the stable version of ${name} to ${stable}. Select Start new cycle in Manage beta.`,
     )
   }
-  if (
-    prerelease !== stable &&
-    !/^\d+\.\d+\.\d+-beta\.\d+$/.test(prerelease)
-  ) {
+  if (prerelease !== stable && !/^\d+\.\d+\.\d+-beta\.\d+$/.test(prerelease)) {
     throw new Error(`Invalid beta package ${name}@${prerelease}.`)
   }
 }
 
 git('switch', '--detach', beta)
-console.log(git('merge', '--no-ff', '--no-edit', main))
+console.log(git('merge', '--no-ff', '-m', 'Merge main into beta', main))
 
 const mergedPre = JSON.parse(readFileSync(prePath, 'utf8'))
 const mergedConfig = JSON.parse(readFileSync(configPath, 'utf8'))
@@ -92,8 +91,12 @@ if (
   throw new Error('Sync changed the beta prerelease state; refusing to push.')
 }
 
-// An ordinary fast-forward push refuses concurrent beta updates.
-git('push', 'origin', 'HEAD:refs/heads/beta')
-report(
-  'Synced main into beta. Merge the resulting Version Packages (beta) PR to publish the next beta.',
-)
+if (git('rev-parse', 'HEAD') === beta) {
+  report('beta is already up to date with main.')
+} else {
+  // An ordinary fast-forward push refuses concurrent beta updates.
+  git('push', 'origin', 'HEAD:refs/heads/beta')
+  report(
+    'Synced main into beta. Merge the resulting Version Packages (beta) PR to publish the next beta.',
+  )
+}

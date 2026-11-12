@@ -13,45 +13,52 @@ on:
 permissions:
   contents: read
 
+# Cancel superseded runs of the same pull request. Every push run gets its own
+# group, so main, beta, and tag builds are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      # Enable turbo remote caching
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-      TURBO_CACHE: remote:rw
+    timeout-minutes: 15
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [22, 24, 26]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup pnpm
-        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-
-      - name: Setup node ${{ matrix.node-version }}
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          persist-credentials: false
 
+      # Neither tool depends on the other, so set them up at the same time
+      - parallel:
+          - name: Setup pnpm
+            uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+          - name: Setup node ${{ matrix.node-version }}
+            uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            with:
+              node-version: ${{ matrix.node-version }}
+              # Installing from the registry is faster than restoring a pnpm store cache
+              package-manager-cache: false
+
+      # Skip dependency install scripts: only ffmpeg-for-homebridge has one, and
+      # build, test, and lint don't need its binary
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Build
-        run: pnpm run build
+      - name: Build, test, and lint
+        run: pnpm run release:verify --continue=dependencies-successful
         env:
           CI: true
-
-      - name: Test
-        run: pnpm test
-        env:
-          CI: true
-
-      - name: Lint
-        run: pnpm run lint
-        env:
-          CI: true
+          # Part of the test cache key, so each Node version runs its own tests
+          # instead of replaying another version's cached result
+          CI_NODE_VERSION: ${{ matrix.node-version }}
+          # Enable turbo remote caching
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+          TURBO_CACHE: remote:rw

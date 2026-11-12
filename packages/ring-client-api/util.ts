@@ -170,8 +170,8 @@ export type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends Array<infer U>
     ? Array<DeepPartial<U>>
     : T[K] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
-    : DeepPartial<T[K]>
+      ? ReadonlyArray<DeepPartial<U>>
+      : DeepPartial<T[K]>
 }
 
 // Override push receiver logging to avoid ECONNRESET errors leaking

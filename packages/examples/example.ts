@@ -68,8 +68,8 @@ async function example() {
             action === PushNotificationAction.Motion
               ? 'Motion detected'
               : action === PushNotificationAction.Ding
-              ? 'Doorbell pressed'
-              : `Video started (${action})`
+                ? 'Doorbell pressed'
+                : `Video started (${action})`
 
         console.log(
           `${event} on ${camera.name} camera. Ding id ${

@@ -397,8 +397,8 @@ export class RingRestClient {
           'error' in responseData && typeof responseData.error === 'string'
             ? responseData.error
             : response.status
-            ? `HTTP ${response.status}`
-            : ''
+              ? `HTTP ${response.status}`
+              : ''
 
       if (
         response.status === 412 || // need 2fa code

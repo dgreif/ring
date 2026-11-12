@@ -121,8 +121,7 @@ export class Thermostat extends BaseDeviceAccessory {
       },
       setValue: (targetHeatingCoolingState: number) => {
         const mode: ThermostatMode | undefined = (():
-          | ThermostatMode
-          | undefined => {
+          ThermostatMode | undefined => {
           switch (targetHeatingCoolingState) {
             case Characteristic.TargetHeatingCoolingState.OFF:
               return 'off'

@@ -243,4 +243,26 @@ describe('RingPlatform', () => {
       '{"refreshToken":"new-token"}',
     )
   })
+
+  it('persists token updates that happen before devices are set up', async () => {
+    getLocations.mockImplementation(function (this: RingApi) {
+      // Ring rotates the token during the initial auth, then again when push
+      // credentials are added, both before getLocations() resolves
+      this.restClient.onRefreshTokenUpdated.next({
+        oldRefreshToken: 'old-token',
+        newRefreshToken: 'rotated-token',
+      })
+      this.restClient.onRefreshTokenUpdated.next({
+        oldRefreshToken: 'rotated-token',
+        newRefreshToken: 'token-with-push-credentials',
+      })
+      return Promise.resolve(locations as any)
+    })
+
+    await createPlatform().connectToApi()
+
+    expect(readFileSync(configPath, 'utf8')).toBe(
+      '{"refreshToken":"token-with-push-credentials"}',
+    )
+  })
 })

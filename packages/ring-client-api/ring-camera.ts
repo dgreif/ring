@@ -124,6 +124,21 @@ export function cleanSnapshotUuid(uuid?: string | null) {
   return uuid.replace(/:.*$/, '')
 }
 
+/**
+ * Ring sometimes sends an all-zero placeholder snapshot uuid in ding/motion
+ * notifications (e.g. `00000000000000000000000000000000`). Requesting a
+ * snapshot with it fails with `400 uuid is zero`, so treat it as missing.
+ */
+export function getUsableSnapshotUuid(uuid?: string | null) {
+  const cleanUuid = cleanSnapshotUuid(uuid)
+
+  if (!cleanUuid || /^[0-]+$/.test(cleanUuid)) {
+    return undefined
+  }
+
+  return uuid as string
+}
+
 const wiredModelsWithNoSnapshotDuringRecording = new Set<RingCameraKind>([
     RingCameraKind.doorbell_graham_cracker,
   ]),
@@ -267,7 +282,7 @@ export class RingCamera extends Subscribed {
 
   get latestNotificationSnapshotUuid() {
     const notification = this.latestNotification
-    return notification?.img?.snapshot_uuid
+    return getUsableSnapshotUuid(notification?.img?.snapshot_uuid)
   }
 
   get batteryLevel() {

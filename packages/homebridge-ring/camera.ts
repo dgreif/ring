@@ -1,6 +1,6 @@
 import { hap } from './hap.ts'
 import type { RingPlatformConfig } from './config.ts'
-import type { RingCamera } from 'ring-client-api'
+import { getUsableSnapshotUuid, type RingCamera } from 'ring-client-api'
 import { BaseDataAccessory } from './base-data-accessory.ts'
 import { filter, map, switchMap, throttleTime } from 'rxjs/operators'
 import { CameraSource } from './camera-source.ts'
@@ -230,7 +230,9 @@ export class Camera extends BaseDataAccessory<RingCamera> {
       await Promise.race([
         firstValueFrom(
           this.device.onNewNotification.pipe(
-            filter((notification) => Boolean(notification.img?.snapshot_uuid)),
+            filter((notification) =>
+              Boolean(getUsableSnapshotUuid(notification.img?.snapshot_uuid)),
+            ),
           ),
         ),
         // wait up to 2 seconds for the second notification

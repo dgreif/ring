@@ -1,6 +1,7 @@
 import {
   getBatteryLevel,
   cleanSnapshotUuid,
+  getUsableSnapshotUuid,
   RingCamera,
 } from '../ring-camera.ts'
 import { StreamingSession } from '../streaming/streaming-session.ts'
@@ -58,6 +59,35 @@ describe('Ring Camera', () => {
     it('should handle falsy values', () => {
       expect(cleanSnapshotUuid(undefined)).toBe(undefined)
       expect(cleanSnapshotUuid(null)).toBe(null)
+    })
+  })
+
+  describe('getUsableSnapshotUuid', () => {
+    it('should return real uuids unchanged', () => {
+      expect(
+        getUsableSnapshotUuid('c2a0a397-3538-422d-bb4e-51837a56b870:122429140'),
+      ).toBe('c2a0a397-3538-422d-bb4e-51837a56b870:122429140')
+      expect(
+        getUsableSnapshotUuid('c2a0a397-3538-422d-bb4e-51837a56b870'),
+      ).toBe('c2a0a397-3538-422d-bb4e-51837a56b870')
+    })
+
+    it('should treat all-zero placeholder uuids as missing', () => {
+      expect(
+        getUsableSnapshotUuid('00000000000000000000000000000000'),
+      ).toBeUndefined()
+      expect(
+        getUsableSnapshotUuid('00000000000000000000000000000000:122429140'),
+      ).toBeUndefined()
+      expect(
+        getUsableSnapshotUuid('00000000-0000-0000-0000-000000000000'),
+      ).toBeUndefined()
+    })
+
+    it('should treat falsy values as missing', () => {
+      expect(getUsableSnapshotUuid(undefined)).toBeUndefined()
+      expect(getUsableSnapshotUuid(null)).toBeUndefined()
+      expect(getUsableSnapshotUuid('')).toBeUndefined()
     })
   })
 

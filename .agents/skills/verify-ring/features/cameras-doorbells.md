@@ -40,6 +40,7 @@ Preconditions:
 - Proof is in `$R ring-state --section events`.
 
 - **Doorbell press.** Someone rings Front Door. Run `$R emit ding "Front Door"`. It returns `observed` with `Front Door/Doorbell/ProgrammableSwitchEvent` `SINGLE_PRESS`, and events show a `snapshot` for camera 1001.
+- **Doorbell press with a zero snapshot uuid.** Ring sometimes sends an all-zero placeholder `snapshot_uuid`. Run `$R emit ding "Front Door" --snapshot-uuid 00000000000000000000000000000000`. It returns `observed` with `SINGLE_PRESS`, events show a `snapshot` for camera 1001 with no `uuid`, and `$R logs --grep "uuid is zero"` finds nothing.
 - **Motion.** Someone walks past Garage Cam. Run `$R emit motion "Garage Cam" --subtype human`. It returns `observed` with `MotionDetected` `1`. Run `$R wait "Garage Cam/MotionDetected" false --timeout 90` before the next motion.
 - **Light from the Ring app.** Run `$R emit camera-update "Garage Cam" '{"led_status":"on"}'` then `$R wait "Garage Cam/Lightbulb/On" true --timeout 15`. The wait returns `1` after the next poll.
 - **Light from HomeKit.** Tap the light on, then off. Run `$R set "Garage Cam/Lightbulb/On" true`, then `false`. Events show `camera-light {state:"on"}` then `{state:"off"}`.

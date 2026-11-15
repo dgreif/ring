@@ -116,6 +116,7 @@ the plugin asked Ring to do:
 ```sh
 $R emit ding "Front Door"                       # waits for the HAP doorbell event
 $R emit ding "Lobby Intercom"                   # intercoms ding too
+$R emit ding "Front Door" --snapshot-uuid 00000000000000000000000000000000   # Ring's zero placeholder; fake snapshots/next rejects it with 400
 $R emit motion "Garage Cam" --subtype human
 $R emit hub-update "Front Door Contact" '{"faulted":true}'
 $R emit hub-update "Security Panel" '{"mode":"all"}'

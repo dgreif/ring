@@ -432,6 +432,7 @@ export async function startFakeRing({
     camera: any,
     kind: 'ding' | 'motion',
     subtype?: string,
+    snapshotUuid?: string,
   ) {
     const now = Date.now(),
       dingId = String(
@@ -485,7 +486,7 @@ export async function startFakeRing({
         },
         location: { id: camera.location_id },
       },
-      img: { snapshot_uuid: randomUUID() },
+      img: { snapshot_uuid: snapshotUuid ?? randomUUID() },
     }
   }
 
@@ -709,9 +710,15 @@ export async function startFakeRing({
     {
       method: 'GET',
       pattern: /^\/snapshots\/next\/(\d+)$/,
-      handler: (match, { res }) => {
-        const now = Date.now()
-        recordEvent('snapshot', { cameraId: Number(match[1]) })
+      handler: (match, { res, query }) => {
+        const now = Date.now(),
+          uuid = query.get('uuid') ?? undefined
+        recordEvent('snapshot', { cameraId: Number(match[1]), uuid })
+        if (uuid && /^[0-]+$/.test(uuid)) {
+          // Ring rejects the all-zero placeholder uuid it sometimes sends in dings
+          json(res, 400, { error: 'ARG', comment: 'uuid is zero' })
+          return undefined
+        }
         res.writeHead(200, {
           'content-type': 'image/jpeg',
           'content-length': snapshotJpeg.length,
@@ -865,6 +872,7 @@ export async function startFakeRing({
           camera,
           body.kind === 'motion' ? 'motion' : 'ding',
           body.subtype,
+          body.snapshotUuid,
         ),
         delivered = sendPush(notification)
       recordEvent('push-sent', {

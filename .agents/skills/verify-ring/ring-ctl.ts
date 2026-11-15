@@ -110,7 +110,7 @@ HomeKit
   snapshot <camera> [--out file] [--width n] [--height n] [--timeout s]
 
 Fake cloud (fake mode only)
-  emit ding <camera|intercom> [--subtype s] [--no-expect] [--timeout s]
+  emit ding <camera|intercom> [--subtype s] [--snapshot-uuid u] [--no-expect] [--timeout s]
   emit motion <camera> [--subtype human|vehicle|other] [--no-expect] [--timeout s]
   emit hub-update <zid|name> <json>   Change an alarm/beams device as Ring would
   emit camera-update <id|name> <json> Change a camera's Ring data (next poll)
@@ -1191,6 +1191,7 @@ async function snapshot(argv: string[]) {
 async function emit(argv: string[]) {
   const { values, positionals } = parse(argv, {
       subtype: { type: 'string' },
+      'snapshot-uuid': { type: 'string' },
       'no-expect': { type: 'boolean' },
       timeout: { type: 'string' },
       status: { type: 'string' },
@@ -1330,6 +1331,7 @@ async function emit(argv: string[]) {
       deviceId: ringCamera.id,
       kind,
       subtype: values.subtype,
+      snapshotUuid: values['snapshot-uuid'],
     })
 
   if (values['no-expect']) {

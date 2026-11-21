@@ -137,9 +137,11 @@ export class WeriftPeerConnection
       }
     })
 
-    pc.iceConnectionStateChange.subscribe(() => {
-      logInfo(`iceConnectionStateChange: ${pc.iceConnectionState}`)
-      if (pc.iceConnectionState === 'closed') {
+    pc.iceConnectionStateChange.subscribe((state) => {
+      const log =
+        state === 'disconnected' || state === 'failed' ? logInfo : logDebug
+      log(`iceConnectionStateChange: ${state}`)
+      if (state === 'closed') {
         this.onConnectionState.next('closed')
       }
     })

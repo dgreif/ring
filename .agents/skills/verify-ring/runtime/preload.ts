@@ -8,7 +8,7 @@
 import { appendFileSync } from 'node:fs'
 import { createRequire, registerHooks } from 'node:module'
 import net from 'node:net'
-import { join } from 'node:path'
+import { join, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { ringClientApiDir, skillDir } from '../src/paths.ts'
 import {
@@ -114,7 +114,7 @@ net.Server.prototype.listen = function (this: net.Server, ...args: any[]) {
 // --- Ring HTTP + hub WebSocket ----------------------------------------------
 
 function undiciRoot(path: string) {
-  const marker = '/node_modules/undici/',
+  const marker = `${sep}node_modules${sep}undici${sep}`,
     index = path.lastIndexOf(marker)
   return index === -1 ? undefined : path.slice(0, index + marker.length)
 }

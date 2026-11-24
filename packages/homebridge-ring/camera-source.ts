@@ -38,9 +38,9 @@ import {
 } from 'werift'
 import type { StreamingSession } from 'ring-client-api/streaming/streaming-session'
 import path from 'node:path'
+import { getMediaDirectory } from './util.ts'
 
-const __dirname = new URL('.', import.meta.url).pathname,
-  mediaDirectory = path.join(__dirname.replace(/\/lib\/?$/, ''), 'media'),
+const mediaDirectory = getMediaDirectory(import.meta.url),
   readFileAsync = promisify(readFile),
   cameraOfflinePath = path.join(mediaDirectory, 'camera-offline.jpg'),
   snapshotsBlockedPath = path.join(mediaDirectory, 'snapshots-blocked.jpg')

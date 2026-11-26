@@ -45,22 +45,22 @@
     "debug": "^4.4.3",
     "json-bigint": "^1.0.0",
     "rxjs": "^7.8.2",
-    "systeminformation": "^5.33.19",
-    "undici": "^8.12.3",
+    "systeminformation": "^5.33.23",
+    "undici": "^8.13.1",
     "uuid": "^14.0.3",
-    "werift": "0.26.0"
+    "werift": "0.28.0"
   },
   "devDependencies": {
     "@types/debug": "4.1.13",
     "@types/json-bigint": "^1.0.4",
     "@types/node": "26.6.6",
     "@types/ws": "^8.18.2",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-config-shared": "workspace:*",
-    "msw": "^3.0.3",
+    "msw": "^3.0.7",
     "tsconfig": "workspace:*",
     "typescript": "7.0.2",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26"

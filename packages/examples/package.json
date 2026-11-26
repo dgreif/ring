@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "26.6.6",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-config-shared": "workspace:*",
     "ring-client-api": "workspace:*",
     "rxjs": "^7.8.2",

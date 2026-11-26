@@ -14,20 +14,20 @@
   },
   "dependencies": {
     "@homebridge/camera-utils": "^3.0.0",
-    "@homebridge/plugin-ui-utils": "^2.2.7",
+    "@homebridge/plugin-ui-utils": "^2.3.0",
     "ring-client-api": "workspace:*",
     "rxjs": "^7.8.2",
-    "werift": "0.26.0"
+    "werift": "0.28.0"
   },
   "devDependencies": {
     "@homebridge/hap-nodejs": "^2.3.0",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-config-shared": "workspace:*",
     "globals": "17.14.0",
     "homebridge": "2.5.0",
     "tsconfig": "workspace:*",
     "typescript": "7.0.2",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "engines": {
     "node": "^22.19.0 || ^24 || ^26",
